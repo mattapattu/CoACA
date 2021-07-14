@@ -1,6 +1,33 @@
 library(foreach)
 library(doParallel)
 
+modifyParam=function(param)
+{
+  lower = param - (param/50)
+  upper = param + (param/50)
+  
+  if(lower <=0 )
+    lower = param
+  
+  
+  if(upper > 1)
+    upper = 1
+  
+  newparam = runif(1, lower, upper)
+  return(newparam)
+}
+
+modifyModelData=function(modelData)
+{
+  
+  modelData@alpha = modifyParam(modelData@alpha)
+  modelData@gamma1 = modifyParam(modelData@gamma1)
+  modelData@gamma2 = modifyParam(modelData@gamma2)
+  
+  return(modelData)
+}
+
+
 HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
 {
   models = testData@Models
@@ -39,7 +66,7 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
   clusterEvalQ(cl, source(paste(src.dir,"HybridModel3.R", sep="/")))
   clusterEvalQ(cl, source(paste(src.dir,"HybridModel4.R", sep="/")))
   clusterEvalQ(cl, source(paste(src.dir,"BaseClasses.R", sep="/")))
-  clusterExport(cl, varlist = c("ratdata","allModelRes","testData","creditAssignment"),envir=environment())
+  clusterExport(cl, varlist = c("ratdata","allModelRes","testData","creditAssignment","modifyModelData","modifyParam"),envir=environment())
   clusterEvalQ(cl, library("TTR"))
   clusterEvalQ(cl, library("dplyr"))
   clusterEvalQ(cl, library("DEoptim"))
@@ -59,14 +86,14 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
     #(clusterExport(cl, varlist = c("trueModelData"),envir=environment()),file='/dev/null')
     #for(i in 1:length(modelNames)) {
       
-      foreach(j=c(1:5), .combine='rbind', .inorder=FALSE) %dopar%{
+      foreach(j=c(1:5), .combine='rbind', .inorder=FALSE) %do%{
         cat('Starting i=',i, ', j=',j,' model=', modelNames[i], ' on ',Sys.info()[['nodename']]
 , '.\n', sep = '')
         model = modelNames[i] 
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-        
+        trueModelData = modifyModelData(trueModelData)
         end_index = -1
         missedOptimalIter = 0
         while(end_index == -1){

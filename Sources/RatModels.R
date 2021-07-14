@@ -56,13 +56,13 @@ for (i in c(2:6)) {
   ratDataList[[i]] = ratdata
   
   #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca3"))
-  testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca3"))
-  #testData = new("TestModels", Models=c("Hybrid3"), creditAssignment=c("aca3"))
+  #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca3","sarsa"))
+  testData = new("TestModels", Models=c("Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("sarsa"))
   
   #load(paste0("C:/Users/matta/Downloads/rat_112_allmodelRes.Rdata"))
-  load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
-  #debug(getModelResults)
-  #allmodelRes = getModelResults(ratdata,testData,sim=2, src.dir, setup.hpc)
+  #load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
+  debug(getModelResults)
+  allmodelRes = getModelResults(ratdata,testData,sim=2, src.dir, setup.hpc)
   #min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
   #print(sprintf("%s is best model for %s",min_method,rats[i]))
   
@@ -71,6 +71,8 @@ for (i in c(2:6)) {
   #debug(generatePlots)
   #generatePlots(ratdata,allmodelRes,window=20,plot.dir)
   
+  #debug(generateEmpiricalPlots)
+  #generateEmpiricalPlots(ratdata,window=20)
   
   
   # #### Holdout Validation ########################################
@@ -82,11 +84,11 @@ for (i in c(2:6)) {
   #debug(testParamEstimation)
   #testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc)
   
-  res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
+  #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
   #debug(plotThetaHat)
   #plotThetaHat(ratdata,res.dir,plot.dir)
   #debug(plotPCA)
-  plotPCA(ratdata, allmodelRes)
+  #plotPCA(ratdata, allmodelRes)
   
   
 }

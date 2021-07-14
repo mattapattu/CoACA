@@ -89,6 +89,11 @@ setMethod("setModelParams",  signature=c("ModelData","numeric"),
               x@gamma1 = modelParams[2]
               x@gamma2 = modelParams[3]
             }
+            else if(x@creditAssignment == "sarsa")
+            {
+              x@alpha = modelParams[1]
+              x@gamma1 = modelParams[2]
+            }
             
             return(x)
           }
@@ -104,14 +109,28 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
             testModel = slot(allModels,model)
             endLearningStage = endLearningStage/2
             
-            argList = list(lower = c(0,0,0), 
-                           upper = c(1,1,1),
-                           ratdata = ratdata,
-                           half_index = endLearningStage, 
-                           modelData = x,
-                           testModel = testModel,
-                           sim = x@sim)
-
+            if(x@creditAssignment == "aca3")
+            {
+              argList = list(lower = c(0,0,0), 
+                             upper = c(1,1,1),
+                             ratdata = ratdata,
+                             half_index = endLearningStage, 
+                             modelData = x,
+                             testModel = testModel,
+                             sim = x@sim)
+              
+            }
+            else if(x@creditAssignment == "sarsa")
+            {
+              argList = list(lower = c(0,0,0), 
+                             upper = c(1,1,0),
+                             ratdata = ratdata,
+                             half_index = endLearningStage, 
+                             modelData = x,
+                             testModel = testModel,
+                             sim = x@sim)
+            }
+            
             return(argList)
           }
 )
@@ -121,29 +140,29 @@ setMethod("setModelResults",  signature=c("ModelData","RatData","AllModels"),
           definition=function(x,ratdata,allModels)
           {
             #endLearningStage = getEndIndex(ratdata@allpaths,sim=x@sim, limit=0.95)
-            baseModel = getBaseModel(x@Model)
-            
+            baseModel = getBaseModel(x)
             model = x@Model
             
             if(model == "Paths")
-            {
-              #endLearningStage = endLearningStage/2
-              x@probMatrix = baseModel@probMatFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
-              likelihood = baseModel@likelihoodFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
-              #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
-              x@likelihood = as.numeric(likelihood)
+              {
+                #endLearningStage = endLearningStage/2
+                x@probMatrix = baseModel@probMatFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
+                likelihood = baseModel@likelihoodFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
+                #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+                x@likelihood = as.numeric(likelihood)
+              }
+              else
+              {
+                #endLearningStage = endLearningStage/2
+                testModel = slot(allModels,model)
+                x@probMatrix = baseModel@probMatFunc(ratdata, x,testModel,x@sim)
+                likelihood = baseModel@likelihoodFunc(ratdata, x,testModel,x@sim)
+                #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+                x@likelihood = likelihood
+                
             }
-            else
-            {
-              #endLearningStage = endLearningStage/2
-              testModel = slot(allModels,model)
-              x@probMatrix = baseModel@probMatFunc(ratdata, x,testModel,x@sim)
-              likelihood = baseModel@likelihoodFunc(ratdata, x,testModel,x@sim)
-              #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
-              x@likelihood = likelihood
-              
-            }
-           return(x)
+        
+            return(x)
           }
         )
 
@@ -278,16 +297,32 @@ turnModelFuncs = new("BaseModel",
                 type = "turns")
 
 
-getBaseModel=function(modelName)
+
+getBaseModel=function(modelData)
 {
-  if(modelName == "Paths")
+  if(modelData@creditAssignment == "aca3")
   {
-    baseModel = pathModelFuncs
+    if(modelName == "Paths")
+    {
+      baseModel = pathModelFuncs
+    }
+    else
+    {
+      baseModel = turnModelFuncs
+    } 
   }
-  else
+  else if(modelData@creditAssignment == "sarsa")
   {
-    baseModel = turnModelFuncs
-  } 
+    if(modelName == "Paths")
+    {
+      baseModel = ""
+    }
+    else
+    {
+      baseModel = "turnModelFuncs"
+    } 
+  }
+  
   return(baseModel)
 }
 

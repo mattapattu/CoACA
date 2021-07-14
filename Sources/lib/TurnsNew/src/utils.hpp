@@ -1,19 +1,73 @@
 #ifndef __UTILS__
 #define __UTILS__
 
-#include <vector>
 #include<set>
 #include <algorithm>
 #include <string>
 #include <regex>
 #include <cmath>
-#include <RcppArmadillo.h>
-#include <RcppArmadilloExtensions/sample.h>
-#include "tree.hpp"
+
 #include "Debugger.hpp"
 
+#include <vector>
+#include <RcppArmadillo.h>
 
+#include <regex>
+#include <RcppArmadilloExtensions/sample.h>
+#include "tree.hpp"
 
+using namespace Rcpp;
+
+int aca_getNextState(int curr_state, int action, int last_turn)
+{
+  //Rcpp::Rcout << "curr_state=" << curr_state << ", action=" << action << ", last_turn=" << last_turn << std::endl;
+  int new_state = -1;
+  if (action == 4 || action == 5)
+  {
+    new_state = curr_state;
+  }
+  else if (action == 6)
+  {
+    if (last_turn == 4 || last_turn == 7 || last_turn == 12 || last_turn == 15)
+    {
+      new_state = 1;
+    }
+    else if (last_turn == 5 || last_turn == 6 || last_turn == 13 || last_turn == 14)
+    {
+      new_state = 0;
+    }
+  }
+  else if (curr_state == 0)
+  {
+    new_state = 1;
+  }
+  else if (curr_state == 1)
+  {
+    new_state = 0;
+  }
+  
+  //Rcpp::Rcout << "new_state=" << new_state << std::endl;
+  
+  return (new_state);
+}
+
+Edge softmax_action_sel(Graph graph, std::vector<Edge> edges)
+{
+  
+  std::vector<double> probVec;
+  for (auto edge = edges.begin(); edge != edges.end(); edge++)
+  {
+    probVec.push_back((*edge).probability);
+  }
+  arma::vec probVec_arma(probVec);
+  //Rcpp::Rcout <<"creditVec_arma="<<creditVec_arma<<std::endl;
+  
+  IntegerVector actions = seq(0, (edges.size() - 1));
+  int action_selected = Rcpp::RcppArmadillo::sample(actions, 1, true, probVec_arma)[0];
+  //Rcpp::Rcout <<"action_selected="<<action_selected<<std::endl;
+  
+  return (edges[action_selected]);
+}
 
 
 Rcpp::IntegerVector cumsum1(Rcpp::IntegerVector x)
@@ -29,11 +83,6 @@ Rcpp::IntegerVector cumsum1(Rcpp::IntegerVector x)
   }
   return res;
 }
-
-
-
-
-
 
 // [[Rcpp::export]]
 std::vector<double> quartiles(std::vector<double> samples)

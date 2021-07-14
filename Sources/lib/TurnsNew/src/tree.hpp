@@ -187,6 +187,7 @@ public:
                 {
                     edgeCredits.push_back((*it).dest->credit);
                     nodeNames.push_back((*it).dest->node);
+                    //Rcpp::Rcout << (*it).dest->node<< "=" << (*it).dest->credit << std::endl;
                 }
                 arma::vec v(edgeCredits);
                 //Rcpp::Rcout << "nodeNames=" << nodeNames << std::endl;

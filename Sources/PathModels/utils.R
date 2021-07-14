@@ -932,26 +932,24 @@ generateModelProbPlots=function(rat, window, res1, res2,models, allpaths_num){
 }
 
 
-generateEmpiricalPlots=function(rat,empiricalProbMatrix2,endLearningStage){
-  x2<-empiricalProbMatrix2[,13]
-  x2_rle <- rle(x2)
-  x1<-cumsum(empiricalProbMatrix2[,15]-empiricalProbMatrix2[,14]+1)
-  endLearningIdx = findInterval(endLearningStage, x1)
-  for(act in c(1:6)){
-    for(state in c(1:2)){
-      jpeg(paste("EmpProb_",rat,"_Path", act, "_State",state,".jpeg",sep=""))
-      
-      plot(empiricalProbMatrix2[,(act+6*(state-1))],col='black',type='l',ylim=c(0,1),ylab="Probability", xaxt='n', xlab='Session Nb')
-      #lines(GB_ACAprobMatrix[which(GB_ACAprobMatrix[,(act+6*(state-1))]!=0),(act+6*(state-1))],col='red',type='l')
-      
-      axis(1, line=0,at=cumsum(x2_rle$lengths), labels = x2_rle$values)
-      abline(v=cumsum(x2_rle$lengths), lty=3)
-      abline(v=endLearningIdx,col='red',lwd=3)
-      title(paste("Probability of selecting Path",act," in State ", state, " for ", rat,sep="" ), line = 2, cex=0.4)
-      
-      dev.off()
-    }
-  }
+generateEmpiricalPlots=function(ratdata,window){
+  allpaths = ratdata@allpaths
+  rle_sess = rle(allpaths[,5])
+  last_paths<-cumsum(rle_sess$lengths)
+  allpaths1<-allpaths[-last_paths,]
+  empiricalProbMat = getEmpProbMat(allpaths1,window)
+  endIdx = getEndIndex(ratdata@allpaths,sim=2,limit=0.95)
+  sessInfo<-ratdata@allpaths[,5:6]
+  act=4
+  state=1
+  actIds <- which(empiricalProbMat[,(act+6*(state-1))]>-1)
+  sessInfoIds<-which(sessInfo[,2] %in% empiricalProbMat[actIds,13])
+  r<-rle(sessInfo[sessInfoIds,1])
+  plot(empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],ylim=c(0,1),ylab="Probability", xaxt='n', xlab='Session Nb',type='l',,cex.lab=1.3)
+  axis(1, line=0,at=cumsum(r$lengths), labels = r$values)
+  abline(v=cumsum(r$lengths), lty=3)
+  endLearningIdx = findInterval(endIdx, sessInfoIds)
+  abline(v=endLearningIdx,col='red',lwd=3)
   
 }
 
@@ -978,11 +976,10 @@ plotSuccessRates=function(ratDataList)
   df <- data.frame(matrix(unlist(successRateList2), ncol=length(successRateList2), byrow=FALSE))
   pdf(file=paste("SuccessRate.pdf",sep=""),width=11, height=7)
   colors=c("black","red","blue","green","orange")
-  matplot(df[,2:6],type='l',col=colors,lty=c(1,1,1,2,2),lwd=c(2,2,2,2,2), xlab = "Session", ylab="", cex.lab=1.5)
-  title(ylab="Success Rate", line=2.5, cex.lab=1.5)
-  
+  matplot(df[,2:6],type='l',col=colors,lty=c(1,1,1,2,2),lwd=c(2,2,2,2,2), xlab = "Session", ylab="", cex.lab=1.6,cex.axis=1.5)
+  title(ylab="Success Rate", line=2.95, cex.lab=1.6,cex.axis=1.5)
   legend=c("rat103", "rat106","rat112","rat113", "rat114")
-  legend("bottomright", legend=legend, cex=0.9, col=colors, lwd = c(2,2,2,2,2),lty=c(1,1,1,2,2), bg="white")
+  legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2),lty=c(1,1,1,2,2), bg="white")
   dev.off()
 }
 
@@ -1065,12 +1062,12 @@ plotPCA=function(ratdata,allmodelRes)
     r5 = c((4*matLen+1):(5*matLen))
     r6 = c((5*matLen+1):(6*matLen))
     
-    p1<-ggplot() + geom_path(data = as.data.frame(pca1$scores[r1,1:2]), size=2, aes(x = pca1$scores[r1,1], y = pca1$scores[r1,2],color=r1))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "vertical"), colours = brewer.pal(5, "Greens")) + new_scale_color()+
-      geom_path(data = as.data.frame(pca1$scores[r2,1:2]),size=2, aes(x = pca1$scores[r2,1], y = pca1$scores[r2,2],color=r1))+ scale_colour_gradientn(name ="Turns",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Reds"))  + new_scale_color()+
+    p1<-ggplot() +  geom_path(data = as.data.frame(pca1$scores[r2,1:2]),size=2, aes(x = pca1$scores[r2,1], y = pca1$scores[r2,2],color=r1))+ scale_colour_gradientn(name ="Turns",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Reds"))  + new_scale_color()+
       geom_path(data = as.data.frame(pca1$scores[r3,1:2]),size=2, aes(x = pca1$scores[r3,1], y = pca1$scores[r3,2],color=r1))+ scale_colour_gradientn(name ="Hybrid1",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Blues")) + new_scale_color()+
       geom_path(data = as.data.frame(pca1$scores[r4,1:2]),size=2, aes(x = pca1$scores[r4,1], y = pca1$scores[r4,2],color=r1))+ scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Greys")) + new_scale_color()+
       geom_path(data = as.data.frame(pca1$scores[r5,1:2]),size=2, aes(x = pca1$scores[r5,1], y = pca1$scores[r5,2],color=r1))+ scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "vertical"), colors=violets) + new_scale_color()+
-      geom_path(data = as.data.frame(pca1$scores[r6,1:2]),size=2, aes(x = pca1$scores[r6,1], y = pca1$scores[r6,2],color=r1))+ scale_colour_gradientn(name ="Hybrid4",guide = guide_colourbar(direction = "vertical"), colors=yellows)+
+      geom_path(data = as.data.frame(pca1$scores[r6,1:2]),size=2, aes(x = pca1$scores[r6,1], y = pca1$scores[r6,2],color=r1))+ scale_colour_gradientn(name ="Hybrid4",guide = guide_colourbar(direction = "vertical"), colors=yellows)+ new_scale_color()+
+      geom_path(data = as.data.frame(pca1$scores[r1,1:2]), size=2, aes(x = pca1$scores[r1,1], y = pca1$scores[r1,2],color=r1))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "vertical"), colours = brewer.pal(5, "Greens")) +
       geom_point(data=as.data.frame(pca1$scores[r1[1],1:2]), mapping=aes(x=pca1$scores[r1[1],1],y=pca1$scores[r1[1],2]), colour="green", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca1$scores[r2[1],1:2]), mapping=aes(x=pca1$scores[r2[1],1],y=pca1$scores[r2[1],2]), colour="red", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca1$scores[r3[1],1:2]), mapping=aes(x=pca1$scores[r3[1],1],y=pca1$scores[r3[1],2]), colour="blue", shape = 17, size=4)+
@@ -1099,9 +1096,10 @@ plotPCA=function(ratdata,allmodelRes)
     r22 = c((matLen+1):(2*matLen))
     r33 = c((2*matLen+1):(3*matLen))
 
-    p2<-ggplot() + geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r11,1:2]), size=2, aes(x = pca2$scores[r11,1], y = pca2$scores[r11,2],color=r11))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) + new_scale_color()+
+    p2<-ggplot() + 
       geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r22,1:2]),size=2, aes(x = pca2$scores[r22,1], y = pca2$scores[r22,2],color=r11))+ scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "horizontal"), colors=brewer.pal(5, "Greys")) + new_scale_color()+
       geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r33,1:2]),size=2, aes(x = pca2$scores[r33,1], y = pca2$scores[r33,2],color=r11))+ scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "horizontal"), colors=violets) + new_scale_color()+
+      geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r11,1:2]), size=2, aes(x = pca2$scores[r11,1], y = pca2$scores[r11,2],color=r11))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) +
       geom_point(data=as.data.frame(pca2$scores[r11[1],1:2]), mapping=aes(x=pca2$scores[r11[1],1],y=pca2$scores[r1[1],2]), colour="green", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca2$scores[r22[1],1:2]), mapping=aes(x=pca2$scores[r22[1],1],y=pca2$scores[r2[1],2]), colour="grey", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca2$scores[r33[1],1:2]), mapping=aes(x=pca2$scores[r33[1],1],y=pca2$scores[r3[1],2]), colour="violet", shape = 17, size=4)+
@@ -1125,8 +1123,9 @@ plotPCA=function(ratdata,allmodelRes)
     r1111 = c(1:matLen)
     r2222 = c((matLen+1):(2*matLen))
 
-    p3<-ggplot() + geom_path(show.legend = FALSE,data = as.data.frame(pca3$scores[r1111,1:2]), size=2, aes(x = pca3$scores[r1111,1], y = pca3$scores[r1111,2],color=r1111))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) + new_scale_color()+
+    p3<-ggplot() + 
       geom_path(show.legend = FALSE,data = as.data.frame(pca3$scores[r2222,1:2]),size=2, aes(x = pca3$scores[r2222,1], y = pca3$scores[r2222,2],color=r1111))+ scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "horizontal"), colors=brewer.pal(5, "Greys")) + new_scale_color()+
+      geom_path(show.legend = FALSE,data = as.data.frame(pca3$scores[r1111,1:2]), size=2, aes(x = pca3$scores[r1111,1], y = pca3$scores[r1111,2],color=r1111))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) + 
       geom_point(data=as.data.frame(pca3$scores[r1111[1],1:2]), mapping=aes(x=pca3$scores[r1111[1],1],y=pca3$scores[r1111[1],2]), colour="green", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca3$scores[r2222[1],1:2]), mapping=aes(x=pca3$scores[r2222[1],1],y=pca3$scores[r2222[1],2]), colour="grey",shape = 17,  size=4)+
       xlab("Component 1") +     ylab("Component 2") + ggtitle("Paths and Hybrid2")+  theme(plot.title = element_text(hjust = 0.5))
@@ -1153,20 +1152,20 @@ plotPCA=function(ratdata,allmodelRes)
     r222 = c((matLen+1):(2*matLen))
 
     p4<-ggplot() + 
-      geom_path(show.legend = FALSE,data = as.data.frame(pca4$scores[r111,1:2]), size=2, aes(x = pca4$scores[r111,1], y = pca4$scores[r111,2],color=r111))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) + new_scale_color()+
       geom_path(show.legend = FALSE,data = as.data.frame(pca4$scores[r222,1:2]),size=2, aes(x = pca4$scores[r222,1], y = pca4$scores[r222,2],color=r111))+ scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "horizontal"), colors=violets) + new_scale_color()+
+      geom_path(show.legend = FALSE,data = as.data.frame(pca4$scores[r111,1:2]), size=2, aes(x = pca4$scores[r111,1], y = pca4$scores[r111,2],color=r111))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) +
       geom_point(data=as.data.frame(pca4$scores[r111[1],1:2]), mapping=aes(x=pca4$scores[r111[1],1],y=pca4$scores[r111[1],2]), colour="green", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca4$scores[r222[1],1:2]), mapping=aes(x=pca4$scores[r222[1],1],y=pca4$scores[r222[1],2]), colour="violet", shape = 17, size=4)+
       xlab("Component 1") +     ylab("Component 2") + ggtitle("Paths and Hybrid3")+  theme(plot.title = element_text(hjust = 0.5))
     
     
     
-    if(state==1) title = paste0(rat,", box E")
-    if(state==2) title = paste0(rat,", box I")
+    #if(state==1) title = paste0(rat,", box E")
+    #if(state==2) title = paste0(rat,", box I")
     
     legend = gtable_filter(ggplot_gtable(ggplot_build(p1)), "guide-box")
-    grid.arrange(arrangeGrob(p1 + theme(legend.position="none"), p2+ theme(legend.position="none"),p3+ theme(legend.position="none"), p4+ theme(legend.position="none"),nrow=2),legend, ncol=1,heights=c(6,1),top = textGrob(title,gp=gpar(fontsize=20,font=3)))
-    grid.arrange(arrangeGrob(p1 + theme(legend.position="none"), p2+ theme(legend.position="none"),p3+ theme(legend.position="none"), p4+ theme(legend.position="none"),nrow=2),legend, ncol=1,heights=c(6,1),top = textGrob(title,gp=gpar(fontsize=20,font=3)))
+    grid.arrange(arrangeGrob(p1 + theme(legend.position="none"), p2+ theme(legend.position="none"),p3+ theme(legend.position="none"), p4+ theme(legend.position="none"),nrow=2),legend, ncol=1,heights=c(6,1))
+    #grid.arrange(arrangeGrob(p1 + theme(legend.position="none"), p2+ theme(legend.position="none"),p3+ theme(legend.position="none"), p4+ theme(legend.position="none"),nrow=2),legend, ncol=1,heights=c(6,1),top = textGrob(title,gp=gpar(fontsize=20,font=3)))
     
     dev.off()
   }

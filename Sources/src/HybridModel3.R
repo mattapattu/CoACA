@@ -1,4 +1,4 @@
-## Hybrid2 #####
+## Hybrid3 #####
 
 ## State 1 ###
 edge1 = new("Edge", edge = c("E", "dch"), prob = 0.333)

@@ -16,11 +16,11 @@ getPathNumber=function(path){
   
   if(grepl("^d.*c.*h.*i$",path)){
     pathnb = 1
+  }else if(grepl("^f.*g.*a.*k.*j.*i$",path)){ 
+    pathnb = 2  
   }else if(grepl("^d.*c.*b.*a.*k.*j.*i$",path)){
-    pathnb = 2
-  }else if(grepl("^f.*g.*a.*k.*j.*i$",path)){
     pathnb = 3
-  }else if(grepl("^f.*g.*a.*b.*c.*c.*d.*e$",path)){
+  }else if(grepl("^f.*g.*a.*b.*c.*d.*e$",path)){
     pathnb = 5
   }else if(grepl("^f.*g.*a.*b.*c.*h.*i$",path)){
     pathnb = 4
@@ -29,9 +29,9 @@ getPathNumber=function(path){
   }
   else if(grepl("^h.*c.*d.*e$",path)){
     pathnb = 1
-  }else if(grepl("^h.*c.*b.*a.*g.*f.*e$",path)){
+  }else if(grepl("^j.*k.*a.*g.*f.*e$",path)){ 
     pathnb = 2
-  }else if(grepl("^j.*k.*a.*g.*f.*e$",path)){
+  }else if(grepl("^h.*c.*b.*a.*g.*f.*e$",path)){
     pathnb = 3
   }else if(grepl("^j.*k.*a.*b.*c.*h.*i$",path)){
     pathnb = 5
@@ -76,10 +76,10 @@ updateACAPathNbmse=function(allpaths){
       allpaths[i,6] = 0
     }
     
-    if(grepl("^, f",allpaths[i,1])||grepl("^, d",allpaths[i,1])){
+    if(grepl("^f",allpaths[i,1])||grepl("^d",allpaths[i,1])){
       allpaths[i,7]=1
     }
-    else if(grepl("^, h",allpaths[i,1])||grepl("^, j",allpaths[i,1])){
+    else if(grepl("^h",allpaths[i,1])||grepl("^j",allpaths[i,1])){
       allpaths[i,7]=2
     }
     ## (to assign states for incomplete paths seen at the end/begining of records)
@@ -1016,6 +1016,139 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
   #legend("center", legend=legend, cex=1.5, col=c("black","black","green","green","red","red"), lwd = c(1,2,1,2,1,2),lty=c(1,2,1,2,1,2),horiz=FALSE,y.intersp=1.2)
   title(paste0("Parameter estimation, ",rat), line = -1, outer = TRUE)
   #par(xpd=FALSE)
+  dev.off()
+}
+
+boxDistances = function(path,state)
+{
+  if(path == 4 & state == 1)
+  {
+    f = 39.16
+    g = 50
+    a = 44.5
+    b = 85
+    c = 42
+    h = 36
+    return(list(f=f,g=g,a=a,b=b,c=c,h=h))
+  }
+  else if(path == 4 & state == 2)
+  {
+    j = 39.16
+    k = 50
+    a = 44.5
+    b = 85
+    c = 42
+    d = 35
+    return(list(j=j,k=k,a=a,b=b,c=c,d=d))
+  }
+  else if(path == 5 & state == 1)
+  {
+    f = 39.16
+    g = 50
+    a = 44.5
+    b = 85
+    c = 42
+    d = 35
+    return(list(f=f,g=g,a=a,b=b,c=c,d=d))
+  }
+  else if(path == 5 & state == 2)
+  {
+    j = 39.16
+    k = 50
+    a = 44.5
+    b = 85
+    c = 42
+    h = 36
+    return(list(j=j,k=k,a=a,b=b,c=c,h=h))
+  }
+}
+
+plotRatSpeed = function(ratdata, ratboxes,plot.dir)
+{
+  rat = ratdata@rat
+  Paths = c( "fgabch", "fgabcd", "jkabcd","jkabch")
+  PathNb = rbind(c(4, 1), c(5, 1), c(4, 2), c(5, 2))
+  endIdx = getEndIndex(ratdata@allpaths,sim=2,limit=0.95)
+  sessions = unique(ratdata@allpaths[,5])
+  learningEndSess = ratdata@allpaths[endIdx,5]
+  learningStageLen = length(sessions[sessions <= learningEndSess])
+  #stage1 = sessions
+  stage1 = sessions[sessions<=(learningStageLen)]
+  stage2 = sessions[sessions>(learningStageLen)]
+  
+  #stage2 = sessions[sessions>(learningStageLen/2) & sessions <= learningStageLen]
+  #stage3 = sessions[sessions > learningStageLen]   
+  pdf(paste(plot.dir,"/BoxSpeeds_",rat,".pdf",sep=""))
+  par(mfrow=c(2,2))
+  for (path in c(1:4))
+  {
+    
+    corrPathIdx = which(ratdata@allpaths[, 1] == PathNb[path,1] & ratdata@allpaths[, 2] == PathNb[path,2])
+    if(length(corrPathIdx)<2)
+    {
+      next
+    }
+    corrPathList = ratdata@allpaths[corrPathIdx, ]
+    boxSpeed = matrix(0,,(nchar(Paths[path])+1))
+    for (i in 1:length(corrPathList[,1]))
+    {
+      speeds <- c()
+      sessNb = corrPathList[i, 5]
+      if (corrPathIdx[i] == 1)
+      {
+        boxIdStart = 1
+      }
+      else
+      {
+        boxIdStart = ratdata@allpaths[(corrPathIdx[i] - 1), 7]
+      }
+      
+      boxIdEnd = ratdata@allpaths[corrPathIdx[i], 7]
+      if(boxIdEnd < boxIdStart)
+      {
+        boxIdStart = 1
+      }
+      
+      boxData <- ratboxes[[sessNb]]$tab[boxIdStart:boxIdEnd, ]
+      boxes <- strsplit(Paths[path], "")[[1]]
+      boxDist <- boxDistances(PathNb[path,1],PathNb[path,2])
+      for(box in boxes)
+      {
+        boxId = which(names == box)
+        boxTime = boxData[which(boxData[,3] == boxId),2] - boxData[which(boxData[,3] == boxId),1]
+        if(boxTime == 0)
+        {
+          speeds <- c(speeds,NA) 
+        }
+        else
+        {
+          speeds <- c(speeds,(boxDist[[box]]*100/boxTime))
+          #speeds <- c(speeds,(boxTime/100))
+        }
+        
+      }
+      speeds <- c(speeds, ratdata@allpaths[corrPathIdx[i], 5])
+      boxSpeed <- rbind(boxSpeed, speeds)
+    }
+    stage1Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage1)
+    stage2Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage2)
+    #stage3Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage3)
+    meanSpeed1 <-  colMeans(boxSpeed[stage1Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
+    meanSpeed2 <-  colMeans(boxSpeed[stage2Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
+    #meanSpeed3 <-  colMeans(boxSpeed[stage3Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
+    #max = max(meanSpeed1,meanSpeed2,meanSpeed3)
+    max = max(meanSpeed1,meanSpeed2)
+    
+    plot(meanSpeed1,type='l',xaxt='n', xlab='Boxes', ylab = 'Box Speeds', main=paste0(Paths[path]),ylim=c(0,max))
+    axis(1, line=0,at=c(1:length(boxes)), labels = boxes)
+    lines(meanSpeed2,col='red')
+    #lines(meanSpeed3,col='blue')
+    #legend=c(paste0(range(stage1)[1],"-",range(stage1)[2]), paste0(range(stage2)[1],"-",range(stage2)[2],"*"), paste0(range(stage3)[1],"-",range(stage3)[2]))
+    legend=c(paste0(range(stage1)[1],"-",range(stage1)[2]), paste0(range(stage2)[1],"-",range(stage2)[2]))
+    
+    legend("topright", legend=legend, cex=0.7, col=c("black","red","blue"), lty=c(1,1,1),title="Sessions")
+    
+  }
   dev.off()
 }
 

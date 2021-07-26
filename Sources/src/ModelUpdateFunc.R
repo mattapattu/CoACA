@@ -39,6 +39,7 @@ getModelResults <- function(ratdata, testingdata, sim, src.dir, setup.hpc) {
 
   clusterExport(cl, varlist = c("getEndIndex", "convertTurnTimes", "negLogLikFunc", "src.dir"))
   clusterEvalQ(cl, source(paste(src.dir, "ModelClasses.R", sep = "/")))
+  clusterEvalQ(cl, source(paste(src.dir, "PathModel.R", sep = "/")))
   clusterEvalQ(cl, source(paste(src.dir, "TurnModel.R", sep = "/")))
   clusterEvalQ(cl, source(paste(src.dir, "HybridModel1.R", sep = "/")))
   clusterEvalQ(cl, source(paste(src.dir, "HybridModel2.R", sep = "/")))
@@ -68,6 +69,7 @@ getModelResults <- function(ratdata, testingdata, sim, src.dir, setup.hpc) {
         clusterExport(cl2, varlist = c("src.dir"))
         clusterCall(cl2, function() {
           source(paste(src.dir, "ModelClasses.R", sep = "/"))
+          source(paste(src.dir, "PathModel.R", sep = "/"))
           source(paste(src.dir, "TurnModel.R", sep = "/"))
           source(paste(src.dir, "HybridModel1.R", sep = "/"))
           source(paste(src.dir, "HybridModel2.R", sep = "/"))
@@ -198,31 +200,31 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   Model <- modelData@Model
   creditAssignment <- modelData@creditAssignment
 
-  if (Model == "Paths") {
-      Hinit <- matrix(0, 2, 6)
-      gamma1 <- par[2]
-      gamma2 <- par[3]
-
-      probMatrix <- Aca3::getProbMatrix(ratdata@allpaths, alpha, gamma1, gamma2, sim)
-      path4Probs <- probMatrix[which(probMatrix[, 4] > 0), 4]
-      path4AboveLim <- which(path4Probs >= 0.95)
-      result <- rle(diff(path4AboveLim))
-      path4Converged <- any(result$lengths >= 30 & result$values == 1)
-
-      path10Probs <- probMatrix[which(probMatrix[, 10] > 0), 10]
-      path10AboveLim <- which(path10Probs >= 0.95)
-      result <- rle(diff(path10AboveLim))
-      path10Converged <- any(result$lengths >= 30 & result$values == 1)
-
-      if (path4Converged && path10Converged) {
-        lik <- Aca3::getPathLikelihood(ratdata@allpaths[1:half_index, ], alpha, gamma1, gamma2, sim)
-      }
-      else {
-        lik <- -1000000
-      }
-    
-  }
-  else {
+  # if (Model == "Paths") {
+  #     Hinit <- matrix(0, 2, 6)
+  #     gamma1 <- par[2]
+  #     gamma2 <- par[3]
+  # 
+  #     probMatrix <- Aca3::getProbMatrix(ratdata@allpaths, alpha, gamma1, gamma2, sim)
+  #     path4Probs <- probMatrix[which(probMatrix[, 4] > 0), 4]
+  #     path4AboveLim <- which(path4Probs >= 0.95)
+  #     result <- rle(diff(path4AboveLim))
+  #     path4Converged <- any(result$lengths >= 30 & result$values == 1)
+  # 
+  #     path10Probs <- probMatrix[which(probMatrix[, 10] > 0), 10]
+  #     path10AboveLim <- which(path10Probs >= 0.95)
+  #     result <- rle(diff(path10AboveLim))
+  #     path10Converged <- any(result$lengths >= 30 & result$values == 1)
+  # 
+  #     if (path4Converged && path10Converged) {
+  #       lik <- Aca3::getPathLikelihood(ratdata@allpaths[1:half_index, ], alpha, gamma1, gamma2, sim)
+  #     }
+  #     else {
+  #       lik <- -1000000
+  #     }
+  #   
+  # }
+  #else {
       gamma1 <- par[2]
       gamma2 <- par[3]
       # reward = par[4]
@@ -251,7 +253,7 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
       else {
         lik <- -1000000
       }
-  }
+  #}
 
   negLogLik <- (-1) * sum(lik)
   # print(sprintf("negLogLik = %f",negLogLik))

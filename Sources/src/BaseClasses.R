@@ -1,6 +1,6 @@
 
-Paths = new("Model", Name = "PathsDummy")
-allModels = new("AllModels",Paths = Paths, Turns = TurnModel,Hybrid1 = Hybrid1,Hybrid2 = Hybrid2, Hybrid3 = Hybrid3,Hybrid4 = Hybrid4)
+#Paths = new("Model", Name = "PathsDummy")
+allModels = new("AllModels",Paths = PathModel, Turns = TurnModel,Hybrid1 = Hybrid1,Hybrid2 = Hybrid2, Hybrid3 = Hybrid3,Hybrid4 = Hybrid4)
 
 setClass("RatData", 
          slots = list(
@@ -143,24 +143,30 @@ setMethod("setModelResults",  signature=c("ModelData","RatData","AllModels"),
             baseModel = getBaseModel(x)
             model = x@Model
             
-            if(model == "Paths")
-              {
-                #endLearningStage = endLearningStage/2
-                x@probMatrix = baseModel@probMatFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
-                likelihood = baseModel@likelihoodFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
-                #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
-                x@likelihood = as.numeric(likelihood)
-              }
-              else
-              {
-                #endLearningStage = endLearningStage/2
-                testModel = slot(allModels,model)
-                x@probMatrix = baseModel@probMatFunc(ratdata, x,testModel,x@sim)
-                likelihood = baseModel@likelihoodFunc(ratdata, x,testModel,x@sim)
-                #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
-                x@likelihood = likelihood
-                
-            }
+            # if(model == "Paths")
+            #   {
+            #     #endLearningStage = endLearningStage/2
+            #     x@probMatrix = baseModel@probMatFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
+            #     likelihood = baseModel@likelihoodFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
+            #     #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+            #     x@likelihood = as.numeric(likelihood)
+            #   }
+            #   else
+            #   {
+            #     #endLearningStage = endLearningStage/2
+            #     testModel = slot(allModels,model)
+            #     x@probMatrix = baseModel@probMatFunc(ratdata, x,testModel,x@sim)
+            #     likelihood = baseModel@likelihoodFunc(ratdata, x,testModel,x@sim)
+            #     #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+            #     x@likelihood = likelihood
+            #     
+            #   }
+            
+            testModel = slot(allModels,model)
+            x@probMatrix = baseModel@probMatFunc(ratdata, x,testModel,x@sim)
+            likelihood = baseModel@likelihoodFunc(ratdata, x,testModel,x@sim)
+            #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+            x@likelihood = likelihood
         
             return(x)
           }
@@ -298,30 +304,39 @@ turnModelFuncs = new("BaseModel",
 
 
 
+# getBaseModel=function(modelData)
+# {
+#   if(modelData@creditAssignment == "aca3")
+#   {
+#     if(modelName == "Paths")
+#     {
+#       baseModel = pathModelFuncs
+#     }
+#     else
+#     {
+#       baseModel = turnModelFuncs
+#     } 
+#   }
+#   else if(modelData@creditAssignment == "sarsa")
+#   {
+#     if(modelName == "Paths")
+#     {
+#       baseModel = ""
+#     }
+#     else
+#     {
+#       baseModel = "turnModelFuncs"
+#     } 
+#   }
+#   
+#   return(baseModel)
+# }
+
+
+
 getBaseModel=function(modelData)
 {
-  if(modelData@creditAssignment == "aca3")
-  {
-    if(modelName == "Paths")
-    {
-      baseModel = pathModelFuncs
-    }
-    else
-    {
-      baseModel = turnModelFuncs
-    } 
-  }
-  else if(modelData@creditAssignment == "sarsa")
-  {
-    if(modelName == "Paths")
-    {
-      baseModel = ""
-    }
-    else
-    {
-      baseModel = "turnModelFuncs"
-    } 
-  }
+  baseModel = turnModelFuncs
   
   return(baseModel)
 }

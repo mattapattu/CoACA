@@ -22,67 +22,67 @@ getModelResults <- function(ratdata, testingdata, sim, src.dir, setup.hpc) {
 
   forloops <- length(models) * length(creditAssignment)
 
-  if (setup.hpc) {
-    # worker.nodes = mpi.universe.size()-1
-    # print(sprintf("worker.nodes=%i",worker.nodes))
-    cl <- makeCluster(5, type = "PSOCK")
-
-    # cl <- startMPIcluster(worker.nodes)
-    # registerDoMPI(cl)
-  }
-  else {
-    cl <- makeCluster(3)
-    # registerDoParallel(cl)
-  }
-
-
-
-  clusterExport(cl, varlist = c("getEndIndex", "convertTurnTimes", "negLogLikFunc", "src.dir"))
-  clusterEvalQ(cl, source(paste(src.dir, "ModelClasses.R", sep = "/")))
-  clusterEvalQ(cl, source(paste(src.dir, "PathModel.R", sep = "/")))
-  clusterEvalQ(cl, source(paste(src.dir, "TurnModel.R", sep = "/")))
-  clusterEvalQ(cl, source(paste(src.dir, "HybridModel1.R", sep = "/")))
-  clusterEvalQ(cl, source(paste(src.dir, "HybridModel2.R", sep = "/")))
-  clusterEvalQ(cl, source(paste(src.dir, "HybridModel3.R", sep = "/")))
-  clusterEvalQ(cl, source(paste(src.dir, "HybridModel4.R", sep = "/")))
-  clusterEvalQ(cl, source(paste(src.dir, "BaseClasses.R", sep = "/")))
-  clusterEvalQ(cl, library("TTR"))
-  clusterEvalQ(cl, library("rlist"))
-  clusterEvalQ(cl, library("DEoptim"))
-
-  clusterCall(cl, function() {
-    library(doParallel)
-    NULL
-  })
-
-  registerDoParallel(cl)
+  # if (setup.hpc) {
+  #   # worker.nodes = mpi.universe.size()-1
+  #   # print(sprintf("worker.nodes=%i",worker.nodes))
+  #   cl <- makeCluster(5, type = "PSOCK")
+  # 
+  #   # cl <- startMPIcluster(worker.nodes)
+  #   # registerDoMPI(cl)
+  # }
+  # else {
+  #   cl <- makeCluster(3)
+  #   # registerDoParallel(cl)
+  # }
+  # 
+  # 
+  # 
+  # clusterExport(cl, varlist = c("getEndIndex", "convertTurnTimes", "negLogLikFunc", "src.dir"))
+  # clusterEvalQ(cl, source(paste(src.dir, "ModelClasses.R", sep = "/")))
+  # clusterEvalQ(cl, source(paste(src.dir, "PathModel.R", sep = "/")))
+  # clusterEvalQ(cl, source(paste(src.dir, "TurnModel.R", sep = "/")))
+  # clusterEvalQ(cl, source(paste(src.dir, "HybridModel1.R", sep = "/")))
+  # clusterEvalQ(cl, source(paste(src.dir, "HybridModel2.R", sep = "/")))
+  # clusterEvalQ(cl, source(paste(src.dir, "HybridModel3.R", sep = "/")))
+  # clusterEvalQ(cl, source(paste(src.dir, "HybridModel4.R", sep = "/")))
+  # clusterEvalQ(cl, source(paste(src.dir, "BaseClasses.R", sep = "/")))
+  # clusterEvalQ(cl, library("TTR"))
+  # clusterEvalQ(cl, library("rlist"))
+  # clusterEvalQ(cl, library("DEoptim"))
+  # 
+  # clusterCall(cl, function() {
+  #   library(doParallel)
+  #   NULL
+  # })
+  # 
+  # registerDoParallel(cl)
 
 
   time <- system.time(
     resMatrix <-
       foreach(model = models, .combine = "rbind") %:%
-      foreach(method = creditAssignment, .combine = "rbind") %do% {
+      foreach(method = creditAssignment, .combine = "rbind") %dopar% {
         modelData <- new("ModelData", Model = model, creditAssignment = method, sim = sim)
         argList <- getArgList(modelData, ratdata)
         nvars <- length(argList$lower)
-        cl2 <- makeCluster(5)
-        clusterExport(cl2, varlist = c("src.dir"))
-        clusterCall(cl2, function() {
-          source(paste(src.dir, "ModelClasses.R", sep = "/"))
-          source(paste(src.dir, "PathModel.R", sep = "/"))
-          source(paste(src.dir, "TurnModel.R", sep = "/"))
-          source(paste(src.dir, "HybridModel1.R", sep = "/"))
-          source(paste(src.dir, "HybridModel2.R", sep = "/"))
-          source(paste(src.dir, "HybridModel3.R", sep = "/"))
-          source(paste(src.dir, "HybridModel4.R", sep = "/"))
-          source(paste(src.dir, "BaseClasses.R", sep = "/"))
-          NULL
-        })
-        registerDoParallel(cl2)
+        # cl2 <- makeCluster(5)
+        # clusterExport(cl2, varlist = c("src.dir"))
+        # clusterCall(cl2, function() {
+        #   source(paste(src.dir, "ModelClasses.R", sep = "/"))
+        #   source(paste(src.dir, "PathModel.R", sep = "/"))
+        #   source(paste(src.dir, "TurnModel.R", sep = "/"))
+        #   source(paste(src.dir, "HybridModel1.R", sep = "/"))
+        #   source(paste(src.dir, "HybridModel2.R", sep = "/"))
+        #   source(paste(src.dir, "HybridModel3.R", sep = "/"))
+        #   source(paste(src.dir, "HybridModel4.R", sep = "/"))
+        #   source(paste(src.dir, "BaseClasses.R", sep = "/"))
+        #   NULL
+        # })
+        # registerDoParallel(cl2)
         np.val <- length(argList$lower) * 10
-        myList <- DEoptim.control(NP = 30, F = 2, CR = 0.9, trace = FALSE, itermax = 200, parallelType = 2)
+        myList <- DEoptim.control(NP = 30, F = 0.8, CR = 0.9, trace = FALSE, itermax = 200)
         out <- do.call("DEoptim", list.append(argList, fn = negLogLikFunc, myList))
-        stopCluster(cl2)
+        #stopCluster(cl2)
         out$optim$bestmem
       }
 
@@ -94,15 +94,15 @@ getModelResults <- function(ratdata, testingdata, sim, src.dir, setup.hpc) {
   # modelData = updateModelData(ratdata,resMatrix, models)
   allmodelRes <- getAllModelResults(ratdata, resMatrix, testingdata, sim)
 
-  if (setup.hpc) {
-    stopCluster(cl)
-    # stopImplicitCluster()
-    # closeCluster(cl)
-  }
-  else {
-    stopCluster(cl)
-    # stopImplicitCluster()
-  }
+  # if (setup.hpc) {
+  #   stopCluster(cl)
+  #   # stopImplicitCluster()
+  #   # closeCluster(cl)
+  # }
+  # else {
+  #   stopCluster(cl)
+  #   # stopImplicitCluster()
+  # }
 
 
   return(allmodelRes)

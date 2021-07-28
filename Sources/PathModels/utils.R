@@ -9,6 +9,7 @@ library(gridExtra)
 library(grid)
 library(gridExtra)
 library(gtable)
+library(reshape)
 
 
 getPathNumber=function(path){
@@ -1063,93 +1064,144 @@ boxDistances = function(path,state)
   }
 }
 
-plotRatSpeed = function(ratdata, ratboxes,plot.dir)
+plotRatSpeed = function(ratDataList, ratboxList,plot.dir)
 {
-  rat = ratdata@rat
+  #pdf(paste(plot.dir,"/BoxSpeeds_",rat,".pdf",sep=""))
+  #par(mfrow=c(2,2))
+  #ratcolor = c("black","red","blue","green","orange")
   Paths = c( "fgabch", "fgabcd", "jkabcd","jkabch")
   PathNb = rbind(c(4, 1), c(5, 1), c(4, 2), c(5, 2))
-  endIdx = getEndIndex(ratdata@allpaths,sim=2,limit=0.95)
-  sessions = unique(ratdata@allpaths[,5])
-  learningEndSess = ratdata@allpaths[endIdx,5]
-  learningStageLen = length(sessions[sessions <= learningEndSess])
-  #stage1 = sessions
-  stage1 = sessions[sessions<=(learningStageLen)]
-  stage2 = sessions[sessions>(learningStageLen)]
-  
-  #stage2 = sessions[sessions>(learningStageLen/2) & sessions <= learningStageLen]
-  #stage3 = sessions[sessions > learningStageLen]   
-  pdf(paste(plot.dir,"/BoxSpeeds_",rat,".pdf",sep=""))
-  par(mfrow=c(2,2))
-  for (path in c(1:4))
+  for(path in c(1:4))
   {
     
-    corrPathIdx = which(ratdata@allpaths[, 1] == PathNb[path,1] & ratdata@allpaths[, 2] == PathNb[path,2])
-    if(length(corrPathIdx)<2)
+    pdf(file=paste("Speeds_",Paths[path],".pdf",sep=""),width=11, height=11)
+    df <- data.frame(boxes= character(6), rat_103= numeric(6), rat_106= numeric(6),rat_112= numeric(6),rat_113= numeric(6),rat_114= numeric(6))
+    mazeboxes <- strsplit(Paths[path], "")[[1]]
+    df[,1] = mazeboxes
+    
+    
+    for(r in c(2:6))
     {
-      next
-    }
-    corrPathList = ratdata@allpaths[corrPathIdx, ]
-    boxSpeed = matrix(0,,(nchar(Paths[path])+1))
-    for (i in 1:length(corrPathList[,1]))
-    {
-      speeds <- c()
-      sessNb = corrPathList[i, 5]
-      if (corrPathIdx[i] == 1)
-      {
-        boxIdStart = 1
-      }
-      else
-      {
-        boxIdStart = ratdata@allpaths[(corrPathIdx[i] - 1), 7]
-      }
+      ratdata <- ratDataList[[r]]
+      ratboxes <- ratboxList[[r]]
+      rat = ratdata@rat
       
-      boxIdEnd = ratdata@allpaths[corrPathIdx[i], 7]
-      if(boxIdEnd < boxIdStart)
-      {
-        boxIdStart = 1
-      }
+      endIdx = getEndIndex(ratdata@allpaths,sim=2,limit=0.95)
+      sessions = unique(ratdata@allpaths[,5])
+      learningEndSess = ratdata@allpaths[endIdx,5]
+      learningStageLen = length(sessions[sessions <= learningEndSess])
+      #stage1 = sessions
+      stage1 = sessions[sessions<=(learningStageLen)]
+      stage2 = sessions[sessions>(learningStageLen)]
       
-      boxData <- ratboxes[[sessNb]]$tab[boxIdStart:boxIdEnd, ]
-      boxes <- strsplit(Paths[path], "")[[1]]
-      boxDist <- boxDistances(PathNb[path,1],PathNb[path,2])
-      for(box in boxes)
+      
+      
+      corrPathIdx = which(ratdata@allpaths[, 1] == PathNb[path,1] & ratdata@allpaths[, 2] == PathNb[path,2])
+      if(length(corrPathIdx)<2)
       {
-        boxId = which(names == box)
-        boxTime = boxData[which(boxData[,3] == boxId),2] - boxData[which(boxData[,3] == boxId),1]
-        if(boxTime == 0)
+        next
+      }
+      corrPathList = ratdata@allpaths[corrPathIdx, ]
+      boxSpeed = matrix(0,,(nchar(Paths[path])+1))
+      for (i in 1:length(corrPathList[,1]))
+      {
+        speeds <- c()
+        sessNb = corrPathList[i, 5]
+        if (corrPathIdx[i] == 1)
         {
-          speeds <- c(speeds,NA) 
+          boxIdStart = 1
         }
         else
         {
-          speeds <- c(speeds,(boxDist[[box]]*100/boxTime))
-          #speeds <- c(speeds,(boxTime/100))
+          boxIdStart = ratdata@allpaths[(corrPathIdx[i] - 1), 7]
         }
         
+        boxIdEnd = ratdata@allpaths[corrPathIdx[i], 7]
+        if(boxIdEnd < boxIdStart)
+        {
+          boxIdStart = 1
+        }
+        
+        boxData <- ratboxes[[sessNb]]$tab[boxIdStart:boxIdEnd, ]
+        
+        boxDist <- boxDistances(PathNb[path,1],PathNb[path,2])
+        for(box in mazeboxes)
+        {
+          boxId = which(names == box)
+          boxTime = boxData[which(boxData[,3] == boxId),2] - boxData[which(boxData[,3] == boxId),1]
+          if(boxTime == 0)
+          {
+            speeds <- c(speeds,NA) 
+          }
+          else
+          {
+            speeds <- c(speeds,(boxDist[[box]]*100/boxTime))
+            #speeds <- c(speeds,(boxTime/100))
+          }
+          
+        }
+        speeds <- c(speeds, ratdata@allpaths[corrPathIdx[i], 5])
+        boxSpeed <- rbind(boxSpeed, speeds)
       }
-      speeds <- c(speeds, ratdata@allpaths[corrPathIdx[i], 5])
-      boxSpeed <- rbind(boxSpeed, speeds)
+      
+      stage1Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage1)
+      stage2Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage2)
+      #stage3Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage3)
+      meanSpeed1 <-  colMeans(boxSpeed[stage1Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
+      meanSpeed2 <-  colMeans(boxSpeed[stage2Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
+      #meanSpeed3 <-  colMeans(boxSpeed[stage3Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
+      #max = max(meanSpeed1,meanSpeed2,meanSpeed3)
+      max = max(meanSpeed1,meanSpeed2)
+      
+      #g <- g + geom_bar(aes(x=boxes,y=meanSpeed2), stat="identity", position ="identity", alpha=.6, fill=fillcolor[r])
+      #lines(meanSpeed2,col='red')
+      df[,r] = meanSpeed2
+      
     }
-    stage1Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage1)
-    stage2Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage2)
-    #stage3Idx = which(boxSpeed[,ncol(boxSpeed)] %in% stage3)
-    meanSpeed1 <-  colMeans(boxSpeed[stage1Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
-    meanSpeed2 <-  colMeans(boxSpeed[stage2Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
-    #meanSpeed3 <-  colMeans(boxSpeed[stage3Idx,(1:nchar(Paths[path]))],na.rm = TRUE)
-    #max = max(meanSpeed1,meanSpeed2,meanSpeed3)
-    max = max(meanSpeed1,meanSpeed2)
     
-    plot(meanSpeed1,type='l',xaxt='n', xlab='Boxes', ylab = 'Box Speeds', main=paste0(Paths[path]),ylim=c(0,max))
-    axis(1, line=0,at=c(1:length(boxes)), labels = boxes)
-    lines(meanSpeed2,col='red')
+    #stage2 = sessions[sessions>(learningStageLen/2) & sessions <= learningStageLen]
+    #stage3 = sessions[sessions > learningStageLen]   
+    
     #lines(meanSpeed3,col='blue')
     #legend=c(paste0(range(stage1)[1],"-",range(stage1)[2]), paste0(range(stage2)[1],"-",range(stage2)[2],"*"), paste0(range(stage3)[1],"-",range(stage3)[2]))
-    legend=c(paste0(range(stage1)[1],"-",range(stage1)[2]), paste0(range(stage2)[1],"-",range(stage2)[2]))
+    #legend=c(paste0(range(stage1)[1],"-",range(stage1)[2]), paste0(range(stage2)[1],"-",range(stage2)[2]))
     
-    legend("topright", legend=legend, cex=0.7, col=c("black","red","blue"), lty=c(1,1,1),title="Sessions")
+    #legend("topright", legend=legend, cex=0.7, col=c("black","red","blue"), lty=c(1,1,1),title="Sessions")
+    
+    melted<-melt(df, id="boxes")
+    #print(ggplot(melted,aes(x=boxes,y=value,fill=variable)) + geom_bar(stat="identity", position = "dodge", alpha=.8))
+    print(ggplot(melted,aes(x=variable,y=value,fill=factor(boxes,levels=mazeboxes))) + geom_bar(stat="identity", position = "dodge", alpha=.8)+  labs(fill = "Boxes"))
+    dev.off()
+  }
+  
+}
+
+
+plotTurnProb=function(ratdata,allmodelRes,testModel)
+{
+  rat = ratdata@rat
+  testModelName = testModel@Name
+  modelData = slot(allmodelRes,testModelName)@aca3
+  S0.nodes <- testModel@nodes.S0[-1]
+  S1.nodes <- testModel@nodes.S1[-1]
+  mat <- TurnsNew::getAca3ProbMatrix2(ratdata,modelData,testModel,sim=2,debug = F)
+  par(mfrow=c(2,4))
+  for(i in c(1:7))
+  {
+    plot(mat[which(mat[,i]>-1),i],main=S0.nodes[i],type='l',xaxt='n',ylab='Prob',xlab="")
+    axis(1, line=0,at=seq(1,length(which(mat[,i]>-1)),by=100), labels = mat[which(mat[,i]>-1),15][seq(1,length(which(mat[,i]>-1)),by=100)])
     
   }
-  dev.off()
+  mtext(paste0(rat,", State 1"), side = 3, line = -2, outer = TRUE)
+  par(mfrow=c(2,4))
+  for(i in c(1:7))
+  {
+    col = 7+i
+    plot(mat[which(mat[,col]>-1),col],main=S1.nodes[i],type='l',xaxt='n',ylab='Prob',xlab="")
+    axis(1, line=0,at=seq(1,length(which(mat[,col]>-1)),by=100), labels = mat[which(mat[,col]>-1),15][seq(1,length(which(mat[,col]>-1)),by=100)])
+    
+  }
+  mtext(paste0(rat,", State 2"), side = 3, line = -2, outer = TRUE)
 }
 
 plotPCA=function(ratdata,allmodelRes)

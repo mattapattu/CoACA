@@ -831,7 +831,8 @@ using namespace Rcpp;
     {
       turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
     }
-    //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
+    Rcpp::List rcppNodeS0 = Rcpp::as<Rcpp::List>(testModel.slot("nodes.S0"));
+    Rcpp::List rcppNodeS1 = Rcpp::as<Rcpp::List>(testModel.slot("nodes.S1"));
 
     double alpha = Rcpp::as<double>(modelData.slot("alpha"));
     double gamma1 = Rcpp::as<double>(modelData.slot("gamma1"));
@@ -985,9 +986,19 @@ using namespace Rcpp;
           prevNode = graph->getNode("I");
         }
 
-        double pathProb = 1;
+        //Rcpp::Rcout << "pathProb=" << pathProb << std::endl;
+        
+
         for (int j = 0; j < nbOfTurns; j++)
         {
+          
+          // S0 and S1 node lists are symmetric, so just get rcppNodeS0 size.
+          int rowlen = rcppNodeS0.size()-1;
+          arma::rowvec probRow((2*rowlen)+1);
+          probRow.fill(-1);
+          probRow((2*rowlen)) = allpaths_pathNb_sess(i);
+
+          
           std::string currTurn = Rcpp::as<std::string>(turns(j));
           currNode = graph->getNode(currTurn);
           //Edge edge = graph.getEdge(prevNode->node, currNode->node);
@@ -1005,67 +1016,24 @@ using namespace Rcpp;
           logger.Print(msg.str()); 
 
           
-          Edge edge = graph->getEdge(prevNode->node, currNode->node);
-          double prob_a = edge.probability;
-          
-          pathProb = pathProb* prob_a; 
-          //Rcpp::Rcout <<"src=" <<prevNode->node << ", dest =" <<  currNode->node  << ", prob_a="<< prob_a << ", pathProb=" <<pathProb <<std::endl;     
+          std::vector<Edge>* outgoingEdges = graph->getOutgoingEdges(prevNode->node);
+          for (auto it = outgoingEdges->begin(); it != outgoingEdges->end(); ++it)
+          {
+            int nodeID = graph->getNodeIndex((*it).dest->node)-1;
+            nodeID = (S*rowlen) + nodeID;
+            //Rcpp::Rcout << "node=" << (*it).dest->node << ", nodeID=" <<nodeID << std::endl;
+            Edge edge = graph->getEdge(prevNode->node, (*it).dest->node);
+            double nodeProb = edge.probability;
+            probRow(nodeID) = nodeProb;
+          }
+          mseMatrix = arma::join_vert(mseMatrix, probRow);
+
           prevNode = currNode;
           session_turn_count++;
         }
 
-        //Rcpp::Rcout << "pathProb=" << pathProb << std::endl;
-        arma::rowvec probRow(13);
-        probRow.fill(-1);
-        probRow(12) = allpaths_pathNb_sess(i);
-
-        for (int path = 0; path < 6; path++)
-        {
-          //Rcpp::Rcout << "path=" << path << ", state=" << S << std::endl;
-          
-          
-          Rcpp::StringVector turnVec;
-          if (S == 0)
-          {
-            turnVec = S0.getTurnsFromPaths(path);
-            turnVec.push_front("E");
-          }
-          else
-          {
-            turnVec = S1.getTurnsFromPaths(path);
-            turnVec.push_front("I");
-          }
-          //Rcpp::Rcout << "turnVec=" << turnVec << std::endl;
-          // msg.str("");
-          // msg << "turnVec=";
-          // logger.PrintRcppVec(msg.str(),turnVec); 
-          double pathProb = 1;
-          for (int k = 0; k < (turnVec.length() - 1); k++)
-          {
-            std::string turn1 = Rcpp::as<std::string>(turnVec[k]);
-            std::string turn2 = Rcpp::as<std::string>(turnVec[k + 1]);
-            //Rcpp::Rcout << "turn1=" << turn1 << ", turn2=" << turn2 << std::endl;
-
-            
-            Edge e;
-            if (S == 0)
-            {
-              e = S0.getEdge(turn1, turn2);
-            }
-            else
-            {
-              e = S1.getEdge(turn1, turn2);
-            }
-
-            //Rcpp::Rcout << "Edge prob=" << e.probability << std::endl;
-            pathProb = e.probability * pathProb;
-          }
-          int index = path + (6 * S);
-          //Rcpp::Rcout << "index=" << index << ", pathProb=" << pathProb << std::endl;
-          probRow[index] = pathProb;
-        }
         //Rcpp::Rcout << "probRow=" << probRow << std::endl;
-        mseMatrix = arma::join_vert(mseMatrix, probRow);
+        
 
         //log_lik=log_lik+ logProb;
 

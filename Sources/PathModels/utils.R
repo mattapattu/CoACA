@@ -3,20 +3,16 @@ library(RColorBrewer)
 library(TTR)
 
 
-
-
-
-
 getPathNumber=function(path){
   #path  = gsub("^, ","",path)
   
   if(grepl("^d.*c.*h.*i$",path)){
     pathnb = 1
+  }else if(grepl("^f.*g.*a.*k.*j.*i$",path)){ 
+    pathnb = 2  
   }else if(grepl("^d.*c.*b.*a.*k.*j.*i$",path)){
-    pathnb = 2
-  }else if(grepl("^f.*g.*a.*k.*j.*i$",path)){
     pathnb = 3
-  }else if(grepl("^f.*g.*a.*b.*c.*c.*d.*e$",path)){
+  }else if(grepl("^f.*g.*a.*b.*c.*d.*e$",path)){
     pathnb = 5
   }else if(grepl("^f.*g.*a.*b.*c.*h.*i$",path)){
     pathnb = 4
@@ -25,9 +21,9 @@ getPathNumber=function(path){
   }
   else if(grepl("^h.*c.*d.*e$",path)){
     pathnb = 1
-  }else if(grepl("^h.*c.*b.*a.*g.*f.*e$",path)){
+  }else if(grepl("^j.*k.*a.*g.*f.*e$",path)){ 
     pathnb = 2
-  }else if(grepl("^j.*k.*a.*g.*f.*e$",path)){
+  }else if(grepl("^h.*c.*b.*a.*g.*f.*e$",path)){
     pathnb = 3
   }else if(grepl("^j.*k.*a.*b.*c.*h.*i$",path)){
     pathnb = 5
@@ -47,8 +43,6 @@ getPathNumber=function(path){
   
   return(pathnb)
 }
-
-
 
 
 # Handle incomplete paths in the begining or when recording is lost
@@ -72,10 +66,10 @@ updateACAPathNbmse=function(allpaths){
       allpaths[i,6] = 0
     }
     
-    if(grepl("^, f",allpaths[i,1])||grepl("^, d",allpaths[i,1])){
+    if(grepl("^f",allpaths[i,1])||grepl("^d",allpaths[i,1])){
       allpaths[i,7]=1
     }
-    else if(grepl("^, h",allpaths[i,1])||grepl("^, j",allpaths[i,1])){
+    else if(grepl("^h",allpaths[i,1])||grepl("^j",allpaths[i,1])){
       allpaths[i,7]=2
     }
     ## (to assign states for incomplete paths seen at the end/begining of records)
@@ -107,7 +101,6 @@ updateACAPathNbmse=function(allpaths){
   }
   return(allpaths)
 }
-
 
 getTurnDuration=function(path, state, enregRows)
 {

@@ -3,6 +3,8 @@
 library(doMPI)
 library(rlist)
 
+
+
 HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
 {
   models = testData@Models
@@ -68,7 +70,7 @@ time1 <-system.time(
       modelName = strsplit(model,"\\.")[[1]][1]
       creditAssignment = strsplit(model,"\\.")[[1]][2]
       trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-      
+      trueModelData = modifyModelData(trueModelData) 
       end_index = -1
       missedOptimalIter = 0
       
@@ -77,11 +79,11 @@ time1 <-system.time(
         end_index = getEndIndex(generated_data@allpaths, sim=1, limit=0.95)
         missedOptimalIter=missedOptimalIter+1
         
-        if(missedOptimalIter>500)
+        if(missedOptimalIter>2000)
         {
           break
         }
-        set.seed(NULL)
+        set.seed(missedOptimalIter)
       }
       
       if(end_index > -1)
@@ -171,7 +173,6 @@ save(resList,  file = paste0(rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resList.
     # }
     
 }
-
 
 
 #######Func testParamEstimation ############
@@ -273,21 +274,25 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
 }
   
 
-getMinimumLikelihood=function(allmodelRes,testingdata)
+getMinimumLikelihood=function(ratdata, allmodelRes,testingdata,sim)
 {
   min_index = 0
   min = 100000
   min_method = "null"
-  
+  endLearningStage = getEndIndex(ratdata@allpaths,sim=sim, limit=0.95)
+  #endLearningStage = endLearningStage/2
+  half_stage = endLearningStage/2 
   for(m in testingdata@Models)
   {
     for(crAssgn in testingdata@creditAssignment)
     {
       modelData = getModelData(allmodelRes,m,crAssgn)
       lik = modelData@likelihood
+      lik = (-1)*sum(lik[-(1:half_stage)])
+      #lik = (-1)*sum(lik[(half_stage:endLearningStage)])
       modelName = paste(modelData@Model,modelData@creditAssignment,sep=".")
       
-      #print(sprintf("model=%s,likelihood=%f",modelName,lik))
+      print(sprintf("model=%s,likelihood=%f",modelName,lik))
       
       if(lik < min)
       {

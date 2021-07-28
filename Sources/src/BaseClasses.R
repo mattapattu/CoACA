@@ -133,7 +133,8 @@ setMethod("setModelResults",  signature=c("ModelData","RatData","AllModels"),
               endLearningStage = endLearningStage/2
               x@probMatrix = baseModel@probMatFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
               likelihood = baseModel@likelihoodFunc(ratdata@allpaths,x@alpha,x@gamma1,x@gamma2,x@sim)
-              x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+              #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+              x@likelihood = as.numeric(likelihood)
             }
             else
             {
@@ -141,7 +142,8 @@ setMethod("setModelResults",  signature=c("ModelData","RatData","AllModels"),
               testModel = slot(allModels,model)
               x@probMatrix = baseModel@probMatFunc(ratdata, x,testModel,x@sim)
               likelihood = baseModel@likelihoodFunc(ratdata, x,testModel,x@sim)
-              x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+              #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
+ 	      x@likelihood = as.numeric(likelihood)
               
             }
            return(x)

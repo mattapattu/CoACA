@@ -31,6 +31,7 @@ options(error=recover)
 load(data.path)
 
 source(paste(src.dir,"ModelClasses.R", sep="/"))
+source(paste(src.dir,"PathModel.R", sep="/"))
 source(paste(src.dir,"TurnModel.R", sep="/"))
 source(paste(src.dir,"HybridModel1.R", sep="/"))
 source(paste(src.dir,"HybridModel2.R", sep="/"))
@@ -44,10 +45,8 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(2:6)) {
+for (i in c(3:6)) {
 
-  
-  
   enregres = enregCombine(donnees_ash[[i]],rats[i])
   allpaths = enregres$allpaths
   boxTimes = enregres$boxTimes
@@ -55,16 +54,17 @@ for (i in c(2:6)) {
   ratdata = populateRatModel(allpaths=allpaths,rat=rats[i],donnees_ash[[i]],TurnModel)
   ratDataList[[i]] = ratdata
   
-  #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca3"))
+  testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca3"))
   #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca3","sarsa"))
-  testData = new("TestModels", Models=c("Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("sarsa"))
+  #testData = new("TestModels", Models=c("Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("sarsa"))
   
   #load(paste0("C:/Users/matta/Downloads/rat_112_allmodelRes.Rdata"))
-  #load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
-  debug(getModelResults)
-  allmodelRes = getModelResults(ratdata,testData,sim=2, src.dir, setup.hpc)
-  #min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
-  #print(sprintf("%s is best model for %s",min_method,rats[i]))
+  load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
+  #load(paste0("C:/Users/matta/Downloads/allmodelRes_",rats[i],".RData"))
+  #debug(getModelResults)
+  #allmodelRes = getModelResults(ratdata,testData,sim=2, src.dir, setup.hpc)
+  min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
+  print(sprintf("%s is best model for %s",min_method,rats[i]))
   
   #save(allmodelRes,file=paste0(plot.dir,"/allmodelRes_",rats[i],".Rdata"))
   #setwd(plot.dir)
@@ -74,6 +74,8 @@ for (i in c(2:6)) {
   #debug(generateEmpiricalPlots)
   #generateEmpiricalPlots(ratdata,window=20)
   
+  
+  #plotTurnProb(ratdata,allmodelRes,Hybrid3)
   
   # #### Holdout Validation ########################################
   
@@ -90,10 +92,13 @@ for (i in c(2:6)) {
   #debug(plotPCA)
   #plotPCA(ratdata, allmodelRes)
   
-  
 }
 
 #debug(plotSuccessRates)
 #plotSuccessRates(ratDataList)
+
+#debug(plotRatSpeed)
+#plotRatSpeed(ratDataList,donnees_ash,plot.dir)
+
 
 print(sprintf("End of script"))

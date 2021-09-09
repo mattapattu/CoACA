@@ -1,5 +1,5 @@
-#ifndef __ACA3__
-#define __ACA3__
+#ifndef __ACA2__
+#define __ACA2__
 
 #include "aca3CreditUpdate.hpp"
 #include "utils.hpp"
@@ -10,7 +10,7 @@ using namespace Rcpp;
 
 
 //namespace aca3 {
-  Rcpp::List simulateAca3TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, arma::vec turnStages, bool debug)
+  Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, arma::vec turnStages, bool debug)
   {
     arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
     std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
@@ -38,8 +38,7 @@ using namespace Rcpp;
     Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
 
     double alpha = Rcpp::as<double>(modelData.slot("alpha"));
-    double gamma1 = Rcpp::as<double>(modelData.slot("gamma1"));
-    double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
+    double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
 
     //Rcpp::Rcout << "model=" << model << ", turnMethod=" << turnMethod << std::endl;
     arma::mat R = arma::zeros(2, 6);
@@ -223,16 +222,14 @@ using namespace Rcpp;
         }
 
         //Rcpp::Rcout << "Here1" << std::endl;
-        S0.decayCredits(gamma1);
-        S1.decayCredits(gamma1);
         //Rcpp::Rcout << "Here2" << std::endl;
 
         S = S_prime;
       }
 
       //Rcpp::Rcout << "Here3" << std::endl;
-      S0.decayCredits(gamma2);
-      S1.decayCredits(gamma2);
+      S0.decayCredits(gamma);
+      S1.decayCredits(gamma);
 
       // if (turnIdx < (nrow * 2) - 1)
       // {
@@ -249,7 +246,7 @@ using namespace Rcpp;
     return (Rcpp::List::create(Named("PathData") = generated_PathData, _["TurnData"] = generated_TurnData));
   }
 
-  std::vector<double> getAca3Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug=false)
+  std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug=false)
   {
     arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
     std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
@@ -283,8 +280,7 @@ using namespace Rcpp;
     //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
 
     double alpha = Rcpp::as<double>(modelData.slot("alpha"));
-    double gamma1 = Rcpp::as<double>(modelData.slot("gamma1"));
-    double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
+    double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
 
 
   //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
@@ -501,13 +497,11 @@ using namespace Rcpp;
           episodeTurnStates.clear();
           episodeTurnTimes.clear();
         }
-        S0.decayCredits(gamma1);
-        S1.decayCredits(gamma1);
         S = S_prime;
         //trial=trial+1;
       }
-      S0.decayCredits(gamma2);
-      S1.decayCredits(gamma2);
+      S0.decayCredits(gamma);
+      S1.decayCredits(gamma);
     }
     //Rcpp::Rcout << "S0 credits: " << std::endl;
     S0.printCredits(debug);
@@ -516,7 +510,7 @@ using namespace Rcpp;
     return (mseMatrix);
   }
 
-  arma::mat getAca3ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug)
+  arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug)
   {
     arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
     std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
@@ -549,8 +543,7 @@ using namespace Rcpp;
     //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
 
     double alpha = Rcpp::as<double>(modelData.slot("alpha"));
-    double gamma1 = Rcpp::as<double>(modelData.slot("gamma1"));
-    double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
+    double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
     //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
 
     arma::mat mseMatrix;
@@ -825,16 +818,14 @@ using namespace Rcpp;
         // msg <<"Here1";
         // logger.Print(msg.str());
         
-        S0.decayCredits(gamma1);
-        S1.decayCredits(gamma1);
         S = S_prime;
         // msg.str("");
         // msg <<"Here2";
         // logger.Print(msg.str());
         //trial=trial+1;
       }
-      S0.decayCredits(gamma2);
-      S1.decayCredits(gamma2);
+      S0.decayCredits(gamma);
+      S1.decayCredits(gamma);
       //Rcpp::Rcout <<  "Here3"<<std::endl;
     }
 

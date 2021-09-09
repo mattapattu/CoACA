@@ -89,6 +89,11 @@ setMethod("setModelParams",  signature=c("ModelData","numeric"),
               x@gamma1 = modelParams[2]
               x@gamma2 = modelParams[3]
             }
+            else if(x@creditAssignment == "aca2")
+            {
+              x@alpha = modelParams[1]
+              x@gamma1 = modelParams[2]
+            }
             else if(x@creditAssignment == "sarsa")
             {
               x@alpha = modelParams[1]
@@ -113,6 +118,17 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
             {
               argList = list(lower = c(0,0,0), 
                              upper = c(1,1,1),
+                             ratdata = ratdata,
+                             half_index = endLearningStage, 
+                             modelData = x,
+                             testModel = testModel,
+                             sim = x@sim)
+              
+            }
+            else if(x@creditAssignment == "aca2")
+            {
+              argList = list(lower = c(0,0), 
+                             upper = c(1,1),
                              ratdata = ratdata,
                              half_index = endLearningStage, 
                              modelData = x,

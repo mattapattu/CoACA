@@ -61,29 +61,37 @@ getModelResults <- function(ratdata, testingdata, sim, src.dir, setup.hpc) {
   time <- system.time(
     resMatrix <-
       foreach(model = models, .combine = "rbind") %:%
-      foreach(method = creditAssignment, .combine = "rbind") %dopar% {
+      foreach(method = creditAssignment, .combine = "rbind") %do% {
         modelData <- new("ModelData", Model = model, creditAssignment = method, sim = sim)
         argList <- getArgList(modelData, ratdata)
         nvars <- length(argList$lower)
-        # cl2 <- makeCluster(5)
-        # clusterExport(cl2, varlist = c("src.dir"))
-        # clusterCall(cl2, function() {
-        #   source(paste(src.dir, "ModelClasses.R", sep = "/"))
-        #   source(paste(src.dir, "PathModel.R", sep = "/"))
-        #   source(paste(src.dir, "TurnModel.R", sep = "/"))
-        #   source(paste(src.dir, "HybridModel1.R", sep = "/"))
-        #   source(paste(src.dir, "HybridModel2.R", sep = "/"))
-        #   source(paste(src.dir, "HybridModel3.R", sep = "/"))
-        #   source(paste(src.dir, "HybridModel4.R", sep = "/"))
-        #   source(paste(src.dir, "BaseClasses.R", sep = "/"))
-        #   NULL
-        # })
-        # registerDoParallel(cl2)
+        cl2 <- makeCluster(5)
+        clusterExport(cl2, varlist = c("src.dir"))
+        clusterCall(cl2, function() {
+          source(paste(src.dir, "ModelClasses.R", sep = "/"))
+          source(paste(src.dir, "PathModel.R", sep = "/"))
+          source(paste(src.dir, "TurnModel.R", sep = "/"))
+          source(paste(src.dir, "HybridModel1.R", sep = "/"))
+          source(paste(src.dir, "HybridModel2.R", sep = "/"))
+          source(paste(src.dir, "HybridModel3.R", sep = "/"))
+          source(paste(src.dir, "HybridModel4.R", sep = "/"))
+          source(paste(src.dir, "BaseClasses.R", sep = "/"))
+          NULL
+        })
+        registerDoParallel(cl2)
         np.val <- length(argList$lower) * 10
         myList <- DEoptim.control(NP = 30, F = 0.8, CR = 0.9, trace = FALSE, itermax = 200)
         out <- do.call("DEoptim", list.append(argList, fn = negLogLikFunc, myList))
         #stopCluster(cl2)
-        out$optim$bestmem
+        if(out$optim$bestval < 100000)
+        {
+          return(out$optim$bestmem)
+        }
+        else
+        {
+          return()
+        }
+        
       }
 
     # print(time)

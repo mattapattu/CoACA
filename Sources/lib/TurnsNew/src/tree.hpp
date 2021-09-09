@@ -174,7 +174,19 @@ public:
         }
     }
 
-    
+    void printCredits(bool debug)
+    {
+        if(debug)
+        {
+            for (auto &node : nodes)
+        {
+            std::cout << "node = " << node.node << ", credit = " << node.credit << "; " ;
+        }
+        std::cout << std::endl;
+        }
+        
+    }
+
     void updateEdgeProbs()
     {
         for (auto &node : nodes)

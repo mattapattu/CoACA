@@ -363,11 +363,11 @@ arma::vec getPathLikelihood(arma::mat allpaths, double alpha, double gamma1, dou
       S = states_sess(0) - 1;
     }
 
-    arma::vec likelihoodVec_sess(nrow - 1);
+    arma::vec likelihoodVec_sess(nrow);
     likelihoodVec_sess.fill(0);
-    arma::vec episodeVec(nrow - 1);
+    arma::vec episodeVec(nrow);
     //All episodes in new session
-    for (int i = 0; i < (nrow - 1); i++)
+    for (int i = 0; i < nrow; i++)
     {
 
       //Rcpp::Rcout << "S=" << S << ", A=" << A << ", episode=" << episode <<std::endl;
@@ -395,15 +395,17 @@ arma::vec getPathLikelihood(arma::mat allpaths, double alpha, double gamma1, dou
       }
 
       int S_prime = 0;
-      if (sim == 1)
+      if (i < (nrow - 1))
       {
-        S_prime = states_sess(i + 1);
+        if (sim == 1)
+        {
+          S_prime = states_sess(i + 1);
+        }
+        else
+        {
+          S_prime = states_sess(i + 1) - 1;
+        }
       }
-      else
-      {
-        S_prime = states_sess(i + 1) - 1;
-      }
-
       episodeVec(i) = episode;
 
       if (S_prime != initState)
@@ -472,6 +474,7 @@ arma::vec getPathLikelihood(arma::mat allpaths, double alpha, double gamma1, dou
     likelihoodVec = arma::join_cols(likelihoodVec, likelihoodVec_sess);
     //Rcpp::Rcout <<  "likelihoodVec=" << likelihoodVec<<std::endl;
   }
+  Rcpp::Rcout <<  "H =" << H<<std::endl;
   return (likelihoodVec);
 }
 

@@ -1184,7 +1184,9 @@ plotTurnProb=function(ratdata,allmodelRes,testModel)
   modelData = slot(allmodelRes,testModelName)@aca3
   S0.nodes <- testModel@nodes.S0[-1]
   S1.nodes <- testModel@nodes.S1[-1]
-  mat <- TurnsNew::getAca3ProbMatrix2(ratdata,modelData,testModel,sim=2,debug = F)
+  mat <- TurnsNew::getAca3ProbMatrix(ratdata,modelData,testModel,sim=2,debug = F)
+  
+  pdf(paste(plot.dir,"/TurnProb_",rat, "_State_E.pdf",sep=""))
   par(mfrow=c(2,4))
   for(i in c(1:7))
   {
@@ -1192,7 +1194,10 @@ plotTurnProb=function(ratdata,allmodelRes,testModel)
     axis(1, line=0,at=seq(1,length(which(mat[,i]>-1)),by=100), labels = mat[which(mat[,i]>-1),15][seq(1,length(which(mat[,i]>-1)),by=100)])
     
   }
-  mtext(paste0(rat,", State 1"), side = 3, line = -2, outer = TRUE)
+  mtext(paste0(rat,", State 1"), side = 3, line = -2, outer = TRUE,cex=0.8)
+  dev.off()
+  
+  pdf(paste(plot.dir,"/TurnProb_",rat, "_State_I.pdf",sep=""))
   par(mfrow=c(2,4))
   for(i in c(1:7))
   {
@@ -1202,6 +1207,7 @@ plotTurnProb=function(ratdata,allmodelRes,testModel)
     
   }
   mtext(paste0(rat,", State 2"), side = 3, line = -2, outer = TRUE)
+  dev.off()
 }
 
 plotPCA=function(ratdata,allmodelRes)

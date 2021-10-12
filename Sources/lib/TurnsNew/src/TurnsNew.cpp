@@ -1,5 +1,6 @@
 #include "aca3.hpp"
 #include "sarsa.hpp"
+#include "aca2.hpp"
 
 // [[Rcpp::export()]]
 Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, arma::vec turnStages, bool debug = false)
@@ -9,6 +10,10 @@ Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
     if(creditAssignment == "aca3")
     {
       ret =   simulateAca3TurnsModels(ratdata, modelData, testModel, turnStages, debug);
+    }
+    else if(creditAssignment == "aca2")
+    {
+        ret =   simulateAca2TurnsModels(ratdata, modelData, testModel, turnStages, debug);
     }
     else if(creditAssignment == "sarsa")
     {
@@ -27,6 +32,10 @@ std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcp
     {
       ret =   getAca3Likelihood(ratdata, modelData, testModel, sim);
     }
+    else if(creditAssignment == "aca2")
+    {
+        ret =   getAca2Likelihood(ratdata, modelData, testModel, sim);
+    }
     else if(creditAssignment == "sarsa")
     {
         ret =   getSarsaLik(ratdata, modelData, testModel, sim);
@@ -43,6 +52,10 @@ arma::mat getProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel
     if(creditAssignment == "aca3")
     {
       ret =   getAca3ProbMatrix(ratdata, modelData, testModel, sim, debug);
+    }
+    else if(creditAssignment == "aca2")
+    {
+        ret =   getAca2ProbMatrix(ratdata, modelData, testModel, sim, debug);
     }
     else if(creditAssignment == "sarsa")
     {

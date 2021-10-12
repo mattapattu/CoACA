@@ -510,6 +510,274 @@ using namespace Rcpp;
     return (mseMatrix);
   }
 
+  // [[Rcpp::export()]]
+  Rcpp::List debugAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug=false)
+  {
+    arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
+    std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
+    arma::mat turnTimes;
+    
+    if(model == "Paths")
+    {
+      turnTimes = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
+    }
+    else if(model == "Turns")
+    {
+      turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));
+    }
+    else if(model == "Hybrid1")
+    {
+      turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel1"));
+    }
+    else if(model == "Hybrid2")
+    {
+      turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel2"));
+    }
+    else if(model == "Hybrid3")
+    {
+      turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel3"));
+    }
+    else if(model == "Hybrid4")
+    {
+      turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
+    }
+
+    //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
+
+    double alpha = Rcpp::as<double>(modelData.slot("alpha"));
+    double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
+
+
+  //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
+
+    std::vector<double> mseMatrix;
+    //int mseRowIdx = 0;
+
+    arma::vec allpath_actions = allpaths.col(0);
+    arma::vec allpath_states = allpaths.col(1);
+    arma::vec allpath_rewards = allpaths.col(2);
+    arma::vec sessionVec = allpaths.col(4);
+    arma::vec uniqSessIdx = arma::unique(sessionVec);
+
+    arma::vec turnTime_method;
+    if (sim == 1)
+    {
+      turnTime_method = turnTimes.col(3);
+    }
+    else if (model == "Paths")
+    {
+      turnTime_method = turnTimes.col(3);
+    }
+    else
+    {
+      turnTime_method = turnTimes.col(5);
+    }
+
+    int episode = 1;
+
+    Graph S0(testModel, 0);
+    //S0.printGraph();
+    Graph S1(testModel, 1);
+    //S1.printGraph();
+
+    //Rcpp::Rcout <<"rootS1.turn ="<<rootS1->turn<<std::endl;
+    //Rcpp::Rcout <<"rootS2.turn ="<<rootS2->turn<<std::endl;
+
+    for (unsigned int session = 0; session < uniqSessIdx.n_elem; session++)
+    {
+
+      int sessId = uniqSessIdx(session);
+      //Rcpp::Rcout <<"sessId="<<sessId<<std::endl;
+      arma::uvec sessionIdx = arma::find(sessionVec == sessId);
+      arma::vec actions_sess = allpath_actions.elem(sessionIdx);
+      arma::vec states_sess = allpath_states.elem(sessionIdx);
+      arma::vec rewards_sess = allpath_rewards.elem(sessionIdx);
+
+      arma::uvec turnTimes_idx; 
+      if (model == "Paths")
+      {
+        turnTimes_idx = arma::find(sessionVec == sessId); ;
+      }
+      else
+      {
+        turnTimes_idx = arma::find(turnTimes.col(4) == sessId); 
+      }
+      arma::vec turn_times_session = turnTime_method.elem(turnTimes_idx);
+      arma::uword session_turn_count = 0;
+
+      int initState = 0;
+      bool changeState = false;
+      bool returnToInitState = false;
+      int score_episode = 0;
+      float avg_score = 0;
+      bool resetVector = true;
+      int nrow = actions_sess.n_rows;
+      int S;
+      if(sim == 1)
+      {
+        S = states_sess(0); 
+      }
+      else
+      {
+        S = states_sess(0) - 1; 
+      }
+      int A = 0;
+      std::vector<std::string> episodeTurns;
+      std::vector<int> episodeTurnStates;
+      std::vector<double> episodeTurnTimes;
+
+      for (int i = 0; i < nrow; i++)
+      {
+
+        if (resetVector)
+        {
+          initState = S;
+          //Rcpp::Rcout <<"initState="<<initState<<std::endl;
+          resetVector = false;
+        }
+
+        int R = rewards_sess(i);
+
+        if (R > 0)
+        {
+          score_episode = score_episode + 1;
+        }
+
+        if (sim == 1)
+        {
+          A = actions_sess(i);
+        }
+        else
+        {
+          A = actions_sess(i) - 1;
+        }
+
+        int S_prime = 0;
+        if(i < (nrow-1))
+        {
+          if (sim == 1)
+          {
+            S_prime = states_sess(i + 1);
+          }
+          else
+          {
+            S_prime = states_sess(i + 1) - 1;
+          }
+        }
+
+        if (S_prime != initState)
+        {
+          changeState = true;
+        }
+        else if (S_prime == initState && changeState)
+        {
+          returnToInitState = true;
+        }
+
+        Rcpp::Rcout <<"ses=" <<sessId << ", i="<< i << ", S=" << S <<", A=" << A << ", S_prime=" << S_prime <<std::endl;
+
+        Rcpp::StringVector turns;
+        if(S==0)
+        {
+          turns = S0.getTurnsFromPaths(A);
+        } 
+        else
+        {
+          turns = S1.getTurnsFromPaths(A);
+        }
+        int nbOfTurns = turns.length();
+        //Rcpp::Rcout <<"turns="<< turns << std::endl;
+
+        Node *prevNode;
+        Node *currNode;
+        Graph graph;
+        if (S == 0)
+        {
+          graph = S0;
+          prevNode = graph.getNode("E");
+        }
+        else
+        {
+          graph = S1;
+          prevNode = graph.getNode("I");
+        }
+        double pathProb = 1;
+        for (int j = 0; j < nbOfTurns; j++)
+        {
+          std::string currTurn = Rcpp::as<std::string>(turns(j));
+          currNode = graph.getNode(currTurn);
+          //currNode->credit = currNode->credit + 1; //Test
+          //Rcpp::Rcout <<"currNode="<< currNode->node<<std::endl;
+          episodeTurns.push_back(currNode->node);
+          episodeTurnStates.push_back(S);
+          episodeTurnTimes.push_back(turn_times_session(session_turn_count));
+
+          Edge edge = graph.getEdge(prevNode->node, currNode->node);
+          double prob_a = edge.probability;
+          pathProb = pathProb* prob_a;      
+          //Rcpp::Rcout <<"prob_a="<< prob_a << ", pathProb=" <<pathProb <<std::endl;
+          
+          session_turn_count++;
+          prevNode = currNode;
+        }
+        if(A != 6)
+        {
+          double logProb = log(pathProb);
+          mseMatrix.push_back(logProb);
+        }
+        
+
+        //log_lik=log_lik+ logProb;
+
+        //Check if episode ended
+        if (returnToInitState)
+        {
+          //Rcpp::Rcout <<  "Inside end episode"<<std::endl;
+          changeState = false;
+          returnToInitState = false;
+
+          //avg_score = avg_score + (score_episode - avg_score) / episode;
+          double episodeDuration = std::accumulate(episodeTurnTimes.begin(), episodeTurnTimes.end(), 0);
+          Rcpp::Rcout << "episodeNb=" <<episode << ", episodeDuration=" <<episodeDuration  << std::endl;
+          Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
+          //Rcpp::Rcout << "Update S0 probabilities"<<std::endl;
+          S0.updateEdgeProbs();
+          //Rcpp::Rcout << "Update S1 probabilities"<<std::endl;
+          S1.updateEdgeProbs();
+          //Rcpp::Rcout <<  "H="<<H<<std::endl;
+          //Rcpp::Rcout << "S0 credits: ";
+          //S0.printCredits(true);
+          //Rcpp::Rcout << std::endl;
+          //Rcpp::Rcout << "S1 credits: ";
+          //Rcpp::Rcout << std::endl;
+          //S1.printCredits(true);
+
+          score_episode = 0;
+          episode = episode + 1;
+          resetVector = true;
+          episodeTurns.clear();
+          episodeTurnStates.clear();
+          episodeTurnTimes.clear();
+        }
+        S = S_prime;
+        //trial=trial+1;
+      }
+      S0.decayCredits(gamma);
+      S1.decayCredits(gamma);
+    }
+    //Rcpp::Rcout << "S0 credits: " << std::endl;
+    S0.printCredits(debug);
+    //Rcpp::Rcout << "S1 credits: " << std::endl;
+    S1.printCredits(debug);
+    
+    Rcpp::List S0_credits = S0.getNodeCredits();
+    Rcpp::List S1_credits = S1.getNodeCredits();
+    return Rcpp::List::create(Rcpp::Named("S0") = S0_credits,
+            Rcpp::Named("S1") = S1_credits);
+
+  }
+
+
   arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug)
   {
     arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));

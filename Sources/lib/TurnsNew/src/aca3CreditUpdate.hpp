@@ -87,10 +87,13 @@
         {
           activity = turnTime / arma::accu(episodeTurnTimes_arma);
         }
-        currNode->credit = currNode->credit + (alpha * score_episode * activity);
+        
+        double deltaH = alpha * score_episode * activity;
+        double prevCredit = currNode->credit;
+        currNode->credit = currNode->credit + deltaH;
         
         //double partialCredit = score_episode * activity;
-        //Rcpp::Rcout <<  "Turn="<< currNode->node  <<", state=" <<state  << ", credit=" << currNode->credit <<std::endl;
+        Rcpp::Rcout <<  "Turn="<< currNode->node  <<", S=" <<state  << ", turnTime=" <<turnTime << ", activity=" << activity  << ", prevNodeCred=" << prevCredit << ", deltaH=" << deltaH  <<", nodeCredit=" << currNode->credit <<std::endl;
         
       }
     }

@@ -121,8 +121,6 @@ public:
             adjList[nodeIndex].push_back(e);
         }
         
-        
-        
     }
 
     Edge getEdge(std::string src, std::string dest)
@@ -178,13 +176,26 @@ public:
     {
         if(debug)
         {
-            for (auto &node : nodes)
+        for (auto &node : nodes)
         {
             std::cout << "node = " << node.node << ", credit = " << node.credit << "; " ;
         }
         std::cout << std::endl;
         }
         
+    }
+
+    Rcpp::List getNodeCredits()
+    {
+        Rcpp::StringVector v1;
+        Rcpp::NumericVector v2;
+        for (auto &node : nodes)
+        {
+            v1.push_back(node.node);
+            v2.push_back(node.credit);
+        }
+
+        return Rcpp::List::create(Rcpp::Named("nodes") = v1 , Rcpp::Named("credits") = v2);
     }
 
     void updateEdgeProbs()

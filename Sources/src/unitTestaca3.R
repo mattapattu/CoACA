@@ -154,7 +154,7 @@ generateSampleTrajectory=function()
 }
   
 
-computeHmatrix=function(ratdata, modelData, testModel,sim=1)
+getNodeCredits=function(ratdata, modelData, testModel,sim=1)
 {
   alpha = modelData@alpha
   gamma1 = modelData@gamma1
@@ -176,7 +176,7 @@ computeHmatrix=function(ratdata, modelData, testModel,sim=1)
   
   if(model == "Paths")
   {
-    turnTimes = slot(ratdata,"turnTimes")
+    turnTimes = slot(ratdata,"allpaths")
   }
   else if(model == "Turns")
   {
@@ -299,6 +299,10 @@ computeHmatrix=function(ratdata, modelData, testModel,sim=1)
         {
           curr_turn_time <- turnTimes_ses[turnTimeId,4]
         }
+        else if (model == "Paths")
+        {
+          curr_turn_time = turnTimes_ses[turnTimeId,4];
+        }
         else{
           curr_turn_time <- turnTimes_ses[turnTimeId,6]
         }
@@ -353,8 +357,8 @@ computeHmatrix=function(ratdata, modelData, testModel,sim=1)
       
       
       #H = gamma1 * H
-      V(S0)$credit <- V(S0)$credit*gamma1
-      V(S1)$credit <- V(S1)$credit*gamma1
+      #V(S0)$credit <- V(S0)$credit*gamma1
+      #V(S1)$credit <- V(S1)$credit*gamma1
       ## Check if episode ended
       if(returnToInitState)
       {
@@ -377,8 +381,11 @@ computeHmatrix=function(ratdata, modelData, testModel,sim=1)
           
           activity = turnDuration/episodeDuration
           #H[1,(action_s0+1)]=H[1,(action_s0+1)]+alpha*(score_episode*activity)
-          V(S0)[nodeId]$credit <- V(S0)[nodeId]$credit + alpha*(score_episode*activity)
-          print(sprintf("Turn=%s,S=0,turnDuration=%f, activity=%f, H[S,A]=%f",action_s0,turnDuration,activity,V(S0)[nodeId]$credit))
+          
+          deltaH = alpha*(score_episode*activity)
+          prevNodeCredit = V(S0)[nodeId]$credit
+          V(S0)[nodeId]$credit <- V(S0)[nodeId]$credit + deltaH
+          print(sprintf("Turn=%s,S=0,turnTime=%f, activity=%f,prevNodeCred=%f,deltaH=%f,nodeCredit=%f",action_s0,turnDuration,activity,prevNodeCredit,deltaH,V(S0)[nodeId]$credit))
         }
         
         
@@ -392,8 +399,10 @@ computeHmatrix=function(ratdata, modelData, testModel,sim=1)
           #nbOfOccurence = length(which(action_s1==episodeActions[state1_idx]))
           activity = turnDuration/episodeDuration
           #H[2,(action_s1+1)]=H[2,(action_s1+1)]+alpha*(score_episode*activity)
-          V(S1)[nodeId]$credit <- V(S1)[nodeId]$credit + alpha*(score_episode*activity)
-          print(sprintf("Turn=%s,S=1,turnDuration=%f, activity=%f, H[S,A]=%f",action_s1,turnDuration,activity,V(S1)[nodeId]$credit))
+          prevNodeCredit = V(S1)[nodeId]$credit
+          deltaH =  alpha*(score_episode*activity)
+          V(S1)[nodeId]$credit <- V(S1)[nodeId]$credit + deltaH
+          print(sprintf("Turn=%s,S=1,turnTime=%f,activity=%f,prevNodeCred=%f,deltaH=%f,nodeCredit=%f",action_s1,turnDuration,activity,prevNodeCredit,deltaH,V(S1)[nodeId]$credit))
         }
         
         #print(H)
@@ -408,12 +417,12 @@ computeHmatrix=function(ratdata, modelData, testModel,sim=1)
       S=S_prime
     }
     
-    V(S0)$credit <- V(S0)$credit*gamma2
-    V(S1)$credit <- V(S1)$credit*gamma2
+    V(S0)$credit <- V(S0)$credit*gamma1
+    V(S1)$credit <- V(S1)$credit*gamma1
     
   }
   
-  return(list(likelihood=lik,probMatrix=probMatrix))
+  return(list(likelihood=lik,probMatrix=probMatrix,nodes = list(S0=as_ids(V(S0)),S1=as_ids(V(S1))),credits=list(S0=V(S0)$credit,S1=V(S1)$credit)))
 }
 
 
@@ -440,9 +449,36 @@ generateGraph=function(testModel,state)
   graph <- graph.data.frame(df)
   graph<-set_vertex_attr(graph, name="credit", value=0)
   graph<-set_vertex_attr(graph, name="probability", value=0)
+  #plot(g0,layout=layout_(g0, as_tree()),vertex.shape="none",vertex.label.cex=0.8)
   return(graph)
 }
 
+
+plotGraphs = function(src.dir)
+{
+  source(paste(src.dir,"TurnModel.R", sep="/"))
+  source(paste(src.dir,"HybridModel1.R", sep="/"))
+  source(paste(src.dir,"HybridModel2.R", sep="/"))
+  source(paste(src.dir,"HybridModel2.R", sep="/"))
+  source(paste(src.dir,"HybridModel3.R", sep="/"))
+  source(paste(src.dir,"HybridModel4.R", sep="/"))
+  
+  #modelFiles <- c("TurnModel.R","HybridModel1.R","HybridModel2.R","HybridModel2.R","HybridModel3.R","HybridModel4.R")
+  models <- c("Turns","Hybrid1","Hybrid2","Hybrid3","Hybrid4")
+  allModels = new("AllModels",Turns = TurnModel,Hybrid1 = Hybrid1,Hybrid2 = Hybrid2, Hybrid3 = Hybrid3,Hybrid4 = Hybrid4)
+  
+  for(model in models)
+  {
+
+    g0 <- generateGraph(slot(allModels,model),0)
+    g1 <- generateGraph(slot(allModels,model),1)
+    par(mfrow=c(1,2))
+    plot(g0,layout=layout_(g0, as_tree()),vertex.shape="none",vertex.label.cex=0.8)
+    plot(g1,layout=layout_(g1, as_tree()),vertex.shape="none",vertex.label.cex=0.8)
+    title(main=print(paste0(model,", Model1")),outer=T, line=-2)
+    
+  }
+}
 
 getTurnsFromPath=function(state, action, testModel)
 {
@@ -530,29 +566,58 @@ aca_getNextState=function(curr_state, action)
 
 
 
-testCode=function()
+testCode=function(ratdata)
 {
   #models = c("Paths","Turns","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
-  ratdata <- generateSampleTrajectory()
-  ratdata@hybridModel1 = convertTurnTimes(ratdata,TurnModel,Hybrid1,sim=1)
-  ratdata@hybridModel2 = convertTurnTimes(ratdata,TurnModel,Hybrid2,sim=1)
-  ratdata@hybridModel3 = convertTurnTimes(ratdata,TurnModel,Hybrid3,sim=1)
-  ratdata@hybridModel4 = convertTurnTimes(ratdata,TurnModel,Hybrid4,sim=1)
-  models = c("Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
-  creditAssgmnt = "aca3"
-  for(model in models[5])
+  # ratdata <- generateSampleTrajectory()
+  # ratdata@hybridModel1 = convertTurnTimes(ratdata,TurnModel,Hybrid1,sim=1)
+  # ratdata@hybridModel2 = convertTurnTimes(ratdata,TurnModel,Hybrid2,sim=1)
+  # ratdata@hybridModel3 = convertTurnTimes(ratdata,TurnModel,Hybrid3,sim=1)
+  # ratdata@hybridModel4 = convertTurnTimes(ratdata,TurnModel,Hybrid4,sim=1)
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  creditAssgmnt = "aca2"
+  for(model in models)
   {
-    modelData <- new("ModelData", Model = model, creditAssignment = creditAssgmnt, sim = 1)
+    modelData <- new("ModelData", Model = model, creditAssignment = creditAssgmnt, sim = 2)
     modelData@alpha=0.2017198
     modelData@gamma1=0.9
-    modelData@gamma2=0.8853001
+    modelData@gamma2=1
     testModel = slot(allModels,model)
-    lik1<-exp(TurnsNew::getTurnsLikelihood(ratdata,modelData,testModel,sim=1))
-    lik2<-exp(getTurnsLikelihood(ratdata,modelData,testModel,sim=1))
-    res<- computeHmatrix(ratdata,modelData,testModel)
-    lik3 <- exp(res$likelihood)
-    print(sprintf("Model=%s,lik1=%f,lik2=%f,lik3=%f",model,lik1,lik2,lik3))
+    # lik1<-exp(TurnsNew::getTurnsLikelihood(ratdata,modelData,testModel,sim=2))
+    # lik2<-exp(getTurnsLikelihood(ratdata,modelData,testModel,sim=2))
+    # res<- getNodeCredits(ratdata,modelData,testModel)
+    # lik3 <- exp(res$likelihood)
+    # print(sprintf("Model=%s,lik1=%f,lik2=%f,lik3=%f",model,lik1,lik2,lik3))
     
+    res<- getNodeCredits(ratdata,modelData,testModel,sim=2)
+    
+    res2<-TurnsNew::debugAca2Likelihood(ratdata,modelData,testModel,sim=2)
+    print(sort(res2$S0$nodes))
+    print(res2$S0$credits[order(res2$S0$nodes)])
+    print(res$credits$S0[order(res$nodes$S0)])
+    
+
+    if(identical(res2$S0$credits[order(res2$S0$nodes)],res$credits$S0[order(res$nodes$S0)]))
+    {
+      print(sprintf("S0 credits are identical for %s", model))
+    }
+    else
+    {
+      print(sprintf("S0 credits are not identical for %s", model))
+    }
+
+    print(sort(res2$S1$nodes))
+    print(res2$S1$credits[order(res2$S1$nodes)])
+    print(res$credits$S1[order(res$nodes$S1)])
+    
+    if(identical(res2$S1$credits[order(res2$S1$nodes)],res$credits$S1[order(res$nodes$S1)]))
+    {
+      print(sprintf("S1 credits are identical for %s", model))
+    }
+    else
+    {
+      print(sprintf("S1 credits are not identical %s", model))
+    }
   }
   
 }

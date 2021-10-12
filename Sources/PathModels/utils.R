@@ -957,7 +957,7 @@ generateEmpiricalPlots=function(ratdata,window){
 plotSuccessRates=function(ratDataList)
 {
   successRateList = list()
-  for(i in c(2:6))
+  for(i in c(2:7))
   {
     ratdata = ratDataList[[i]]
     rat = ratdata@rat
@@ -975,12 +975,13 @@ plotSuccessRates=function(ratDataList)
   maxlen <- max(lengths(successRateList))
   successRateList2 <- lapply(successRateList, function(lst) c(lst, rep(0, maxlen - length(lst))))
   df <- data.frame(matrix(unlist(successRateList2), ncol=length(successRateList2), byrow=FALSE))
+  df[df==0] <- NA
   pdf(file=paste("SuccessRate.pdf",sep=""),width=11, height=7)
-  colors=c("black","red","blue","green","orange")
-  matplot(df[,2:6],type='l',col=colors,lty=c(1,1,1,2,2),lwd=c(2,2,2,2,2), xlab = "Session", ylab="", cex.lab=1.6,cex.axis=1.5)
+  colors=c("black","red","blue","green","orange","violet")
+  matplot(df[,2:7],type='l',col=colors,lty=c(1,1,1,1,1,1),lwd=c(2,2,2,2,2), xlab = "Session", ylab="", cex.lab=1.6,cex.axis=1.5)
   title(ylab="Success Rate", line=2.95, cex.lab=1.6,cex.axis=1.5)
-  legend=c("rat103", "rat106","rat112","rat113", "rat114")
-  legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2),lty=c(1,1,1,2,2), bg="white")
+  legend=c("rat1", "rat2","rat3","rat4", "rat5","rat6")
+  legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2,2),lty=c(1,1,1,1,1,1), bg="white")
   dev.off()
 }
 
@@ -1003,11 +1004,11 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
     gamma2 = paramTest[[i]]$model@gamma2
     model = paramTest[[i]]$model@Model
     plot(unname(paramTest[[i]]$resMat[,2]),type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials (hundreds)", main=model,lty=1,lwd=1)
-    abline(h=paramTest[[i]]$model@alpha,col='black',lty=2,lwd=2)
+    abline(h=paramTest[[i]]$model@alpha,col='black',lty=1,lwd=2)
     lines(unname(paramTest[[i]]$resMat[,3]),type='l',col='red',lty=1,lwd=1)
-    abline(h=paramTest[[i]]$model@gamma1,col='red',lty=2,lwd=2)
+    abline(h=paramTest[[i]]$model@gamma1,col='red',lty=1,lwd=2)
     lines(unname(paramTest[[i]]$resMat[,4]),type='l',col='green',lty=1,lwd=1)
-    abline(h=paramTest[[i]]$model@gamma2,col='3',lty=2,lwd=2)
+    abline(h=paramTest[[i]]$model@gamma2,col='3',lty=1,lwd=2)
   
   }
   #plot.new()
@@ -1536,7 +1537,16 @@ enregCombine=function(enreg,rat){
     
     for(i in 1:(length(boxIndices)-1))
     {
-      range = boxIndices[i+1]-boxIndices[i]
+      if(boxIndices[i] == 1)
+      {
+        range = boxIndices[i+1]
+      }
+      else
+      {
+        range = boxIndices[i+1]-boxIndices[i]  
+      }
+      
+      
       if(range > 0)
       {
         range = range-1

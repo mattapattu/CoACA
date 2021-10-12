@@ -9,7 +9,7 @@ library(doParallel)
 # library(snow);
 # library(doSNOW);
 
-getModelResults <- function(ratdata, testingdata, sim, src.dir, setup.hpc) {
+getModelResults <- function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc) {
   end_index <- getEndIndex(ratdata@allpaths, sim, limit = 0.95)
   start_index <- round(end_index / 2)
   if (start_index >= end_index) {
@@ -66,15 +66,15 @@ getModelResults <- function(ratdata, testingdata, sim, src.dir, setup.hpc) {
         argList <- getArgList(modelData, ratdata)
         nvars <- length(argList$lower)
         cl2 <- makeCluster(5)
-        clusterExport(cl2, varlist = c("src.dir"))
+        clusterExport(cl2, varlist = c("src.dir","model.src"))
         clusterCall(cl2, function() {
           source(paste(src.dir, "ModelClasses.R", sep = "/"))
-          source(paste(src.dir, "PathModel.R", sep = "/"))
-          source(paste(src.dir, "TurnModel.R", sep = "/"))
-          source(paste(src.dir, "HybridModel1.R", sep = "/"))
-          source(paste(src.dir, "HybridModel2.R", sep = "/"))
-          source(paste(src.dir, "HybridModel3.R", sep = "/"))
-          source(paste(src.dir, "HybridModel4.R", sep = "/"))
+          source(paste(model.src, "PathModel.R", sep = "/"))
+          source(paste(model.src, "TurnModel.R", sep = "/"))
+          source(paste(model.src, "HybridModel1.R", sep = "/"))
+          source(paste(model.src, "HybridModel2.R", sep = "/"))
+          source(paste(model.src, "HybridModel3.R", sep = "/"))
+          source(paste(model.src, "HybridModel4.R", sep = "/"))
           source(paste(src.dir, "BaseClasses.R", sep = "/"))
           NULL
         })

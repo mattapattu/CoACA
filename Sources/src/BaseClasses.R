@@ -18,7 +18,7 @@ setClass("TestModels",
          slots = list(
            Models="character",
            creditAssignment = "character"
-           )
+         )
 )
 
 setClass("BaseModel", 
@@ -29,7 +29,7 @@ setClass("BaseModel",
            probMatFunc = "function",
            rule="character",
            type="character")
-         )
+)
 
 setClass("ModelData", 
          slots = list(
@@ -42,8 +42,8 @@ setClass("ModelData",
            likelihood = "numeric",
            probMatrix = "matrix",
            sim = "numeric"
-           )
-        )
+         )
+)
 
 setClass("ModelDataList",
          slots = list(
@@ -108,8 +108,8 @@ setMethod("setModelParams",  signature=c("ModelData","numeric"),
 setMethod("getArgList",  signature=c("ModelData","RatData"),
           definition=function(x,ratdata)
           {
-            
-            endLearningStage = getEndIndex(ratdata@allpaths,sim=x@sim, limit=0.95)
+            ratName = ratdata@rat
+            endLearningStage = getEndIndex(ratName, ratdata@allpaths,sim=x@sim, limit=0.95)
             model = x@Model
             testModel = slot(allModels,model)
             endLearningStage = endLearningStage/2
@@ -183,16 +183,17 @@ setMethod("setModelResults",  signature=c("ModelData","RatData","AllModels"),
             likelihood = baseModel@likelihoodFunc(ratdata, x,testModel,x@sim)
             #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
             x@likelihood = likelihood
-        
+            
             return(x)
           }
-        )
+)
 
 setMethod("simulateData",  signature=c("ModelData","RatData","AllModels"),
           definition=function(x,ratdata,allModels)
           {
-            endStage1 = getEndIndex(ratdata@allpaths,sim=2,limit=0.5)
-            endStage2 = getEndIndex(ratdata@allpaths,sim=2,limit=0.95)
+            ratName = ratdata@rat
+            endStage1 = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.5)
+            endStage2 = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.85)
             endStage3 = length(ratdata@allpaths[,1])
             pathstages=c(1,endStage1,endStage2,endStage3)
             
@@ -245,7 +246,7 @@ setMethod("simulateData",  signature=c("ModelData","RatData","AllModels"),
             
             simData = new("RatData", rat = "simulation",allpaths = generated_data$PathData)
             
-           
+            
             if(x@Model=="Paths")
             {
               slot(simData, "turnTimes") = generated_data$TurnData 
@@ -282,7 +283,7 @@ setMethod("addModelData",  signature=c("AllModelRes","ModelData"),
             model = modelData@Model
             creditAssignment = modelData@creditAssignment
             
-
+            
             slot(slot(x,model),creditAssignment) = modelData
             
             return(x)
@@ -305,18 +306,18 @@ setMethod("getModelData",  signature=c("AllModelRes","character","character"),
 ### Models 
 
 pathModelFuncs = new("BaseModel", 
-                Name = "PathModel", 
-                simulateFunc = Aca3::simulateTrials, 
-                likelihoodFunc = Aca3::getPathLikelihood,
-                probMatFunc = Aca3::getProbMatrix,
-                type = "paths")
+                     Name = "PathModel", 
+                     simulateFunc = Aca3::simulateTrials, 
+                     likelihoodFunc = Aca3::getPathLikelihood,
+                     probMatFunc = Aca3::getProbMatrix,
+                     type = "paths")
 
 turnModelFuncs = new("BaseModel", 
-                Name = "TurnModel", 
-                simulateFunc = TurnsNew::simulateTurnsModels, 
-                likelihoodFunc = TurnsNew::getTurnsLikelihood,
-                probMatFunc = TurnsNew::getProbMatrix,
-                type = "turns")
+                     Name = "TurnModel", 
+                     simulateFunc = TurnsNew::simulateTurnsModels, 
+                     likelihoodFunc = TurnsNew::getTurnsLikelihood,
+                     probMatFunc = TurnsNew::getProbMatrix,
+                     type = "turns")
 
 
 

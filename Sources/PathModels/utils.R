@@ -483,7 +483,7 @@ convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
   hybridModelMat = matrix(0,totActions,6)
   colnames(hybridModelMat) <- c("ActionNb", "Path", "State","ActionId","Session", "Duration" )
   actIdx = 1;
-
+  
   if(sim != 1)
   {
     allpaths[,1:2] = allpaths[,1:2]-1
@@ -563,7 +563,7 @@ convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
         turn_idx = which(turnsactNbvec == row[6])
         diff_times = turntimevec[turn_idx[res_idx]]
       }
-
+      
       hybridModelMat[actIdx,6] = sum(diff_times)
       actIdx = actIdx+1
     }
@@ -745,12 +745,12 @@ generatePlots=function(ratdata,allmodelRes,window,plot.dir){
   
   #empiricalProbMat = baseModels::empiricalProbMat(allpaths1, window = window)
   empiricalProbMat = getEmpProbMat(allpaths1,window)
-  TurnsMat = allmodelRes@Turns@aca3@probMatrix
-  PathsMat = allmodelRes@Paths@aca3@probMatrix
-  Hybrid1Mat = allmodelRes@Hybrid1@aca3@probMatrix
-  Hybrid2Mat = allmodelRes@Hybrid2@aca3@probMatrix
-  Hybrid3Mat = allmodelRes@Hybrid3@aca3@probMatrix
-  Hybrid4Mat = allmodelRes@Hybrid4@aca3@probMatrix
+  TurnsMat = allmodelRes@Turns@aca2@probMatrix
+  PathsMat = allmodelRes@Paths@aca2@probMatrix
+  Hybrid1Mat = allmodelRes@Hybrid1@aca2@probMatrix
+  Hybrid2Mat = allmodelRes@Hybrid2@aca2@probMatrix
+  Hybrid3Mat = allmodelRes@Hybrid3@aca2@probMatrix
+  Hybrid4Mat = allmodelRes@Hybrid4@aca2@probMatrix
   
   rat=ratdata@rat
   
@@ -1009,7 +1009,7 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
     abline(h=paramTest[[i]]$model@gamma1,col='red',lty=1,lwd=2)
     lines(unname(paramTest[[i]]$resMat[,4]),type='l',col='green',lty=1,lwd=1)
     abline(h=paramTest[[i]]$model@gamma2,col='3',lty=1,lwd=2)
-  
+    
   }
   #plot.new()
   #par(xpd=TRUE)
@@ -1220,7 +1220,7 @@ plotPCA=function(ratdata,allmodelRes)
   {
     if (state==1) pdf(file=paste("PCA_",rat,"boxE.pdf",sep=""),width=11, height=11,onefile=FALSE)
     if (state==2) pdf(file=paste("PCA_",rat,"boxI.pdf",sep=""),width=11, height=11,onefile=FALSE)    
-
+    
     endIdx = getEndIndex(ratdata@allpaths,sim=2,limit=0.95)
     state_idx = which(ratdata@allpaths[,2] == state)
     state_idx = which(allmodelRes@Paths@aca3@probMatrix[,13] %in% state_idx)
@@ -1267,14 +1267,14 @@ plotPCA=function(ratdata,allmodelRes)
       geom_point(data=as.data.frame(pca1$scores[r5[1],1:2]), mapping=aes(x=pca1$scores[r5[1],1],y=pca1$scores[r5[1],2]), colour="violet",shape = 17,  size=4)+
       geom_point(data=as.data.frame(pca1$scores[r6[1],1:2]), mapping=aes(x=pca1$scores[r6[1],1],y=pca1$scores[r6[1],2]), colour="yellow", shape = 17, size=4)+
       xlab("Component 1") +     ylab("Component 2") + theme(legend.direction = "vertical", legend.box = "horizontal",legend.position = "right")+ggtitle("All models")+  theme(plot.title = element_text(hjust = 0.5))
-      
-  
-  
-  ## 3 models together - Path, Hybrid2, Hybrid3
+    
+    
+    
+    ## 3 models together - Path, Hybrid2, Hybrid3
     X1=allmodelRes@Paths@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     X4=allmodelRes@Hybrid2@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     X5=allmodelRes@Hybrid3@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-
+    
     X=rbind(X1,X4,X5)
     Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
     pca2=princomp(Xtilde)
@@ -1287,7 +1287,7 @@ plotPCA=function(ratdata,allmodelRes)
     r11 = c(1:matLen)
     r22 = c((matLen+1):(2*matLen))
     r33 = c((2*matLen+1):(3*matLen))
-
+    
     p2<-ggplot() + 
       geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r22,1:2]),size=2, aes(x = pca2$scores[r22,1], y = pca2$scores[r22,2],color=r11))+ scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "horizontal"), colors=brewer.pal(5, "Greys")) + new_scale_color()+
       geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r33,1:2]),size=2, aes(x = pca2$scores[r33,1], y = pca2$scores[r33,2],color=r11))+ scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "horizontal"), colors=violets) + new_scale_color()+
@@ -1302,7 +1302,7 @@ plotPCA=function(ratdata,allmodelRes)
     
     X1=allmodelRes@Paths@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     X4=allmodelRes@Hybrid2@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-
+    
     X=rbind(X1,X4)
     Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
     pca3=princomp(Xtilde)
@@ -1314,7 +1314,7 @@ plotPCA=function(ratdata,allmodelRes)
     violets<-seq_gradient_pal("white", "violet")(x)
     r1111 = c(1:matLen)
     r2222 = c((matLen+1):(2*matLen))
-
+    
     p3<-ggplot() + 
       geom_path(show.legend = FALSE,data = as.data.frame(pca3$scores[r2222,1:2]),size=2, aes(x = pca3$scores[r2222,1], y = pca3$scores[r2222,2],color=r1111))+ scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "horizontal"), colors=brewer.pal(5, "Greys")) + new_scale_color()+
       geom_path(show.legend = FALSE,data = as.data.frame(pca3$scores[r1111,1:2]), size=2, aes(x = pca3$scores[r1111,1], y = pca3$scores[r1111,2],color=r1111))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) + 
@@ -1342,7 +1342,7 @@ plotPCA=function(ratdata,allmodelRes)
     violets<-seq_gradient_pal("white", "violet")(x)
     r111 = c(1:matLen)
     r222 = c((matLen+1):(2*matLen))
-
+    
     p4<-ggplot() + 
       geom_path(show.legend = FALSE,data = as.data.frame(pca4$scores[r222,1:2]),size=2, aes(x = pca4$scores[r222,1], y = pca4$scores[r222,2],color=r111))+ scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "horizontal"), colors=violets) + new_scale_color()+
       geom_path(show.legend = FALSE,data = as.data.frame(pca4$scores[r111,1:2]), size=2, aes(x = pca4$scores[r111,1], y = pca4$scores[r111,2],color=r111))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) +
@@ -1368,7 +1368,7 @@ plotPCA=function(ratdata,allmodelRes)
 getEmpProbMat=function(allpaths,window){
   totalActions = length(allpaths[,1])
   empProbMat = matrix(-1,totalActions,13)
-
+  
   
   for(trial in c(1:totalActions)){
     empProbMat[trial,13]= allpaths[trial,6]
@@ -1381,7 +1381,7 @@ getEmpProbMat=function(allpaths,window){
     {
       trialSet = (trial-window+1):trial
     }
-
+    
     Idx <- which(allpaths[trialSet,2]==currState)
     stateIdx <- trialSet[Idx]
     
@@ -1390,16 +1390,16 @@ getEmpProbMat=function(allpaths,window){
       empProbMat[trial,(path+6*(currState-1))] = mean(as.numeric(allpaths[stateIdx,1] %in% path))
     }
   }
-    
+  
   return(empProbMat)
 }
 
 getStartIndex = function(generated_data){
   start_index=0
-  l<-which(SMA(generated_data[,3],30)>=0.6)
+  l<-which(SMA(generated_data[,3],20)>=0.6)
   k<-split(l, cumsum(c(1, diff(l) != 1)))
   for(set in 1:length(k)){
-    if(length(k[[set]])>30){
+    if(length(k[[set]])>20){
       start_index=k[[set]][1]
       break
     }
@@ -1407,42 +1407,55 @@ getStartIndex = function(generated_data){
   return(start_index)
 }
 
-getEndIndex = function(generated_data, sim, limit){
+getEndIndex = function(ratName, generated_data, sim, limit){
+  
   if(sim==1){
     generated_data[,1:2] = generated_data[,1:2] + 1
   }
+  if(ratName == "rat_101" || ratName == "robert")
+  {
+    limit = 0.85
+    trialPeriod = 20
+    consecutiveTrials = 10
+  }
+  else
+  {
+    limit = 0.95
+    trialPeriod = 30
+    consecutiveTrials = 20
+  }
   end_index1=0
   s1 <- which(generated_data[,2]==1)
-  l<-which(SMA(generated_data[s1,3],30)>=limit)
+  l<-which(SMA(generated_data[s1,3],trialPeriod)>=limit)
   k<-split(l, cumsum(c(1, diff(l) != 1)))
   for(set in 1:length(k)){
-    if(length(k[[set]])>20){
+    if(length(k[[set]])>consecutiveTrials){
       end_index1=k[[set]][1]
       break
     }
   }
-
-
+  
+  
   end_index2=0
   s2 <- which(generated_data[,2]==2)
-  l<-which(SMA(generated_data[s2,3],30)>=limit)
+  l<-which(SMA(generated_data[s2,3],trialPeriod)>=limit)
   k<-split(l, cumsum(c(1, diff(l) != 1)))
   for(set in 1:length(k)){
-    if(length(k[[set]])>20){
+    if(length(k[[set]])>consecutiveTrials){
       end_index2=k[[set]][1]
       break
     }
   }
-
+  
   if(end_index1==0 || end_index2 ==0){
     end_index = -1
   }else{
     end_index = max(s1[end_index1],s2[end_index2])
     #end_index = round(length(generated_data[,1]))/2
   }
-
+  
   #print(sprintf("end_index=%i", end_index))
-
+  
   return(end_index)
 }
 
@@ -1654,12 +1667,11 @@ populateSimRatModel=function(generated_data,testModelName)
     generated_data@hybridModel1 = convertTurnTimes(generated_data,TurnModel,Hybrid1,sim=1)
     generated_data@hybridModel2 = convertTurnTimes(generated_data,TurnModel,Hybrid2,sim=1)
     generated_data@hybridModel3 = convertTurnTimes(generated_data,TurnModel,Hybrid3,sim=1)
-
+    
     
   }
   
   return(generated_data)
   
 }
-
 

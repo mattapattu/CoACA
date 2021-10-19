@@ -1,13 +1,4 @@
-#library(R.matlab)
-#library(SDMTools)
-#library(stringr)
-#library(eegkit)#Librairie EEG pour l'analyse du LFP
-#library("plot3D")
-#library(data.tree)
-#library(pracma)
-#library(sp) #for spatial polygons
-#library(doMPI)
-#library(Rmpi)
+
 library(doParallel)
 
 options(error=recover)
@@ -17,13 +8,14 @@ names=c('e','f','g','c','d','h','i','j','a','b','k')
 
 ### Options Linux/Windows ####
 
-src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
+#src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 #src.dir = file.path("/home/amoongat/Projects/Rats-Credit/Sources/src")
+src.dir = file.path("/home/ajames/Rats-Credit/Sources/src")
 
 setup.hpc = FALSE
 #setup.hpc = TRUE
 
-unitTest = T
+unitTest = F
 
 if(unitTest)
 {
@@ -31,8 +23,9 @@ if(unitTest)
   data.path = file.path("C:/Rats-Credits/Data/testDonnes1.RData") 
 }else
 {
-  #data.path = file.path("C:/Rats-Credits/Data/data_journeys.RData")
-  data.path = file.path("C:/Rats-Credits/Data/New_robert_combined_data_journeys.RData")
+  data.path = file.path("/home/ajames/Rats-Credit/Data/data_journeys_robert.Rdata")
+  #data.path = file.path("C:/Rats-Credits/Data/New_robert_combined_data_journeys.RData")
+  #data.path = file.path("C:/Rats-Credits/Data/combined_data_journeys.RData")
   #data.path = file.path("/home/amoongat/Projects/Rats-Credit/data_journeys.Rdata")
   
 }
@@ -40,10 +33,10 @@ if(unitTest)
 load(data.path)
 #load(data.path2)
 
-plot.dir = file.path("C:/Rats-Credits")
+#plot.dir = file.path("C:/Rats-Credits")
+plot.dir = file.path("/home/ajames/Rats-Credit")
 
-
-model = "Model1"  ## {Model1,Model2,Model3}
+model = "Model2"  ## {Model1,Model2,Model3}
 source(paste(src.dir,"ModelClasses.R", sep="/"))
 
 ## Model files
@@ -64,8 +57,11 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(2:7)) {
-
+for (i in c(1:1)) {
+  
+  testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
+  
+  
   if(unitTest)
   {
     rawData <- testDonnes1
@@ -79,36 +75,32 @@ for (i in c(2:7)) {
   allpaths = enregres$allpaths
   boxTimes = enregres$boxTimes
   
-  #ratdata = populateRatModel(allpaths=allpaths,rat=rats[i],donnees_ash[[i]],TurnModel)
-  ratdata = populateRatModel(allpaths=allpaths,rat="testRat",rawData,TurnModel)
-  ratDataList[[i]] = ratdata
-  
-  testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
-  #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca3","sarsa"))
-  #testData = new("TestModels", Models=c("Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("sarsa"))
   
   if(unitTest)
   {
+    ratdata = populateRatModel(allpaths=allpaths,rat="testRat",rawData,TurnModel)
     debug(testCode)
     testCode(ratdata)
   }
   else
   {
+    ratdata = populateRatModel(allpaths=allpaths,rat=rats[i],donnees_ash[[i]],TurnModel)
     #load(paste0("C:/Users/matta/Downloads/rat_112_allmodelRes.Rdata"))
     #load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
     #load(paste0("C:/Rats-Credits/aca2_allmodelRes_",rats[i],".RData"))
-    debug(getModelResults)
+    #debug(getModelResults)
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
-    #min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
-    #print(sprintf("%s is best model for %s",min_method,rats[i]))
-
+    min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
+    print(sprintf("%s is best model for %s",min_method,rats[i]))
+    
   }
   
+  ratDataList[[i]] = ratdata
   
-  #save(allmodelRes,file=paste0(plot.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+  save(allmodelRes,file=paste0(plot.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   #setwd(plot.dir)
   #debug(generatePlots)
-  #generatePlots(ratdata,allmodelRes,window=20,plot.dir)
+  generatePlots(ratdata,allmodelRes,window=20,plot.dir)
   
   #debug(generateEmpiricalPlots)
   #generateEmpiricalPlots(ratdata,window=20)
@@ -134,7 +126,7 @@ for (i in c(2:7)) {
 }
 
 #debug(plotSuccessRates)
-plotSuccessRates(ratDataList)
+#plotSuccessRates(ratDataList)
 
 #debug(plotRatSpeed)
 #plotRatSpeed(ratDataList,donnees_ash,plot.dir)

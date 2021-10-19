@@ -3,7 +3,7 @@ library(doParallel)
 
 options(error=recover)
 
-rats = c("rat_101","rat_103","rat_106","rat_112","rat_113","rat_114")
+rats = c("rat_101","rat_103","rat_106","rat_112","rat_113","rat_114","robert")
 names=c('e','f','g','c','d','h','i','j','a','b','k')
 
 ### Options Linux/Windows ####
@@ -88,19 +88,19 @@ for (i in c(1:1)) {
     #load(paste0("C:/Users/matta/Downloads/rat_112_allmodelRes.Rdata"))
     #load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
     #load(paste0("C:/Rats-Credits/aca2_allmodelRes_",rats[i],".RData"))
-    #debug(getModelResults)
-    allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
-    min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
-    print(sprintf("%s is best model for %s",min_method,rats[i]))
-    
   }
+  # 
+  #ratDataList[[i]] = ratdata
   
-  ratDataList[[i]] = ratdata
-  
-  save(allmodelRes,file=paste0(plot.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+  ############### Likelihood Computation and Model Selection ###########################################
+  #debug(getModelResults)
+  #allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
+  #min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
+  #print(sprintf("%s is best model for %s",min_method,rats[i]))
+  #save(allmodelRes,file=paste0(plot.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   #setwd(plot.dir)
   #debug(generatePlots)
-  generatePlots(ratdata,allmodelRes,window=20,plot.dir)
+  #generatePlots(ratdata,allmodelRes,window=20,plot.dir)
   
   #debug(generateEmpiricalPlots)
   #generateEmpiricalPlots(ratdata,window=20)
@@ -109,9 +109,10 @@ for (i in c(1:1)) {
   #plotTurnProb(ratdata,allmodelRes,Hybrid3)
   
   # #### Holdout Validation ########################################
-  
-  #debug(HoldoutTest)
-  #HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc)
+  load(file=paste0(plot.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+  debug(HoldoutTest)
+  src.dir = file.path(src.dir,model)
+  HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc)
   
   #### Parameter estimation test ##############
   #debug(testParamEstimation)

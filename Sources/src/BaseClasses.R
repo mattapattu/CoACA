@@ -200,30 +200,17 @@ setMethod("simulateData",  signature=c("ModelData","RatData","AllModels"),
             
             if(x@Model == "Paths")
             {
-              argList = list(allpaths = ratdata@allpaths, 
-                             turnTimes = ratdata@turnTimes,
-                             alpha = x@alpha,
-                             gamma1 = x@gamma1,
-                             gamma2 = x@gamma2,
-                             pathStages = pathstages)
-              generated_data = do.call(pathModelFuncs@simulateFunc,argList)
+              testModel = PathModel
+              turnstages = pathstages
             }
             else if(x@Model == "Turns")
             {
               
+              testModel = TurnModel
               turnIdxStage1 = last(which(ratdata@turnTimes[,1]<=endStage1))
               turnIdxStage2 = last(which(ratdata@turnTimes[,1]<=endStage2))
               turnIdxStage3 = length(ratdata@turnTimes[,1])
               turnstages = c(1,turnIdxStage1,turnIdxStage2,turnIdxStage3)
-              model = x@Model
-              testModel = TurnModel
-              testTurnTimes = ratdata@turnTimes
-              argList = list(ratdata = ratdata, 
-                             modelData = x,
-                             testModel = testModel,
-                             turnstages = turnstages)
-              
-              generated_data = TurnsNew::simulateTurnsModels(ratdata,x,testModel,turnstages)
             }
             else
             {
@@ -236,13 +223,13 @@ setMethod("simulateData",  signature=c("ModelData","RatData","AllModels"),
               turnIdxStage3 = length(testTurnTimes[,1])
               turnstages = c(1,turnIdxStage1,turnIdxStage2,turnIdxStage3)
               
-              argList = list(ratdata = ratdata, 
-                             modelData = x,
-                             testModel = testModel,
-                             turnstages = turnstages)
-              
-              generated_data = TurnsNew::simulateTurnsModels(ratdata,x,testModel,turnstages)
             }
+            # argList = list(ratdata = ratdata, 
+            #                modelData = x,
+            #                testModel = testModel,
+            #                turnstages = turnstages)
+            
+            generated_data = TurnsNew::simulateTurnsModels(ratdata,x,testModel,turnstages)
             
             simData = new("RatData", rat = "simulation",allpaths = generated_data$PathData)
             

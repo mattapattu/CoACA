@@ -1414,13 +1414,16 @@ getEndIndex = function(ratName, generated_data, sim, limit){
   }
   if(ratName == "rat_101" || ratName == "robert")
   {
-    limit = 0.85
+    if(limit > 0.85)
+    {
+      limit = 0.85
+    }
     trialPeriod = 20
-    consecutiveTrials = 10
+    consecutiveTrials = 15
   }
   else
   {
-    limit = 0.95
+    #limit = 0.95
     trialPeriod = 30
     consecutiveTrials = 20
   }

@@ -15,7 +15,12 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
   std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
   arma::mat turnTimes;
-  if(model == "Turns")
+  
+  if(model == "Paths")
+  {
+    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
+  }
+  else if(model == "Turns")
   {
     turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));
   }
@@ -35,6 +40,10 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   {
     turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
   }
+  
+
+
+
   Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
@@ -200,7 +209,6 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         //Rcpp::Rcout << "Inside end episode" << std::endl;
         changeState = false;
         returnToInitState = false;
-        avg_score = (avg_score * (episode - 1) + (score_episode - avg_score)) / episode;
         //Rcpp::Rcout << "episodeTurns.size=" <<episodeTurns.size() << ", episodeTurnStates.size()=" <<episodeTurnStates.size() << ", episodeTurnTimes.size=" << episodeTurnTimes.size()<< std::endl;
         // for(unsigned int i=0; i<episodeTurns.size(); i++)
         // {

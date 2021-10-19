@@ -3,8 +3,8 @@ library(doParallel)
 
 modifyParam=function(param)
 {
-  lower = param - (param/50)
-  upper = param + (param/50)
+  lower = param - (param/20)
+  upper = param + (param/20)
   
   if(lower <=0 )
     lower = param
@@ -21,7 +21,7 @@ modifyModelData=function(modelData)
   
   modelData@alpha = modifyParam(modelData@alpha)
   modelData@gamma1 = modifyParam(modelData@gamma1)
-  modelData@gamma2 = modifyParam(modelData@gamma2)
+  #modelData@gamma2 = modifyParam(modelData@gamma2)
   
   return(modelData)
 }
@@ -54,15 +54,16 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
     cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
     
     initWorkers <-  function() {
-      source(paste(src.dir,"ModelClasses.R", sep="/"))
+      source(paste(src.dir,"../ModelClasses.R", sep="/"))
+      source(paste(src.dir,"PathModel.R", sep="/"))
       source(paste(src.dir,"TurnModel.R", sep="/"))
       source(paste(src.dir,"HybridModel1.R", sep="/"))
       source(paste(src.dir,"HybridModel2.R", sep="/"))
       source(paste(src.dir,"HybridModel3.R", sep="/"))
       source(paste(src.dir,"HybridModel4.R", sep="/"))
-      source(paste(src.dir,"BaseClasses.R", sep="/"))
-      source(paste(src.dir,"exportFunctions.R", sep="/"))
-      source(paste(src.dir,"ModelUpdateFunc.R", sep="/"))
+      source(paste(src.dir,"../BaseClasses.R", sep="/"))
+      source(paste(src.dir,"../exportFunctions.R", sep="/"))
+      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
       #attach(myEnv, name="sourced_scripts")
     }
     
@@ -74,13 +75,14 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
     cl <- makeCluster(3, outfile = "")
     #registerDoParallel(cl)
     clusterExport(cl, varlist = c("getEndIndex", "convertTurnTimes","simulateData","src.dir","populateSimRatModel","getMinimumLikelihood","getModelResults","negLogLikFunc","getAllModelResults","getTurnTimesMat","getModelResultsSeq"))
-    clusterEvalQ(cl, source(paste(src.dir,"ModelClasses.R", sep="/")))
+    clusterEvalQ(cl, source(paste(src.dir,"../ModelClasses.R", sep="/")))
+    clusterEvalQ(cl, source(paste(src.dir,"PathModel.R", sep="/")))
     clusterEvalQ(cl, source(paste(src.dir,"TurnModel.R", sep="/")))
     clusterEvalQ(cl, source(paste(src.dir,"HybridModel1.R", sep="/")))
     clusterEvalQ(cl, source(paste(src.dir,"HybridModel2.R", sep="/")))
     clusterEvalQ(cl, source(paste(src.dir,"HybridModel3.R", sep="/")))
     clusterEvalQ(cl, source(paste(src.dir,"HybridModel4.R", sep="/")))
-    clusterEvalQ(cl, source(paste(src.dir,"BaseClasses.R", sep="/")))
+    clusterEvalQ(cl, source(paste(src.dir,"../BaseClasses.R", sep="/")))
     clusterExport(cl, varlist = c("ratdata","allModelRes","testData","creditAssignment","modifyModelData","modifyParam"),envir=environment())
     clusterEvalQ(cl, library("TTR"))
     clusterEvalQ(cl, library("dplyr"))

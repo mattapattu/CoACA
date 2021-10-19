@@ -12,11 +12,13 @@ using namespace Rcpp;
 //namespace aca3 {
 Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, arma::vec turnStages, bool debug)
 {
+  Rcpp::Rcout << "Inside simulateAca2TurnsModels" << std::endl;
   arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
   std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
+  Rcpp::Rcout << "model=" << model << std::endl;
   arma::mat turnTimes;
   
-  if(model == "Paths")
+ if(model == "Paths")
   {
     turnTimes = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
   }
@@ -41,15 +43,17 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
     turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
   }
   
+  //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
+  
+  double alpha = Rcpp::as<double>(modelData.slot("alpha"));
+  double gamma = Rcpp::as<double>(modelData.slot("gamma1"));  
 
-
+  Rcpp::Rcout << "alpha=" << alpha << ", gamma1=" << gamma << std::endl;
 
   Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
   
-  double alpha = Rcpp::as<double>(modelData.slot("alpha"));
-  double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
   
-  //Rcpp::Rcout << "model=" << model << ", turnMethod=" << turnMethod << std::endl;
+  
   arma::mat R = arma::zeros(2, 6);
   R(0, 3) = 1;
   R(1, 3) = 1;
@@ -63,8 +67,8 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   arma::vec uniqSessIdx = arma::unique(sessionVec);
   arma::vec pathNb = allpaths.col(5);
   
-  arma::vec all_turns = turnTimes.col(3);
-  arma::vec turns_sessions = turnTimes.col(4);
+  //arma::vec all_turns = turnTimes.col(3);
+  //arma::vec turns_sessions = turnTimes.col(4);
   
   //Rcpp::Rcout << "sessionVec=" << sessionVec << std::endl;
   //Rcpp::Rcout << "uniqSessIdx=" << uniqSessIdx << std::endl;
@@ -78,13 +82,13 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   {
     
     int sessId = uniqSessIdx(session);
-    //Rcpp::Rcout << "session=" << session << ", sessId=" << sessId << std::endl;
+    Rcpp::Rcout << "session=" << session << ", sessId=" << sessId << std::endl;
     arma::uvec sessionIdx = arma::find(sessionVec == (sessId));
     arma::vec actions_sess = allpath_actions.elem(sessionIdx);
     arma::vec states_sess = allpath_states.elem(sessionIdx);
     
-    arma::uvec turns_sessIdx = arma::find(turns_sessions == (sessId));
-    arma::vec turns_sess = all_turns.elem(turns_sessIdx);
+    //arma::uvec turns_sessIdx = arma::find(turns_sessions == (sessId));
+    //arma::vec turns_sess = all_turns.elem(turns_sessIdx);
     
     int initState = 0;
     bool changeState = false;
@@ -106,7 +110,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
     generated_TurnsData_sess.fill(-1);
     unsigned int turnIdx = 0; // counter for turn model
     //All episodes in new session
-    //Rcpp::Rcout << "nrow=" << nrow << std::endl;
+    Rcpp::Rcout << "nrow=" << nrow << std::endl;
     for (int i = 0; i < nrow; i++)
     {
       actionNb++;
@@ -138,6 +142,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
       {
         Edge edgeSelected = softmax_action_sel(graph, *edges);
         std::string turnSelected = edgeSelected.dest->node;
+        Rcpp::Rcout << "Turn=" << turnSelected <<std::endl;
         int turnNb = graph.getNodeIndex(turnSelected);
         currNode = edgeSelected.dest;
         arma::vec durationVec = simulateTurnDuration(turnTimes, allpaths, turnNb, (turnIdx+1), turnStages,nodeGroups,debug);
@@ -153,7 +158,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         generated_TurnsData_sess(turnIdx, 1) = S;
         generated_TurnsData_sess(turnIdx, 2) = 0;
         generated_TurnsData_sess(turnIdx, 3) = turnTime;
-        //Rcpp::Rcout << "Turn=" << currTurn <<", turn duration="<< generated_TurnsData_sess(turnIdx, 3)<<std::endl;
+        Rcpp::Rcout << "Turn=" << turnSelected <<", turnDuration="<< turnTime<<std::endl;
         generated_TurnsData_sess(turnIdx, 4) = sessId;
         generated_TurnsData_sess(turnIdx, 5) = actionNb;
         generated_TurnsData_sess(turnIdx, 6) = durationVec(0);
@@ -174,7 +179,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
       
       //arma::mat durationMat = simulatePathTime(turnTimes, allpaths, actionNb, A, pathStages,nodeGroups);
       
-      //Rcpp::Rcout <<"A=" << A << ", S=" << S << ", sessId=" <<sessId<< std::endl;
+      Rcpp::Rcout <<"A=" << A << ", S=" << S << ", sessId=" <<sessId<< std::endl;
       generated_PathData_sess(i, 0) = A;
       generated_PathData_sess(i, 1) = S;
       //Rcpp::Rcout <<"R(S, A)=" <<R(S, A)<< std::endl;
@@ -309,7 +314,7 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
   }
   else if (model == "Paths")
   {
-    turnTime_method = sessionVec;
+    turnTime_method = turnTimes.col(3);
   }
   else
   {
@@ -833,7 +838,11 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
   arma::vec uniqSessIdx = arma::unique(sessionVec);
   
   arma::vec turnTime_method;
-  if (sim == 1)
+    if (sim == 1)
+  {
+    turnTime_method = turnTimes.col(3);
+  }
+  else if (model == "Paths")
   {
     turnTime_method = turnTimes.col(3);
   }
@@ -841,6 +850,7 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
   {
     turnTime_method = turnTimes.col(5);
   }
+
   int episode = 1;
   
   Graph S0(testModel, 0);

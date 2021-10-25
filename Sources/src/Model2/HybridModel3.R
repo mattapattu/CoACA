@@ -45,7 +45,7 @@ graphS1 = new("Graph", Name ="turnsS1",State=1,
               Path4 = c("jka1","a2bch"),
               Path5 = c("hcba1","a2kj"))
 
-groups = list(grp1=c(1),grp2=c(3,4,5),grp3=c(2,6,7))
+groups = list(grp1=c(1),grp2=c(3,4,5,6),grp3=c(2,7,8))
 
 Hybrid3 = new("Model", Name = "Hybrid3",
               S0 = graphS0,

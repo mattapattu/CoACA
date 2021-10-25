@@ -10,7 +10,7 @@ names=c('e','f','g','c','d','h','i','j','a','b','k')
 
 #src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 #src.dir = file.path("/home/amoongat/Projects/Rats-Credit/Sources/src")
-src.dir = file.path("/home/ajames/Rats-Credit/Sources/src")
+src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 
 setup.hpc = FALSE
 #setup.hpc = TRUE
@@ -23,9 +23,7 @@ if(unitTest)
   data.path = file.path("C:/Rats-Credits/Data/testDonnes1.RData") 
 }else
 {
-  data.path = file.path("/home/ajames/Rats-Credit/Data/data_journeys_robert.Rdata")
-  #data.path = file.path("C:/Rats-Credits/Data/New_robert_combined_data_journeys.RData")
-  #data.path = file.path("C:/Rats-Credits/Data/combined_data_journeys.RData")
+  data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/data_journeys.Rdata")
   #data.path = file.path("/home/amoongat/Projects/Rats-Credit/data_journeys.Rdata")
   
 }
@@ -33,8 +31,9 @@ if(unitTest)
 load(data.path)
 #load(data.path2)
 
-#plot.dir = file.path("C:/Rats-Credits")
-plot.dir = file.path("/home/ajames/Rats-Credit")
+plot.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Plots")
+model.data.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data")
+#plot.dir = file.path("/home/ajames/Rats-Credit")
 
 model = "Model2"  ## {Model1,Model2,Model3}
 source(paste(src.dir,"ModelClasses.R", sep="/"))
@@ -57,7 +56,7 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(1:1)) {
+for (i in c(1:2)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
   
@@ -97,7 +96,7 @@ for (i in c(1:1)) {
   #allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
   #min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
   #print(sprintf("%s is best model for %s",min_method,rats[i]))
-  #save(allmodelRes,file=paste0(plot.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+  #save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   #setwd(plot.dir)
   #debug(generatePlots)
   #generatePlots(ratdata,allmodelRes,window=20,plot.dir)
@@ -109,7 +108,7 @@ for (i in c(1:1)) {
   #plotTurnProb(ratdata,allmodelRes,Hybrid3)
   
   # #### Holdout Validation ########################################
-  load(file=paste0(plot.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+  load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   debug(HoldoutTest)
   src.dir = file.path(src.dir,model)
   HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc)

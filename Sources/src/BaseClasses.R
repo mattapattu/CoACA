@@ -292,12 +292,12 @@ setMethod("getModelData",  signature=c("AllModelRes","character","character"),
 
 ### Models 
 
-pathModelFuncs = new("BaseModel", 
-                     Name = "PathModel", 
-                     simulateFunc = Aca3::simulateTrials, 
-                     likelihoodFunc = Aca3::getPathLikelihood,
-                     probMatFunc = Aca3::getProbMatrix,
-                     type = "paths")
+# pathModelFuncs = new("BaseModel", 
+#                      Name = "PathModel", 
+#                      simulateFunc = Aca3::simulateTrials, 
+#                      likelihoodFunc = Aca3::getPathLikelihood,
+#                      probMatFunc = Aca3::getProbMatrix,
+#                      type = "paths")
 
 turnModelFuncs = new("BaseModel", 
                      Name = "TurnModel", 

@@ -139,7 +139,7 @@ Rcpp::List simulateSarsa2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
           std::string turnSelected = edgeSelected.dest->node;
           int turnNb = graph.getNodeIndex(turnSelected);
           currNode = edgeSelected.dest;
-          arma::vec durationVec = simulateTurnDuration(model,turnTimes, allpaths, turnNb, (turnIdx + 1), turnStages, nodeGroups, debug);
+          arma::vec durationVec = simulateTurnDuration(turnTimes, allpaths, turnNb, (turnIdx + 1), turnStages, nodeGroups, debug);
           double turnTime = durationVec(1);
           turnNames.push_back(turnSelected);
           episodeTurns.push_back(currNode->node);

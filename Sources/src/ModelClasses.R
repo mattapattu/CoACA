@@ -27,7 +27,9 @@ setClass("Model",
            edges.S0 = "list",
            edges.S1 = "list",
            nodes.S0 = "character",
-           nodes.S1 = "character"
+           nodes.S1 = "character",
+           turnNodes.S0 = "list",
+           turnNodes.S1 = "list"
          ))
 
 setClass("AllModels",

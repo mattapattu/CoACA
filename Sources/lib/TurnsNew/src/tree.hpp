@@ -36,6 +36,7 @@ public:
     std::vector<Node> nodes;
     std::vector<std::vector<Edge>> adjList;
     Paths mazePaths = Paths();
+    Rcpp::List turnNodes;
     
 
     int getNodeIndex(std::string nodeName)
@@ -73,12 +74,14 @@ public:
         Rcpp::S4 graph;
         Rcpp::List rcppNodeList;
         Rcpp::List rcppEdgeList;
+        
 
         if (state == 0)
         {
             graph = Rcpp::as<Rcpp::S4>(turnModel.slot("S0"));
             rcppNodeList = turnModel.slot("nodes.S0");
             rcppEdgeList = turnModel.slot("edges.S0");
+            turnNodes = turnModel.slot("turnNodes.S0");
 
         }
         else
@@ -86,6 +89,7 @@ public:
             graph = Rcpp::as<Rcpp::S4>(turnModel.slot("S1"));
             rcppNodeList = turnModel.slot("nodes.S1");
             rcppEdgeList = turnModel.slot("edges.S1");
+            turnNodes = turnModel.slot("turnNodes.S1");
         }
 
         mazePaths.Path0 = Rcpp::as<Rcpp::StringVector>(graph.slot("Path0"));
@@ -184,6 +188,16 @@ public:
         }
         
     }
+    
+    void printPaths()
+    {
+      Rcpp::Rcout <<  mazePaths.Path0 << std::endl;
+      Rcpp::Rcout <<  mazePaths.Path1 << std::endl;
+      Rcpp::Rcout <<  mazePaths.Path2 << std::endl;
+      Rcpp::Rcout <<  mazePaths.Path3 << std::endl;
+      Rcpp::Rcout <<  mazePaths.Path4 << std::endl;
+      Rcpp::Rcout <<  mazePaths.Path5 << std::endl;
+    }
 
     Rcpp::List getNodeCredits()
     {
@@ -236,6 +250,7 @@ public:
     Rcpp::StringVector getTurnsFromPaths(int path)
     {
         Rcpp::StringVector turns;
+        //Rcpp::Rcout << "path=" << path <<std::endl;
         if(path == 0)
         {
             turns = mazePaths.Path0;
@@ -293,6 +308,27 @@ public:
         }
 
         return(path);
+    }
+
+
+    Rcpp::StringVector getTurnNodes(std::string nodeName)
+    {
+        
+        return(turnNodes[nodeName]);
+
+    }
+
+    Rcpp::IntegerVector getComponentIds(Rcpp::StringVector nodenames)
+    {
+        Rcpp::IntegerVector nodeIds;
+        for(int k=0; k<nodenames.size(); k++ )
+        {
+            std::string node = Rcpp::as<std::string>(nodenames[k]);
+            int nodeId = getNodeIndex(node);
+            nodeIds.push_back(nodeId);
+        }
+
+        return(nodeIds);
     }
 };
 

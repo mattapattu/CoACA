@@ -26,6 +26,53 @@ modifyModelData=function(modelData)
   return(modelData)
 }
 
+unitTestHoldOut=function(ratdata,allModelRes,testData,src.dir)
+{
+  models = testData@Models
+  creditAssignment = testData@creditAssignment
+  
+  modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  
+  mat_res = matrix(0, length(modelNames), length(modelNames))
+  colnames(mat_res) <- modelNames
+  rownames(mat_res) <- modelNames
+  
+  print(sprintf("models: %s",toString(modelNames)))
+  
+  foreach(i=1:length(modelNames))
+  {
+      model = modelNames[i] 
+      modelName = strsplit(model,"\\.")[[1]][1]
+      creditAssignment = strsplit(model,"\\.")[[1]][2]
+      trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
+      trueModelData = modifyModelData(trueModelData) 
+      end_index = -1
+      missedOptimalIter = 0
+      
+      while(end_index == -1){
+        generated_data = simulateData(trueModelData,ratdata,allModels)
+        end_index = getEndIndex("testRat",generated_data@allpaths, sim=1, limit=0.85)
+        missedOptimalIter=missedOptimalIter+1
+        
+        if(missedOptimalIter>2000)
+        {
+          break
+        }
+        set.seed(missedOptimalIter)
+      }
+      
+      print(sprintf("Agent learns, missedOptimalIter =  %i", missedOptimalIter))
+      
+      
+      if(end_index > -1)
+      {
+        #debug(populateSimRatModel)
+        generated_data = populateSimRatModel(ratdata,generated_data,modelName)
+        print(sprintf("Successfully converted data"))
+      }
+      
+    }
+}
 
 HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
 {

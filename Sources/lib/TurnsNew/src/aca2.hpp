@@ -10,15 +10,15 @@
 
 
 //namespace aca3 {
-Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, arma::vec turnStages, bool debug)
+Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, Rcpp::S4 turnModel, arma::vec turnStages, bool debug)
 {
   //Rcpp::Rcout << "Inside simulateAca2TurnsModels" << std::endl;
   arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
   std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
   //Rcpp::Rcout << "model=" << model << std::endl;
-  arma::mat turnTimes;
+  arma::mat turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));;
   
- if(model == "Paths")
+ /* if(model == "Paths")
   {
     turnTimes = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
   }
@@ -42,7 +42,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   {
     turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
   }
-  
+   */
   //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
@@ -50,7 +50,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
 
   //Rcpp::Rcout << "alpha=" << alpha << ", gamma1=" << gamma << std::endl;
 
-  Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
+  Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(turnModel.slot("nodeGroups"));
   
   
   
@@ -74,6 +74,9 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   //Rcpp::Rcout << "uniqSessIdx=" << uniqSessIdx << std::endl;
   Graph S0(testModel, 0);
   Graph S1(testModel, 1);
+
+  Graph turnsS0(turnModel, 0);
+  Graph turnsS1(turnModel, 1);
   
   int actionNb = 0;
   
@@ -82,7 +85,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   {
     
     int sessId = uniqSessIdx(session);
-    //Rcpp::Rcout << "session=" << session << ", sessId=" << sessId << std::endl;
+    Rcpp::Rcout << "session=" << session << ", sessId=" << sessId << std::endl;
     arma::uvec sessionIdx = arma::find(sessionVec == (sessId));
     arma::vec actions_sess = allpath_actions.elem(sessionIdx);
     arma::vec states_sess = allpath_states.elem(sessionIdx);
@@ -120,66 +123,146 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         //Rcpp::Rcout <<"initState="<<initState<<std::endl;
         resetVector = false;
       }
-      //Rcpp::Rcout <<"i=" <<i <<", S=" <<S  << std::endl;
+      Rcpp::Rcout <<"i=" <<i <<", S=" <<S  << std::endl;
       Node *currNode;
       std::vector<Edge> *edges;
       Rcpp::StringVector turnNames;
+      Rcpp::StringVector testTurnNames;
       Graph graph;
+      Graph turnsGraph;
       if (S == 0)
       {
         graph = S0;
         edges = graph.getOutgoingEdges("E");
+        turnsGraph = turnsS0;
       }
       else
       {
         graph = S1;
         edges = graph.getOutgoingEdges("I");
+        turnsGraph = turnsS1;
       }
       
-      Rcpp::IntegerVector turns_index;
+      
       double pathDuration = 0;
+      //HERE  the nodes based on testModel from one reward box to another are selected 
       while (!edges->empty())
       {
         Edge edgeSelected = softmax_action_sel(graph, *edges);
         std::string turnSelected = edgeSelected.dest->node;
         //Rcpp::Rcout << "Turn=" << turnSelected <<std::endl;
-        int turnNb = graph.getNodeIndex(turnSelected);
+        
+        //Convert the selected edge to TurnModel components
         //Rcpp::Rcout << "Turn=" << turnSelected  << ", turnNb=" << turnNb <<std::endl;
         currNode = edgeSelected.dest;
-        //Rcpp::Rcout << "currNode=" << currNode <<std::endl;
-        arma::vec durationVec = simulateTurnDuration(model,turnTimes, allpaths, turnNb, (turnIdx+1), turnStages,nodeGroups,debug);
-        double turnTime = durationVec(1);
+        Rcpp::Rcout << "turnSelected =" << turnSelected <<std::endl;
+                
         //Rcpp::Rcout << "turnTime=" << turnTime <<std::endl;
-        turnNames.push_back(turnSelected);
+        testTurnNames.push_back(turnSelected);
         episodeTurns.push_back(currNode->node);
         episodeTurnStates.push_back(S);
-        episodeTurnTimes.push_back(turnTime);
-        turns_index.push_back(turnIdx);
-        pathDuration = pathDuration+ turnTime;
-        
-        generated_TurnsData_sess(turnIdx, 0) = turnNb;
-        generated_TurnsData_sess(turnIdx, 1) = S;
-        generated_TurnsData_sess(turnIdx, 2) = 0;
-        generated_TurnsData_sess(turnIdx, 3) = turnTime;
-        //Rcpp::Rcout << "Turn=" << turnSelected <<", turnDuration="<< turnTime<<std::endl;
-        generated_TurnsData_sess(turnIdx, 4) = sessId;
-        generated_TurnsData_sess(turnIdx, 5) = actionNb;
-        generated_TurnsData_sess(turnIdx, 6) = durationVec(0);
-        turnIdx++;
+        Rcpp::Rcout << "model=" << model <<std::endl;
+        if(model == "Turns")
+        {
+          //std::string turnName = currNode->node;
+          //turnNames.push_back(turnSelected);
+          int componentId = turnsGraph.getNodeIndex(turnSelected);     
+          
+          arma::vec durationVec = simulateTurnDuration(turnTimes, allpaths, componentId, (turnIdx+1), turnStages,nodeGroups,debug);
+          double turnTime = durationVec(1);
+          
+          
+          pathDuration = pathDuration + turnTime;
+          episodeTurnTimes.push_back(turnTime);
+          
+          generated_TurnsData_sess(turnIdx, 0) = componentId;
+          generated_TurnsData_sess(turnIdx, 1) = S;
+          generated_TurnsData_sess(turnIdx, 2) = 0;
+          generated_TurnsData_sess(turnIdx, 3) = turnTime;
+          Rcpp::Rcout << "Turn=" << turnSelected <<", turnDuration="<< turnTime<<std::endl;
+          generated_TurnsData_sess(turnIdx, 4) = sessId;
+          generated_TurnsData_sess(turnIdx, 5) = actionNb;
+          generated_TurnsData_sess(turnIdx, 6) = durationVec(0);
+          turnIdx++;
+          
+        }
         
         edges = graph.getOutgoingEdges(currNode->node);
       }
+
+      Rcpp::Rcout << "testTurnNames=" << testTurnNames <<std::endl;
+      graph.printPaths();
+      int A = graph.getPathFromTurns(testTurnNames);
+      Rcpp::Rcout << "A=" << A <<std::endl;
       
-      int A;
-      if(S == 0)
+      if(model != "Turns")
       {
-        A = S0.getPathFromTurns(turnNames);
-      }
-      else
-      {
-        A = S1.getPathFromTurns(turnNames); 
+        Rcpp::StringVector turnComponents = turnsGraph.getTurnsFromPaths(A);
+        Rcpp::Rcout << "turnComponents=" << turnComponents <<std::endl;
+        arma::mat turnDurationMat(turnComponents.size(),2);
+        turnDurationMat.zeros();
+        
+        arma::mat testTurnDurationMat(testTurnNames.size(),2);
+        testTurnDurationMat.zeros();
+        
+        // To generate TurnModel durations, the path is converted to TurnModel components
+        // For each TurnModel component, a duration is simulated
+        for(int k=0; k<turnComponents.size(); k++ ){
+          
+          std::string turnName1 = Rcpp::as<std::string>(turnComponents[k]);
+          turnNames.push_back(turnName1);
+          int componentId = turnsGraph.getNodeIndex(turnName1);     
+          
+          arma::vec durationVec = simulateTurnDuration(turnTimes, allpaths, componentId, (turnIdx+1), turnStages,nodeGroups,debug);
+          double turnTime = durationVec(1);
+          
+          turnDurationMat(k,0) = componentId;
+          turnDurationMat(k,1) = turnTime;
+          //episodeTurnTimes.push_back(turnTime);
+          
+          pathDuration = pathDuration + turnTime;
+          
+          generated_TurnsData_sess(turnIdx, 0) = componentId;
+          generated_TurnsData_sess(turnIdx, 1) = S;
+          generated_TurnsData_sess(turnIdx, 2) = 0;
+          generated_TurnsData_sess(turnIdx, 3) = turnTime;
+          Rcpp::Rcout << "Turn=" << turnName1 <<", turnDuration="<< turnTime<<std::endl;
+          generated_TurnsData_sess(turnIdx, 4) = sessId;
+          generated_TurnsData_sess(turnIdx, 5) = actionNb;
+          generated_TurnsData_sess(turnIdx, 6) = durationVec(0);
+          turnIdx++;
+          
+        }
+        
+        // Based on the TurnModel durations, the durations of the testModel components 
+        // are determined.
+        
+        for(int k=0; k<testTurnNames.size(); k++ )
+        {
+          std::string node = Rcpp::as<std::string>(testTurnNames(k));
+          Rcpp::Rcout << "node=" << node <<std::endl;
+          //Decompose hybrid node to get the TurnModel nodes
+          Rcpp::StringVector turnNodes  = graph.getTurnNodes(node);
+          // Get the nodeIds corresponding to the TurnModel
+          Rcpp::IntegerVector turnNodeIds = turnsGraph.getComponentIds(turnNodes);
+          double testNodeDuration = 0;
+          Rcpp::Rcout << "turnDurationMat is" << std::endl << turnDurationMat << std::endl;
+          
+          for(int j=0; j<turnNodeIds.size();j++)
+          {
+            arma::uvec id = arma::find(turnDurationMat.col(0) == turnNodeIds[j]);
+            Rcpp::Rcout << "id:" << id << std::endl;
+            testNodeDuration = testNodeDuration + turnDurationMat(id(0),1);
+          }
+          Rcpp::Rcout << "testNode=" << node <<", testNodeDuration="<< testNodeDuration<<std::endl;
+          
+          episodeTurnTimes.push_back(testNodeDuration);
+        }
+        
       }
       
+
+     
       //arma::mat durationMat = simulatePathTime(turnTimes, allpaths, actionNb, A, pathStages,nodeGroups);
       
       //Rcpp::Rcout <<"A=" << A << ", S=" << S << ", sessId=" <<sessId<< std::endl;

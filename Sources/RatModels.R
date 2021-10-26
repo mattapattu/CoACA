@@ -16,6 +16,8 @@ setup.hpc = FALSE
 #setup.hpc = TRUE
 
 unitTest = F
+unitTest2 = T
+
 
 if(unitTest)
 {
@@ -109,9 +111,21 @@ for (i in c(1:2)) {
   
   # #### Holdout Validation ########################################
   load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
-  debug(HoldoutTest)
+  
   src.dir = file.path(src.dir,model)
-  HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc)
+  
+  if(unitTest2)
+  {
+    debug(unitTestHoldOut)
+    unitTestHoldOut(ratdata,allmodelRes,testData,src.dir) 
+  }
+  else
+  {
+    debug(HoldoutTest)
+    HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc)
+  }
+  
+  
   
   #### Parameter estimation test ##############
   #debug(testParamEstimation)

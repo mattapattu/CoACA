@@ -8,11 +8,16 @@ edge4 = new("Edge", edge = c("E", "fgabch"), prob = 0.166)
 edge5 = new("Edge", edge = c("E", "fgabcd"), prob = 0.166)
 edge6 = new("Edge", edge = c("E", "dcbagf"), prob = 0.166)
 
-
-
 edgeListS0 = list(edge1,edge2,edge3,edge4,edge5,edge6);
 nodeListS0 = c("E","dch","fgakj","dcbakj","fgabch","fgabcd","dcbagf")
 
+NodesToTurnsS0 <- list()
+NodesToTurnsS0[["dch"]] <- c("dc1","c2h")
+NodesToTurnsS0[["fgakj"]] <- c("fga1","a2kj")
+NodesToTurnsS0[["dcbakj"]] <- c("dc1","c2ba1","a2kj")
+NodesToTurnsS0[["fgabch"]] <- c("fga1","a2bc1","c2h")
+NodesToTurnsS0[["fgabcd"]] <- c("fga1","a2bc1","c2d")
+NodesToTurnsS0[["dcbagf"]] <- c("dc1","c2ba1","a2gf")
 
 ### State 2 ####
 edge7 = new("Edge", edge = c("I", "hcd"), prob = 0.166)
@@ -26,6 +31,13 @@ edgeListS1 = list(edge7,edge8,edge9,edge10,edge11,edge12);
 nodeListS1 = c("I","hcd","jkagf","hcbagf","jkabcd","jkabch","hcbakj")
 
 
+NodesToTurnsS1 <- list()
+NodesToTurnsS1[["hcd"]] <- c("hc1","c2d")
+NodesToTurnsS1[["jkagf"]] <- c("jka1","a2gf")
+NodesToTurnsS1[["hcbagf"]] <- c("hc1","c2ba1","a2gf")
+NodesToTurnsS1[["jkabcd"]] <- c("jka1","a2bc1","c2d")
+NodesToTurnsS1[["jkabch"]] <- c("jka1","a2bc1","c2h")
+NodesToTurnsS1[["hcbakj"]] <- c("hc1","c2ba1","a2kj")
 
 
 graphS0 = new("Graph", Name="PathsS0",State=0,
@@ -55,5 +67,8 @@ PathModel = new("Model", Name = "PathModel",
                 edges.S0 = edgeListS0,
                 edges.S1 = edgeListS1,
                 nodes.S0 = nodeListS0,
-                nodes.S1 = nodeListS1)
+                nodes.S1 = nodeListS1,
+                turnNodes.S0 = NodesToTurnsS0,
+                turnNodes.S1 = NodesToTurnsS1
+                )
 

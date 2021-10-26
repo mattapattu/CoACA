@@ -14,6 +14,17 @@ edge8 = new("Edge", edge = c("fga1", "a2bcd"), prob = 0.333)
 edgeListS0 = list(edge1,edge2,edge3,edge4,edge5,edge6,edge7,edge8);
 nodeListS0 = c("E","dch","dcba1","fga1","dcba1.a2kj","fga1.a2kj","a2gf","a2bch","a2bcd")
 
+NodesToTurnsS0 <- list()
+NodesToTurnsS0[["dch"]] <- c("dc1","c2h")
+NodesToTurnsS0[["dcba1"]] <- c("dc1","c2ba1")
+NodesToTurnsS0[["fga1"]] <- c("fga1")
+NodesToTurnsS0[["dcba1.a2kj"]] <- c("dcba1.a2kj")
+NodesToTurnsS0[["fga1.a2kj"]] <- c("fga1.a2kj")
+NodesToTurnsS0[["a2gf"]] <- c("a2gf")
+NodesToTurnsS0[["a2bch"]] <- c("a2bc1","c2h")
+NodesToTurnsS0[["a2bcd"]] <- c("a2bc1","c2d")
+
+
 graphS0 = new("Graph", Name="turnsS0",State=0,
               Path0 = c("dch"),
               Path1 = c("fga1","fga1.a2kj"),
@@ -36,6 +47,16 @@ edge16 = new("Edge", edge = c("jka1", "a2bcd"), prob = 0.333)
 edgeListS1 = list(edge9,edge10,edge11,edge12,edge13,edge14,edge15,edge16);
 nodeListS1 = c("I","hcd","hcba1","jka1","hcba1.a2gf","jka1.a2gf","a2kj","a2bch","a2bcd")
 
+NodesToTurnsS1 <- list()
+NodesToTurnsS1[["hcd"]] <- c("hc1","c2d")
+NodesToTurnsS1[["hcba1"]] <- c("hc1","c2ba1")
+NodesToTurnsS1[["jka1"]] <- c("jka1")
+NodesToTurnsS1[["hcba1.a2gf"]] <- c("hcba1.a2gf")
+NodesToTurnsS1[["jka1.a2gf"]] <- c("jka1.a2gf")
+NodesToTurnsS1[["a2kj"]] <- c("a2kj")
+NodesToTurnsS1[["a2bch"]] <- c("a2bc1","c2h")
+NodesToTurnsS1[["a2bcd"]] <- c("a2bc1","c2d")
+
 
 graphS1 = new("Graph", Name ="turnsS1",State=1,
               Path0 = c("hcd"),
@@ -54,4 +75,7 @@ Hybrid3 = new("Model", Name = "Hybrid3",
               edges.S0 = edgeListS0,
               edges.S1 = edgeListS1,
               nodes.S0 = nodeListS0,
-              nodes.S1 = nodeListS1)
+              nodes.S1 = nodeListS1,
+              turnNodes.S0 = NodesToTurnsS0,
+              turnNodes.S1 = NodesToTurnsS1
+              )

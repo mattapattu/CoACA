@@ -3,7 +3,7 @@
 #include "aca2.hpp"
 
 // [[Rcpp::export()]]
-Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, arma::vec turnStages, bool debug = false)
+Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, Rcpp::S4 turnModel, arma::vec turnStages, bool debug = false)
 {
     std::string creditAssignment = Rcpp::as<std::string>(modelData.slot("creditAssignment"));
     Rcpp::List ret;
@@ -13,7 +13,7 @@ Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
     }
     else if(creditAssignment == "aca2")
     {
-        ret =   simulateAca2TurnsModels(ratdata, modelData, testModel, turnStages, debug);
+        ret =   simulateAca2TurnsModels(ratdata, modelData, testModel, turnModel,turnStages, debug);
     }
     else if(creditAssignment == "sarsa")
     {

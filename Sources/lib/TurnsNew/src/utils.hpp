@@ -104,7 +104,7 @@ std::vector<double> quartiles(std::vector<double> samples)
 }
 
 // [[Rcpp::export]]
-arma::vec simulateTurnDuration(std::string model, arma::mat turnTimes, arma::mat allpaths, int turnId, int turnNb, arma::vec turnStages, Rcpp::List nodeGroups, bool debug = false)
+arma::vec simulateTurnDuration(arma::mat turnTimes, arma::mat allpaths, int turnId, int turnNb, arma::vec turnStages, Rcpp::List nodeGroups, bool debug = false)
 {
   Debugger logger;
   logger.setDebug(debug);
@@ -133,15 +133,7 @@ arma::vec simulateTurnDuration(std::string model, arma::mat turnTimes, arma::mat
   //Rcpp::Rcout << "start=" << start << ", end=" << end << std::endl;
   
   arma::mat turnTimes_submat = turnTimes.rows(start,end);
-  arma::vec turnId_submat;
-  if(model == "Paths")
-  {
-    turnId_submat = turnTimes_submat.col(0);
-  }
-  else
-  {
-    turnId_submat = turnTimes_submat.col(3);
-  }
+  arma::vec turnId_submat = turnTimes_submat.col(3);
 
   
   Rcpp::IntegerVector idx;
@@ -177,13 +169,7 @@ arma::vec simulateTurnDuration(std::string model, arma::mat turnTimes, arma::mat
   arma::mat submat_sample = turnTimes_submat.rows(arma_idx);
   //Rcpp::Rcout <<"submat_sample=" <<submat_sample << std::endl;
   arma::vec sample;
-  if(model == "Paths")
-  {
-    sample = submat_sample.col(3);
-  }
-  else{
-    sample = submat_sample.col(5);
-  }
+  sample = submat_sample.col(5);
   //Rcpp::Rcout <<"sample=" <<sample << std::endl;
 
   std::vector<double> q = quartiles(arma::conv_to<std::vector<double>>::from(sample));
@@ -199,13 +185,7 @@ arma::vec simulateTurnDuration(std::string model, arma::mat turnTimes, arma::mat
 
   arma::rowvec turnRow = submat_sample.row(sampled_id);
   arma::uvec cols; //3 = ActionNb, 5 = actionNb
-  if(model == "Paths")
-  {
-    cols = {5,3};
-  }
-  else{
-    cols = {0,5};
-  }
+  cols = {0,5};
    //msg.str("");
    //msg << "turnRow=";
   //logger.PrintArmaRowVec(msg.str(),turnRow); 

@@ -16,11 +16,11 @@ nodeListS0 = c("E","dc1","fgakj","fgabc1","dc1.c2h","fgabc1.c2h","c2bakj","c2bag
 
 NodesToTurnsS0 <- list()
 NodesToTurnsS0[["dc1"]] <- c("dc1")
-NodesToTurnsS0[["fgakj"]] <- c("fga1","a2kj")
+NodesToTurnsS0[["fgakj"]] <- c("fga1","fga1.a2kj")
 NodesToTurnsS0[["fgabc1"]] <- c("fga1","a2bc1")
 NodesToTurnsS0[["dc1.c2h"]] <- c("dc1.c2h")
-NodesToTurnsS0[["fgabc1.c2h"]] <- c("fgabc1.c2h")
-NodesToTurnsS0[["c2bakj"]] <- c("c2ba1","a2kj")
+NodesToTurnsS0[["fgabc1.c2h"]] <- c("a2bc1.c2h")
+NodesToTurnsS0[["c2bakj"]] <- c("c2ba1","c2ba1.a2kj")
 NodesToTurnsS0[["c2bagf"]] <- c("c2ba1","a2gf")
 NodesToTurnsS0[["c2d"]] <- c("c2d")
 
@@ -48,12 +48,12 @@ nodeListS1 = c("I","hc1","jkagf","jkabc1","hc1.c2d","jkabc1.c2d","c2bakj","c2bag
 
 NodesToTurnsS1 <- list()
 NodesToTurnsS1[["hc1"]] <- c("hc1")
-NodesToTurnsS1[["jkagf"]] <- c("jka1","a2gf")
+NodesToTurnsS1[["jkagf"]] <- c("jka1","jka1.a2gf")
 NodesToTurnsS1[["jkabc1"]] <- c("jka1","a2bc1")
 NodesToTurnsS1[["hc1.c2d"]] <- c("hc1.c2d")
-NodesToTurnsS1[["jkabc1.c2d"]] <- c("jkabc1.c2d")
+NodesToTurnsS1[["jkabc1.c2d"]] <- c("a2bc1.c2d")
 NodesToTurnsS1[["c2bakj"]] <- c("c2ba1","a2kj")
-NodesToTurnsS1[["c2bagf"]] <- c("c2ba1","a2gf")
+NodesToTurnsS1[["c2bagf"]] <- c("c2ba1","c2ba1.a2gf")
 NodesToTurnsS1[["c2h"]] <- c("c2h")
 
 graphS1 = new("Graph", Name ="turnsS1",State=1,

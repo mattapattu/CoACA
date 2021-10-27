@@ -12,10 +12,10 @@ edgeListS0 = list(edge1,edge2,edge3,edge4,edge5,edge6);
 nodeListS0 = c("E","dch","fgakj","dcbakj","fgabch","fgabcd","dcbagf")
 
 NodesToTurnsS0 <- list()
-NodesToTurnsS0[["dch"]] <- c("dc1","c2h")
-NodesToTurnsS0[["fgakj"]] <- c("fga1","a2kj")
-NodesToTurnsS0[["dcbakj"]] <- c("dc1","c2ba1","a2kj")
-NodesToTurnsS0[["fgabch"]] <- c("fga1","a2bc1","c2h")
+NodesToTurnsS0[["dch"]] <- c("dc1","dc1.c2h")
+NodesToTurnsS0[["fgakj"]] <- c("fga1","fga1.a2kj")
+NodesToTurnsS0[["dcbakj"]] <- c("dc1","c2ba1","c2ba1.a2kj")
+NodesToTurnsS0[["fgabch"]] <- c("fga1","a2bc1","a2bc1.c2h")
 NodesToTurnsS0[["fgabcd"]] <- c("fga1","a2bc1","c2d")
 NodesToTurnsS0[["dcbagf"]] <- c("dc1","c2ba1","a2gf")
 
@@ -32,10 +32,10 @@ nodeListS1 = c("I","hcd","jkagf","hcbagf","jkabcd","jkabch","hcbakj")
 
 
 NodesToTurnsS1 <- list()
-NodesToTurnsS1[["hcd"]] <- c("hc1","c2d")
-NodesToTurnsS1[["jkagf"]] <- c("jka1","a2gf")
-NodesToTurnsS1[["hcbagf"]] <- c("hc1","c2ba1","a2gf")
-NodesToTurnsS1[["jkabcd"]] <- c("jka1","a2bc1","c2d")
+NodesToTurnsS1[["hcd"]] <- c("hc1","hc1.c2d")
+NodesToTurnsS1[["jkagf"]] <- c("jka1","jka1.a2gf")
+NodesToTurnsS1[["hcbagf"]] <- c("hc1","c2ba1","c2ba1.a2gf")
+NodesToTurnsS1[["jkabcd"]] <- c("jka1","a2bc1","a2bc1.c2d")
 NodesToTurnsS1[["jkabch"]] <- c("jka1","a2bc1","c2h")
 NodesToTurnsS1[["hcbakj"]] <- c("hc1","c2ba1","a2kj")
 

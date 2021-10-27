@@ -28,6 +28,7 @@ modifyModelData=function(modelData)
 
 unitTestHoldOut=function(ratdata,allModelRes,testData,src.dir)
 {
+  rat = ratdata@rat
   models = testData@Models
   creditAssignment = testData@creditAssignment
   
@@ -39,7 +40,7 @@ unitTestHoldOut=function(ratdata,allModelRes,testData,src.dir)
   
   print(sprintf("models: %s",toString(modelNames)))
   
-  foreach(i=1:length(modelNames))
+  for(i in c(1:length(modelNames)))
   {
       model = modelNames[i] 
       modelName = strsplit(model,"\\.")[[1]][1]
@@ -51,7 +52,7 @@ unitTestHoldOut=function(ratdata,allModelRes,testData,src.dir)
       
       while(end_index == -1){
         generated_data = simulateData(trueModelData,ratdata,allModels)
-        end_index = getEndIndex("testRat",generated_data@allpaths, sim=1, limit=0.85)
+        end_index = getEndIndex(rat,generated_data@allpaths, sim=1, limit=0.95)
         missedOptimalIter=missedOptimalIter+1
         
         if(missedOptimalIter>2000)
@@ -61,14 +62,28 @@ unitTestHoldOut=function(ratdata,allModelRes,testData,src.dir)
         set.seed(missedOptimalIter)
       }
       
-      print(sprintf("Agent learns, missedOptimalIter =  %i", missedOptimalIter))
+      print(sprintf("Model=%s converges, missedOptimalIter =  %i", model,missedOptimalIter))
       
       
       if(end_index > -1)
       {
         #debug(populateSimRatModel)
         generated_data = populateSimRatModel(ratdata,generated_data,modelName)
-        print(sprintf("Successfully converted data"))
+        bool1 <- any(is.na(generated_data@allpaths) == TRUE)
+        bool2 <- any(is.na(generated_data@turnTimes) == TRUE)
+        bool3 <- any(is.na(generated_data@hybridModel1) == TRUE)
+        bool4 <- any(is.na(generated_data@hybridModel2) == TRUE)
+        bool5 <- any(is.na(generated_data@hybridModel3) == TRUE)
+        bool6 <- any(is.na(generated_data@hybridModel4) == TRUE)
+        if(!bool1 && !bool2 && !bool3 && !bool4 && !bool5 && !bool6)
+        {
+          print(sprintf("Successfully converted data"))
+        }
+        else
+        {
+          print(sprintf("Error: NA in generated data"))
+        }
+        
       }
       
     }

@@ -106,6 +106,7 @@ std::vector<double> quartiles(std::vector<double> samples)
 // [[Rcpp::export]]
 arma::vec simulateTurnDuration(arma::mat turnTimes, arma::mat allpaths, int turnId, int turnNb, arma::vec turnStages, Rcpp::List nodeGroups, bool debug = false)
 {
+  //Rcpp::Rcout <<"Inside simulateTurnDuration" << std::endl;
   Debugger logger;
   logger.setDebug(debug);
   std::ostringstream msg; 
@@ -145,7 +146,7 @@ arma::vec simulateTurnDuration(arma::mat turnTimes, arma::mat allpaths, int turn
      Rcpp::CharacterVector table(1);
      table(0) = turnId;
      Rcpp::IntegerVector vec =  Rcpp::match(vecGrp , table ) ;
-     //Rcpp::Rcout <<"TurnId=" <<turnId << ", vec=" <<vec << std::endl;
+     //Rcpp::Rcout <<"TurnId=" <<turnId << ", vecGrp=" <<vecGrp << std::endl;
      
      //bool res = Rcpp::any(vec == 1);
      if(std::find(vec.begin(), vec.end(), 1)!=vec.end())
@@ -163,9 +164,9 @@ arma::vec simulateTurnDuration(arma::mat turnTimes, arma::mat allpaths, int turn
   }
   
   arma::uvec arma_idx = Rcpp::as<arma::uvec>(idx);
-  //Rcpp::Rcout <<"arma_idx=" <<arma_idx << std::endl;
+  //Rcpp::Rcout <<"arma_idx.size =" << arma_idx.n_elem << std::endl;
  
-  //arma::vec turndurations_submat = turnTimes_submat.col(5);
+  arma::vec turndurations_submat = turnTimes_submat.col(5);
   arma::mat submat_sample = turnTimes_submat.rows(arma_idx);
   //Rcpp::Rcout <<"submat_sample=" <<submat_sample << std::endl;
   arma::vec sample;

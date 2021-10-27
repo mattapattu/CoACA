@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <RcppArmadillo.h>
+#include <regex>
+
 
 
 struct Node
@@ -318,9 +320,10 @@ public:
 
     }
 
-    Rcpp::IntegerVector getComponentIds(Rcpp::StringVector nodenames)
+    Rcpp::IntegerVector getNodeIds(Rcpp::StringVector nodenames)
     {
         Rcpp::IntegerVector nodeIds;
+        //Rcpp::Rcout << "nodenames:" <<  nodenames << std::endl;
         for(int k=0; k<nodenames.size(); k++ )
         {
             std::string node = Rcpp::as<std::string>(nodenames[k]);

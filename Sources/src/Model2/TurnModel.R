@@ -50,7 +50,7 @@ edge19 = new("Edge", edge = c("a2bc1", "a2bc1.c2d"), prob = 0.5)
 edge20 = new("Edge", edge = c("a2bc1", "c2h"), prob = 0.5)
 
 edgeListS1 = list(edge11,edge12,edge13,edge14,edge15,edge16,edge17,edge18,edge19,edge20);
-nodeListS1 = c("I","hc1","jka1","hc1.c2d","c2ba1","a2bc1","a2kj","c2ba1.a2gf","jka1.a2gf","a2bc1.c2d","c2h")
+nodeListS1 = c("I","hc1","jka1","hc1.c2d","c2ba1","a2bc1","c2h","a2kj","c2ba1.a2gf","jka1.a2gf","a2bc1.c2d")
 
 
 NodesToTurnsS1 <- list()
@@ -74,7 +74,8 @@ graphS1 = new("Graph", Name ="turnsS1",State=1,
               Path5 = c("hc1","c2ba1","a2kj"))
 
 
-groups = list(grp1=c(1,2,3,6,7,8),grp2=c(4,5))
+groups = list(grp1=c(1,3,6,10),grp2=c(4,5),grp3=c(2,7,8,9))
+#groups = list(grp1=c(1,2,3,6,7,8,9,10),grp2=c(4,5))
 
 TurnModel = new("Model", Name = "TurnModel",
                  S0 = graphS0,

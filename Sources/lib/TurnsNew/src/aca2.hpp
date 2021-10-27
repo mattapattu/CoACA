@@ -85,7 +85,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   {
     
     int sessId = uniqSessIdx(session);
-    Rcpp::Rcout << "session=" << session << ", sessId=" << sessId << std::endl;
+    //Rcpp::Rcout << "session=" << session << ", sessId=" << sessId << std::endl;
     arma::uvec sessionIdx = arma::find(sessionVec == (sessId));
     arma::vec actions_sess = allpath_actions.elem(sessionIdx);
     arma::vec states_sess = allpath_states.elem(sessionIdx);
@@ -123,7 +123,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         //Rcpp::Rcout <<"initState="<<initState<<std::endl;
         resetVector = false;
       }
-      Rcpp::Rcout <<"i=" <<i <<", S=" <<S  << std::endl;
+      //Rcpp::Rcout <<"i=" <<i <<", S=" <<S  << std::endl;
       Node *currNode;
       std::vector<Edge> *edges;
       Rcpp::StringVector turnNames;
@@ -155,13 +155,13 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         //Convert the selected edge to TurnModel components
         //Rcpp::Rcout << "Turn=" << turnSelected  << ", turnNb=" << turnNb <<std::endl;
         currNode = edgeSelected.dest;
-        Rcpp::Rcout << "turnSelected =" << turnSelected <<std::endl;
+        //Rcpp::Rcout << "turnSelected =" << turnSelected <<std::endl;
                 
         //Rcpp::Rcout << "turnTime=" << turnTime <<std::endl;
         testTurnNames.push_back(turnSelected);
         episodeTurns.push_back(currNode->node);
         episodeTurnStates.push_back(S);
-        Rcpp::Rcout << "model=" << model <<std::endl;
+        //Rcpp::Rcout << "model=" << model <<std::endl;
         if(model == "Turns")
         {
           //std::string turnName = currNode->node;
@@ -179,7 +179,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
           generated_TurnsData_sess(turnIdx, 1) = S;
           generated_TurnsData_sess(turnIdx, 2) = 0;
           generated_TurnsData_sess(turnIdx, 3) = turnTime;
-          Rcpp::Rcout << "Turn=" << turnSelected <<", turnDuration="<< turnTime<<std::endl;
+          //Rcpp::Rcout << "Turn=" << turnSelected <<", turnDuration="<< turnTime<<std::endl;
           generated_TurnsData_sess(turnIdx, 4) = sessId;
           generated_TurnsData_sess(turnIdx, 5) = actionNb;
           generated_TurnsData_sess(turnIdx, 6) = durationVec(0);
@@ -190,15 +190,15 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         edges = graph.getOutgoingEdges(currNode->node);
       }
 
-      Rcpp::Rcout << "testTurnNames=" << testTurnNames <<std::endl;
-      graph.printPaths();
+      //Rcpp::Rcout << "testTurnNames=" << testTurnNames <<std::endl;
+      //graph.printPaths();
       int A = graph.getPathFromTurns(testTurnNames);
-      Rcpp::Rcout << "A=" << A <<std::endl;
+      //Rcpp::Rcout << "S=" <<S << ", A=" << A <<std::endl;
       
       if(model != "Turns")
       {
         Rcpp::StringVector turnComponents = turnsGraph.getTurnsFromPaths(A);
-        Rcpp::Rcout << "turnComponents=" << turnComponents <<std::endl;
+        //Rcpp::Rcout << "turnComponents=" << turnComponents <<std::endl;
         arma::mat turnDurationMat(turnComponents.size(),2);
         turnDurationMat.zeros();
         
@@ -207,26 +207,26 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         
         // To generate TurnModel durations, the path is converted to TurnModel components
         // For each TurnModel component, a duration is simulated
-        for(int k=0; k<turnComponents.size(); k++ ){
+        for(int k=0; k < turnComponents.size(); k++ ){
           
           std::string turnName1 = Rcpp::as<std::string>(turnComponents[k]);
           turnNames.push_back(turnName1);
           int componentId = turnsGraph.getNodeIndex(turnName1);     
-          
+          //Rcpp::Rcout << "turnName=" << turnName1 << ", turnId=" << componentId << std::endl;
           arma::vec durationVec = simulateTurnDuration(turnTimes, allpaths, componentId, (turnIdx+1), turnStages,nodeGroups,debug);
           double turnTime = durationVec(1);
           
           turnDurationMat(k,0) = componentId;
           turnDurationMat(k,1) = turnTime;
           //episodeTurnTimes.push_back(turnTime);
-          
+          //Rcpp::Rcout << "turnDurationMat is" << std::endl << turnDurationMat << std::endl;
           pathDuration = pathDuration + turnTime;
           
           generated_TurnsData_sess(turnIdx, 0) = componentId;
           generated_TurnsData_sess(turnIdx, 1) = S;
           generated_TurnsData_sess(turnIdx, 2) = 0;
           generated_TurnsData_sess(turnIdx, 3) = turnTime;
-          Rcpp::Rcout << "Turn=" << turnName1 <<", turnDuration="<< turnTime<<std::endl;
+          //Rcpp::Rcout << "Turn=" << turnName1 <<", turnDuration="<< turnTime<<std::endl;
           generated_TurnsData_sess(turnIdx, 4) = sessId;
           generated_TurnsData_sess(turnIdx, 5) = actionNb;
           generated_TurnsData_sess(turnIdx, 6) = durationVec(0);
@@ -237,24 +237,25 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         // Based on the TurnModel durations, the durations of the testModel components 
         // are determined.
         
-        for(int k=0; k<testTurnNames.size(); k++ )
+        for(int k=0; k < testTurnNames.size(); k++ )
         {
           std::string node = Rcpp::as<std::string>(testTurnNames(k));
-          Rcpp::Rcout << "node=" << node <<std::endl;
+          
           //Decompose hybrid node to get the TurnModel nodes
           Rcpp::StringVector turnNodes  = graph.getTurnNodes(node);
+          //Rcpp::Rcout <<"S=" << S << ", testTurn=" << node << ", turnNodes=" << turnNodes <<std::endl;
           // Get the nodeIds corresponding to the TurnModel
-          Rcpp::IntegerVector turnNodeIds = turnsGraph.getComponentIds(turnNodes);
+          Rcpp::IntegerVector turnNodeIds = turnsGraph.getNodeIds(turnNodes);
           double testNodeDuration = 0;
-          Rcpp::Rcout << "turnDurationMat is" << std::endl << turnDurationMat << std::endl;
-          
+          //Rcpp::Rcout << "turnDurationMat is" << std::endl << turnDurationMat << std::endl;
+          //Rcpp::Rcout << "turnNodeIds:" <<  turnNodeIds << std::endl;
           for(int j=0; j<turnNodeIds.size();j++)
           {
             arma::uvec id = arma::find(turnDurationMat.col(0) == turnNodeIds[j]);
-            Rcpp::Rcout << "id:" << id << std::endl;
+            //Rcpp::Rcout << "id:" << id << std::endl;
             testNodeDuration = testNodeDuration + turnDurationMat(id(0),1);
           }
-          Rcpp::Rcout << "testNode=" << node <<", testNodeDuration="<< testNodeDuration<<std::endl;
+          //Rcpp::Rcout << "testNode=" << node <<", testNodeDuration="<< testNodeDuration<<std::endl;
           
           episodeTurnTimes.push_back(testNodeDuration);
         }

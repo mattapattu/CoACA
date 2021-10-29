@@ -83,7 +83,7 @@ getModelResults <- function(ratdata, testingdata, sim, src.dir, model.src, setup
         np.val <- length(argList$lower) * 10
         myList <- DEoptim.control(NP = 30, F = 0.8, CR = 0.9, trace = FALSE, itermax = 200)
         out <- do.call("DEoptim", list.append(argList, fn = negLogLikFunc, myList))
-        #stopCluster(cl2)
+        stopCluster(cl2)
         if(out$optim$bestval < 100000)
         {
           return(out$optim$bestmem)
@@ -103,15 +103,15 @@ getModelResults <- function(ratdata, testingdata, sim, src.dir, model.src, setup
   # modelData = updateModelData(ratdata,resMatrix, models)
   allmodelRes <- getAllModelResults(ratdata, resMatrix, testingdata, sim)
   
-  # if (setup.hpc) {
-  #   stopCluster(cl)
-  #   # stopImplicitCluster()
-  #   # closeCluster(cl)
-  # }
-  # else {
-  #   stopCluster(cl)
-  #   # stopImplicitCluster()
-  # }
+  if (setup.hpc) {
+    #stopCluster(cl)
+    # stopImplicitCluster()
+    closeCluster(cl)
+  }
+  else {
+    #stopCluster(cl)
+    #stopImplicitCluster()
+  }
   
   
   return(allmodelRes)

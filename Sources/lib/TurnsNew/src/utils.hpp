@@ -64,6 +64,7 @@ Edge softmax_action_sel(Graph graph, std::vector<Edge> edges)
   
   IntegerVector actions = seq(0, (edges.size() - 1));
   int action_selected = Rcpp::RcppArmadillo::sample(actions, 1, true, probVec_arma)[0];
+  //int action_selected = Rcpp::sample(actions, 1, true, probVec_arma)[0];
   //Rcpp::Rcout <<"action_selected="<<action_selected<<std::endl;
   
   return (edges[action_selected]);

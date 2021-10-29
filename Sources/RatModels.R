@@ -15,17 +15,39 @@ src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 setup.hpc = FALSE
 #setup.hpc = TRUE
 
-unitTest = F
-unitTest2 = T
+############### Select tests to run
+
+unitTest1 = FALSE
+
+computeModelLik = FALSE
+loadAllModelRes = TRUE
+modelSelection = TRUE
+
+plotProb = FALSE
+
+unitTest2 = FALSE
+
+validateHoldout = FALSE
+
+paramEstTest = FALSE
+thetaHatTest = FALSE
+pcaPlot = FALSE
+
+successPlot = FALSE
+ratSpeedPlot = FALSE
+
+############### TEST EXECUTIONS ######################################
 
 
-if(unitTest)
+
+if(unitTest1)
 {
   source(paste(src.dir,"unitTestaca3.R", sep="/"))
   data.path = file.path("C:/Rats-Credits/Data/testDonnes1.RData") 
 }else
 {
-  data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/data_journeys.Rdata")
+  data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/new_data_journeys.Rdata")
+  #data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/data_journeys.Rdata")
   #data.path = file.path("/home/amoongat/Projects/Rats-Credit/data_journeys.Rdata")
   
 }
@@ -58,12 +80,12 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(1:2)) {
+for (i in c(1:7)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
   
   
-  if(unitTest)
+  if(unitTest1)
   {
     rawData <- testDonnes1
   }
@@ -77,7 +99,7 @@ for (i in c(1:2)) {
   boxTimes = enregres$boxTimes
   
   
-  if(unitTest)
+  if(unitTest1)
   {
     ratdata = populateRatModel(allpaths=allpaths,rat="testRat",rawData,TurnModel)
     debug(testCode)
@@ -94,56 +116,100 @@ for (i in c(1:2)) {
   #ratDataList[[i]] = ratdata
   
   ############### Likelihood Computation and Model Selection ###########################################
-  #debug(getModelResults)
-  #allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
-  #min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
-  #print(sprintf("%s is best model for %s",min_method,rats[i]))
-  #save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
-  #setwd(plot.dir)
-  #debug(generatePlots)
-  #generatePlots(ratdata,allmodelRes,window=20,plot.dir)
   
-  #debug(generateEmpiricalPlots)
-  #generateEmpiricalPlots(ratdata,window=20)
+ 
+  
+  if(computeModelLik)
+  {
+    #debug(getModelResults)
+    allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
+  }
+  
+  if(loadAllModelRes)
+  {
+    load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    
+  }
+  
+  if(modelSelection)
+  {
+    
+    min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
+    print(sprintf("%s is best model for %s",min_method,rats[i]))
+    save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    
+  }
+  
+  if(plotProb)
+  {
+    setwd(plot.dir)
+    #debug(generatePlots)
+    generatePlots(ratdata,allmodelRes,window=20,plot.dir)
+    
+    #debug(generateEmpiricalPlots)
+    #generateEmpiricalPlots(ratdata,window=20)
+    #plotTurnProb(ratdata,allmodelRes,Hybrid3)
+    
+  }
   
   
-  #plotTurnProb(ratdata,allmodelRes,Hybrid3)
   
   # #### Holdout Validation ########################################
-  load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   
-  src.dir = file.path(src.dir,model)
+ 
   
   if(unitTest2)
   {
-    debug(unitTestHoldOut)
-    unitTestHoldOut(ratdata,allmodelRes,testData,src.dir) 
+    #debug(unitTestHoldOut)
+    unitTestHoldOut(ratdata,allmodelRes,testData,model.src) 
   }
-  else
+  
+  if(validateHoldout)
   {
-    debug(HoldoutTest)
+    #debug(HoldoutTest)
     HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc)
   }
   
   
   
   #### Parameter estimation test ##############
-  #debug(testParamEstimation)
-  #testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc)
   
-  #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
-  #debug(plotThetaHat)
-  #plotThetaHat(ratdata,res.dir,plot.dir)
-  #debug(plotPCA)
-  #plotPCA(ratdata, allmodelRes)
+  if(paramEstTest)
+  {
+    #debug(testParamEstimation)
+    testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc)
+    
+  }
+  
+  if(thetaHatTest)
+  {
+    res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
+    #debug(plotThetaHat)
+    plotThetaHat(ratdata,res.dir,plot.dir)
+  }
+  
+  if(pcaPlot)
+  {
+    #debug(plotPCA)
+    plotPCA(ratdata, allmodelRes)
+    
+  }
   
 }
 
-#debug(plotSuccessRates)
-#plotSuccessRates(ratDataList)
+if(successPlot)
+{
+  #debug(plotSuccessRates)
+  plotSuccessRates(ratDataList)
+  
+}
 
-#debug(plotRatSpeed)
-#plotRatSpeed(ratDataList,donnees_ash,plot.dir)
+if(ratSpeedPlot)
+{
+  #debug(plotRatSpeed)
+  plotRatSpeed(ratDataList,donnees_ash,plot.dir)
+  
+}
 
 
 print(sprintf("End of script"))

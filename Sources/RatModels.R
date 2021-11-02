@@ -19,11 +19,12 @@ setup.hpc = FALSE
 
 unitTest1 = FALSE
 
-computeModelLik = FALSE
-loadAllModelRes = TRUE
-modelSelection = TRUE
+computeModelLik = F
+loadAllModelRes = T
+modelSelection = F
 
-plotProb = FALSE
+plotProb = T
+plotLik = T
 
 unitTest2 = FALSE
 
@@ -80,7 +81,7 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(1:7)) {
+for (i in c(4:7)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
   
@@ -152,6 +153,17 @@ for (i in c(1:7)) {
     
   }
   
+  if(plotLik)
+  {
+    setwd(plot.dir)
+    debug(generateLikelihoodPlots)
+    generateLikelihoodPlots(ratdata,allmodelRes,testData,plot.dir)
+    
+    #debug(generateEmpiricalPlots)
+    #generateEmpiricalPlots(ratdata,window=20)
+    #plotTurnProb(ratdata,allmodelRes,Hybrid3)
+    
+  }
   
   
   # #### Holdout Validation ########################################

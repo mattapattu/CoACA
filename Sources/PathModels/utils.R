@@ -744,7 +744,7 @@ generatePlots=function(ratdata,allmodelRes,window,plot.dir){
   allpaths1<-allpaths[-last_paths,]
   
   #empiricalProbMat = baseModels::empiricalProbMat(allpaths1, window = window)
-  empiricalProbMat = getEmpProbMat(allpaths1,window)
+  empiricalProbMat = getEmpProbMat(allpaths,window)
   TurnsMat = allmodelRes@Turns@aca2@probMatrix
   PathsMat = allmodelRes@Paths@aca2@probMatrix
   Hybrid1Mat = allmodelRes@Hybrid1@aca2@probMatrix
@@ -770,23 +770,24 @@ generatePlots=function(ratdata,allmodelRes,window,plot.dir){
       
       cols=c("black","blue","darkgreen","red", "darkmagenta","darkorange","deeppink")
       #cols <- brewer.pal(7,'Dark2')
-      plot(PathsMat[which(PathsMat[,(act+6*(state-1))]>0),(act+6*(state-1))],col=cols[2],type='l',lty=1,ylim=c(0,1),ylab="Probability", main="Path Model",xlab="Trial")
-      lines(empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l')
+      sIdx <- which(PathsMat[,(act+6*(state-1))]>0)
+      plot(sIdx,PathsMat[which(PathsMat[,(act+6*(state-1))]>0),(act+6*(state-1))],col=cols[2],type='l',lty=1,ylim=c(0,1),ylab="Probability", main="Path Model",xlab="Trial")
+      lines(sIdx,empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l')
       
-      plot(TurnsMat[which(TurnsMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[3],type='l',ylim=c(0,1),main="Turns Model",ylab="Probability",xlab="Trial")
-      lines(empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
+      plot(sIdx,TurnsMat[which(TurnsMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[3],type='l',ylim=c(0,1),main="Turns Model",ylab="Probability",xlab="Trial")
+      lines(sIdx,empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
       
-      plot(Hybrid1Mat[which(Hybrid1Mat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[4],type='l',ylim=c(0,1),main="Hybrid1 Model",ylab="Probability",xlab="Trial")
-      lines(empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
+      plot(sIdx,Hybrid1Mat[which(Hybrid1Mat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[4],type='l',ylim=c(0,1),main="Hybrid1 Model",ylab="Probability",xlab="Trial")
+      lines(sIdx,empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
       
-      plot(Hybrid2Mat[which(Hybrid2Mat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[5],type='l',ylim=c(0,1),main="Hybrid2 Model",ylab="Probability",xlab="Trial")
-      lines(empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
+      plot(sIdx,Hybrid2Mat[which(Hybrid2Mat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[5],type='l',ylim=c(0,1),main="Hybrid2 Model",ylab="Probability",xlab="Trial")
+      lines(sIdx,empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
       
-      plot(Hybrid3Mat[which(Hybrid3Mat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[6],type='l',ylim=c(0,1),main="Hybrid3 Model",ylab="Probability",xlab="Trial")
-      lines(empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
+      plot(sIdx,Hybrid3Mat[which(Hybrid3Mat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[6],type='l',ylim=c(0,1),main="Hybrid3 Model",ylab="Probability",xlab="Trial")
+      lines(sIdx,empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
       
-      plot(Hybrid4Mat[which(Hybrid4Mat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[7],type='l',ylim=c(0,1),main="Hybrid4 Model",ylab="Probability",xlab="Trial")
-      lines(empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
+      plot(sIdx,Hybrid4Mat[which(Hybrid4Mat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col=cols[7],type='l',ylim=c(0,1),main="Hybrid4 Model",ylab="Probability",xlab="Trial")
+      lines(sIdx,empiricalProbMat[which(empiricalProbMat[,(act+6*(state-1))]>-1),(act+6*(state-1))],col='black',type='l',ylim=c(0,1))
       
       if(state==1)
       {
@@ -811,8 +812,122 @@ generatePlots=function(ratdata,allmodelRes,window,plot.dir){
       dev.off()
     }
   }
+}
+
+
+generateLikelihoodPlots=function(ratdata,allmodelRes,testData,plot.dir){
+  
+  allpaths = ratdata@allpaths
+  
+  
+  
+  TurnsLik = allmodelRes@Turns@aca2@likelihood
+  PathsLik = allmodelRes@Paths@aca2@likelihood
+  Hybrid1Lik = allmodelRes@Hybrid1@aca2@likelihood
+  Hybrid2Lik = allmodelRes@Hybrid2@aca2@likelihood
+  Hybrid3Lik = allmodelRes@Hybrid3@aca2@likelihood
+  Hybrid4Lik = allmodelRes@Hybrid4@aca2@likelihood
+  
+  min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
+  if(grepl("Paths",min_method,fixed = TRUE))
+  {
+    minLik = PathsLik
+  }
+  else if(grepl("Hybrid1",min_method,fixed = TRUE))
+  {
+    minLik = Hybrid1Lik
+  }
+  else if(grepl("Hybrid2",min_method,fixed = TRUE))
+  {
+    minLik = Hybrid2Lik
+  }
+  else if(grepl("Hybrid3",min_method,fixed = TRUE))
+  {
+    minLik = Hybrid3Lik
+  }
+  else if(grepl("Hybrid4",min_method,fixed = TRUE))
+  {
+    minLik = Hybrid4Lik
+  }
+  else if(grepl("Turns",min_method,fixed = TRUE))
+  {
+    minLik = TurnsLik
+  }
+  
+  rat=ratdata@rat
+  endIndx = getEndIndex(rat,ratdata@allpaths,sim=2,limit=0.95)
+  
+  models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+
+  for(model in models)
+  {
+    for(state  in c(1:2)){
+      pdf(paste(plot.dir,"/Likelihoodplot_",rat,"_",model,"_State",state,".pdf",sep=""))
+      par(mfrow=c(3,2))
+      for(act  in c(1:6)){
+        
+        if(model == "Paths")
+        {
+          likVec = PathsLik
+        }
+        else if(model == "Hybrid1")
+        {
+          likVec = Hybrid1Lik
+        }
+        else if(model == "Hybrid2")
+        {
+          likVec = Hybrid2Lik
+        }
+        else if(model == "Hybrid3")
+        {
+          likVec = Hybrid3Lik
+        }
+        else if(model == "Hybrid4")
+        {
+          likVec = Hybrid4Lik
+        }
+        else if(model == "Turns")
+        {
+          likVec = TurnsLik
+        }
+        
+        cols=c("blue","darkgreen","red", "darkmagenta","darkorange","deeppink")
+        
+        idx<-which(allpaths[,1]==act & allpaths[,2]==state)
+        if(length(idx)>0)
+        {
+          plot(idx,exp(likVec[idx]),col=cols[1],type='l',ylim=c(0,1),ylab = "Probability", xlab="Trials", main=paste0("Path ", act))
+          lines(idx, exp(minLik[idx]))
+          
+          abline(v=endIndx,lwd=2,lty=2)
+          
+          if(state==1)
+          {
+            box = "E"
+          }
+          else
+          {
+            box = "I"
+          }
+          
+        }
+        else
+        {
+          next
+        }
+        
+      }
+      
+      title(paste("Likelihoodplot, box=", box, ", ", model, ", ", rat,sep="" ),  cex=0.4,line = -2, outer = TRUE)
+      dev.off()
+      
+  }
+    
+    
+  }
   
 }
+
 generateModelProbPlots=function(rat, window, res1, res2,models, allpaths_num){
   
   rle_sess = rle(allpaths_num[,5])

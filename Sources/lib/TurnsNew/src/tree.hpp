@@ -182,11 +182,11 @@ public:
     {
         if(debug)
         {
-        for (auto &node : nodes)
-        {
-            std::cout << "node = " << node.node << ", credit = " << node.credit << "; " ;
-        }
-        std::cout << std::endl;
+            for (auto &node : nodes)
+            {
+                std::cout << "node = " << node.node << ", credit = " << node.credit << "; " ;
+            }
+            std::cout << std::endl;
         }
         
     }
@@ -214,7 +214,7 @@ public:
         return Rcpp::List::create(Rcpp::Named("nodes") = v1 , Rcpp::Named("credits") = v2);
     }
 
-    void updateEdgeProbs()
+    void updateEdgeProbs(bool debug = false)
     {
         for (auto &node : nodes)
         {
@@ -227,17 +227,30 @@ public:
                 {
                     edgeCredits.push_back((*it).dest->credit);
                     nodeNames.push_back((*it).dest->node);
-                    //Rcpp::Rcout << (*it).dest->node<< "=" << (*it).dest->credit << std::endl;
+                    if(debug)
+                    {
+                        Rcpp::Rcout << (*it).dest->node<< "=" << (*it).dest->credit << std::endl;
+
+                    }
                 }
                 arma::vec v(edgeCredits);
-                //Rcpp::Rcout << "nodeNames=" << nodeNames << std::endl;
-                //Rcpp::Rcout << "outgoingEdges=" << outgoingEdges<< std::endl;
-                //Rcpp::Rcout << "v=" << v << std::endl;
+                
                 double m = arma::max(v);
-                v = exp(v - m);
+                // if(debug)
+                // {
+                //    Rcpp::Rcout << "v-m=" << v-m<< std::endl; 
+                // }
+                //v = exp(v - m);
                 // //Rcpp::Rcout << "m=" << m<< std::endl;
-                double exp_sum = arma::accu(v);
-                arma::vec probVec = v / exp_sum;
+                double exp_sum = arma::accu(exp(v));
+                arma::vec probVec = exp(v) / exp_sum;
+                if(debug)
+                {
+                    Rcpp::Rcout << "nodeNames=" << nodeNames << std::endl;
+                    Rcpp::Rcout << "outgoingEdges=" << outgoingEdges<< std::endl;
+                    Rcpp::Rcout << "v=" << v << std::endl;
+                    Rcpp::Rcout << "probVec=" << probVec << std::endl;
+                }
                 int i=0;
                 for (auto it = outgoingEdges->begin(); it != outgoingEdges->end(); ++it)
                 {

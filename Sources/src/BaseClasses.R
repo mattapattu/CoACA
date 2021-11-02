@@ -179,7 +179,8 @@ setMethod("setModelResults",  signature=c("ModelData","RatData","AllModels"),
             #   }
             
             testModel = slot(allModels,model)
-            x@probMatrix = baseModel@probMatFunc(ratdata, x,testModel,x@sim)
+            #x@probMatrix = baseModel@probMatFunc(ratdata, x,testModel,x@sim)
+            x@probMatrix = TurnsNew::getProbMatrix(ratdata, x,testModel,x@sim)
             likelihood = baseModel@likelihoodFunc(ratdata, x,testModel,x@sim)
             #x@likelihood = (-1) * sum(likelihood[-(1:endLearningStage)])
             x@likelihood = likelihood

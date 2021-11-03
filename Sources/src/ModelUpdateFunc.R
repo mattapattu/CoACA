@@ -23,7 +23,7 @@ library(doMPI);
 
 getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc)
 {
-  end_index = getEndIndex(ratdata@allpaths, sim, limit=0.95)
+  end_index <- getEndIndex(ratName, ratdata@allpaths, sim, limit = 0.95)
   start_index = round(end_index/2)
   if(start_index >= end_index){
     print(sprintf("start_index >= end_index. Check if rat learns optimal behavior"))

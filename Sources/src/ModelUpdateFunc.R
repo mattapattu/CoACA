@@ -9,113 +9,143 @@ library(doParallel)
 # library(snow);
 # library(doSNOW);
 
-getModelResults <- function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc) {
-  ratName = ratdata@rat
-  end_index <- getEndIndex(ratName, ratdata@allpaths, sim, limit = 0.95)
-  start_index <- round(end_index / 2)
-  if (start_index >= end_index) {
+#library(GA)
+library(DEoptim)
+#library(Rmpi)
+#library(rgenoud)
+library(rlist)
+#library(parallel)
+#library(foreach)
+#library(doParallel)
+library(doMPI);
+#library(snow);
+#library(doSNOW);
+
+getModelResults=function(ratdata, testingdata, sim, src.dir, setup.hpc)
+{
+  end_index = getEndIndex(ratdata@allpaths, sim, limit=0.95)
+  start_index = round(end_index/2)
+  if(start_index >= end_index){
     print(sprintf("start_index >= end_index. Check if rat learns optimal behavior"))
     return()
   }
   
-  models <- testingdata@Models
-  creditAssignment <- testingdata@creditAssignment
+  models = testingdata@Models
+  creditAssignment = testingdata@creditAssignment
   
-  forloops <- length(models) * length(creditAssignment)
+  forloops = length(models) * length(creditAssignment)
   
-  # if (setup.hpc) {
-  #   # worker.nodes = mpi.universe.size()-1
-  #   # print(sprintf("worker.nodes=%i",worker.nodes))
-  #   cl <- makeCluster(5, type = "PSOCK")
-  # 
-  #   # cl <- startMPIcluster(worker.nodes)
-  #   # registerDoMPI(cl)
-  # }
-  # else {
-  #   cl <- makeCluster(3)
-  #   # registerDoParallel(cl)
-  # }
-  # 
-  # 
-  # 
-  # clusterExport(cl, varlist = c("getEndIndex", "convertTurnTimes", "negLogLikFunc", "src.dir"))
-  # clusterEvalQ(cl, source(paste(src.dir, "ModelClasses.R", sep = "/")))
-  # clusterEvalQ(cl, source(paste(src.dir, "PathModel.R", sep = "/")))
-  # clusterEvalQ(cl, source(paste(src.dir, "TurnModel.R", sep = "/")))
-  # clusterEvalQ(cl, source(paste(src.dir, "HybridModel1.R", sep = "/")))
-  # clusterEvalQ(cl, source(paste(src.dir, "HybridModel2.R", sep = "/")))
-  # clusterEvalQ(cl, source(paste(src.dir, "HybridModel3.R", sep = "/")))
-  # clusterEvalQ(cl, source(paste(src.dir, "HybridModel4.R", sep = "/")))
-  # clusterEvalQ(cl, source(paste(src.dir, "BaseClasses.R", sep = "/")))
-  # clusterEvalQ(cl, library("TTR"))
-  # clusterEvalQ(cl, library("rlist"))
-  # clusterEvalQ(cl, library("DEoptim"))
-  # 
-  # clusterCall(cl, function() {
-  #   library(doParallel)
-  #   NULL
-  # })
-  # 
-  # registerDoParallel(cl)
-  
-  
-  time <- system.time(
-    resMatrix <-
-      foreach(model = models, .combine = "rbind") %:%
-      foreach(method = creditAssignment, .combine = "rbind") %do% {
-        modelData <- new("ModelData", Model = model, creditAssignment = method, sim = sim)
-        argList <- getArgList(modelData, ratdata)
-        nvars <- length(argList$lower)
-        cl2 <- makeCluster(5)
-        clusterExport(cl2, varlist = c("src.dir","model.src"))
-        clusterCall(cl2, function() {
-          source(paste(src.dir, "ModelClasses.R", sep = "/"))
-          source(paste(model.src, "PathModel.R", sep = "/"))
-          source(paste(model.src, "TurnModel.R", sep = "/"))
-          source(paste(model.src, "HybridModel1.R", sep = "/"))
-          source(paste(model.src, "HybridModel2.R", sep = "/"))
-          source(paste(model.src, "HybridModel3.R", sep = "/"))
-          source(paste(model.src, "HybridModel4.R", sep = "/"))
-          source(paste(src.dir, "BaseClasses.R", sep = "/"))
-          NULL
-        })
-        registerDoParallel(cl2)
-        np.val <- length(argList$lower) * 10
-        myList <- DEoptim.control(NP = 30, F = 0.8, CR = 0.9, trace = FALSE, itermax = 200)
-        out <- do.call("DEoptim", list.append(argList, fn = negLogLikFunc, myList))
-        stopCluster(cl2)
-        if(out$optim$bestval < 100000)
-        {
-          return(out$optim$bestmem)
-        }
-        else
-        {
-          return()
-        }
-        
-      }
+  if(setup.hpc)
+  {
+    cl <- startMPIcluster(6,bcast=FALSE)
+    exportDoMPI(cl, "src.dir") 
+    #exportDoMPI(cl, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
+    registerDoMPI(cl)
     
-    # print(time)
-  )
-  print(time)
-  ## END IF
-  
-  # modelData = updateModelData(ratdata,resMatrix, models)
-  allmodelRes <- getAllModelResults(ratdata, resMatrix, testingdata, sim)
-  
-  if (setup.hpc) {
-    #stopCluster(cl)
-    # stopImplicitCluster()
-    closeCluster(cl)
+    initWorkers <-  function() {
+      #myEnv <- new.env()
+      #cl2 <- startMPIcluster(5,verbose=TRUE)
+      #exportDoMPI(cl2, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
+      #ignore <- foreach(icount(getDoParWorkers()), .options.mpi=opts) %dopar% NULL
+      #registerDoMPI(cl2)
+      #cl2 <- getDoMpiCluster()
+      source(paste(src.dir,"ModelClasses.R", sep="/"))
+      source(paste(src.dir,"TurnModel.R", sep="/"))
+      source(paste(src.dir,"HybridModel1.R", sep="/"))
+      source(paste(src.dir,"HybridModel2.R", sep="/"))
+      source(paste(src.dir,"HybridModel3.R", sep="/"))
+      source(paste(src.dir,"HybridModel4.R", sep="/"))
+      source(paste(src.dir,"BaseClasses.R", sep="/"))
+      source(paste(src.dir,"exportFunctions.R", sep="/"))
+      #attach(myEnv, name="sourced_scripts")
+    }
+    
+    opts <- list(initEnvir=initWorkers)
+    print("Spawned cluster")
+    time <- system.time(
+      resMatrix <-
+        foreach(model=models, .combine='rbind',.options.mpi=opts,.packages = c("rlist","DEoptim","doMPI")) %:%
+        foreach(method=creditAssignment, .combine='rbind') %dopar% {
+          #envir = ls() 
+          cat('model =',model,'\n',sep = '')
+          modelData =  new("ModelData", Model=model, creditAssignment = method, sim=sim)
+          argList<-getArgList(modelData,ratdata)
+          cat('Create new cluster\n') 
+          #cl2 <- getDoMpiCluster()
+          np.val = length(argList$lower)*10
+          myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
+          out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=argList[[4]],modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
+          unname(out$optim$bestmem)		
+        }
+    )
+    print(time)
   }
-  else {
-    #stopCluster(cl)
+  else
+  {
+    time <- system.time(
+      resMatrix <-
+        foreach(model = models, .combine = "rbind") %:%
+        foreach(method = creditAssignment, .combine = "rbind") %do% {
+          modelData <- new("ModelData", Model = model, creditAssignment = method, sim = sim)
+          argList <- getArgList(modelData, ratdata)
+          nvars <- length(argList$lower)
+          cl2 <- makeCluster(5)
+          clusterExport(cl2, varlist = c("src.dir","model.src"))
+          clusterCall(cl2, function() {
+            source(paste(src.dir, "ModelClasses.R", sep = "/"))
+            source(paste(model.src, "PathModel.R", sep = "/"))
+            source(paste(model.src, "TurnModel.R", sep = "/"))
+            source(paste(model.src, "HybridModel1.R", sep = "/"))
+            source(paste(model.src, "HybridModel2.R", sep = "/"))
+            source(paste(model.src, "HybridModel3.R", sep = "/"))
+            source(paste(model.src, "HybridModel4.R", sep = "/"))
+            source(paste(src.dir, "BaseClasses.R", sep = "/"))
+            NULL
+          })
+          registerDoParallel(cl2)
+          np.val <- length(argList$lower) * 10
+          myList <- DEoptim.control(NP = 30, F = 0.8, CR = 0.9, trace = FALSE, itermax = 200)
+          out <- do.call("DEoptim", list.append(argList, fn = negLogLikFunc, myList))
+          stopCluster(cl2)
+          if(out$optim$bestval < 100000)
+          {
+            return(out$optim$bestmem)
+          }
+          else
+          {
+            return()
+          }
+          
+        }
+      
+      # print(time)
+    )
+    print(time)
+    
+  }
+  
+  #modelData = updateModelData(ratdata,resMatrix, models)
+  allmodelRes = getAllModelResults(ratdata, resMatrix,testingdata, sim) 
+  save(allmodelRes,  file = paste0(ratdata@rat,"_allmodelRes.Rdata"))
+  
+  if(setup.hpc)
+  {
+    #stopCluster(cl)	
+    #stopImplicitCluster()
+    closeCluster(cl)
+    #mpi.finalize()
+  }
+  else
+  {
+    stopCluster(cl)
     #stopImplicitCluster()
   }
   
   
   return(allmodelRes)
 }
+
+
 
 getModelResultsSeq <- function(ratdata, testingdata, sim, src.dir) {
   models <- testingdata@Models

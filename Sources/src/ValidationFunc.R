@@ -1,5 +1,8 @@
 library(foreach)
 library(doParallel)
+library(doMPI)
+library(rlist)
+
 
 modifyParam=function(param)
 {

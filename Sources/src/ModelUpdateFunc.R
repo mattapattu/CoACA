@@ -23,6 +23,7 @@ library(doMPI);
 
 getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc)
 {
+  ratName = ratdata@rat
   end_index <- getEndIndex(ratName, ratdata@allpaths, sim, limit = 0.95)
   start_index = round(end_index/2)
   if(start_index >= end_index){

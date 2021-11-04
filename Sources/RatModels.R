@@ -1,7 +1,7 @@
 
 library(doParallel)
 
-options(error=recover)
+#options(error=recover)
 
 rats = c("rat_101","rat_103","rat_106","rat_112","rat_113","rat_114","robert")
 names=c('e','f','g','c','d','h','i','j','a','b','k')
@@ -9,11 +9,11 @@ names=c('e','f','g','c','d','h','i','j','a','b','k')
 ### Options Linux/Windows ####
 
 #src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
-#src.dir = file.path("/home/amoongat/Projects/Rats-Credit/Sources/src")
-src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
+src.dir = file.path("/home/amoongat/Projects/Rats-Credit/Sources/src")
+#src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 
-setup.hpc = FALSE
-#setup.hpc = TRUE
+#setup.hpc = FALSE
+setup.hpc = TRUE
 
 ############### Select tests to run
 
@@ -21,17 +21,17 @@ unitTest1 = FALSE
 
 computeModelLik = T
 loadAllModelRes = F
-modelSelection = F
+modelSelection = T
 
-plotProb = T
-plotLik = T
+plotProb = F
+plotLik = F
 
 unitTest2 = FALSE
 
 validateHoldout = FALSE
 
-paramEstTest = FALSE
-thetaHatTest = FALSE
+paramEstTest = T 
+thetaHatTest = F 
 pcaPlot = FALSE
 
 successPlot = FALSE
@@ -47,18 +47,19 @@ if(unitTest1)
   data.path = file.path("C:/Rats-Credits/Data/testDonnes1.RData") 
 }else
 {
-  data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/new_data_journeys.Rdata")
+  #data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/new_data_journeys.Rdata")
   #data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/data_journeys.Rdata")
-  #data.path = file.path("/home/amoongat/Projects/Rats-Credit/data_journeys.Rdata")
+  data.path = file.path("/home/amoongat/Projects/Rats-Credit/Data/new_data_journeys.Rdata")
   
 }
 
 load(data.path)
 #load(data.path2)
 
-plot.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Plots")
-model.data.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data")
-#plot.dir = file.path("/home/ajames/Rats-Credit")
+#plot.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Plots")
+plot.dir = file.path("/home/amoongat/Projects/Rats-Credit/Plots")
+#model.data.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data")
+model.data.dir = file.path("/home/amoongat/Projects/Rats-Credit/Data/Rat_Model_Data")
 
 model = "Model2"  ## {Model1,Model2,Model3}
 source(paste(src.dir,"ModelClasses.R", sep="/"))
@@ -81,7 +82,7 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(4:7)) {
+for (i in c(1:7)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
   

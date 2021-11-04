@@ -92,7 +92,7 @@ unitTestHoldOut=function(ratdata,allModelRes,testData,src.dir)
     }
 }
 
-HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
+HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.dir)
 {
   models = testData@Models
   creditAssignment = testData@creditAssignment
@@ -224,7 +224,7 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
   
   print(time2)
   rat = ratdata@rat
-  save(resList,  file = paste0(rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resList.Rdata"))
+  save(resList,  file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resList.Rdata"))
   for(i in 1:modelNum)
   {
     min_method = ""
@@ -250,7 +250,7 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
   }
   
   rat = ratdata@rat
-  save(mat_res, generatedDataList,resList,  file = paste0(rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_mat_res.Rdata"))
+  save(mat_res, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_mat_res.Rdata"))
   
   
   if(setup.hpc)
@@ -276,7 +276,7 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
 
 
 
-testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
+testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.dir)
 {
   models = testData@Models
   creditAssignment = testData@creditAssignment
@@ -362,7 +362,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
       set.seed(missedOptimalIter)
     }
     rat = ratdata@rat
-    save(generated_data, file = paste0(rat, "_", modelName,"_genData.Rdata")) 
+    save(generated_data, file = paste0(model.data.dir, "/", rat, "_", modelName,"_genData.Rdata")) 
     if(end_index > -1)
     {
       iter=as.integer(floor(length(generated_data@allpaths[,1])/100))-1
@@ -386,7 +386,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc)
   
   
   rat = ratdata@rat
-  save(paramTest, file = paste0(rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_paramTest.Rdata")) 
+  save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_paramTest.Rdata")) 
   
   if(setup.hpc)
   {

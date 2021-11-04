@@ -180,7 +180,7 @@ for (i in c(4:7)) {
   if(validateHoldout)
   {
     #debug(HoldoutTest)
-    HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc)
+    HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
   }
   
   
@@ -190,7 +190,7 @@ for (i in c(4:7)) {
   if(paramEstTest)
   {
     #debug(testParamEstimation)
-    testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc)
+    testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
     
   }
   

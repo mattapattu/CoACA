@@ -1,6 +1,5 @@
-library(foreach)
-library(doParallel)
-#library(doMPI)
+library(doMPI)
+>>>>>>> Stashed changes
 library(rlist)
 
 
@@ -99,6 +98,8 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.d
   
   modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   
+  ratName = ratdata@rat
+  
   mat_res = matrix(0, length(modelNames), length(modelNames))
   colnames(mat_res) <- modelNames
   rownames(mat_res) <- modelNames
@@ -177,7 +178,7 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.d
         
         while(end_index == -1){
           generated_data = simulateData(trueModelData,ratdata,allModels)
-          end_index = getEndIndex("testRat",generated_data@allpaths, sim=1, limit=0.85)
+          end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.85)
           missedOptimalIter=missedOptimalIter+1
           
           if(missedOptimalIter>2000)
@@ -284,6 +285,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
   paramTest = list()
   modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   
+  ratName = ratdata@rat 
   
   if(setup.hpc)
   {
@@ -350,7 +352,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
       generated_data = simulateData(trueModelData,ratdata,allModels)
       #generated_data@simModel = trueModelData@Model
       #generated_data@simMethod = trueModelData@creditAssignment
-      end_index = getEndIndex(generated_data@allpaths, sim=1, limit=0.95)
+      end_index = getEndIndex(ratName, generated_data@allpaths, sim=1, limit=0.95)
       #cat('i=',i, ', j=',j,' end_index=', end_index, '.\n', sep = '') 
       missedOptimalIter=missedOptimalIter+1
       

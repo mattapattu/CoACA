@@ -1736,59 +1736,7 @@ populateRatModel=function(rat,allpaths,enreg,turnsModel)
 
 populateSimRatModel=function(ratdata,generated_data,testModelName)
 {
-  # if(testModelName=="Paths")
-  # {
-  #   generated_data@hybridModel1 = convertTurnTimes(generated_data,TurnModel,Hybrid1,sim=1)
-  #   generated_data@hybridModel2 = convertTurnTimes(generated_data,TurnModel,Hybrid2,sim=1)
-  #   generated_data@hybridModel3 = convertTurnTimes(generated_data,TurnModel,Hybrid3,sim=1)
-  #   generated_data@hybridModel4 = convertTurnTimes(generated_data,TurnModel,Hybrid4,sim=1)
-  # }
-  # else if(testModelName=="Turns")
-  # {
-  #   generated_data@hybridModel1 = convertTurnTimes(generated_data,TurnModel,Hybrid1,sim=1)
-  #   generated_data@hybridModel2 = convertTurnTimes(generated_data,TurnModel,Hybrid2,sim=1)
-  #   generated_data@hybridModel3 = convertTurnTimes(generated_data,TurnModel,Hybrid3,sim=1)
-  #   generated_data@hybridModel4 = convertTurnTimes(generated_data,TurnModel,Hybrid4,sim=1)
-  #   
-  #   
-  # }
-  # else if(testModelName=="Hybrid1")
-  # {
-  #   generated_data@turnTimes = getTurnTimesMat(ratdata,generated_data,testModelName)
-  #   generated_data@hybridModel2 = convertTurnTimes(generated_data,TurnModel,Hybrid2,sim=1)
-  #   generated_data@hybridModel3 = convertTurnTimes(generated_data,TurnModel,Hybrid3,sim=1)
-  #   generated_data@hybridModel4 = convertTurnTimes(generated_data,TurnModel,Hybrid4,sim=1)
-  #   
-  #   
-  # }
-  # else if(testModelName=="Hybrid2")
-  # {
-  #   generated_data@turnTimes = getTurnTimesMat(ratdata,generated_data,testModelName)
-  #   generated_data@hybridModel1 = convertTurnTimes(generated_data,TurnModel,Hybrid1,sim=1)
-  #   generated_data@hybridModel3 = convertTurnTimes(generated_data,TurnModel,Hybrid3,sim=1)
-  #   generated_data@hybridModel4 = convertTurnTimes(generated_data,TurnModel,Hybrid4,sim=1)
-  #   
-  #   
-  # }
-  # else if(testModelName=="Hybrid3")
-  # {
-  #   generated_data@turnTimes = getTurnTimesMat(ratdata,generated_data,testModelName)
-  #   generated_data@hybridModel1 = convertTurnTimes(generated_data,TurnModel,Hybrid1,sim=1)
-  #   generated_data@hybridModel2 = convertTurnTimes(generated_data,TurnModel,Hybrid2,sim=1)
-  #   generated_data@hybridModel4 = convertTurnTimes(generated_data,TurnModel,Hybrid4,sim=1)
-  #   
-  #   
-  # }
-  # else if(testModelName=="Hybrid4")
-  # {
-  #   generated_data@turnTimes = getTurnTimesMat(ratdata,generated_data,testModelName)
-  #   generated_data@hybridModel1 = convertTurnTimes(generated_data,TurnModel,Hybrid1,sim=1)
-  #   generated_data@hybridModel2 = convertTurnTimes(generated_data,TurnModel,Hybrid2,sim=1)
-  #   generated_data@hybridModel3 = convertTurnTimes(generated_data,TurnModel,Hybrid3,sim=1)
-  #   
-  #   
-  # }
-  
+
   generated_data@hybridModel1 = convertTurnTimes(generated_data,TurnModel,Hybrid1,sim=1)
   generated_data@hybridModel2 = convertTurnTimes(generated_data,TurnModel,Hybrid2,sim=1)
   generated_data@hybridModel3 = convertTurnTimes(generated_data,TurnModel,Hybrid3,sim=1)

@@ -19,8 +19,8 @@ setup.hpc = FALSE
 
 unitTest1 = FALSE
 
-computeModelLik = F
-loadAllModelRes = T
+computeModelLik = T
+loadAllModelRes = F
 modelSelection = F
 
 plotProb = T
@@ -122,8 +122,9 @@ for (i in c(4:7)) {
   
   if(computeModelLik)
   {
-    #debug(getModelResults)
+    debug(getModelResults)
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
+    save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   }
   
   if(loadAllModelRes)
@@ -137,7 +138,7 @@ for (i in c(4:7)) {
     
     min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
     print(sprintf("%s is best model for %s",min_method,rats[i]))
-    save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    
     
   }
   

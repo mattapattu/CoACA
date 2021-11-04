@@ -1,6 +1,6 @@
 library(foreach)
 library(doParallel)
-library(doMPI)
+#library(doMPI)
 library(rlist)
 
 

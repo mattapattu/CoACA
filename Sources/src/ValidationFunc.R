@@ -111,7 +111,7 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.d
   {
     #worker.nodes = mpi.universe.size()-1
     #print(sprintf("worker.nodes=%i",worker.nodes))
-    cl <- startMPIcluster(100)
+    cl <- startMPIcluster()
     setRngDoMPI(cl, seed=1234)
     exportDoMPI(cl, c("src.dir"),envir=environment())
     registerDoMPI(cl)
@@ -289,7 +289,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
   {
     #worker.nodes = mpi.universe.size()-1
     #print(sprintf("worker.nodes=%i",worker.nodes))
-    cl <- startMPIcluster(50)
+    cl <- startMPIcluster()
     setRngDoMPI(cl, seed=1234)
     
     exportDoMPI(cl, c("src.dir"),envir=environment())

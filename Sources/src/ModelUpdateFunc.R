@@ -38,7 +38,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   
   if(setup.hpc)
   {
-    cl <- startMPIcluster(6,bcast=FALSE)
+    cl <- startMPIcluster()
     exportDoMPI(cl, "src.dir") 
     #exportDoMPI(cl, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
     registerDoMPI(cl)

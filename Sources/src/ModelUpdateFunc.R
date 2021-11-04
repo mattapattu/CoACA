@@ -129,7 +129,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   
   #modelData = updateModelData(ratdata,resMatrix, models)
   allmodelRes = getAllModelResults(ratdata, resMatrix,testingdata, sim) 
-  save(allmodelRes,  file = paste0(ratdata@rat,"_allmodelRes.Rdata"))
+  #save(allmodelRes,  file = paste0(ratdata@rat,"_allmodelRes.Rdata"))
   
   if(setup.hpc)
   {

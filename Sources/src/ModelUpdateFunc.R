@@ -21,6 +21,83 @@ library(rlist)
 #library(snow);
 #library(doSNOW);
 
+
+
+computeModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
+{
+  models = testData@Models
+  creditAssignment = testData@creditAssignment
+  
+  paramTest = list()
+  modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  
+  ratName = ratdata@rat 
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
+  cl <- startMPIcluster(verbose=TRUE, logdir = dir.path)
+  #setRngDoMPI(cl, seed=1234)
+    
+  exportDoMPI(cl, c("src.dir"),envir=environment())
+  registerDoMPI(cl)
+    
+   initWorkers <-  function() {
+      source(paste(src.dir,"../ModelClasses.R", sep="/"))
+      source(paste(src.dir,"PathModel.R", sep="/"))
+      source(paste(src.dir,"TurnModel.R", sep="/"))
+      source(paste(src.dir,"HybridModel1.R", sep="/"))
+      source(paste(src.dir,"HybridModel2.R", sep="/"))
+      source(paste(src.dir,"HybridModel3.R", sep="/"))
+      source(paste(src.dir,"HybridModel4.R", sep="/"))
+      source(paste(src.dir,"../BaseClasses.R", sep="/"))
+      source(paste(src.dir,"../exportFunctions.R", sep="/"))
+      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
+      #attach(myEnv, name="sourced_scripts")
+    }
+ 
+   opts <- list(initEnvir=initWorkers) 
+  
+  for(i in 1:length(modelNames))
+  {
+    model = modelNames[i] 
+    print(sprintf('Model is %s\n', model))
+    modelName = strsplit(model,"\\.")[[1]][1]
+    creditAssignment = strsplit(model,"\\.")[[1]][2]
+    print(sprintf('Data is generated for model=%s, end_index=%i', model, end_index))
+    rat = ratdata@rat
+    save(generated_data, file = paste0(model.data.dir, "/", rat, "_", modelName,"_genData.Rdata"))
+    iter=as.integer(floor(length(generated_data@allpaths[,1])/100))-1
+      #print(iter)
+     resMat <- 
+       foreach(j=c(1:iter), .combine='rbind', .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"), .inorder=TRUE) %dopar%{
+          rowEnd = j*100
+          cat(sprintf('model = %s, rowEnd = %i\n', model,rowEnd))
+          modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
+          argList<-getArgList(modelData,generated_data)
+          np.val = length(argList$lower) * 10
+          myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
+          out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
+          modelData = setModelParams(modelData, unname(out$optim$bestmem))
+          cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
+          c(rowEnd,modelData@alpha, modelData@gamma1)
+          
+        }   
+        paramTest = list.append(paramTest,list(model=trueModelData,resMat=resMat))
+    
+   }
+  
+  
+  
+  rat = ratdata@rat
+  save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_modelParamRes.Rdata")) 
+  
+  if(setup.hpc)
+  {
+    closeCluster(cl)
+  }
+  
+}
+
+
+
 getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc)
 {
   ratName = ratdata@rat

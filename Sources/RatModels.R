@@ -1,6 +1,17 @@
 
 library(doParallel)
 
+
+args <- commandArgs(trailingOnly = TRUE)
+ratIndex=as.numeric(args[1])
+if(!is.null(ratIndex))
+{
+ print(sprintf("ratIndex is %i",ratIndex)) 
+}
+else
+{
+ stop("ratIndex is missing")
+}
 #options(error=recover)
 
 rats = c("rat_101","rat_103","rat_106","rat_112","rat_113","rat_114","robert")
@@ -18,18 +29,19 @@ setup.hpc = TRUE
 
 unitTest1 = FALSE
 
-computeModelLik = T
+computeModelParams = T
+computeModelLik = F
 loadAllModelRes = F
-modelSelection = T
+modelSelection = F
 
 plotProb = F
 plotLik = F
 
 unitTest2 = FALSE
 
-validateHoldout = FALSE
+validateHoldout = F
 
-paramEstTest = T 
+paramEstTest = F 
 thetaHatTest = F 
 pcaPlot = FALSE
 
@@ -79,9 +91,10 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(1:7)) {
+for (i in c(ratIndex)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
+   #testData = new("TestModels", Models=c("Paths"), creditAssignment=c("aca2"))
   
   
   if(unitTest1)
@@ -116,11 +129,14 @@ for (i in c(1:7)) {
   
   ############### Likelihood Computation and Model Selection ###########################################
   
- 
+  if(computeModelParams)
+  {
+   computeModelParams(ratdata,testData,src.dir,setup.hpc,model.data.dir)
+  } 
   
   if(computeModelLik)
   {
-    debug(getModelResults)
+    #debug(getModelResults)
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
     save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   }
@@ -155,7 +171,7 @@ for (i in c(1:7)) {
   if(plotLik)
   {
     setwd(plot.dir)
-    debug(generateLikelihoodPlots)
+    #debug(generateLikelihoodPlots)
     generateLikelihoodPlots(ratdata,allmodelRes,testData,plot.dir)
     
     #debug(generateEmpiricalPlots)
@@ -178,7 +194,7 @@ for (i in c(1:7)) {
   if(validateHoldout)
   {
     #debug(HoldoutTest)
-    HoldoutTest(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
+    HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir)
   }
   
   
@@ -188,15 +204,15 @@ for (i in c(1:7)) {
   if(paramEstTest)
   {
     #debug(testParamEstimation)
-    testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
+    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir)
     
   }
   
   if(thetaHatTest)
   {
-    res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
+    #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
     #debug(plotThetaHat)
-    plotThetaHat(ratdata,res.dir,plot.dir)
+    plotThetaHat(ratdata,model.data.dir,plot.dir)
   }
   
   if(pcaPlot)

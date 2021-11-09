@@ -10,7 +10,10 @@ setClass("RatData",
            hybridModel1 = "matrix",
            hybridModel2 = "matrix",
            hybridModel3 = "matrix",
-           hybridModel4 = "matrix")
+           hybridModel4 = "matrix",
+           simModel = "character",
+           simMethod = "character")
+
 )
 
 

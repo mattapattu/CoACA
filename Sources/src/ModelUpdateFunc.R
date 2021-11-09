@@ -23,7 +23,7 @@ library(rlist)
 
 
 
-computeModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
+getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
 {
   models = testData@Models
   creditAssignment = testData@creditAssignment
@@ -39,19 +39,20 @@ computeModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
   exportDoMPI(cl, c("src.dir"),envir=environment())
   registerDoMPI(cl)
     
-   initWorkers <-  function() {
-      source(paste(src.dir,"../ModelClasses.R", sep="/"))
-      source(paste(src.dir,"PathModel.R", sep="/"))
-      source(paste(src.dir,"TurnModel.R", sep="/"))
-      source(paste(src.dir,"HybridModel1.R", sep="/"))
-      source(paste(src.dir,"HybridModel2.R", sep="/"))
-      source(paste(src.dir,"HybridModel3.R", sep="/"))
-      source(paste(src.dir,"HybridModel4.R", sep="/"))
-      source(paste(src.dir,"../BaseClasses.R", sep="/"))
-      source(paste(src.dir,"../exportFunctions.R", sep="/"))
-      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
+  initWorkers <-  function() {
+      source(paste(src.dir, "ModelClasses.R", sep = "/"))
+      source(paste(model.src, "PathModel.R", sep = "/"))
+      source(paste(model.src, "TurnModel.R", sep = "/"))
+      source(paste(model.src, "HybridModel1.R", sep = "/"))
+      source(paste(model.src, "HybridModel2.R", sep = "/"))
+      source(paste(model.src, "HybridModel3.R", sep = "/"))
+      source(paste(model.src, "HybridModel4.R", sep = "/"))
+      source(paste(src.dir, "BaseClasses.R", sep = "/"))
+      source(paste(src.dir,"exportFunctions.R", sep="/"))
+
       #attach(myEnv, name="sourced_scripts")
     }
+
  
    opts <- list(initEnvir=initWorkers) 
   
@@ -61,17 +62,14 @@ computeModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
     print(sprintf('Model is %s\n', model))
     modelName = strsplit(model,"\\.")[[1]][1]
     creditAssignment = strsplit(model,"\\.")[[1]][2]
-    print(sprintf('Data is generated for model=%s, end_index=%i', model, end_index))
-    rat = ratdata@rat
-    save(generated_data, file = paste0(model.data.dir, "/", rat, "_", modelName,"_genData.Rdata"))
-    iter=as.integer(floor(length(generated_data@allpaths[,1])/100))-1
+    iter=as.integer(floor(length(ratdata@allpaths[,1])/100))-1
       #print(iter)
      resMat <- 
        foreach(j=c(1:iter), .combine='rbind', .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"), .inorder=TRUE) %dopar%{
           rowEnd = j*100
           cat(sprintf('model = %s, rowEnd = %i\n', model,rowEnd))
           modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
-          argList<-getArgList(modelData,generated_data)
+          argList<-getArgList(modelData,ratdata)
           np.val = length(argList$lower) * 10
           myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
           out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
@@ -121,12 +119,6 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
     registerDoMPI(cl)
     
     initWorkers <-  function() {
-      #myEnv <- new.env()
-      #cl2 <- startMPIcluster(5,verbose=TRUE)
-      #exportDoMPI(cl2, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
-      #ignore <- foreach(icount(getDoParWorkers()), .options.mpi=opts) %dopar% NULL
-      #registerDoMPI(cl2)
-      #cl2 <- getDoMpiCluster()
       source(paste(src.dir, "ModelClasses.R", sep = "/"))
       source(paste(model.src, "PathModel.R", sep = "/"))
       source(paste(model.src, "TurnModel.R", sep = "/"))

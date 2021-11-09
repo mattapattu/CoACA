@@ -1072,7 +1072,7 @@ generateEmpiricalPlots=function(ratdata,window){
 plotSuccessRates=function(ratDataList)
 {
   successRateList = list()
-  for(i in c(2:7))
+  for(i in c(1:7))
   {
     ratdata = ratDataList[[i]]
     rat = ratdata@rat
@@ -1092,45 +1092,45 @@ plotSuccessRates=function(ratDataList)
   df <- data.frame(matrix(unlist(successRateList2), ncol=length(successRateList2), byrow=FALSE))
   df[df==0] <- NA
   pdf(file=paste("SuccessRate.pdf",sep=""),width=11, height=7)
-  colors=c("black","red","blue","green","orange","violet")
-  matplot(df[,2:7],type='l',col=colors,lty=c(1,1,1,1,1,1),lwd=c(2,2,2,2,2), xlab = "Session", ylab="", cex.lab=1.6,cex.axis=1.5)
+  colors=c("black","red","blue","green","orange","violet","brown")
+  matplot(df[,1:7],type='l',col=colors,lty=c(1,1,1,1,1,1,1),lwd=c(2,2,2,2,2,2), xlab = "Session", ylab="", cex.lab=1.6,cex.axis=1.5)
   title(ylab="Success Rate", line=2.95, cex.lab=1.6,cex.axis=1.5)
-  legend=c("rat1", "rat2","rat3","rat4", "rat5","rat6")
-  legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2,2),lty=c(1,1,1,1,1,1), bg="white")
+  legend=c("rat1", "rat2","rat3","rat4", "rat5","rat6","rat7")
+  legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2,2,2),lty=c(1,1,1,1,1,1,1), bg="white")
   dev.off()
 }
 
 plotThetaHat=function(ratdata,res.dir,plot.dir)
 {
   rat=ratdata@rat
-  rat.dir = file.path(paste(res.dir,rat,sep="/"))
-  setwd(rat.dir)
-  rat_allmodelRes = paste0(rat,"_allmodelRes.Rdata")
-  load(rat_allmodelRes)
-  paramTestData=list.files(".", pattern="*.paramTest.Rdata", full.names=FALSE)
+  #rat.dir = file.path(paste(res.dir,rat,sep="/"))
+  setwd(res.dir)
+  #rat_allmodelRes = paste0(rat,"_allmodelRes.Rdata")
+  #load(rat_allmodelRes)
+  paramTestData=list.files(".", pattern=paste0(rat,".*.paramTest.Rdata"), full.names=FALSE)
   load(paramTestData)
   setwd(plot.dir)
-  pdf(file=paste("ParameterTest_",rat,".pdf",sep=""),width=11, height=7)
+  #pdf(file=paste("ParameterTest_",rat,".pdf",sep=""),width=11, height=7)
   par(mfrow=c(3,2))
-  for(i in c(1:6))
+  for(i in c(1:length(paramTest)))
   {
     alpha = paramTest[[i]]$model@alpha
     gamma1 = paramTest[[i]]$model@gamma1
-    gamma2 = paramTest[[i]]$model@gamma2
+    #gamma2 = paramTest[[i]]$model@gamma2
     model = paramTest[[i]]$model@Model
-    plot(unname(paramTest[[i]]$resMat[,2]),type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials (hundreds)", main=model,lty=1,lwd=1)
+    plot(unname(paramTest[[i]]$resMat[,2]),type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials (hundreds)", main=model,lty=2,lwd=1)
     abline(h=paramTest[[i]]$model@alpha,col='black',lty=1,lwd=2)
-    lines(unname(paramTest[[i]]$resMat[,3]),type='l',col='red',lty=1,lwd=1)
+    lines(unname(paramTest[[i]]$resMat[,3]),type='l',col='red',lty=2,lwd=1)
     abline(h=paramTest[[i]]$model@gamma1,col='red',lty=1,lwd=2)
-    lines(unname(paramTest[[i]]$resMat[,4]),type='l',col='green',lty=1,lwd=1)
-    abline(h=paramTest[[i]]$model@gamma2,col='3',lty=1,lwd=2)
+    #lines(unname(paramTest[[i]]$resMat[,4]),type='l',col='green',lty=1,lwd=1)
+    #abline(h=paramTest[[i]]$model@gamma2,col='3',lty=1,lwd=2)
     
   }
   #plot.new()
   #par(xpd=TRUE)
   
-  #legend=c(expression(hat(alpha)), expression(alpha),expression(hat(gamma[1])), expression(gamma[1]),expression(hat(gamma[2])), expression(gamma[2])) 
-  #legend("center", legend=legend, cex=1.5, col=c("black","black","green","green","red","red"), lwd = c(1,2,1,2,1,2),lty=c(1,2,1,2,1,2),horiz=FALSE,y.intersp=1.2)
+  legend=c(expression(hat(alpha)), expression(alpha),expression(hat(gamma[1])), expression(gamma[1]),expression(hat(gamma[2])), expression(gamma[2])) 
+  legend("center", legend=legend, cex=1.5, col=c("black","black","green","green","red","red"), lwd = c(1,2,1,2,1,2),lty=c(1,2,1,2,1,2),horiz=FALSE,y.intersp=1.2)
   title(paste0("Parameter estimation, ",rat), line = -1, outer = TRUE)
   #par(xpd=FALSE)
   dev.off()
@@ -1336,32 +1336,38 @@ plotPCA=function(ratdata,allmodelRes)
     if (state==1) pdf(file=paste("PCA_",rat,"boxE.pdf",sep=""),width=11, height=11,onefile=FALSE)
     if (state==2) pdf(file=paste("PCA_",rat,"boxI.pdf",sep=""),width=11, height=11,onefile=FALSE)    
     
-    endIdx = getEndIndex(ratdata@allpaths,sim=2,limit=0.95)
+    ratName = ratdata@rat
+    endIdx = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.95)
     state_idx = which(ratdata@allpaths[,2] == state)
-    state_idx = which(allmodelRes@Paths@aca3@probMatrix[,13] %in% state_idx)
-    n=length(state_idx) 
+    state_idx = which(allmodelRes@Paths@aca2@probMatrix[,13] %in% state_idx)
+    #n=length(state_idx) 
     
     rangeEnd = endIdx/2
     
     if(state==1) colIdx= c(1:6)
     if(state==2) colIdx= c(7:12)
     
-    X1=allmodelRes@Paths@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X2=allmodelRes@Turns@aca3@probMatrix[state_idx[state_idx> rangeEnd],colIdx]
-    X3=allmodelRes@Hybrid1@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X4=allmodelRes@Hybrid2@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X5=allmodelRes@Hybrid3@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X6=allmodelRes@Hybrid4@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X1=allmodelRes@Paths@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X2=allmodelRes@Turns@aca2@probMatrix[state_idx[state_idx> rangeEnd],colIdx]
+    X3=allmodelRes@Hybrid1@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X4=allmodelRes@Hybrid2@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X5=allmodelRes@Hybrid3@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     
-    X=rbind(X1,X2,X3,X4,X5,X6)
-    Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
-    pca1=princomp(Xtilde)
+    X6=allmodelRes@Hybrid4@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     
     matLen = length(X1[,1])
     x <- seq(0, 1, length.out = matLen)
     yellows<-seq_gradient_pal("white", "yellow")(x)
     x <- seq(0, 1, length.out = matLen)
     violets<-seq_gradient_pal("white", "violet")(x)
+    
+    X=rbind(X1,X2,X3,X4,X5,X6)
+   
+    n=length(X[,1]) 
+    Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+    pca1=princomp(Xtilde)
+
+   
     r1 = c(1:matLen)
     r2 = c((matLen+1):(2*matLen))
     r3 = c((2*matLen+1):(3*matLen))
@@ -1369,12 +1375,32 @@ plotPCA=function(ratdata,allmodelRes)
     r5 = c((4*matLen+1):(5*matLen))
     r6 = c((5*matLen+1):(6*matLen))
     
-    p1<-ggplot() +  geom_path(data = as.data.frame(pca1$scores[r2,1:2]),size=2, aes(x = pca1$scores[r2,1], y = pca1$scores[r2,2],color=r1))+ scale_colour_gradientn(name ="Turns",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Reds"))  + new_scale_color()+
-      geom_path(data = as.data.frame(pca1$scores[r3,1:2]),size=2, aes(x = pca1$scores[r3,1], y = pca1$scores[r3,2],color=r1))+ scale_colour_gradientn(name ="Hybrid1",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Blues")) + new_scale_color()+
-      geom_path(data = as.data.frame(pca1$scores[r4,1:2]),size=2, aes(x = pca1$scores[r4,1], y = pca1$scores[r4,2],color=r1))+ scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Greys")) + new_scale_color()+
-      geom_path(data = as.data.frame(pca1$scores[r5,1:2]),size=2, aes(x = pca1$scores[r5,1], y = pca1$scores[r5,2],color=r1))+ scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "vertical"), colors=violets) + new_scale_color()+
-      geom_path(data = as.data.frame(pca1$scores[r6,1:2]),size=2, aes(x = pca1$scores[r6,1], y = pca1$scores[r6,2],color=r1))+ scale_colour_gradientn(name ="Hybrid4",guide = guide_colourbar(direction = "vertical"), colors=yellows)+ new_scale_color()+
-      geom_path(data = as.data.frame(pca1$scores[r1,1:2]), size=2, aes(x = pca1$scores[r1,1], y = pca1$scores[r1,2],color=r1))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "vertical"), colours = brewer.pal(5, "Greens")) +
+    
+    p1<-ggplot() +  
+      geom_path(data = as.data.frame(pca1$scores[r2,1:2]),size=2, aes(x = pca1$scores[r2,1], y = pca1$scores[r2,2],color=r1))+ 
+       scale_colour_gradientn(name ="Turns",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Reds"))  +
+        new_scale_color() +
+      
+      geom_path(data = as.data.frame(pca1$scores[r3,1:2]),size=2, aes(x = pca1$scores[r3,1], y = pca1$scores[r3,2],color=r1))+
+       scale_colour_gradientn(name ="Hybrid1",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Blues")) + 
+        new_scale_color() +
+      
+      geom_path(data = as.data.frame(pca1$scores[r4,1:2]),size=2, aes(x = pca1$scores[r4,1], y = pca1$scores[r4,2],color=r1))+ 
+       scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Greys")) + 
+        new_scale_color() +
+      
+      geom_path(data = as.data.frame(pca1$scores[r5,1:2]),size=2, aes(x = pca1$scores[r5,1], y = pca1$scores[r5,2],color=r1))+ 
+        scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "vertical"), colors=violets) + 
+         new_scale_color() +
+      
+      geom_path(data = as.data.frame(pca1$scores[r6,1:2]),size=2, aes(x = pca1$scores[r6,1], y = pca1$scores[r6,2],color=r1))+ 
+        scale_colour_gradientn(name ="Hybrid4",guide = guide_colourbar(direction = "vertical"), colors=yellows)+ 
+         new_scale_color() +
+      
+      geom_path(data = as.data.frame(pca1$scores[r1,1:2]), size=2, aes(x = pca1$scores[r1,1], y = pca1$scores[r1,2],color=r1))+
+        scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "vertical"), 
+         colours = brewer.pal(5, "Greens")) +
+      
       geom_point(data=as.data.frame(pca1$scores[r1[1],1:2]), mapping=aes(x=pca1$scores[r1[1],1],y=pca1$scores[r1[1],2]), colour="green", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca1$scores[r2[1],1:2]), mapping=aes(x=pca1$scores[r2[1],1],y=pca1$scores[r2[1],2]), colour="red", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca1$scores[r3[1],1:2]), mapping=aes(x=pca1$scores[r3[1],1],y=pca1$scores[r3[1],2]), colour="blue", shape = 17, size=4)+
@@ -1384,11 +1410,58 @@ plotPCA=function(ratdata,allmodelRes)
       xlab("Component 1") +     ylab("Component 2") + theme(legend.direction = "vertical", legend.box = "horizontal",legend.position = "right")+ggtitle("All models")+  theme(plot.title = element_text(hjust = 0.5))
     
     
+    ## 4 models together - Hybrid1,2,3,4
+    X3=allmodelRes@Hybrid1@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X4=allmodelRes@Hybrid2@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X5=allmodelRes@Hybrid3@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X6=allmodelRes@Hybrid4@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    
+    X=rbind(X3,X4,X5,X6)
+    n=length(X[,1]) 
+    Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+    pca.new = princomp(Xtilde)
+  
+    matLen = length(X3[,1])
+    x <- seq(0, 1, length.out = matLen)
+    yellows<-seq_gradient_pal("white", "yellow")(x)
+    x <- seq(0, 1, length.out = matLen)
+    violets<-seq_gradient_pal("white", "violet")(x)
+    r3.new = c(1:matLen)
+    r4.new = c((matLen+1):(2*matLen))
+    r5.new = c((2*matLen+1):(3*matLen))
+    r6.new = c((3*matLen+1):(4*matLen))
+
+    p1<-ggplot() +  
+      geom_path(data = as.data.frame(pca1$scores[r3.new,1:2]),size=2, aes(x = pca1$scores[r3.new,1], y = pca1$scores[r3.new,2],color=r1))+ 
+      scale_colour_gradientn(name ="Turns",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Reds"))  +
+      new_scale_color() +
+      
+      geom_path(data = as.data.frame(pca1$scores[r4.new,1:2]),size=2, aes(x = pca1$scores[r4.new,1], y = pca1$scores[r4.new,2],color=r1))+
+      scale_colour_gradientn(name ="Hybrid1",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Blues")) + 
+      new_scale_color() +
+      
+      geom_path(data = as.data.frame(pca1$scores[r5.new,1:2]),size=2, aes(x = pca1$scores[r5.new,1], y = pca1$scores[r5.new,2],color=r1))+ 
+      scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Greys")) + 
+      new_scale_color() +
+      
+      geom_path(data = as.data.frame(pca1$scores[r6.new,1:2]),size=2, aes(x = pca1$scores[r6.new,1], y = pca1$scores[r6.new,2],color=r1))+ 
+      scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "vertical"), colors=violets) + 
+      new_scale_color() +
+      
+      geom_point(data=as.data.frame(pca1$scores[r3[1],1:2]), mapping=aes(x=pca1$scores[r3.new[1],1],y=pca1$scores[r3.new[1],2]), colour="blue", shape = 17, size=4)+
+      geom_point(data=as.data.frame(pca1$scores[r4[1],1:2]), mapping=aes(x=pca1$scores[r4.new[1],1],y=pca1$scores[r4.new[1],2]), colour="grey", shape = 17, size=4)+
+      geom_point(data=as.data.frame(pca1$scores[r5[1],1:2]), mapping=aes(x=pca1$scores[r5.new[1],1],y=pca1$scores[r5.new[1],2]), colour="violet",shape = 17,  size=4)+
+      geom_point(data=as.data.frame(pca1$scores[r6[1],1:2]), mapping=aes(x=pca1$scores[r6.new[1],1],y=pca1$scores[r6.new[1],2]), colour="yellow", shape = 17, size=4)+
+      xlab("Component 1") +     ylab("Component 2") + theme(legend.direction = "vertical", legend.box = "horizontal",legend.position = "right")+ggtitle("All models")+  theme(plot.title = element_text(hjust = 0.5))
+    
+    
+
+    
     
     ## 3 models together - Path, Hybrid2, Hybrid3
-    X1=allmodelRes@Paths@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X4=allmodelRes@Hybrid2@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X5=allmodelRes@Hybrid3@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X1=allmodelRes@Paths@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X4=allmodelRes@Hybrid2@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X5=allmodelRes@Hybrid3@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     
     X=rbind(X1,X4,X5)
     Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
@@ -1415,8 +1488,8 @@ plotPCA=function(ratdata,allmodelRes)
     
     ## 2 models together - Path, Hybrid2
     
-    X1=allmodelRes@Paths@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X4=allmodelRes@Hybrid2@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X1=allmodelRes@Paths@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X4=allmodelRes@Hybrid2@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     
     X=rbind(X1,X4)
     Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
@@ -1439,12 +1512,10 @@ plotPCA=function(ratdata,allmodelRes)
     
     
     
-    
-    
     ## 2 models together - Path, Hybrid3 
     
-    X1=allmodelRes@Paths@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X5=allmodelRes@Hybrid3@aca3@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X1=allmodelRes@Paths@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
+    X5=allmodelRes@Hybrid3@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     
     X=rbind(X1,X5)
     Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})

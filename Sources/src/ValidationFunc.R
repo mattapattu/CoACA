@@ -284,6 +284,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
   paramTest = list()
   modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   
+  ratName = ratdata@rat
   
   if(setup.hpc)
   {
@@ -348,9 +349,10 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
     
     while(end_index == -1){
       generated_data = simulateData(trueModelData,ratdata,allModels)
+      generated_data = populateSimRatModel(ratdata,generated_data,modelName)
       #generated_data@simModel = trueModelData@Model
       #generated_data@simMethod = trueModelData@creditAssignment
-      end_index = getEndIndex(generated_data@allpaths, sim=1, limit=0.95)
+      end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
       #cat('i=',i, ', j=',j,' end_index=', end_index, '.\n', sep = '') 
       missedOptimalIter=missedOptimalIter+1
       
@@ -361,8 +363,10 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
       cat(sprintf('model = %s, missedOptimalIter=%i\n', model, missedOptimalIter))
       set.seed(missedOptimalIter)
     }
+    
     rat = ratdata@rat
     save(generated_data, file = paste0(model.data.dir, "/", rat, "_", modelName,"_genData.Rdata")) 
+    
     if(end_index > -1)
     {
       iter=as.integer(floor(length(generated_data@allpaths[,1])/100))-1
@@ -386,7 +390,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
   
   
   rat = ratdata@rat
-  save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_paramTest.Rdata")) 
+  save(paramTest, file = paste0(model.data.dir, "/", rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_paramTest.Rdata")) 
   
   if(setup.hpc)
   {

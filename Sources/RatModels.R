@@ -19,22 +19,22 @@ setup.hpc = FALSE
 
 unitTest1 = FALSE
 
-computeModelLik = T
-loadAllModelRes = F
+computeModelLik = F
+loadAllModelRes = T
 modelSelection = F
 
-plotProb = T
-plotLik = T
+plotProb = F
+plotLik = F
 
 unitTest2 = FALSE
 
 validateHoldout = FALSE
 
-paramEstTest = FALSE
-thetaHatTest = FALSE
-pcaPlot = FALSE
+paramEstTest = F
+thetaHatTest = F
+pcaPlot = T
 
-successPlot = FALSE
+successPlot = F
 ratSpeedPlot = FALSE
 
 ############### TEST EXECUTIONS ######################################
@@ -114,7 +114,7 @@ for (i in c(4:7)) {
     #load(paste0("C:/Rats-Credits/aca2_allmodelRes_",rats[i],".RData"))
   }
   # 
-  #ratDataList[[i]] = ratdata
+  ratDataList[[i]] = ratdata
   
   ############### Likelihood Computation and Model Selection ###########################################
   
@@ -189,21 +189,21 @@ for (i in c(4:7)) {
   
   if(paramEstTest)
   {
-    #debug(testParamEstimation)
+    debug(testParamEstimation)
     testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
     
   }
   
   if(thetaHatTest)
   {
-    res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
-    #debug(plotThetaHat)
+    res.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data/paramTestData")
+    debug(plotThetaHat)
     plotThetaHat(ratdata,res.dir,plot.dir)
   }
   
   if(pcaPlot)
   {
-    #debug(plotPCA)
+    debug(plotPCA)
     plotPCA(ratdata, allmodelRes)
     
   }
@@ -212,7 +212,7 @@ for (i in c(4:7)) {
 
 if(successPlot)
 {
-  #debug(plotSuccessRates)
+  debug(plotSuccessRates)
   plotSuccessRates(ratDataList)
   
 }

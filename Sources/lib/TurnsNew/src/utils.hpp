@@ -70,6 +70,35 @@ Edge softmax_action_sel(Graph graph, std::vector<Edge> edges)
   return (edges[action_selected]);
 }
 
+// [[Rcpp::export]]
+void set_seed(double seed) {
+    Rcpp::Environment base_env("package:base");
+    Rcpp::Function set_seed_r = base_env["set.seed"];
+    set_seed_r(std::floor(std::fabs(seed)));
+}
+
+
+// [[Rcpp::export]]
+ std::vector<double> testSample(Rcpp::IntegerVector actions, arma::vec prob, double d, bool setSeed)
+{
+    if(setSeed)
+    {
+      set_seed(d);
+    }
+    
+    //int action_selected = Rcpp::RcppArmadillo::sample(actions, 1, true, prob)[0];
+    std::vector<double> actVec;
+    for(int i = 0; i < 10; i++)
+    {
+      int action_selected = Rcpp::RcppArmadillo::sample(actions, 1, true, prob)[0];
+      actVec.push_back(action_selected);
+    }
+  //int action_selected = Rcpp::sample(actions, 1, true, probVec_arma)[0];
+  //Rcpp::Rcout <<"action_selected="<<action_selected<<std::endl;
+  
+  return (actVec);
+}
+
 
 Rcpp::IntegerVector cumsum1(Rcpp::IntegerVector x)
 {

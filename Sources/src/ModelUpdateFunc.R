@@ -33,28 +33,28 @@ getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
   
   ratName = ratdata@rat 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
-  #cl <- startMPIcluster(verbose=TRUE, logdir = dir.path)
-  #setRngDoMPI(cl, seed=1234)
+  cl <- startMPIcluster(verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=1234)
     
-  #exportDoMPI(cl, c("src.dir"),envir=environment())
-  #registerDoMPI(cl)
+  exportDoMPI(cl, c("src.dir"),envir=environment())
+  registerDoMPI(cl)
     
-  # initWorkers <-  function() {
-  #     source(paste(src.dir, "ModelClasses.R", sep = "/"))
-  #     source(paste(model.src, "PathModel.R", sep = "/"))
-  #     source(paste(model.src, "TurnModel.R", sep = "/"))
-  #     source(paste(model.src, "HybridModel1.R", sep = "/"))
-  #     source(paste(model.src, "HybridModel2.R", sep = "/"))
-  #     source(paste(model.src, "HybridModel3.R", sep = "/"))
-  #     source(paste(model.src, "HybridModel4.R", sep = "/"))
-  #     source(paste(src.dir, "BaseClasses.R", sep = "/"))
-  #     source(paste(src.dir,"exportFunctions.R", sep="/"))
-  # 
-  #     #attach(myEnv, name="sourced_scripts")
-  #   }
-  # 
-  # 
-  #  opts <- list(initEnvir=initWorkers) 
+   initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"))
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
+   
+   
+    opts <- list(initEnvir=initWorkers) 
   
   for(i in 1:length(modelNames))
   {
@@ -65,7 +65,7 @@ getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
     iter=as.integer(floor(length(ratdata@allpaths[,1])/100))-1
       #print(iter)
      resMat <- 
-       foreach(j=c(1:iter), .combine='rbind', .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"), .inorder=TRUE) %dor%{
+       foreach(j=c(1:iter), .combine='rbind', .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"), .inorder=TRUE) %dopar%{
           rowEnd = j*100
           cat(sprintf('model = %s, rowEnd = %i\n', model,rowEnd))
           modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
@@ -78,11 +78,9 @@ getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
           c(rowEnd,modelData@alpha, modelData@gamma1)
           
         }   
-        paramTest = list.append(paramTest,list(model=trueModelData,resMat=resMat))
+        paramTest = list.append(paramTest,list(resMat=resMat))
     
    }
-  
-  
   
   rat = ratdata@rat
   save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_modelParamRes.Rdata")) 

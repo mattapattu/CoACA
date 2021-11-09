@@ -112,17 +112,17 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
           definition=function(x,ratdata)
           {
             ratName = ratdata@rat
-            endLearningStage = getEndIndex(ratName, ratdata@allpaths,sim=x@sim, limit=0.95)
+            #endLearningStage = getEndIndex(ratName, ratdata@allpaths,sim=x@sim, limit=0.95)
             model = x@Model
             testModel = slot(allModels,model)
-            endLearningStage = endLearningStage/2
+            #endLearningStage = endLearningStage/2
             
             if(x@creditAssignment == "aca3")
             {
               argList = list(lower = c(0,0,0), 
                              upper = c(1,1,1),
                              ratdata = ratdata,
-                             half_index = endLearningStage, 
+                             half_index = 0, 
                              modelData = x,
                              testModel = testModel,
                              sim = x@sim)
@@ -133,7 +133,7 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
               argList = list(lower = c(0,0), 
                              upper = c(1,1),
                              ratdata = ratdata,
-                             half_index = endLearningStage, 
+                             half_index = 0, 
                              modelData = x,
                              testModel = testModel,
                              sim = x@sim)
@@ -144,7 +144,7 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
               argList = list(lower = c(0,0,0), 
                              upper = c(1,1,0),
                              ratdata = ratdata,
-                             half_index = endLearningStage, 
+                             half_index = 0, 
                              modelData = x,
                              testModel = testModel,
                              sim = x@sim)

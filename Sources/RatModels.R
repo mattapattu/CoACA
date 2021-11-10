@@ -2,16 +2,6 @@
 library(doParallel)
 
 
-args <- commandArgs(trailingOnly = TRUE)
-ratIndex=as.numeric(args[1])
-if(!is.null(ratIndex))
-{
- print(sprintf("ratIndex is %i",ratIndex)) 
-}
-else
-{
- stop("ratIndex is missing")
-}
 #options(error=recover)
 
 rats = c("rat_101","rat_103","rat_106","rat_112","rat_113","rat_114","robert")
@@ -91,7 +81,7 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(ratIndex)) {
+for (i in c(1:7)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
    #testData = new("TestModels", Models=c("Paths"), creditAssignment=c("aca2"))
@@ -127,11 +117,18 @@ for (i in c(ratIndex)) {
   # 
   #ratDataList[[i]] = ratdata
   
+  ############ New validation tests ##########################
+
+  if(paramEst)
+  {
+    allmodelRes = updateModelParams(ratdata,model.data.dir,testData, sim=2)
+
+  }  
   ############### Likelihood Computation and Model Selection ###########################################
-  
+   
   if(computeModelParams)
   {
-   computeModelParams(ratdata,testData,src.dir,setup.hpc,model.data.dir)
+   getModelParams(ratdata,testData,src.dir,setup.hpc,model.data.dir)
   } 
   
   if(computeModelLik)

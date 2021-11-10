@@ -62,13 +62,19 @@ getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
     print(sprintf('Model is %s\n', model))
     modelName = strsplit(model,"\\.")[[1]][1]
     creditAssignment = strsplit(model,"\\.")[[1]][2]
-    iter=as.integer(floor(length(ratdata@allpaths[,1])/100))-1
+    iter=floor(length(ratdata@allpaths[,1])/100)
       #print(iter)
      resMat <- 
        foreach(j=c(1:iter), .combine='rbind', .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"), .inorder=TRUE) %dopar%{
-          rowEnd = j*100
+          
+	  if(j==iter)
+          {
+           rowEnd = length(ratdata@allpaths[,1])
+          }else{
+           rowEnd = j*100
+          }
           cat(sprintf('model = %s, rowEnd = %i\n', model,rowEnd))
-          modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
+          modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
           argList<-getArgList(modelData,ratdata)
           np.val = length(argList$lower) * 10
           myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
@@ -303,6 +309,39 @@ getAllModelResults <- function(ratdata, resMatrix, testingdata, sim) {
   
   return(allmodelRes)
 }
+
+updateModelParams <- function(ratdata,res.dir,testingdata, sim){
+  
+  models <- testingdata@Models
+  methods <- testingdata@creditAssignment
+  allmodelRes <- new("AllModelRes")
+  setwd(res.dir)
+  rat=ratdata@rat
+  paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+  load(paramTestData)
+  
+  
+  for (i in 1:length(models))
+  {
+    for (j in 1:length(methods))
+    {
+      modelData <- new("ModelData", Model = models[i], creditAssignment = methods[j], sim = sim)
+      index <- length(methods) * (i - 1) + j
+      resMatrix <- paramTest[[index]]$resMat
+      rowlen <- length(resMatrix[,1])
+      #modelData <- setModelParams(modelData, resMatrix[rowlen, ])
+      modelData@alpha <- resMatrix[rowlen, 2]
+      modelData@gamma1 <- resMatrix[rowlen, 3]
+      #debug(setModelResults)
+      modelData <- setModelResults(modelData, ratdata, allModels)
+      allmodelRes <- addModelData(allmodelRes, modelData)
+    }
+  }
+  
+  return(allmodelRes)
+  
+}
+
 
 
 negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {

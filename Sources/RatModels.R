@@ -119,9 +119,10 @@ for (i in c(1:7)) {
   
   ############ New validation tests ##########################
 
-  if(paramEst)
+  if(paramEstTest)
   {
     allmodelRes = updateModelParams(ratdata,model.data.dir,testData, sim=2)
+    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir)
 
   }  
   ############### Likelihood Computation and Model Selection ###########################################
@@ -198,20 +199,20 @@ for (i in c(1:7)) {
   
   #### Parameter estimation test ##############
   
-  if(paramEstTest)
-  {
-    #debug(testParamEstimation)
-    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir)
-    
-  }
-  
-  if(thetaHatTest)
-  {
-    #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
-    #debug(plotThetaHat)
-    plotThetaHat(ratdata,model.data.dir,plot.dir)
-  }
-  
+  # if(paramEstTest)
+  # {
+  #   #debug(testParamEstimation)
+  #   testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir)
+  #   
+  # }
+  # 
+  # if(thetaHatTest)
+  # {
+  #   #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
+  #   #debug(plotThetaHat)
+  #   plotThetaHat(ratdata,model.data.dir,plot.dir)
+  # }
+  # 
   if(pcaPlot)
   {
     #debug(plotPCA)

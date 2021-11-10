@@ -284,65 +284,99 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
  
    opts <- list(initEnvir=initWorkers) 
   
-  for(i in 1:length(modelNames))
-  {
-    model = modelNames[i] 
-    print(sprintf('Model is %s\n', model))
-    modelName = strsplit(model,"\\.")[[1]][1]
-    creditAssignment = strsplit(model,"\\.")[[1]][2]
-    trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-    end_index = -1
-    missedOptimalIter = 0
-    
-    while(end_index == -1){
-      generated_data = simulateData(trueModelData,ratdata,allModels)
-      generated_data = populateSimRatModel(ratdata,generated_data,modelName)
-      #generated_data@simModel = trueModelData@Model
-      #generated_data@simMethod = trueModelData@creditAssignment
-      end_index = getEndIndex(ratName, generated_data@allpaths, sim=1, limit=0.95)
-      #cat('i=',i, ', j=',j,' end_index=', end_index, '.\n', sep = '') 
-      missedOptimalIter=missedOptimalIter+1
-      
-      if(missedOptimalIter>500)
-      {
-        break
-      }
-      cat(sprintf('model = %s, missedOptimalIter=%i\n', model, missedOptimalIter))
-      set.seed(missedOptimalIter)
-    }
-    if(end_index > -1)
-    {
-      print(sprintf('Data is generated for model=%s, end_index=%i', model, end_index))
-      rat = ratdata@rat
-      save(generated_data, file = paste0(model.data.dir, "/", rat, "_", modelName,"_genData.Rdata"))
-      iter=as.integer(floor(length(generated_data@allpaths[,1])/100))-1
-      #print(iter)
-      resMat <- 
-        foreach(j=c(1:iter), .combine='rbind', .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"), .inorder=TRUE) %dopar%{
-          rowEnd = j*100
-          cat(sprintf('model = %s, rowEnd = %i\n', model,rowEnd))
-          modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
-          argList<-getArgList(modelData,generated_data)
-          np.val = length(argList$lower) * 10
-          myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
-          out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
-          modelData = setModelParams(modelData, unname(out$optim$bestmem))
-          cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
-          c(rowEnd,modelData@alpha, modelData@gamma1)
-          
-        }   
-        paramTest = list.append(paramTest,list(model=trueModelData,resMat=resMat))
-    }
-    else
+  
+   generatedDataList <-  
+     foreach(i=1:length(modelNames), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
+     foreach(generation=1:50) %dopar%
      {
-       print(sprintf('Model =%s not learning', model))
+       model = modelNames[i] 
+       modelName = strsplit(model,"\\.")[[1]][1]
+       creditAssignment = strsplit(model,"\\.")[[1]][2]
+       trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
+       trueModelData = modifyModelData(trueModelData) 
+       end_index = -1
+       missedOptimalIter = 0
+       
+       while(end_index == -1){
+         generated_data = simulateData(trueModelData,ratdata,allModels)
+         end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
+         missedOptimalIter=missedOptimalIter+1
+         
+         if(missedOptimalIter>500)
+         {
+           break
+         }
+         #set.seed()
+       }
+       
+       if(end_index > -1)
+       {
+         generated_data = populateSimRatModel(ratdata,generated_data,modelName)
+         generated_data@simModel = trueModelData@Model
+         generated_data@simMethod = trueModelData@creditAssignment
+         generated_data
+       }
+       
+     } 
+   
+   
+   allData<-unlist(generatedDataList)
+   modelNum =  length(allData)
+   iter=as.integer(floor(length(ratdata@allpaths[,1])/100))
+   
+   resList<-
+     foreach(i=c(1:iter), .combine='rbind', .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"), .inorder=TRUE) %:%
+      foreach(j = c(1:modelNum)) %dopar% {
+       generated_data = allData[[j]]
+       if(j==iter)
+       {
+         rowEnd = length(generated_data@allpaths[,1])
+       }else{
+         rowEnd = i*100
+       }
+       cat(sprintf('model = %s, rowEnd = %i\n', model,rowEnd))
+       modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
+       argList<-getArgList(modelData,generated_data)
+       np.val = length(argList$lower) * 10
+       myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
+       out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
+       modelData = setModelParams(modelData, unname(out$optim$bestmem))
+       cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
+       list(iter = i, genDataIndex = j,data=generated_data,res=modelData)
      }
+   
+   
+
+   print(time2)
+   rat = ratdata@rat
+   save(resList,  file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_ParamEstResList.Rdata"))
+   
+   df <- data.frame(model=character(),
+                    iter=integer(),
+                    genIndex=integer(),
+                    alpha=double(),
+                    gamma=double(),
+                    stringsAsFactors=FALSE)
+   
+   for(k in c(1:length(resList)))
+   {
+     iter = resList[[k]]$iter
+     genIndex = resList[[k]]$genDataIndex
+     generated_data = resList[[k]]$data
+     modelDataRes = resList[[k]]$modelData
+     
+     df[k,1] <- modelDataRes@Model
+     df[k,2] <- iter
+     df[k,3] <- genIndex
+     df[k,4] <- modelDataRes@alpha
+     df[k,5] <- modelDataRes@gamma
   }
-  
-  
-  rat = ratdata@rat
-  save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_paramTest.Rdata")) 
-  
+   
+
+   rat = ratdata@rat
+   save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_ParamEs_df.Rdata"))
+   
+   
   if(setup.hpc)
   {
     closeCluster(cl)

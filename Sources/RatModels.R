@@ -20,7 +20,7 @@ setup.hpc = FALSE
 unitTest1 = FALSE
 
 computeModelLik = F
-loadAllModelRes = T
+loadAllModelRes = F
 modelSelection = F
 
 plotProb = F
@@ -31,8 +31,8 @@ unitTest2 = FALSE
 validateHoldout = FALSE
 
 paramEstTest = F
-thetaHatTest = F
-pcaPlot = T
+thetaHatTest = T
+pcaPlot = F
 
 successPlot = F
 ratSpeedPlot = FALSE
@@ -57,7 +57,7 @@ load(data.path)
 #load(data.path2)
 
 plot.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Plots")
-model.data.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data")
+model.data.dir = file.path("C:/Projects/Rats-Credits/Data")
 #plot.dir = file.path("/home/ajames/Rats-Credit")
 
 model = "Model2"  ## {Model1,Model2,Model3}
@@ -81,7 +81,7 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(4:7)) {
+for (i in c(1:7)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
   
@@ -189,16 +189,16 @@ for (i in c(4:7)) {
   
   if(paramEstTest)
   {
-    debug(testParamEstimation)
-    testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
+    #debug(testParamEstimation)
+    #testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
     
   }
   
   if(thetaHatTest)
   {
-    res.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data/paramTestData")
-    debug(plotThetaHat)
-    plotThetaHat(ratdata,res.dir,plot.dir)
+    #res.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data")
+    #debug(plotThetaHat)
+    plotThetaHat(ratdata,model.data.dir,plot.dir)
   }
   
   if(pcaPlot)

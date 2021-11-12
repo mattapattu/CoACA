@@ -1103,25 +1103,31 @@ plotSuccessRates=function(ratDataList)
 plotThetaHat=function(ratdata,res.dir,plot.dir)
 {
   rat=ratdata@rat
+  end_index80 = getEndIndex2(rat, ratdata@allpaths, sim=2, limit=0.85)
+  end_index95 = getEndIndex2(rat, ratdata@allpaths, sim=2, limit=0.95)
+  
   #rat.dir = file.path(paste(res.dir,rat,sep="/"))
   setwd(res.dir)
   #rat_allmodelRes = paste0(rat,"_allmodelRes.Rdata")
   #load(rat_allmodelRes)
-  paramTestData=list.files(".", pattern=paste0(rat,".*.paramTest.Rdata"), full.names=FALSE)
+  paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
   load(paramTestData)
   setwd(plot.dir)
-  #pdf(file=paste("ParameterTest_",rat,".pdf",sep=""),width=11, height=7)
+  pdf(file=paste("Params_",rat,".pdf",sep=""),width=11, height=7)
+  models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
   par(mfrow=c(3,2))
   for(i in c(1:length(paramTest)))
   {
-    alpha = paramTest[[i]]$model@alpha
-    gamma1 = paramTest[[i]]$model@gamma1
+    trials = paramTest[[i]]$resMat[,1]
+    alpha = paramTest[[i]]$resMat[,2]
+    gamma1 = paramTest[[i]]$resMat[,3]
     #gamma2 = paramTest[[i]]$model@gamma2
-    model = paramTest[[i]]$model@Model
-    plot(unname(paramTest[[i]]$resMat[,2]),type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials (hundreds)", main=model,lty=2,lwd=1)
-    abline(h=paramTest[[i]]$model@alpha,col='black',lty=1,lwd=2)
-    lines(unname(paramTest[[i]]$resMat[,3]),type='l',col='red',lty=2,lwd=1)
-    abline(h=paramTest[[i]]$model@gamma1,col='red',lty=1,lwd=2)
+    model = models[i]
+    plot(trials, alpha,type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials", main=model,lty=1,lwd=1)
+    lines(trials, gamma1,type='l',col='red',lty=1,lwd=1)
+    
+    abline(v=end_index80,col='blue',lty=1,lwd=2)
+    abline(v=end_index95,col='green',lty=1,lwd=2)
     #lines(unname(paramTest[[i]]$resMat[,4]),type='l',col='green',lty=1,lwd=1)
     #abline(h=paramTest[[i]]$model@gamma2,col='3',lty=1,lwd=2)
     
@@ -1129,8 +1135,8 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
   #plot.new()
   #par(xpd=TRUE)
   
-  legend=c(expression(hat(alpha)), expression(alpha),expression(hat(gamma[1])), expression(gamma[1]),expression(hat(gamma[2])), expression(gamma[2])) 
-  legend("center", legend=legend, cex=1.5, col=c("black","black","green","green","red","red"), lwd = c(1,2,1,2,1,2),lty=c(1,2,1,2,1,2),horiz=FALSE,y.intersp=1.2)
+  #legend=c(expression(alpha),expression(gamma[1])) 
+  #legend("center", legend=legend, cex=1.5, col=c("black","red"), lwd = c(1,1),lty=c(1,1),horiz=FALSE,y.intersp=1.2)
   title(paste0("Parameter estimation, ",rat), line = -1, outer = TRUE)
   #par(xpd=FALSE)
   dev.off()
@@ -1593,7 +1599,28 @@ getStartIndex = function(generated_data){
   return(start_index)
 }
 
-getEndIndex = function(ratName, generated_data, sim, limit){
+getEndIndex = function(allpaths, sim, limit){
+  
+  end_index = -1
+  sessions <- allpaths[,5]
+  uniqueSessIds <- unique(sessions)
+  
+  for(sess in uniqueSessIds)
+  {
+    sessIdx <- which(allpaths[,5]==sess)
+    rewards_sess <- allpaths[sessIdx,3]
+    successRate <- sum(rewards_sess)/length(sessIdx)
+    if(successRate >= limit)
+    {
+      end_index = sessIdx[length(sessIdx)]
+      break
+    }
+  }
+  
+  return(end_index)
+}
+
+getEndIndex2 = function(ratName, generated_data, sim, limit){
   
   if(sim==1){
     generated_data[,1:2] = generated_data[,1:2] + 1
@@ -1647,6 +1674,7 @@ getEndIndex = function(ratName, generated_data, sim, limit){
   
   return(end_index)
 }
+
 
 
 simulateTurnTime=function(turnTimes, allpaths,turnId, turnNb)

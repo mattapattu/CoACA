@@ -56,6 +56,31 @@ getEndIndex = function(ratName, generated_data, sim, limit){
 }
 
 
+checkSimLearns=function(allpaths,sim,limit)
+{
+  #end_index = -1
+  simLearns = FALSE
+  sessions <- allpaths[,5]
+  uniqueSessIds <- unique(sessions)
+  
+  for(sess in uniqueSessIds)
+  {
+    sessIdx <- which(allpaths[,5]==sess)
+    rewards_sess <- allpaths[sessIdx,3]
+    successRate <- sum(rewards_sess)/length(sessIdx)
+    if(successRate >= limit)
+    {
+      end_index = sessIdx[length(sessIdx)]
+      simLearns = TRUE
+      break
+    }
+  }
+  
+  return(simLearns)
+}
+
+
+
 convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
 {
   allpaths = ratdata@allpaths
@@ -184,11 +209,19 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   modelData@alpha <- alpha
   modelData@gamma1 <- gamma1
   #modelData@gamma2 <- gamma2
+  
+  simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
+  if(simLearns)
+  {
+   lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
+   lik <- lik[1:half_index]
+   negLogLik <- (-1) * sum(lik)
+  }
+  else
+  {
+   negLogLik = 1000000
+  }
 
-  lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
-  lik <- lik[1:half_index]
-
-  negLogLik <- (-1) * sum(lik)
   # print(sprintf("negLogLik = %f",negLogLik))
   if (is.infinite(negLogLik)) {
     return(1000000)
@@ -212,6 +245,36 @@ populateSimRatModel=function(ratdata,generated_data,testModelName)
   
   return(generated_data)
   
+}
+
+
+modifyParam=function(param)
+{
+  lower = param - (param/20)
+  upper = param + (param/20)
+
+  if(lower <=0 )
+  {
+    lower = param
+  }
+
+  if(upper > 1)
+  {
+    upper = 1
+  }
+
+  newparam = runif(1, lower, upper)
+  return(newparam)
+}
+
+modifyModelData=function(modelData)
+{
+
+  modelData@alpha = modifyParam(modelData@alpha)
+  modelData@gamma1 = modifyParam(modelData@gamma1)
+  #modelData@gamma2 = modifyParam(modelData@gamma2)
+
+  return(modelData)
 }
 
 

@@ -23,7 +23,7 @@ library(rlist)
 
 
 
-getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
+getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
   models = testData@Models
   creditAssignment = testData@creditAssignment
@@ -33,10 +33,10 @@ getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
   
   ratName = ratdata@rat 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
-  cl <- startMPIcluster(verbose=TRUE, logdir = dir.path)
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=1234)
     
-  exportDoMPI(cl, c("src.dir"),envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
   registerDoMPI(cl)
     
    initWorkers <-  function() {
@@ -84,7 +84,8 @@ getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
           c(rowEnd,modelData@alpha, modelData@gamma1)
           
         }   
-        paramTest = list.append(paramTest,list(resMat=resMat))
+        modelRes <- setNames(list(resMat),model)
+        paramTest = list.append(paramTest,modelRes)
     
    }
   
@@ -100,7 +101,7 @@ getModelParams=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
 
 
 
-getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc)
+getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc,count)
 {
   ratName = ratdata@rat
   end_index <- getEndIndex(ratName, ratdata@allpaths, sim, limit = 0.95)
@@ -117,8 +118,8 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   
   if(setup.hpc)
   {
-    cl <- startMPIcluster()
-    exportDoMPI(cl, "src.dir") 
+    cl <- startMPIcluster(count=count)
+    exportDoMPI(cl, c("src.dir","model.src")) 
     #exportDoMPI(cl, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
     registerDoMPI(cl)
     
@@ -310,14 +311,16 @@ getAllModelResults <- function(ratdata, resMatrix, testingdata, sim) {
   return(allmodelRes)
 }
 
-updateModelParams <- function(ratdata,res.dir,testingdata, sim){
+readModelParams <- function(ratdata,res.dir,testingdata, sim){
   
+  print(sprintf("Inside readModelParams"))
   models <- testingdata@Models
   methods <- testingdata@creditAssignment
   allmodelRes <- new("AllModelRes")
   setwd(res.dir)
   rat=ratdata@rat
   paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+  #print(paramTestData)
   load(paramTestData)
   
   
@@ -327,7 +330,7 @@ updateModelParams <- function(ratdata,res.dir,testingdata, sim){
     {
       modelData <- new("ModelData", Model = models[i], creditAssignment = methods[j], sim = sim)
       index <- length(methods) * (i - 1) + j
-      resMatrix <- paramTest[[index]]$resMat
+      resMatrix <- paramTest[[index]][[1]]
       rowlen <- length(resMatrix[,1])
       #modelData <- setModelParams(modelData, resMatrix[rowlen, ])
       modelData@alpha <- resMatrix[rowlen, 2]
@@ -359,10 +362,19 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   modelData@gamma1 <- gamma1
   #modelData@gamma2 <- gamma2
 
-  lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
-  lik <- lik[1:half_index]
-  
-  negLogLik <- (-1) * sum(lik)
+  simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
+  if(simLearns)
+  {
+   lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
+   lik <- lik[1:half_index]
+   negLogLik <- (-1) * sum(lik)
+  }
+  else
+  {
+   negLogLik = 1000000
+  }
+
+
   # print(sprintf("negLogLik = %f",negLogLik))
   if (is.infinite(negLogLik)) {
     return(1000000)

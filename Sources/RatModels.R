@@ -2,6 +2,13 @@
 library(doParallel)
 
 
+#options(echo=TRUE) # if you want see commands in output file
+args <- commandArgs(trailingOnly = TRUE)
+print(args)
+
+select_rat <- as.integer(args[1])
+seed <- as.numeric(args[2])
+count <- as.integer(args[3])
 #options(error=recover)
 
 rats = c("rat_101","rat_103","rat_106","rat_112","rat_113","rat_114","robert")
@@ -19,7 +26,8 @@ setup.hpc = TRUE
 
 unitTest1 = FALSE
 
-computeModelParams = T
+computeModelParams = F
+
 computeModelLik = F
 loadAllModelRes = F
 modelSelection = F
@@ -31,7 +39,7 @@ unitTest2 = FALSE
 
 validateHoldout = F
 
-paramEstTest = F 
+paramEstTest = T 
 thetaHatTest = F 
 pcaPlot = FALSE
 
@@ -81,7 +89,7 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(1:7)) {
+for (i in c(select_rat)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
    #testData = new("TestModels", Models=c("Paths"), creditAssignment=c("aca2"))
@@ -116,26 +124,39 @@ for (i in c(1:7)) {
   }
   # 
   #ratDataList[[i]] = ratdata
-  
+ 
+######### Estimate model params at interval of 200 trials ################# 
+
+  if(computeModelParams)
+  {
+   getModelParams(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+  }
+
+ 
   ############ New validation tests ##########################
+
+   if(thetaHatTest)
+   {
+     #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
+     #debug(plotThetaHat)
+     plotThetaHat(ratdata,model.data.dir,plot.dir)
+   }
+
 
   if(paramEstTest)
   {
-    allmodelRes = updateModelParams(ratdata,model.data.dir,testData, sim=2)
-    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir)
+    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
 
   }  
   ############### Likelihood Computation and Model Selection ###########################################
    
-  if(computeModelParams)
-  {
-   getModelParams(ratdata,testData,src.dir,setup.hpc,model.data.dir)
-  } 
   
   if(computeModelLik)
   {
     #debug(getModelResults)
-    allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
+    allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc,count)
     save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   }
   
@@ -192,7 +213,7 @@ for (i in c(1:7)) {
   if(validateHoldout)
   {
     #debug(HoldoutTest)
-    HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir)
+    HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,count)
   }
   
   

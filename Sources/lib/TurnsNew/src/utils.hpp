@@ -28,6 +28,7 @@ int aca_getNextState(int curr_state, int action, int last_turn)
   }
   else if (action == 6)
   {
+    
     if (last_turn == 4 || last_turn == 7 || last_turn == 12 || last_turn == 15)
     {
       new_state = 1;
@@ -49,6 +50,16 @@ int aca_getNextState(int curr_state, int action, int last_turn)
   //Rcpp::Rcout << "new_state=" << new_state << std::endl;
   
   return (new_state);
+}
+
+double getAlphaPrime(double alpha, int episodeNb)
+{
+ double power = 1;
+ double denominator = std::pow(episodeNb, power);
+ double alphaPrime = alpha/denominator;
+
+ return(alphaPrime);
+
 }
 
 Edge softmax_action_sel(Graph graph, std::vector<Edge> edges)

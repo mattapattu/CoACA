@@ -233,7 +233,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
   
   ratName = ratdata@rat 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
-  cl <- startMPIcluster(count=count,verbose=FALSE, logdir = dir.path)
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
   exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
@@ -258,7 +258,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
   
    generatedDataList <-  
      foreach(i=1:length(modelNames), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
-     foreach(generation=1:25) %dopar%
+     foreach(generation=1:20) %dopar%
      {
        model = modelNames[i] 
        modelName = strsplit(model,"\\.")[[1]][1]
@@ -276,10 +276,10 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
          
          if(missedOptimalIter>500)
          {
-            cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %f', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
+            cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
 	    break
          }
-         #set.seed()
+         cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
        }
        
        if(simLearns)
@@ -287,6 +287,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
          generated_data = populateSimRatModel(ratdata,generated_data,modelName)
          generated_data@simModel = trueModelData@Model
          generated_data@simMethod = trueModelData@creditAssignment
+         generated_data@simModelData = trueModelData
          generated_data
        }
        
@@ -314,9 +315,28 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
        np.val = length(argList$lower) * 10
        myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
        out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
-       modelData = setModelParams(modelData, unname(out$optim$bestmem))
-       cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
-       list(iter = rowEnd, genDataIndex = j,data=generated_data,res=modelData)
+       modelData <- setModelParams(modelData, unname(out$optim$bestmem))
+       #modelData <- setModelResults(modelData, ratdata, allModels)
+       probMat <- TurnsNew::getProbMatrix(argList[[3]], modelData, argList[[6]], sim=1)
+       trueModelData <- generated_data@simModelData
+       trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
+       row1 <- (trueProbMat[rowEnd,] - probMat[rowEnd,])
+       if(trueProbMat[rowEnd,1] == -1)
+       {
+         index <- max(which(probMat[1:rowEnd,1] != -1))
+       }else{
+         index <- max(which(probMat[1:rowEnd,7] != -1))
+       }
+       print(sprintf("index=%i",index))
+       row2 <- (trueProbMat[index,] - probMat[index,])
+       probRow <- row1 + row2  
+      # cat(sprintf("Params= (%s)\n", toString(unname(out$optim$bestmem))))
+      # cat(sprintf("BestLik= %s, testModel=%s,\n", out$optim$bestval,argList[[6]]@Name))
+      # lik <- TurnsNew::getTurnsLikelihood(argList[[3]], modelData, argList[[6]], sim=1)
+      #likSum <- (-1) *sum(lik[1:rowEnd])
+      #cat(sprintf("likSum=%f\n", likSum)) 
+      cat(sprintf('Success: rowEnd = %i, alpha = %f, gamma = %f\n',rowEnd, modelData@alpha, modelData@gamma1))
+       list(iter = rowEnd, genDataIndex = j,data=generated_data,res=modelData,probRow=probRow)
      }
    
    
@@ -343,7 +363,11 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
      df[k,3] <- genIndex
      df[k,4] <- modelDataRes@alpha
      df[k,5] <- modelDataRes@gamma1
+
+
   }
+
+  
    
 
    rat = ratdata@rat

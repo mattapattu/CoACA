@@ -40,7 +40,7 @@ unitTest2 = FALSE
 validateHoldout = F
 
 paramEstTest = T 
-thetaHatTest = F 
+thetaHatTest = T 
 pcaPlot = FALSE
 
 successPlot = FALSE
@@ -145,9 +145,10 @@ for (i in c(select_rat)) {
 
   if(paramEstTest)
   {
-    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
     plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
+    plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
 
   }  
   ############### Likelihood Computation and Model Selection ###########################################

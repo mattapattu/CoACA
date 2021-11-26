@@ -2,21 +2,6 @@
 #Paths = new("Model", Name = "PathsDummy")
 allModels = new("AllModels",Paths = PathModel, Turns = TurnModel,Hybrid1 = Hybrid1,Hybrid2 = Hybrid2, Hybrid3 = Hybrid3,Hybrid4 = Hybrid4)
 
-setClass("RatData", 
-         slots = list(
-           rat = "character",
-           allpaths="matrix",
-           turnTimes = "matrix",
-           hybridModel1 = "matrix",
-           hybridModel2 = "matrix",
-           hybridModel3 = "matrix",
-           hybridModel4 = "matrix",
-           simModel = "character",
-           simMethod = "character")
-
-)
-
-
 setClass("TestModels", 
          slots = list(
            Models="character",
@@ -71,6 +56,22 @@ setClass("AllModelRes",
            Hybrid4 = "ModelDataList",
            type = "character"),
          contains = "ModelData"
+)
+
+setClass("RatData",
+         slots = list(
+           rat = "character",
+           allpaths="matrix",
+           turnTimes = "matrix",
+           hybridModel1 = "matrix",
+           hybridModel2 = "matrix",
+           hybridModel3 = "matrix",
+           hybridModel4 = "matrix",
+           simModel = "character",
+           simMethod = "character",
+           simModelData = "ModelData"
+          )
+
 )
 
 

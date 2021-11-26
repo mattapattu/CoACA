@@ -3,13 +3,13 @@ library(RColorBrewer)
 library(TTR)
 library(pracma)
 #library(ggnewscale)
-#library(ggplot2)
+library(ggplot2)
 #library(scales)
 #library(gridExtra)
 #library(grid)
 #library(gridExtra)
 #library(gtable)
-#library(reshape)
+library(reshape)
 
 
 getPathNumber=function(path){
@@ -1360,6 +1360,111 @@ getSimLearningEndIndices=function(rat, dfData, res.dir)
   
 }
 
+plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_df.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1:length(dfData)))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  #combinedResList <- bind_rows(listDfData)
+  #load(paramTestData)
+  #setwd(plot.dir)
+  #pdf(file=paste(plot.dir,"/","SimParamEstimation_",rat,".pdf",sep=""),width=11, height=7)
+  
+  
+  
+  #models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+  #par(mfrow=c(3,2))
+  
+  #iterations=as.integer(floor(length(ratdata@allpaths[,1])/100))
+  
+  PathProbMat <- matrix(0,,14)
+  Hybrid1ProbMat <- matrix(0,,14)
+  Hybrid2ProbMat <- matrix(0,,14)
+  Hybrid3ProbMat <- matrix(0,,14)
+  Hybrid4ProbMat <- matrix(0,,14)
+  TurnsProbMat <- matrix(0,,14)
+  colnames(PathProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(Hybrid1ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(Hybrid2ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(Hybrid3ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(Hybrid4ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(TurnsProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  
+  for(k in c(1:length(combinedResList)))
+  {
+    iter = combinedResList[[k]]$iter
+    modelDataRes = combinedResList[[k]]$res
+    model = modelDataRes@Model
+    probRow = combinedResList[[k]]$probRow
+    probRow = probRow[1:12]
+    probRow[13] = iter
+    probRow[14] = model
+    print(sprintf("model=%s, iter=%i",model,iter))
+    if(model == "Paths")
+    {
+      PathProbMat = rbind(PathProbMat,probRow)
+    }
+    else if(model == "Hybrid1")
+    {
+      Hybrid1ProbMat = rbind(Hybrid1ProbMat,probRow)
+    }
+    else if(model == "Hybrid2")
+    {
+      Hybrid2ProbMat = rbind(Hybrid2ProbMat,probRow)
+    }
+    else if(model == "Hybrid3")
+    {
+      Hybrid3ProbMat = rbind(Hybrid3ProbMat,probRow)
+    }
+    else if(model == "Hybrid4")
+    {
+      Hybrid4ProbMat = rbind(Hybrid4ProbMat,probRow)
+    }
+    else if(model == "Turns")
+    {
+      TurnsProbMat = rbind(TurnsProbMat,probRow)
+    }
+    
+  }
+  
+  PathProbMat.df <- as.data.frame(PathProbMat)
+  Hybrid1ProbMat.df <- as.data.frame(Hybrid1ProbMat)
+  Hybrid2ProbMat.df <- as.data.frame(Hybrid2ProbMat)
+  Hybrid3ProbMat.df <- as.data.frame(Hybrid3ProbMat)
+  Hybrid4ProbMat.df <- as.data.frame(Hybrid4ProbMat)
+  TurnsProbMat.df <- as.data.frame(TurnsProbMat) 
+  
+  PathProbMat.df[,1:13] <- lapply(PathProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  Hybrid1ProbMat.df[,1:13] <- lapply(Hybrid1ProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  Hybrid2ProbMat.df[,1:13] <- lapply(Hybrid2ProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  Hybrid3ProbMat.df[,1:13] <- lapply(Hybrid3ProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  Hybrid4ProbMat.df[,1:13] <- lapply(Hybrid4ProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  TurnsProbMat.df[,1:13] <- lapply(TurnsProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  
+  X<-do.call("rbind", list(PathProbMat.df[-1,],Hybrid1ProbMat.df[-1,],Hybrid2ProbMat.df[-1,],Hybrid3ProbMat.df[-1,],Hybrid4ProbMat.df[-1,],TurnsProbMat.df[-1,]))
+  
+  X.melt<- melt(X,id.vars = c("iter","model"))
+  
+  #p <- ggplot(data = PathProbMat.df)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_wrap(~as.factor(variable), nrow=5)
+  p <- ggplot(data = X.melt)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_grid(model~as.factor(variable))+theme(
+    strip.background = element_blank(),
+    strip.text.x = element_blank(),
+    axis.text.x = element_blank()
+  )+labs(y = "Probability Difference", x = "Paths") 
+  
+  pdf(paste(plot.dir,"/","BoxPlotSim_",rat,".pdf",sep=""),width=11, height=7)
+  print(p)
+  dev.off()
+  
+  
+}
 
 
 boxDistances = function(path,state)

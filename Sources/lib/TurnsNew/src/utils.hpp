@@ -54,7 +54,7 @@ int aca_getNextState(int curr_state, int action, int last_turn)
 
 double getAlphaPrime(double alpha, int episodeNb)
 {
- double power = 1;
+ double power = 0;
  double denominator = std::pow(episodeNb, power);
  double alphaPrime = alpha/denominator;
 

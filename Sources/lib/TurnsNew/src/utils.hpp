@@ -51,6 +51,17 @@ int aca_getNextState(int curr_state, int action, int last_turn)
   return (new_state);
 }
 
+double getAlphaPrime(double alpha, int episodeNb)
+{
+  double power = 0.2;
+  double denominator = std::pow(episodeNb, power);
+  double alphaPrime = alpha/denominator;
+  
+  return(alphaPrime);
+  
+}
+
+
 Edge softmax_action_sel(Graph graph, std::vector<Edge> edges)
 {
   

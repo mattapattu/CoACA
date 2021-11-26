@@ -47,7 +47,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double gamma = Rcpp::as<double>(modelData.slot("gamma1"));  
-
+  int episodeNb = 0;
   //Rcpp::Rcout << "alpha=" << alpha << ", gamma1=" << gamma << std::endl;
 
   Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(turnModel.slot("nodeGroups"));
@@ -307,8 +307,10 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         //   std::cout << episodeTurns[i] << "," <<episodeTurnStates[i] << "," <<episodeTurnTimes[i] << "; ";
         // }
         
+        episodeNb = episodeNb+1;
+        double alpha_prime = getAlphaPrime(alpha,episodeNb);
         
-        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
+        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         //Rcpp::Rcout << "Here7" << std::endl;
         S0.updateEdgeProbs();
         S1.updateEdgeProbs();
@@ -381,7 +383,7 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
-  
+  int episodeNb = 0;
   
   //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
   
@@ -575,13 +577,9 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
         changeState = false;
         returnToInitState = false;
         
-        avg_score = avg_score + (score_episode - avg_score) / episode;
-        //Rcpp::Rcout <<  "score_episode=" << score_episode<<std::endl;
-        // for (unsigned int index = 0; index < episodeTurns.size(); ++index)
-        // {
-        //   Rcpp::Rcout << "index=" <<index << ", episodeTurns[index]= " <<episodeTurns[index]->node <<std::endl;
-        // }
-        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
+        episodeNb = episodeNb+1;
+        double alpha_prime = getAlphaPrime(alpha,episodeNb);
+        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         //Rcpp::Rcout << "Update S0 probabilities"<<std::endl;
         S0.updateEdgeProbs();
         //Rcpp::Rcout << "Update S1 probabilities"<<std::endl;
@@ -919,6 +917,7 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
+  int episodeNb = 0;
   //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
   
   arma::mat mseMatrix;
@@ -1182,9 +1181,10 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
         changeState = false;
         returnToInitState = false;
         
-        avg_score = avg_score + (score_episode - avg_score) / episode;
+        episodeNb = episodeNb+1;
+        double alpha_prime = getAlphaPrime(alpha,episodeNb);
         
-        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
+        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         S0.updateEdgeProbs();
         S1.updateEdgeProbs();
         score_episode = 0;

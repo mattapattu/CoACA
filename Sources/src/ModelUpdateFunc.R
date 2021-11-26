@@ -239,41 +239,33 @@ getAllModelResults <- function(ratdata, resMatrix, testingdata, sim) {
 
 
 negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
+  
   alpha <- par[1]
   Model <- modelData@Model
   creditAssignment <- modelData@creditAssignment
   
   gamma1 <- par[2]
-  gamma2 <- par[3]
+  #gamma2 <- par[3]
   # reward = par[4]
   # reward = 1+reward*9
   reward <- 1
   #
   modelData@alpha <- alpha
   modelData@gamma1 <- gamma1
-  modelData@gamma2 <- gamma2
-  probMatrix <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
-  path4Probs <- probMatrix[which(probMatrix[, 4] > 0), 4]
-  path4AboveLim <- which(path4Probs >= 0.95)
-  result <- rle(diff(path4AboveLim))
-  path4Converged <- any(result$lengths >= 30 & result$values == 1)
+  #modelData@gamma2 <- gamma2
   
-  path10Probs <- probMatrix[which(probMatrix[, 10] > 0), 10]
-  path10AboveLim <- which(path10Probs >= 0.95)
-  result <- rle(diff(path10AboveLim))
-  path10Converged <- any(result$lengths >= 30 & result$values == 1)
-  
-  if (path4Converged && path10Converged) {
-    # ratdata@allpaths = ratdata@allpaths[1:half_index,]
+  simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
+  if(simLearns)
+  {
     lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
     lik <- lik[1:half_index]
+    negLogLik <- (-1) * sum(lik)
   }
-  else {
-    lik <- -1000000
+  else
+  {
+    negLogLik = 1000000
   }
-  #}
   
-  negLogLik <- (-1) * sum(lik)
   # print(sprintf("negLogLik = %f",negLogLik))
   if (is.infinite(negLogLik)) {
     return(1000000)

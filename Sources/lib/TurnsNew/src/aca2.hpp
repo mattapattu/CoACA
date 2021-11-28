@@ -297,7 +297,7 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         returnToInitState = true;
       }
       
-      if (returnToInitState)
+      if (returnToInitState || (i==nrow-1))
       {
         //Rcpp::Rcout << "Inside end episode" << std::endl;
         changeState = false;
@@ -313,8 +313,8 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         
        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         //Rcpp::Rcout << "Here7" << std::endl;
-        S0.updateEdgeProbs();
-        S1.updateEdgeProbs();
+        S0.updateEdgeProbs(false);
+        S1.updateEdgeProbs(false);
         //Rcpp::Rcout <<  "H="<<H<<std::endl;
         score_episode = 0;
         episode = episode + 1;
@@ -333,18 +333,12 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
     //Rcpp::Rcout << "Here3" << std::endl;
     S0.decayCredits(gamma);
     S1.decayCredits(gamma);
+    S0.updateEdgeProbs(false);
+    S1.updateEdgeProbs(false);
+
     
-    // if (turnIdx < (nrow * 2) - 1)
-    // {
-    //   generated_TurnsData_sess.shed_rows((turnIdx), ((nrow * 2) - 1));
-    // }
-    //Rcpp::Rcout << "Here4" << std::endl;
     generated_TurnData = arma::join_cols(generated_TurnData, generated_TurnsData_sess.rows(0, (turnIdx - 1)));
-    //Rcpp::Rcout <<  "H after session=" << H<<std::endl;
-    //Rcpp::Rcout << "Here5" << std::endl;
     generated_PathData = arma::join_cols(generated_PathData, generated_PathData_sess);
-    //Rcpp::Rcout << "Here6" << std::endl;
-    //Rcpp::Rcout <<  "likelihoodVec=" << likelihoodVec<<std::endl;
   }
   return (Rcpp::List::create(Named("PathData") = generated_PathData, _["TurnData"] = generated_TurnData));
 }
@@ -572,7 +566,7 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
       //log_lik=log_lik+ logProb;
       
       //Check if episode ended
-      if (returnToInitState)
+      if (returnToInitState || (i==nrow-1))
       {
         //Rcpp::Rcout <<  "Inside end episode"<<std::endl;
         changeState = false;
@@ -592,9 +586,9 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         //Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
         //Rcpp::Rcout << "Update S0 probabilities"<<std::endl;
-        S0.updateEdgeProbs();
+        S0.updateEdgeProbs(false);
         //Rcpp::Rcout << "Update S1 probabilities"<<std::endl;
-        S1.updateEdgeProbs();
+        S1.updateEdgeProbs(false);
         //Rcpp::Rcout <<  "H="<<H<<std::endl;
         //Rcpp::Rcout << "S0 credits: ";
         //S0.printCredits(true);
@@ -615,6 +609,9 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
     }
     S0.decayCredits(gamma);
     S1.decayCredits(gamma);
+    S0.updateEdgeProbs(false);
+    S1.updateEdgeProbs(false);
+
   }
   //Rcpp::Rcout << "S0 credits: " << std::endl;
   S0.printCredits(debug);
@@ -843,7 +840,7 @@ Rcpp::List debugAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
       //log_lik=log_lik+ logProb;
       
       //Check if episode ended
-      if (returnToInitState)
+      if (returnToInitState || (i==nrow-1))
       {
         //Rcpp::Rcout <<  "Inside end episode"<<std::endl;
         changeState = false;
@@ -854,9 +851,9 @@ Rcpp::List debugAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
         Rcpp::Rcout << "episodeNb=" <<episode << ", episodeDuration=" <<episodeDuration  << std::endl;
         Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
         //Rcpp::Rcout << "Update S0 probabilities"<<std::endl;
-        S0.updateEdgeProbs();
+        S0.updateEdgeProbs(false);
         //Rcpp::Rcout << "Update S1 probabilities"<<std::endl;
-        S1.updateEdgeProbs();
+        S1.updateEdgeProbs(false);
         //Rcpp::Rcout <<  "H="<<H<<std::endl;
         //Rcpp::Rcout << "S0 credits: ";
         //S0.printCredits(true);
@@ -1182,7 +1179,7 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
       //log_lik=log_lik+ logProb;
       
       //Check if episode ended
-      if (returnToInitState)
+      if (returnToInitState || (i==nrow-1))
       {
         //Rcpp::Rcout <<  "Inside end episode"<<std::endl;
         msg.str("");
@@ -1196,8 +1193,8 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
 
        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         //Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
-        S0.updateEdgeProbs();
-        S1.updateEdgeProbs();
+        S0.updateEdgeProbs(false);
+        S1.updateEdgeProbs(false);
         score_episode = 0;
         episode = episode + 1;
         resetVector = true;

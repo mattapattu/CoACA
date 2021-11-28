@@ -542,14 +542,18 @@ convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
       hybridModelMat[actIdx,1] = row[6]
       hybridModelMat[actIdx,2] = row[1]
       hybridModelMat[actIdx,3] = row[2]
-      actId = which(slot(hybridModel, nodeList) == actions[j]) - 1
+      actId = which(slot(hybridModel, nodeList)==actions[j]) - 1
       hybridModelMat[actIdx,4] = actId
       hybridModelMat[actIdx,5] = row[5]
       
       turnVector = slot(slot(turnsModel,currState),currPath)
       hybridVector = slot(slot(hybridModel,currState),currPath)
       
-      if(!actions[j] %in% turnVector)
+      turnVector = gsub("\\w+\\.","",turnVector)
+      hybridVector = gsub("\\w+\\.","",hybridVector)
+      
+      curr_action = gsub("\\w+\\.","",actions[j])
+      if(!curr_action %in% turnVector)
       {
         common = intersect(hybridVector,turnVector)
         res = turnVector[!turnVector %in% common]
@@ -559,7 +563,7 @@ convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
       }
       else
       {
-        res_idx = which(turnVector %in% actions[j])
+        res_idx = which(turnVector %in% curr_action)
         turn_idx = which(turnsactNbvec == row[6])
         diff_times = turntimevec[turn_idx[res_idx]]
       }
@@ -567,6 +571,7 @@ convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
       hybridModelMat[actIdx,6] = sum(diff_times)
       actIdx = actIdx+1
     }
+
   }
   hybridModelMat = hybridModelMat[-(actIdx:totActions),]
   if(sim == 1)

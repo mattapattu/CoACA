@@ -25,6 +25,7 @@ setup.hpc = TRUE
 ############### Select tests to run
 
 unitTest1 = FALSE
+unitTest3 = F 
 
 computeModelParams = F
 
@@ -40,7 +41,7 @@ unitTest2 = FALSE
 validateHoldout = F
 
 paramEstTest = T 
-thetaHatTest = T 
+thetaHatTest = F 
 pcaPlot = FALSE
 
 successPlot = FALSE
@@ -124,7 +125,12 @@ for (i in c(select_rat)) {
   }
   # 
   #ratDataList[[i]] = ratdata
- 
+  if(unitTest3)
+  {
+    source(paste(src.dir,"unitTestaca3.R", sep="/"))
+    #debug(unitTestRes)
+    unitTestRes(ratdata,model.src)
+  } 
 ######### Estimate model params at interval of 200 trials ################# 
 
   if(computeModelParams)
@@ -147,7 +153,7 @@ for (i in c(select_rat)) {
   {
     #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
     #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
-    plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
+    #plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
     plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
 
   }  

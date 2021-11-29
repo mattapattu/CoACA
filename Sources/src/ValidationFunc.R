@@ -264,7 +264,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
        modelName = strsplit(model,"\\.")[[1]][1]
        creditAssignment = strsplit(model,"\\.")[[1]][2]
        trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-       trueModelData = modifyModelData(trueModelData) 
+       #trueModelData = modifyModelData(trueModelData) 
        simLearns = FALSE 
        missedOptimalIter = 0
        
@@ -320,7 +320,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
        probMat <- TurnsNew::getProbMatrix(argList[[3]], modelData, argList[[6]], sim=1)
        trueModelData <- generated_data@simModelData
        trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
-       row1 <- (trueProbMat[rowEnd,] - probMat[rowEnd,])
+       row1 <- (trueProbMat[rowEnd,] - probMat[rowEnd,])/trueProbMat[rowEnd,]
        if(trueProbMat[rowEnd,1] == -1)
        {
          index <- max(which(probMat[1:rowEnd,1] != -1))
@@ -328,7 +328,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
          index <- max(which(probMat[1:rowEnd,7] != -1))
        }
        print(sprintf("index=%i",index))
-       row2 <- (trueProbMat[index,] - probMat[index,])
+       row2 <- (trueProbMat[index,] - probMat[index,])/trueProbMat[index,]
        probRow <- row1 + row2  
       # cat(sprintf("Params= (%s)\n", toString(unname(out$optim$bestmem))))
       # cat(sprintf("BestLik= %s, testModel=%s,\n", out$optim$bestval,argList[[6]]@Name))

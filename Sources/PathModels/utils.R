@@ -1458,12 +1458,11 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   X.melt<- melt(X,id.vars = c("iter","model"))
   
   #p <- ggplot(data = PathProbMat.df)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_wrap(~as.factor(variable), nrow=5)
-  p <- ggplot(data = X.melt)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_grid(model~as.factor(variable))+theme(
+  p <- ggplot(data = X.melt)+geom_boxplot(aes(x=as.factor(iter), y=value),outlier.size = 0.1)+facet_grid(model ~ variable)+theme(
     strip.background = element_blank(),
-    strip.text.x = element_blank(),
     axis.text.x = element_blank()
-  )+labs(y = "Probability Difference", x = "Paths") 
-  
+  )+labs(y = "Probability Difference", x = "Paths")  
+ 
   pdf(paste(plot.dir,"/","BoxPlotSim_",rat,".pdf",sep=""),width=11, height=7)
   print(p)
   dev.off()

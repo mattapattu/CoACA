@@ -184,9 +184,9 @@ public:
         {
             for (auto &node : nodes)
             {
-                std::cout << "node = " << node.node << ", credit = " << node.credit << "; " ;
+                Rcpp::Rcout << "node = " << node.node << ", credit = " << node.credit << "; " ;
             }
-            std::cout << std::endl;
+            Rcpp::Rcout << std::endl;
         }
         
     }

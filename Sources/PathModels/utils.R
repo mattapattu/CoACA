@@ -542,14 +542,18 @@ convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
       hybridModelMat[actIdx,1] = row[6]
       hybridModelMat[actIdx,2] = row[1]
       hybridModelMat[actIdx,3] = row[2]
-      actId = which(slot(hybridModel, nodeList) == actions[j]) - 1
+      actId = which(slot(hybridModel, nodeList)==actions[j]) - 1
       hybridModelMat[actIdx,4] = actId
       hybridModelMat[actIdx,5] = row[5]
       
       turnVector = slot(slot(turnsModel,currState),currPath)
       hybridVector = slot(slot(hybridModel,currState),currPath)
       
-      if(!actions[j] %in% turnVector)
+      turnVector = gsub("\\w+\\.","",turnVector)
+      hybridVector = gsub("\\w+\\.","",hybridVector)
+      
+      curr_action = gsub("\\w+\\.","",actions[j])
+      if(!curr_action %in% turnVector)
       {
         common = intersect(hybridVector,turnVector)
         res = turnVector[!turnVector %in% common]
@@ -559,7 +563,7 @@ convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
       }
       else
       {
-        res_idx = which(turnVector %in% actions[j])
+        res_idx = which(turnVector %in% curr_action)
         turn_idx = which(turnsactNbvec == row[6])
         diff_times = turntimevec[turn_idx[res_idx]]
       }
@@ -1103,13 +1107,11 @@ plotSuccessRates=function(ratDataList)
 plotThetaHat=function(ratdata,res.dir,plot.dir)
 {
   rat=ratdata@rat
-  end_index80 = getEndIndex2(rat, ratdata@allpaths, sim=2, limit=0.85)
-  end_index95 = getEndIndex2(rat, ratdata@allpaths, sim=2, limit=0.95)
+  end_index80 = getEndIndex(ratdata@allpaths, sim=2, limit=0.80)
+  #end_index95 = getEndIndex(ratdata@allpaths, sim=2, limit=0.95)
   
   #rat.dir = file.path(paste(res.dir,rat,sep="/"))
   setwd(res.dir)
-  #rat_allmodelRes = paste0(rat,"_allmodelRes.Rdata")
-  #load(rat_allmodelRes)
   paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
   load(paramTestData)
   setwd(plot.dir)
@@ -1126,8 +1128,8 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
     plot(trials, alpha,type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials", main=model,lty=1,lwd=1)
     lines(trials, gamma1,type='l',col='red',lty=1,lwd=1)
     
-    abline(v=end_index80,col='blue',lty=1,lwd=2)
-    abline(v=end_index95,col='green',lty=1,lwd=2)
+    abline(v=end_index80,col='green',lty=1,lwd=2)
+    #abline(v=end_index95,col='green',lty=1,lwd=2)
     #lines(unname(paramTest[[i]]$resMat[,4]),type='l',col='green',lty=1,lwd=1)
     #abline(h=paramTest[[i]]$model@gamma2,col='3',lty=1,lwd=2)
     
@@ -1140,6 +1142,414 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
   title(paste0("Parameter estimation, ",rat), line = -1, outer = TRUE)
   #par(xpd=FALSE)
   dev.off()
+}
+
+
+getCI=function(X)
+{
+  if(length(X) < 30)
+  {
+    X.mean <- mean(X)
+    X.sd <- sd(X)
+    X.se <- X.sd/sqrt(length(X))
+    alpha = 0.95
+    degrees.freedom = length(X) - 1
+    t.score = qt(0.975, df=degrees.freedom)
+    #print(t.score)
+    
+    margin.error <- t.score * X.se
+    lower.bound <- X.mean - margin.error
+    upper.bound <- X.mean + margin.error
+    
+  }
+  else
+  {
+    X.mean <- mean(X)
+    X.sd <- sd(X)
+    X.se <- X.sd/sqrt(length(X))
+    margin.error <- qnorm(0.975)*X.se
+    lower.bound <- X.mean - margin.error
+    upper.bound <- X.mean + margin.error
+  }
+  return(c(lower.bound,upper.bound))
+}
+
+
+plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_df.Rdata"), full.names=FALSE)
+  eightyCI <- getSimLearningEndIndices(rat,dfData,res.dir)
+  listDfData <- list()
+  for(i in c(1:length(dfData)))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    listDfData[[i]] <- df
+  }
+  dfcombined <- bind_rows(listDfData)
+  #load(paramTestData)
+  #setwd(plot.dir)
+  #pdf(file=paste(plot.dir,"/","SimParamEstimation_",rat,".pdf",sep=""),width=11, height=7)
+  models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+  par(mfrow=c(3,2))
+  
+  iterations=as.integer(floor(length(ratdata@allpaths[,1])/100))
+  for(model in models)
+  {
+    dfModel <- dfcombined[which(dfcombined[,1]==model),]
+    nbSims <- length(which(dfModel[,2]==100))
+    print(sprintf("model=%s, nbSims=%i",model,nbSims)) 
+    if(nbSims > 0)
+    {
+      alpha_upper_bounds <- c()
+      alpha_lower_bounds <- c()
+      gamma_upper_bounds <- c()
+      gamma_lower_bounds <- c()
+      for(iter in c(1:iterations))
+      {
+        if(iter==iterations)
+        {
+          #rowEnd = length(ratdata@allpaths[,1])
+          rowEnd = iter*100
+        }else{
+          rowEnd = iter*100
+        }
+        
+        simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),4]
+        simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),5]
+        
+        alpha_bounds <- getCI(simulation_alphas)
+        
+        
+        alpha_upper_bounds <- c(alpha_upper_bounds,alpha_bounds[2])
+        alpha_lower_bounds <- c(alpha_lower_bounds,alpha_bounds[1])
+        
+        gamma_bounds <- getCI(simulation_gammas)
+        
+        gamma_upper_bounds <- c(gamma_upper_bounds,gamma_bounds[2])
+        gamma_lower_bounds <- c(gamma_lower_bounds,gamma_bounds[1])
+        
+        if(any(is.nan(alpha_bounds)) || any(is.nan(gamma_bounds)))
+        {
+          print(sprintf("NaN found, model=%s, rowEnd=%i",model,rowEnd))
+          print(sprintf("alpha_bounds:"))
+          print(alpha_bounds)
+          print(sprintf("gamma_bounds:"))
+          print(gamma_bounds)
+          
+        } 
+        
+        if(any((gamma_bounds)<0) || any((gamma_bounds)>1))
+        {
+          print(sprintf("gamma out of range, model=%s, rowEnd=%i, mean=%f, simulation_gammas:",model,rowEnd, mean(simulation_gammas)))
+          #print(sprintf("alpha_bounds:"))
+          print(simulation_gammas)
+          print(sprintf("gamma_bounds:"))
+          print(gamma_bounds)
+          
+        }
+      }
+      
+      paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+      print(paramTestData)
+      load(paramTestData)
+      index = which(models %in% model)
+      print(sprintf("model=%s, index=%i", model, index))
+      resMat <- paramTest[[index]][[1]]
+      n.rows <- length(resMat[,1])
+      alpha =  resMat[n.rows,2]
+      gamma1 = resMat[n.rows,3]
+      
+      true80 <- getEndIndex(ratdata@allpaths,sim=2,limit=0.8)
+      upperbound80 <- eightyCI[[index]][2]
+      lowerbound80 <- eightyCI[[index]][1]
+      
+      #print(sprintf("alpha=%f,gamma1=%s, model=%s, index=%i",alpha,gamma1,model,index))
+      #print(sprintf("alpha_upper_bounds len = %i",length(alpha_upper_bounds)))
+      #print(sprintf("gamma_upper_bounds:"))
+      #print(gamma_upper_bounds)
+      #print(sprintf("gamma_lower_bounds:"))
+      #print(gamma_lower_bounds)
+      xaxis <- c(1:iterations)*100
+      title <- paste(model, ", nbSim=",nbSims,collapse="")
+      plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters")
+      lines(xaxis,alpha_lower_bounds, lty=2, col="black")
+      lines(xaxis,gamma_upper_bounds, lty=2, col='red')
+      lines(xaxis,gamma_lower_bounds, lty=2, col='red')
+      abline(h=alpha,col="black")
+      abline(h=gamma1, col='red')
+      
+      abline(v=true80,col='green')  
+      abline(v=lowerbound80, col='green', lty=2)
+      abline(v=upperbound80, col='green', lty=2)
+      
+      #ggplot((dfModel[,c(2,4,5)]),aes(x=iter,y=alpha)) + geom_boxplot(aes(fill=factor(iter)))
+      #ggplot((dfModel[,c(2,4,5)]),aes(x=iter,y=gamma)) + geom_boxplot(aes(fill=factor(iter)))
+      
+    }  
+    
+  }
+  #plot.new()
+  #par(xpd=TRUE)
+  
+  #legend=c(expression(alpha),expression(gamma[1])) 
+  #legend("center", legend=legend, cex=1.5, col=c("black","red"), lwd = c(1,1),lty=c(1,1),horiz=FALSE,y.intersp=1.2)
+  #title(paste0("Param comparison, model=",model," ", rat), line = -1, outer = TRUE)
+  #par(xpd=FALSE)
+  dev.off()
+  
+}
+
+getSimLearningEndIndices=function(rat, dfData, res.dir)
+{
+  rat = ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_df.Rdata"), full.names=FALSE)
+  PathIndices <- c()
+  Hybrid1Indices <- c()
+  Hybrid2Indices <- c()
+  Hybrid3Indices <- c()
+  Hybrid4Indices <- c()
+  TurnsIndices <- c()
+  for(i in c(1:length(dfData)))
+  {
+    load(dfData[i])
+    allData<-unlist(generatedDataList)
+    
+    for(i in c(1:length(allData)))
+    {
+      generated_data = allData[[i]]
+      end_index = getEndIndex(generated_data@allpaths,sim=1,limit = 0.80)
+      model = allData[[i]]@simModel
+      if(model == "Paths")
+      {
+        PathIndices <- c(PathIndices,end_index)
+      }
+      else if(model == "Hybrid1")
+      {
+        print(i)
+        Hybrid1Indices <- c(Hybrid1Indices,end_index)
+      }
+      else if(model == "Hybrid2")
+      {
+        Hybrid2Indices <- c(Hybrid2Indices,end_index)
+      }
+      else if(model == "Hybrid3")
+      {
+        Hybrid3Indices <- c(Hybrid3Indices,end_index)
+      }
+      else if(model == "Hybrid4")
+      {
+        Hybrid4Indices <- c(Hybrid4Indices,end_index)
+      }
+      else if(model == "Turns")
+      {
+        TurnsIndices <- c(TurnsIndices,end_index)
+      }
+      
+    }
+    
+  }
+  modelIndices <- list(PathIndices,Hybrid1Indices,Hybrid2Indices,Hybrid3Indices,Hybrid4Indices,TurnsIndices)
+  modelCI <- list()
+  for(j in c(1:6))
+  {
+    bounds <- getCI(modelIndices[[j]])
+    modelCI[[j]] <- bounds
+    
+  }
+  return(modelCI)
+  
+}
+
+
+
+plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_df.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1:length(dfData)))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  #combinedResList <- bind_rows(listDfData)
+  #load(paramTestData)
+  #setwd(plot.dir)
+  #pdf(file=paste(plot.dir,"/","SimParamEstimation_",rat,".pdf",sep=""),width=11, height=7)
+  
+  
+  
+  #models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+  #par(mfrow=c(3,2))
+  
+  iterations=as.integer(floor(length(ratdata@allpaths[,1])/100))
+  
+  PathProbMat <- matrix(0,,14)
+  Hybrid1ProbMat <- matrix(0,,14)
+  Hybrid2ProbMat <- matrix(0,,14)
+  Hybrid3ProbMat <- matrix(0,,14)
+  Hybrid4ProbMat <- matrix(0,,14)
+  TurnsProbMat <- matrix(0,,14)
+  colnames(PathProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(Hybrid1ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(Hybrid2ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(Hybrid3ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(Hybrid4ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  colnames(TurnsProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
+  
+  
+  # n = 12
+  # x<-c(1:iterations)
+  # splits<-split(x, sort(x%%n))
+  # maxVecs<-sapply(splits, function(x) max(x))
+  # maxVecs <- maxVecs*100
+  
+  
+  n = 8
+  sessions<-unique(ratdata@allpaths[,5])
+  session_grps<-split(sessions, sort(sessions%%8))
+  maxVecs <- c()
+  for(grp in c(1:n))
+  {
+    print(grp)
+    begin_ses <- min(session_grps[[grp]])
+    end_ses <- max(session_grps[[grp]])
+    indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
+    maxVecs <- c(maxVecs,max(indices_of_ses))
+  }
+  
+  
+  for(k in c(1:length(combinedResList)))
+  {
+    iter = combinedResList[[k]]$iter
+    if(iter %in% maxVecs )
+    {
+      modelDataRes = combinedResList[[k]]$res
+      model = modelDataRes@Model
+      probRow = combinedResList[[k]]$probRow
+      probRow = probRow[1:12]
+      probRow[13] = iter
+      probRow[14] = model
+      print(sprintf("model=%s, iter=%i",model,iter))
+      if(model == "Paths")
+      {
+        PathProbMat = rbind(PathProbMat,probRow)
+      }
+      else if(model == "Hybrid1")
+      {
+        Hybrid1ProbMat = rbind(Hybrid1ProbMat,probRow)
+      }
+      else if(model == "Hybrid2")
+      {
+        Hybrid2ProbMat = rbind(Hybrid2ProbMat,probRow)
+      }
+      else if(model == "Hybrid3")
+      {
+        Hybrid3ProbMat = rbind(Hybrid3ProbMat,probRow)
+      }
+      else if(model == "Hybrid4")
+      {
+        Hybrid4ProbMat = rbind(Hybrid4ProbMat,probRow)
+      }
+      else if(model == "Turns")
+      {
+        TurnsProbMat = rbind(TurnsProbMat,probRow)
+      }
+      
+    }
+    
+  }
+  
+  PathProbMat.df <- as.data.frame(PathProbMat)
+  Hybrid1ProbMat.df <- as.data.frame(Hybrid1ProbMat)
+  Hybrid2ProbMat.df <- as.data.frame(Hybrid2ProbMat)
+  Hybrid3ProbMat.df <- as.data.frame(Hybrid3ProbMat)
+  Hybrid4ProbMat.df <- as.data.frame(Hybrid4ProbMat)
+  TurnsProbMat.df <- as.data.frame(TurnsProbMat) 
+  
+  PathProbMat.df[,1:13] <- lapply(PathProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  Hybrid1ProbMat.df[,1:13] <- lapply(Hybrid1ProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  Hybrid2ProbMat.df[,1:13] <- lapply(Hybrid2ProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  Hybrid3ProbMat.df[,1:13] <- lapply(Hybrid3ProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  Hybrid4ProbMat.df[,1:13] <- lapply(Hybrid4ProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  TurnsProbMat.df[,1:13] <- lapply(TurnsProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
+  
+  X<-do.call("rbind", list(PathProbMat.df[-1,],Hybrid1ProbMat.df[-1,],Hybrid2ProbMat.df[-1,],Hybrid3ProbMat.df[-1,],Hybrid4ProbMat.df[-1,],TurnsProbMat.df[-1,]))
+  
+  X.melt<- melt(X,id.vars = c("iter","model"))
+  
+  #p <- ggplot(data = PathProbMat.df)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_wrap(~as.factor(variable), nrow=5)
+  p <- ggplot(data = X.melt)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_grid(model~variable)+theme(
+    strip.background = element_blank(),
+    axis.text.x = element_blank()
+  )+labs(y = "Probability Difference", x = "Paths")  
+  
+  pdf(paste(plot.dir,"/","BoxPlotSim_",rat,".pdf",sep=""),width=11, height=7)
+  print(p)
+  dev.off()
+  
+  
+}
+
+verifySimDataProbPlots=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_df.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1:length(dfData)))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  setwd(plot.dir)
+  #pdf(file=paste("Params_",rat,".pdf",sep=""),width=11, height=7)
+  models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+  par(mfrow=c(6,2))
+  
+  for(model in models)
+  {
+    paramTestData=list.files(res.dir, pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=TRUE)
+    print(paramTestData)
+    load(paramTestData)
+    index = which(models %in% model)
+    print(sprintf("model=%s, index=%i", model, index))
+    resMat <- paramTest[[index]][[1]]
+    n.rows <- length(resMat[,1])
+    alpha =  resMat[n.rows,2]
+    gamma1 = resMat[n.rows,3]
+    modelData <- new("ModelData", Model = model, creditAssignment = "aca2", sim = 1, alpha=alpha,gamma1=gamma1)
+    for(k in c(1:20))
+    {
+      if(!is.null(generatedDataList[[index]][[k]]))
+      {
+        genData <- generatedDataList[[index]][[k]]
+        print(sprintf("model=%s, simModel=%s",model,genData@simModel))
+        break
+      }
+      
+    }
+    testMOdel = slot(allModels, model)
+    probMat <- TurnsNew::getProbMatrix(genData, modelData, testMOdel, sim=1)
+    empiricalProbMat <- getEmpProbMat(genData@allpaths,30,sim=1)
+    par(mar=c(1,1,1,1))
+    s1Idx <- which(probMat[,4]>0)
+    plot(s1Idx,probMat[s1Idx,4],col="red",type='l',lty=1,ylim=c(0,1),ylab="Probability", main=model,xlab="Trial")
+    lines(s1Idx,empiricalProbMat[s1Idx,4],col='black',type='l')
+    s2Idx <- which(probMat[,10]>0)
+    plot(s2Idx,probMat[s2Idx,10],col="blue",type="l")
+    lines(s2Idx,empiricalProbMat[s2Idx,10],col="green")
+    
+  }
+  
+  
 }
 
 boxDistances = function(path,state)
@@ -1557,11 +1967,14 @@ plotPCA=function(ratdata,allmodelRes)
   #ggsave(paste("PCA_",rat,".pdf",sep=""),width=11, height=11)
 }
 
-getEmpProbMat=function(allpaths,window){
+getEmpProbMat=function(allpaths,window,sim){
   totalActions = length(allpaths[,1])
   empProbMat = matrix(-1,totalActions,13)
   
-  
+  if(sim==1)
+  {
+    allpaths[,c(1:2)] = allpaths[,c(1:2)] + 1
+  }
   for(trial in c(1:totalActions)){
     empProbMat[trial,13]= allpaths[trial,6]
     currState = allpaths[trial,2]
@@ -1576,6 +1989,7 @@ getEmpProbMat=function(allpaths,window){
     
     Idx <- which(allpaths[trialSet,2]==currState)
     stateIdx <- trialSet[Idx]
+    
     
     for(path in c(1:6))
     {

@@ -622,4 +622,41 @@ testCode=function(ratdata)
   
 }
 
+### Test whether TurnsNew::simulateTurnsModels and TurnsNew::getTurnsLikelihood have the same probabilities
+unitTestRes=function(ratdata){
+  
+  print(sprintf("rat=%s",ratdata@rat))
+  models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  for(model in models)
+  {
+    modelData =  new("ModelData", Model=model, creditAssignment = "aca2",alpha=0.6,gamma1=0.8, sim=1)
+    
+    ratName = ratdata@rat
+    endStage1 = getEndIndex2(ratName,ratdata@allpaths,sim=2,limit=0.5)
+    endStage2 = getEndIndex2(ratName,ratdata@allpaths,sim=2,limit=0.85)
+    endStage3 = length(ratdata@allpaths[,1])
+    
+    turnIdxStage1 = last(which(ratdata@turnTimes[,1]<=endStage1))
+    turnIdxStage2 = last(which(ratdata@turnTimes[,1]<=endStage2))
+    turnIdxStage3 = length(ratdata@turnTimes[,1])
+    turnstages = c(1,turnIdxStage1,turnIdxStage2,turnIdxStage3)
+    
+    testModel = slot(allModels,model)
+    sink("test1.txt")
+    simData = TurnsNew::simulateTurnsModels(ratdata,modelData,testModel,TurnModel,turnstages,debug = TRUE)
+    generated_data = new("RatData", rat = "simulation",allpaths = simData$PathData, turnTimes = simData$TurnData)
+    generated_data = populateSimRatModel(ratdata,generated_data,modelName)
+    probMat1 <- simData$probMat
+    sink()
+    sink("test2.txt")
+    probMat2 <- TurnsNew::getProbMatrix(generated_data,modelData,testModel,sim=1) 
+    sink()
+    m <- probMat1[,1:12] - probMat2[,1:12]
+    maxDiff<- max(m[which(m != 0, TRUE)])
+    print(sprintf("model=%s, maxDiff=%f",model,maxDiff))
+    lik <- TurnsNew::getTurnsLikelihood(generated_data,modelData,testModel,sim=1) 
+  }
+  
+}
+
 

@@ -10,7 +10,7 @@ names=c('e','f','g','c','d','h','i','j','a','b','k')
 
 #src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 #src.dir = file.path("/home/amoongat/Projects/Rats-Credit/Sources/src")
-src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
+src.dir = file.path("C:/Users/matta/OneDrive/Documents/Projects/Rats-Credit/Sources/src")
 
 setup.hpc = FALSE
 #setup.hpc = TRUE
@@ -18,6 +18,8 @@ setup.hpc = FALSE
 ############### Select tests to run
 
 unitTest1 = FALSE
+unitTest2 = FALSE
+unitTest3 = F
 
 computeModelLik = F
 loadAllModelRes = F
@@ -26,12 +28,12 @@ modelSelection = F
 plotProb = F
 plotLik = F
 
-unitTest2 = FALSE
+
 
 validateHoldout = FALSE
 
 paramEstTest = F
-thetaHatTest = T
+thetaHatTest = F
 pcaPlot = F
 
 successPlot = F
@@ -47,7 +49,7 @@ if(unitTest1)
   data.path = file.path("C:/Rats-Credits/Data/testDonnes1.RData") 
 }else
 {
-  data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/new_data_journeys.Rdata")
+  data.path = file.path("C:/Users/matta/OneDrive/Documents/Projects/Rats-Credit/Data/new_data_journeys.Rdata")
   #data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/data_journeys.Rdata")
   #data.path = file.path("/home/amoongat/Projects/Rats-Credit/data_journeys.Rdata")
   
@@ -56,7 +58,7 @@ if(unitTest1)
 load(data.path)
 #load(data.path2)
 
-plot.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Plots")
+plot.dir = file.path("C:/Users/matta/OneDrive/Documents/Projects/Rats-Credit/Plots")
 model.data.dir = file.path("C:/Projects/Rats-Credits/Data")
 #plot.dir = file.path("/home/ajames/Rats-Credit")
 
@@ -81,7 +83,7 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(1)) {
+for (i in c(3)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
   
@@ -113,6 +115,22 @@ for (i in c(1)) {
     #load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
     #load(paste0("C:/Rats-Credits/aca2_allmodelRes_",rats[i],".RData"))
   }
+  
+  if(unitTest2)
+  {
+    #debug(unitTestHoldOut)
+    unitTestHoldOut(ratdata,allmodelRes,testData,model.src) 
+  }
+  
+  if(unitTest3)
+  {
+    source(paste(src.dir,"unitTestaca3.R", sep="/"))
+    #debug(unitTestRes)
+    unitTestRes(ratdata)
+  }
+  
+  
+  
   # 
   ratDataList[[i]] = ratdata
   
@@ -171,11 +189,6 @@ for (i in c(1)) {
   
  
   
-  if(unitTest2)
-  {
-    #debug(unitTestHoldOut)
-    unitTestHoldOut(ratdata,allmodelRes,testData,model.src) 
-  }
   
   if(validateHoldout)
   {

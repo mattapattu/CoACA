@@ -1115,7 +1115,7 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
   setwd(plot.dir)
   pdf(file=paste("ParameterTest_",rat,".pdf",sep=""),width=11, height=7)
   par(mfrow=c(3,2))
-  models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+  models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
   for(i in c(1:6))
   {
     rowEnd = paramTest[[i]][[1]][,1]
@@ -1190,10 +1190,23 @@ plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
   par(mfrow=c(3,2))
   
   iterations=as.integer(floor(length(ratdata@allpaths[,1])/100))
+  n = 8
+  sessions<-unique(ratdata@allpaths[,5])
+  session_grps<-split(sessions, sort(sessions%%8))
+  maxVecs <- c()
+  for(grp in c(1:n))
+  {
+   print(grp)
+   begin_ses <- min(session_grps[[grp]])
+   end_ses <- max(session_grps[[grp]])
+   indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
+   maxVecs <- c(maxVecs,max(indices_of_ses))
+  }
+
   for(model in models)
   {
     dfModel <- dfcombined[which(dfcombined[,1]==model),]
-    nbSims <- length(which(dfModel[,2]==100))
+    nbSims <- length(which(dfModel[,2]==maxVecs[1]))
     print(sprintf("model=%s, nbSims=%i",model,nbSims)) 
     if(nbSims > 0)
     {
@@ -1201,16 +1214,16 @@ plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
      alpha_lower_bounds <- c()
      gamma_upper_bounds <- c()
      gamma_lower_bounds <- c()
-     for(iter in c(1:iterations))
+     for(iter in maxVecs)
      {
-       if(iter==iterations)
-       {
+       #if(iter==iterations)
+       #{
          #rowEnd = length(ratdata@allpaths[,1])
-          rowEnd = iter*100
-       }else{
-         rowEnd = iter*100
-       }
-
+       #   rowEnd = iter*100
+       #}else{
+       #  rowEnd = iter*100
+       #}
+       rowEnd = iter
        simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),4]
        simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),5]
 
@@ -1266,7 +1279,8 @@ plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
      #print(gamma_upper_bounds)
      #print(sprintf("gamma_lower_bounds:"))
      #print(gamma_lower_bounds)
-     xaxis <- c(1:iterations)*100
+     #xaxis <- c(1:iterations)*100
+     xaxis <- maxVecs
      title <- paste(model, ", nbSim=",nbSims,collapse="")
      plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters")
      lines(xaxis,alpha_lower_bounds, lty=2, col="black")
@@ -1311,6 +1325,7 @@ getSimLearningEndIndices=function(rat, dfData, res.dir)
   Hybrid3Indices <- c()
   Hybrid4Indices <- c()
   TurnsIndices <- c()
+  
   for(k in c(1:length(dfData)))
   {
     load(dfData[k])
@@ -1405,6 +1420,7 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   for(k in c(1:length(combinedResList)))
   {
     iter = combinedResList[[k]]$iter
+    print(sprintf("iter=%i",iter))
     modelDataRes = combinedResList[[k]]$res
     model = modelDataRes@Model
     probRow = combinedResList[[k]]$probRow
@@ -1454,7 +1470,9 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   TurnsProbMat.df[,1:13] <- lapply(TurnsProbMat.df[,1:13], function(x) as.numeric(as.character(x)))
   
   X<-do.call("rbind", list(PathProbMat.df[-1,],Hybrid1ProbMat.df[-1,],Hybrid2ProbMat.df[-1,],Hybrid3ProbMat.df[-1,],Hybrid4ProbMat.df[-1,],TurnsProbMat.df[-1,]))
-  
+ 
+  iter_unique = unique(X[,13])
+  print(sprintf("iter_unique=%s",paste(iter_unique, collapse=" "))) 
   X.melt<- melt(X,id.vars = c("iter","model"))
   
   #p <- ggplot(data = PathProbMat.df)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_wrap(~as.factor(variable), nrow=5)

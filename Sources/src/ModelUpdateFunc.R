@@ -320,7 +320,7 @@ readModelParams <- function(ratdata,res.dir,testingdata, sim){
   setwd(res.dir)
   rat=ratdata@rat
   paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
-  #print(paramTestData)
+  print(paramTestData)
   load(paramTestData)
   
   

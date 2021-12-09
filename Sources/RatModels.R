@@ -38,9 +38,9 @@ plotLik = F
 
 unitTest2 = FALSE
 
-validateHoldout = F
+validateHoldout = T
 
-paramEstTest = T 
+paramEstTest = F 
 thetaHatTest = F 
 pcaPlot = FALSE
 
@@ -151,12 +151,30 @@ for (i in c(select_rat)) {
 
   if(paramEstTest)
   {
-    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
-    #plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
+    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
     plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
 
   }  
+
+  # #### Holdout Validation ########################################
+
+
+
+  if(unitTest2)
+  {
+    #debug(unitTestHoldOut)
+    unitTestHoldOut(ratdata,allmodelRes,testData,model.src)
+  }
+
+  if(validateHoldout)
+  {
+    #debug(HoldoutTest)
+    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+  }
+
   ############### Likelihood Computation and Model Selection ###########################################
    
   
@@ -207,40 +225,6 @@ for (i in c(select_rat)) {
   }
   
   
-  # #### Holdout Validation ########################################
-  
- 
-  
-  if(unitTest2)
-  {
-    #debug(unitTestHoldOut)
-    unitTestHoldOut(ratdata,allmodelRes,testData,model.src) 
-  }
-  
-  if(validateHoldout)
-  {
-    #debug(HoldoutTest)
-    HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,count)
-  }
-  
-  
-  
-  #### Parameter estimation test ##############
-  
-  # if(paramEstTest)
-  # {
-  #   #debug(testParamEstimation)
-  #   testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir)
-  #   
-  # }
-  # 
-  # if(thetaHatTest)
-  # {
-  #   #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
-  #   #debug(plotThetaHat)
-  #   plotThetaHat(ratdata,model.data.dir,plot.dir)
-  # }
-  # 
   if(pcaPlot)
   {
     #debug(plotPCA)

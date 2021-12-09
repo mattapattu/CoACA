@@ -2,7 +2,7 @@
 
 echo "Submit NEF Jobs" 
 core_number=51
-walltime=8:00
+walltime=04:00
 let spawnSlaves=$core_number-1
 
 for rat in   1 2 3 4 5 6 7

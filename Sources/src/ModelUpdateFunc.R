@@ -104,102 +104,56 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
 getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc,count)
 {
   ratName = ratdata@rat
-  end_index <- getEndIndex(ratName, ratdata@allpaths, sim, limit = 0.95)
-  start_index = round(end_index/2)
-  if(start_index >= end_index){
-    print(sprintf("start_index >= end_index. Check if rat learns optimal behavior"))
-    return()
-  }
+  #end_index <- getEndIndex(ratName, ratdata@allpaths, sim, limit = 0.95)
+  #start_index = round(end_index/2)
+  #if(start_index >= end_index){
+  #  print(sprintf("start_index >= end_index. Check if rat learns optimal behavior"))
+  #  return()
+  #}
   
   models = testingdata@Models
   creditAssignment = testingdata@creditAssignment
   
   forloops = length(models) * length(creditAssignment)
   
-  if(setup.hpc)
-  {
-    cl <- startMPIcluster(count=count)
-    exportDoMPI(cl, c("src.dir","model.src")) 
-    #exportDoMPI(cl, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
-    registerDoMPI(cl)
+  cl <- startMPIcluster(count=count)
+  exportDoMPI(cl, c("src.dir","model.src")) 
+  #exportDoMPI(cl, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
+  registerDoMPI(cl)
     
-    initWorkers <-  function() {
-      source(paste(src.dir, "ModelClasses.R", sep = "/"))
-      source(paste(model.src, "PathModel.R", sep = "/"))
-      source(paste(model.src, "TurnModel.R", sep = "/"))
-      source(paste(model.src, "HybridModel1.R", sep = "/"))
-      source(paste(model.src, "HybridModel2.R", sep = "/"))
-      source(paste(model.src, "HybridModel3.R", sep = "/"))
-      source(paste(model.src, "HybridModel4.R", sep = "/"))
-      source(paste(src.dir, "BaseClasses.R", sep = "/"))
-      source(paste(src.dir,"exportFunctions.R", sep="/"))
+  initWorkers <-  function() {
+    source(paste(src.dir, "ModelClasses.R", sep = "/"))
+    source(paste(model.src, "PathModel.R", sep = "/"))
+    source(paste(model.src, "TurnModel.R", sep = "/"))
+    source(paste(model.src, "HybridModel1.R", sep = "/"))
+    source(paste(model.src, "HybridModel2.R", sep = "/"))
+    source(paste(model.src, "HybridModel3.R", sep = "/"))
+    source(paste(model.src, "HybridModel4.R", sep = "/"))
+    source(paste(src.dir, "BaseClasses.R", sep = "/"))
+    source(paste(src.dir,"exportFunctions.R", sep="/"))
       
       #attach(myEnv, name="sourced_scripts")
-    }
+  }
     
-    opts <- list(initEnvir=initWorkers)
-    print("Spawned cluster")
-    time <- system.time(
-      resMatrix <-
-        foreach(model=models, .combine='rbind',.options.mpi=opts,.packages = c("rlist","DEoptim","doMPI")) %:%
-        foreach(method=creditAssignment, .combine='rbind') %dopar% {
+  opts <- list(initEnvir=initWorkers)
+  print("Spawned cluster")
+  time <- system.time(
+  resMatrix <-
+      foreach(model=models, .combine='rbind',.options.mpi=opts,.packages = c("rlist","DEoptim","doMPI")) %:%
+      foreach(method=creditAssignment, .combine='rbind') %dopar% {
           #envir = ls() 
-          cat('model =',model,'\n',sep = '')
-          modelData =  new("ModelData", Model=model, creditAssignment = method, sim=sim)
-          argList<-getArgList(modelData,ratdata)
-          cat('Create new cluster\n') 
+        cat('model =',model,'\n',sep = '')
+        modelData =  new("ModelData", Model=model, creditAssignment = method, sim=sim)
+        argList<-getArgList(modelData,ratdata)
+        cat('Create new cluster\n') 
           #cl2 <- getDoMpiCluster()
-          np.val = length(argList$lower)*10
-          myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
-          out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=argList[[4]],modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
-          unname(out$optim$bestmem)		
-        }
-    )
-    print(time)
-  }
-  else
-  {
-    time <- system.time(
-      resMatrix <-
-        foreach(model = models, .combine = "rbind") %:%
-        foreach(method = creditAssignment, .combine = "rbind") %do% {
-          modelData <- new("ModelData", Model = model, creditAssignment = method, sim = sim)
-          argList <- getArgList(modelData, ratdata)
-          nvars <- length(argList$lower)
-          cl2 <- makeCluster(5)
-          clusterExport(cl2, varlist = c("src.dir","model.src"))
-          clusterCall(cl2, function() {
-            source(paste(src.dir, "ModelClasses.R", sep = "/"))
-            source(paste(model.src, "PathModel.R", sep = "/"))
-            source(paste(model.src, "TurnModel.R", sep = "/"))
-            source(paste(model.src, "HybridModel1.R", sep = "/"))
-            source(paste(model.src, "HybridModel2.R", sep = "/"))
-            source(paste(model.src, "HybridModel3.R", sep = "/"))
-            source(paste(model.src, "HybridModel4.R", sep = "/"))
-            source(paste(src.dir, "BaseClasses.R", sep = "/"))
-            NULL
-          })
-          registerDoParallel(cl2)
-          np.val <- length(argList$lower) * 10
-          myList <- DEoptim.control(NP = 30, F = 0.8, CR = 0.9, trace = FALSE, itermax = 200)
-          out <- do.call("DEoptim", list.append(argList, fn = negLogLikFunc, myList))
-          stopCluster(cl2)
-          if(out$optim$bestval < 100000)
-          {
-            return(out$optim$bestmem)
-          }
-          else
-          {
-            return()
-          }
-          
-        }
-      
-      # print(time)
-    )
-    print(time)
-    
-  }
+        np.val = length(argList$lower)*10
+        myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
+        out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=800,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
+        unname(out$optim$bestmem)		
+      }
+  )
+  print(time)
   
   #modelData = updateModelData(ratdata,resMatrix, models)
   allmodelRes = getAllModelResults(ratdata, resMatrix,testingdata, sim) 

@@ -1416,7 +1416,21 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   colnames(Hybrid3ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
   colnames(Hybrid4ProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
   colnames(TurnsProbMat) <- c("Path1.S1","Path2.S1","Path3.S1","Path4.S1","Path5.S1","Path6.S1","Path1.S2","Path2.S2","Path3.S2","Path4.S2","Path5.S2","Path6.S2","iter","model")
-  
+ 
+
+  n = 8
+  sessions<-unique(ratdata@allpaths[,5])
+  session_grps<-split(sessions, sort(sessions%%8))
+  maxVecs <- c()
+  for(grp in c(1:n))
+  {
+    print(grp)
+    begin_ses <- min(session_grps[[grp]])
+    end_ses <- max(session_grps[[grp]])
+    indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
+    maxVecs <- c(maxVecs,max(indices_of_ses))
+  }
+ 
   for(k in c(1:length(combinedResList)))
   {
     iter = combinedResList[[k]]$iter
@@ -1476,11 +1490,14 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   X.melt<- melt(X,id.vars = c("iter","model"))
   
   #p <- ggplot(data = PathProbMat.df)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_wrap(~as.factor(variable), nrow=5)
-  p <- ggplot(data = X.melt)+geom_boxplot(aes(x=as.factor(iter), y=value),outlier.size = 0.1)+facet_grid(model ~ variable)+theme(
-    strip.background = element_blank(),
-    axis.text.x = element_blank()
-  )+labs(y = "Probability Difference", x = "Paths")  
- 
+  #p <- ggplot(data = X.melt)+geom_boxplot(aes(x=as.factor(iter), y=value),outlier.size = 0.1)+facet_grid(model ~ variable)+theme(
+  #  strip.background = element_blank(),
+  #  axis.text.x = element_blank()
+  #)+labs(y = "Probability Difference", x = "Paths")  
+
+  p <- ggplot(data = X.melt)+geom_boxplot(aes(x=as.factor(iter), y=value),,outlier.size = 0.1)+facet_grid(model~variable)+scale_x_discrete(labels=maxVecs,guide = guide_axis(n.dodge=4)) + theme(
+    axis.text.x = element_text(size = 5))+labs(y = "Normalized Prob Err", x = "Trials") 
+
   pdf(paste(plot.dir,"/","BoxPlotSim_",rat,".pdf",sep=""),width=11, height=7)
   print(p)
   dev.off()
@@ -1488,6 +1505,32 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   
 }
 
+printMatRes=function(ratdata,testData,res.dir)
+{
+  rat=ratdata@rat
+  print(sprintf("Rat is %s", rat))
+  models = testData@Models
+  creditAssignment = testData@creditAssignment
+  
+  modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  
+  mat_res_f = matrix(0, length(modelNames), length(modelNames))
+  colnames(mat_res_f) <- modelNames
+  rownames(mat_res_f) <- modelNames
+  
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*mat_res.Rdata"), full.names=FALSE)
+  #mat_res_f <- matrix()
+  for(i in c(1:length(dfData)))
+  {
+    load(dfData[i])
+    mat_res_f <- mat_res_f + mat_res
+  }
+  print(mat_res_f)
+  
+  
+  
+}
 
 boxDistances = function(path,state)
 {

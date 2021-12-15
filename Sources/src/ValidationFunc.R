@@ -442,9 +442,10 @@ getMinimumLikelihood=function(ratdata, allmodelRes,testingdata,sim)
   min = 100000
   min_method = "null"
   ratName = ratdata@rat
-  endLearningStage = getEndIndex(ratName,ratdata@allpaths,sim=sim, limit=0.95)
+  #endLearningStage = getEndIndex(ratName,ratdata@allpaths,sim=sim, limit=0.95)
   #endLearningStage = endLearningStage/2
-  half_stage = endLearningStage/2
+  #half_stage = endLearningStage/2
+  half_stage = 800
   for(m in testingdata@Models)
   {
     for(crAssgn in testingdata@creditAssignment)
@@ -454,8 +455,10 @@ getMinimumLikelihood=function(ratdata, allmodelRes,testingdata,sim)
       lik = (-1)*sum(lik[-(1:half_stage)])
       #lik = (-1)*sum(lik[(half_stage:endLearningStage)])
       modelName = paste(modelData@Model,modelData@creditAssignment,sep=".")
-      
-      print(sprintf("model=%s,likelihood=%f",modelName,lik))
+      alpha = round(modelData@alpha,3)
+      gamma = round(modelData@gamma1,3)
+      lik = round(lik,2)
+      print(sprintf("model=%s,likelihood=%f,alpha=%f,gamma=%f",modelName,lik,alpha,gamma))
       
       if(lik < min)
       {

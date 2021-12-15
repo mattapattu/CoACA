@@ -27,22 +27,21 @@ setup.hpc = TRUE
 unitTest1 = FALSE
 unitTest3 = F 
 
+validateHoldout = F
+
+paramEstTest = T
+thetaHatTest = F
+pcaPlot = FALSE
+
 computeModelParams = F
 
 computeModelLik = F
 loadAllModelRes = F
-modelSelection = F
 
 plotProb = F
 plotLik = F
 
 unitTest2 = FALSE
-
-validateHoldout = T
-
-paramEstTest = F 
-thetaHatTest = F 
-pcaPlot = FALSE
 
 successPlot = FALSE
 ratSpeedPlot = FALSE
@@ -151,9 +150,9 @@ for (i in c(select_rat)) {
 
   if(paramEstTest)
   {
-    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
-    plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
+    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    #plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
     plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
 
   }  
@@ -171,8 +170,9 @@ for (i in c(select_rat)) {
   if(validateHoldout)
   {
     #debug(HoldoutTest)
-    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    printMatRes(ratdata,testData,model.data.dir)
   }
 
   ############### Likelihood Computation and Model Selection ###########################################
@@ -183,6 +183,8 @@ for (i in c(select_rat)) {
     #debug(getModelResults)
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc,count)
     save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
+    print(sprintf("%s is best model for %s",min_method,rats[i]))
   }
   
   if(loadAllModelRes)
@@ -191,14 +193,6 @@ for (i in c(select_rat)) {
     
   }
   
-  if(modelSelection)
-  {
-    
-    min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
-    print(sprintf("%s is best model for %s",min_method,rats[i]))
-    
-    
-  }
   
   if(plotProb)
   {

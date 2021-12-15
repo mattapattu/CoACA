@@ -281,23 +281,28 @@ modifyModelData=function(modelData)
   return(modelData)
 }
 
-
-getMinimumLikelihood=function(allmodelRes,testingdata)
+getMinimumLikelihood=function(ratdata, allmodelRes,testingdata,sim)
 {
   min_index = 0
   min = 100000
   min_method = "null"
-  
+  ratName = ratdata@rat
+  #endLearningStage = getEndIndex(ratName,ratdata@allpaths,sim=sim, limit=0.95)
+  #endLearningStage = endLearningStage/2
+  #half_stage = endLearningStage/2
+  half_stage = 800
   for(m in testingdata@Models)
   {
     for(crAssgn in testingdata@creditAssignment)
     {
       modelData = getModelData(allmodelRes,m,crAssgn)
       lik = modelData@likelihood
+      lik = (-1)*sum(lik[-(1:half_stage)])
+      #lik = (-1)*sum(lik[(half_stage:endLearningStage)])
       modelName = paste(modelData@Model,modelData@creditAssignment,sep=".")
-      
+
       print(sprintf("model=%s,likelihood=%f",modelName,lik))
-      
+
       if(lik < min)
       {
         min = lik
@@ -307,3 +312,4 @@ getMinimumLikelihood=function(allmodelRes,testingdata)
   }
   return(min_method)
 }
+

@@ -28,10 +28,9 @@ modelSelection = F
 plotProb = F
 plotLik = F
 
-
-
 validateHoldout = FALSE
 
+printHoldoutRes = F
 paramEstTest = F
 thetaHatTest = F
 pcaPlot = F
@@ -136,6 +135,10 @@ for (i in c(3)) {
   
   ############### Likelihood Computation and Model Selection ###########################################
   
+  if(printHoldoutRes)
+  {
+    printMatRes(ratdata,testData,"C:/Users/matta/Downloads")
+  }
  
   
   if(computeModelLik)
@@ -216,9 +219,10 @@ for (i in c(3)) {
   
   if(pcaPlot)
   {
-    debug(plotPCA)
-    plotPCA(ratdata, allmodelRes)
-    
+    debug(plotPCA3)
+    plotPCA3(ratdata,"C:/Users/matta/Downloads",plot.dir)
+    #debug(testPCA)
+    #testPCA(ratdata,"C:/Users/matta/Downloads",plot.dir)
   }
   
 }
@@ -232,7 +236,7 @@ if(successPlot)
 
 if(ratSpeedPlot)
 {
-  #debug(plotRatSpeed)
+  debug(plotRatSpeed)
   plotRatSpeed(ratDataList,donnees_ash,plot.dir)
   
 }

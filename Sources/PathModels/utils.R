@@ -1175,6 +1175,34 @@ getCI=function(X)
 }
 
 
+printMatRes=function(ratdata,testData,res.dir)
+{
+  rat=ratdata@rat
+  print(sprintf("Rat is %s", rat))
+  models = testData@Models
+  creditAssignment = testData@creditAssignment
+  
+  modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  
+  mat_res_f = matrix(0, length(modelNames), length(modelNames))
+  colnames(mat_res_f) <- modelNames
+  rownames(mat_res_f) <- modelNames
+  
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*mat_res.Rdata"), full.names=FALSE)
+  #mat_res_f <- matrix()
+  for(i in c(1:length(dfData)))
+  {
+    load(dfData[i])
+    mat_res_f <- mat_res_f + mat_res
+  }
+  print(mat_res_f)
+  
+  
+  
+}
+
+
 plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
 {
   rat=ratdata@rat
@@ -1431,18 +1459,25 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
     if(iter %in% maxVecs )
     {
       modelDataRes = combinedResList[[k]]$res
+      alphahat = modelDataRes@alpha
+      gammahat = modelDataRes@gamma1
+      trueModelData <- combinedResList[[k]]$data@simModelData
+      alpha = trueModelData@alpha
+      gamma = trueModelData@gamma1
       model = modelDataRes@Model
       probRow = combinedResList[[k]]$probRow
       probRow = probRow[1:12]
       probRow[13] = iter
       probRow[14] = model
-      print(sprintf("model=%s, iter=%i",model,iter))
+      #print(sprintf("model=%s, iter=%i, alphahat=%f, gammahat=%f, alpha=%f, gamma=%f",model,iter,alphahat,gammahat,alpha,gamma))
+      print(sprintf("%s, %s",toString(round(as.numeric(probRow[1:13]),2)),model))
       if(model == "Paths")
       {
         PathProbMat = rbind(PathProbMat,probRow)
       }
       else if(model == "Hybrid1")
       {
+        print(toString(round(as.numeric(probRow[1:13]),2)))
         Hybrid1ProbMat = rbind(Hybrid1ProbMat,probRow)
       }
       else if(model == "Hybrid2")
@@ -1541,11 +1576,11 @@ verifySimDataProbPlots=function(ratdata,res.dir,plot.dir)
     empiricalProbMat <- getEmpProbMat(genData@allpaths,30,sim=1)
     par(mar=c(1,1,1,1))
     s1Idx <- which(probMat[,4]>0)
-    plot(s1Idx,probMat[s1Idx,4],col="red",type='l',lty=1,ylim=c(0,1),ylab="Probability", main=model,xlab="Trial")
+    plot(s1Idx,probMat[s1Idx,4],col="red",type='l',lty=1,ylim=c(0,1),ylab="Probability", main=paste0(model,".boxE"),xaxt='n')
     lines(s1Idx,empiricalProbMat[s1Idx,4],col='black',type='l')
     s2Idx <- which(probMat[,10]>0)
-    plot(s2Idx,probMat[s2Idx,10],col="blue",type="l")
-    lines(s2Idx,empiricalProbMat[s2Idx,10],col="green")
+    plot(s2Idx,probMat[s2Idx,10],col="blue",type="l",main=paste0(model,".boxI"),xaxt='n')
+    lines(s2Idx,empiricalProbMat[s2Idx,10],col="black")
     
   }
   
@@ -1742,23 +1777,59 @@ plotTurnProb=function(ratdata,allmodelRes,testModel)
   dev.off()
 }
 
-plotPCA=function(ratdata,allmodelRes)
+plotPCA=function(ratdata,res.dir,plot.dir)
 {
   rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*resList.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  allmodelRes <- new("AllModelRes")
+  models.populated = c()
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  for(k in c(1:length(combinedResList)))
+  {
+    ##Extracting generator model from resList[[k]][[1]]
+    genModel = combinedResList[[k]][[1]]$data@simModel
+    ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+    index = which(models==genModel)
+    testModelData = combinedResList[[k]][[index]]$res
+    testModel = testModelData@Model
+    print(sprintf("genModel=%s, testModel=%s",genModel,testModel))
+    if(length(slot(slot(slot(allmodelRes,genModel),"aca2"),"probMatrix"))==0)
+    {
+      models.populated = c(models.populated,genModel)
+      #print(sprintf("models.populated=%s",models.populated))
+      #modelData <- slot(slot(allmodelRes,"Paths"),"aca2")
+      allmodelRes <- addModelData(allmodelRes, testModelData)
+      
+    }
+    
+    if(length(models.populated)==6)
+    {
+      break
+    }
+  }
+      
   ## All 6 models together
   #pdf(file=paste("PCA_",rat,".pdf",sep=""),width=11, height=11,onefile=FALSE)
   for(state in c(1,2))
   {
-    if (state==1) pdf(file=paste("PCA_",rat,"boxE.pdf",sep=""),width=11, height=11,onefile=FALSE)
-    if (state==2) pdf(file=paste("PCA_",rat,"boxI.pdf",sep=""),width=11, height=11,onefile=FALSE)    
+    #if (state==1) pdf(file=paste("PCA_",rat,"boxE.pdf",sep=""),width=11, height=11,onefile=FALSE)
+    #if (state==2) pdf(file=paste("PCA_",rat,"boxI.pdf",sep=""),width=11, height=11,onefile=FALSE)    
     
     ratName = ratdata@rat
-    endIdx = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.95)
+    endIdx = 800
     state_idx = which(ratdata@allpaths[,2] == state)
-    state_idx = which(allmodelRes@Paths@aca2@probMatrix[,13] %in% state_idx)
+    #state_idx = which(allmodelRes@Paths@aca2@probMatrix[,13] %in% state_idx)
     #n=length(state_idx) 
     
-    rangeEnd = endIdx/2
+    rangeEnd = 800
     
     if(state==1) colIdx= c(1:6)
     if(state==2) colIdx= c(7:12)
@@ -1768,7 +1839,6 @@ plotPCA=function(ratdata,allmodelRes)
     X3=allmodelRes@Hybrid1@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     X4=allmodelRes@Hybrid2@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     X5=allmodelRes@Hybrid3@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    
     X6=allmodelRes@Hybrid4@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
     
     matLen = length(X1[,1])
@@ -1778,7 +1848,7 @@ plotPCA=function(ratdata,allmodelRes)
     violets<-seq_gradient_pal("white", "violet")(x)
     
     X=rbind(X1,X2,X3,X4,X5,X6)
-   
+    X=X[,c(1:5)]
     n=length(X[,1]) 
     Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
     pca1=princomp(Xtilde)
@@ -1791,6 +1861,24 @@ plotPCA=function(ratdata,allmodelRes)
     r5 = c((4*matLen+1):(5*matLen))
     r6 = c((5*matLen+1):(6*matLen))
     
+    pathplot <- ggplot() + geom_path(data = as.data.frame(pca1$scores[r1,1:2]), size=2, aes(x = pca1$scores[r1,1], y = pca1$scores[r1,2],color=r1))+
+      scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "vertical"), colours = brewer.pal(5, "Greens")) + xlab("Component 1") + ylab("Component 2")+geom_point(data=as.data.frame(pca1$scores[r1[1],1:2]), mapping=aes(x=pca1$scores[r1[1],1],y=pca1$scores[r1[1],2]), colour="green", shape = 17, size=4)
+      
+    hybrid1plot <- ggplot() + geom_path(data = as.data.frame(pca1$scores[r3,1:2]),size=2, aes(x = pca1$scores[r3,1], y = pca1$scores[r3,2],color=r1))+
+      scale_colour_gradientn(name ="Hybrid1",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Blues")) + xlab("Component 1") + ylab("Component 2")  + geom_point(data=as.data.frame(pca1$scores[r3[1],1:2]), mapping=aes(x=pca1$scores[r3[1],1],y=pca1$scores[r3[1],2]), colour="blue", shape = 17, size=4)
+
+    hybrid2plot <- ggplot() + geom_path(data = as.data.frame(pca1$scores[r4,1:2]),size=2, aes(x = pca1$scores[r4,1], y = pca1$scores[r4,2],color=r1))+ 
+      scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Greys"))+ xlab("Component 1") + ylab("Component 2") + geom_point(data=as.data.frame(pca1$scores[r4[1],1:2]), mapping=aes(x=pca1$scores[r4[1],1],y=pca1$scores[r4[1],2]), colour="grey", shape = 17, size=4)
+
+    hybrid3plot <- ggplot() +  geom_path(data = as.data.frame(pca1$scores[r5,1:2]),size=2, aes(x = pca1$scores[r5,1], y = pca1$scores[r5,2],color=r1))+ 
+      scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "vertical"), colors=violets)+ xlab("Component 1") + ylab("Component 2")  + geom_point(data=as.data.frame(pca1$scores[r5[1],1:2]), mapping=aes(x=pca1$scores[r5[1],1],y=pca1$scores[r5[1],2]), colour="violet",shape = 17,  size=4)
+
+    hybrid4plot <- ggplot() + geom_path(data = as.data.frame(pca1$scores[r6,1:2]),size=2, aes(x = pca1$scores[r6,1], y = pca1$scores[r6,2],color=r1))+ 
+      scale_colour_gradientn(name ="Hybrid4",guide = guide_colourbar(direction = "vertical"), colors=yellows)+ xlab("Component 1") + ylab("Component 2")  + geom_point(data=as.data.frame(pca1$scores[r6[1],1:2]), mapping=aes(x=pca1$scores[r6[1],1],y=pca1$scores[r6[1],2]), colour="yellow", shape = 17, size=4)
+
+    turnsplot <- ggplot() + geom_path(data = as.data.frame(pca1$scores[r2,1:2]),size=2, aes(x = pca1$scores[r2,1], y = pca1$scores[r2,2],color=r1))+ 
+      scale_colour_gradientn(name ="Turns",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Reds"))+ xlab("Component 1") + ylab("Component 2") + geom_point(data=as.data.frame(pca1$scores[r2[1],1:2]), mapping=aes(x=pca1$scores[r2[1],1],y=pca1$scores[r2[1],2]), colour="red", shape = 17, size=4)
+
     
     p1<-ggplot() +  
       geom_path(data = as.data.frame(pca1$scores[r2,1:2]),size=2, aes(x = pca1$scores[r2,1], y = pca1$scores[r2,2],color=r1))+ 
@@ -1823,149 +1911,492 @@ plotPCA=function(ratdata,allmodelRes)
       geom_point(data=as.data.frame(pca1$scores[r4[1],1:2]), mapping=aes(x=pca1$scores[r4[1],1],y=pca1$scores[r4[1],2]), colour="grey", shape = 17, size=4)+
       geom_point(data=as.data.frame(pca1$scores[r5[1],1:2]), mapping=aes(x=pca1$scores[r5[1],1],y=pca1$scores[r5[1],2]), colour="violet",shape = 17,  size=4)+
       geom_point(data=as.data.frame(pca1$scores[r6[1],1:2]), mapping=aes(x=pca1$scores[r6[1],1],y=pca1$scores[r6[1],2]), colour="yellow", shape = 17, size=4)+
-      xlab("Component 1") +     ylab("Component 2") + theme(legend.direction = "vertical", legend.box = "horizontal",legend.position = "right")+ggtitle("All models")+  theme(plot.title = element_text(hjust = 0.5))
+      xlab("Component 1") +     ylab("Component 2") + theme(legend.direction = "vertical", legend.box = "horizontal",legend.position = "right")+ggtitle("All models")+  theme(plot.title = element_text(hjust = 0.5))+theme(legend.position = "none")
     
+    #grid.arrange(pathplot, hybrid1plot, hybrid2plot, hybrid3plot, hybrid4plot, turnsplot,p1, layout_matrix = lay)
+    P3<-grid.arrange(pathplot, hybrid1plot, hybrid2plot, hybrid3plot, hybrid4plot, turnsplot,nrow=2)
+    P4 <- plot_grid(P3,p1,labels = "auto", ncol = 1, align = 'v', axis = 'l')
     
-    ## 4 models together - Hybrid1,2,3,4
-    X3=allmodelRes@Hybrid1@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X4=allmodelRes@Hybrid2@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X5=allmodelRes@Hybrid3@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X6=allmodelRes@Hybrid4@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    
-    X=rbind(X3,X4,X5,X6)
-    n=length(X[,1]) 
-    Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
-    pca.new = princomp(Xtilde)
-  
-    matLen = length(X3[,1])
-    x <- seq(0, 1, length.out = matLen)
-    yellows<-seq_gradient_pal("white", "yellow")(x)
-    x <- seq(0, 1, length.out = matLen)
-    violets<-seq_gradient_pal("white", "violet")(x)
-    r3.new = c(1:matLen)
-    r4.new = c((matLen+1):(2*matLen))
-    r5.new = c((2*matLen+1):(3*matLen))
-    r6.new = c((3*matLen+1):(4*matLen))
-
-    p1<-ggplot() +  
-      geom_path(data = as.data.frame(pca1$scores[r3.new,1:2]),size=2, aes(x = pca1$scores[r3.new,1], y = pca1$scores[r3.new,2],color=r1))+ 
-      scale_colour_gradientn(name ="Turns",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Reds"))  +
-      new_scale_color() +
-      
-      geom_path(data = as.data.frame(pca1$scores[r4.new,1:2]),size=2, aes(x = pca1$scores[r4.new,1], y = pca1$scores[r4.new,2],color=r1))+
-      scale_colour_gradientn(name ="Hybrid1",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Blues")) + 
-      new_scale_color() +
-      
-      geom_path(data = as.data.frame(pca1$scores[r5.new,1:2]),size=2, aes(x = pca1$scores[r5.new,1], y = pca1$scores[r5.new,2],color=r1))+ 
-      scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "vertical"), colors=brewer.pal(5, "Greys")) + 
-      new_scale_color() +
-      
-      geom_path(data = as.data.frame(pca1$scores[r6.new,1:2]),size=2, aes(x = pca1$scores[r6.new,1], y = pca1$scores[r6.new,2],color=r1))+ 
-      scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "vertical"), colors=violets) + 
-      new_scale_color() +
-      
-      geom_point(data=as.data.frame(pca1$scores[r3[1],1:2]), mapping=aes(x=pca1$scores[r3.new[1],1],y=pca1$scores[r3.new[1],2]), colour="blue", shape = 17, size=4)+
-      geom_point(data=as.data.frame(pca1$scores[r4[1],1:2]), mapping=aes(x=pca1$scores[r4.new[1],1],y=pca1$scores[r4.new[1],2]), colour="grey", shape = 17, size=4)+
-      geom_point(data=as.data.frame(pca1$scores[r5[1],1:2]), mapping=aes(x=pca1$scores[r5.new[1],1],y=pca1$scores[r5.new[1],2]), colour="violet",shape = 17,  size=4)+
-      geom_point(data=as.data.frame(pca1$scores[r6[1],1:2]), mapping=aes(x=pca1$scores[r6.new[1],1],y=pca1$scores[r6.new[1],2]), colour="yellow", shape = 17, size=4)+
-      xlab("Component 1") +     ylab("Component 2") + theme(legend.direction = "vertical", legend.box = "horizontal",legend.position = "right")+ggtitle("All models")+  theme(plot.title = element_text(hjust = 0.5))
-    
-    
-
-    
-    
-    ## 3 models together - Path, Hybrid2, Hybrid3
-    X1=allmodelRes@Paths@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X4=allmodelRes@Hybrid2@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X5=allmodelRes@Hybrid3@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    
-    X=rbind(X1,X4,X5)
-    Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
-    pca2=princomp(Xtilde)
-    
-    matLen = length(X1[,1])
-    x <- seq(0, 1, length.out = matLen)
-    yellows<-seq_gradient_pal("white", "yellow")(x)
-    x <- seq(0, 1, length.out = matLen)
-    violets<-seq_gradient_pal("white", "violet")(x)
-    r11 = c(1:matLen)
-    r22 = c((matLen+1):(2*matLen))
-    r33 = c((2*matLen+1):(3*matLen))
-    
-    p2<-ggplot() + 
-      geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r22,1:2]),size=2, aes(x = pca2$scores[r22,1], y = pca2$scores[r22,2],color=r11))+ scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "horizontal"), colors=brewer.pal(5, "Greys")) + new_scale_color()+
-      geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r33,1:2]),size=2, aes(x = pca2$scores[r33,1], y = pca2$scores[r33,2],color=r11))+ scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "horizontal"), colors=violets) + new_scale_color()+
-      geom_path(show.legend = FALSE,data = as.data.frame(pca2$scores[r11,1:2]), size=2, aes(x = pca2$scores[r11,1], y = pca2$scores[r11,2],color=r11))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) +
-      geom_point(data=as.data.frame(pca2$scores[r11[1],1:2]), mapping=aes(x=pca2$scores[r11[1],1],y=pca2$scores[r1[1],2]), colour="green", shape = 17, size=4)+
-      geom_point(data=as.data.frame(pca2$scores[r22[1],1:2]), mapping=aes(x=pca2$scores[r22[1],1],y=pca2$scores[r2[1],2]), colour="grey", shape = 17, size=4)+
-      geom_point(data=as.data.frame(pca2$scores[r33[1],1:2]), mapping=aes(x=pca2$scores[r33[1],1],y=pca2$scores[r3[1],2]), colour="violet", shape = 17, size=4)+
-      xlab("Component 1") +     ylab("Component 2") + ggtitle("Paths, Hybrid2 and Hybrid3")+  theme(plot.title = element_text(hjust = 0.5))
-    
-    
-    ## 2 models together - Path, Hybrid2
-    
-    X1=allmodelRes@Paths@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X4=allmodelRes@Hybrid2@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    
-    X=rbind(X1,X4)
-    Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
-    pca3=princomp(Xtilde)
-    
-    matLen = length(X1[,1])
-    x <- seq(0, 1, length.out = matLen)
-    yellows<-seq_gradient_pal("white", "yellow")(x)
-    x <- seq(0, 1, length.out = matLen)
-    violets<-seq_gradient_pal("white", "violet")(x)
-    r1111 = c(1:matLen)
-    r2222 = c((matLen+1):(2*matLen))
-    
-    p3<-ggplot() + 
-      geom_path(show.legend = FALSE,data = as.data.frame(pca3$scores[r2222,1:2]),size=2, aes(x = pca3$scores[r2222,1], y = pca3$scores[r2222,2],color=r1111))+ scale_colour_gradientn(name ="Hybrid2",guide = guide_colourbar(direction = "horizontal"), colors=brewer.pal(5, "Greys")) + new_scale_color()+
-      geom_path(show.legend = FALSE,data = as.data.frame(pca3$scores[r1111,1:2]), size=2, aes(x = pca3$scores[r1111,1], y = pca3$scores[r1111,2],color=r1111))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) + 
-      geom_point(data=as.data.frame(pca3$scores[r1111[1],1:2]), mapping=aes(x=pca3$scores[r1111[1],1],y=pca3$scores[r1111[1],2]), colour="green", shape = 17, size=4)+
-      geom_point(data=as.data.frame(pca3$scores[r2222[1],1:2]), mapping=aes(x=pca3$scores[r2222[1],1],y=pca3$scores[r2222[1],2]), colour="grey",shape = 17,  size=4)+
-      xlab("Component 1") +     ylab("Component 2") + ggtitle("Paths and Hybrid2")+  theme(plot.title = element_text(hjust = 0.5))
-    
-    
-    
-    ## 2 models together - Path, Hybrid3 
-    
-    X1=allmodelRes@Paths@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    X5=allmodelRes@Hybrid3@aca2@probMatrix[state_idx[state_idx > rangeEnd],colIdx]
-    
-    X=rbind(X1,X5)
-    Xtilde=apply(X,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
-    pca4=princomp(Xtilde)
-    
-    matLen = length(X1[,1])
-    x <- seq(0, 1, length.out = matLen)
-    yellows<-seq_gradient_pal("white", "yellow")(x)
-    x <- seq(0, 1, length.out = matLen)
-    violets<-seq_gradient_pal("white", "violet")(x)
-    r111 = c(1:matLen)
-    r222 = c((matLen+1):(2*matLen))
-    
-    p4<-ggplot() + 
-      geom_path(show.legend = FALSE,data = as.data.frame(pca4$scores[r222,1:2]),size=2, aes(x = pca4$scores[r222,1], y = pca4$scores[r222,2],color=r111))+ scale_colour_gradientn(name ="Hybrid3",guide = guide_colourbar(direction = "horizontal"), colors=violets) + new_scale_color()+
-      geom_path(show.legend = FALSE,data = as.data.frame(pca4$scores[r111,1:2]), size=2, aes(x = pca4$scores[r111,1], y = pca4$scores[r111,2],color=r111))+scale_colour_gradientn(name ="Path",guide = guide_colourbar(direction = "horizontal"), colours = brewer.pal(5, "Greens")) +
-      geom_point(data=as.data.frame(pca4$scores[r111[1],1:2]), mapping=aes(x=pca4$scores[r111[1],1],y=pca4$scores[r111[1],2]), colour="green", shape = 17, size=4)+
-      geom_point(data=as.data.frame(pca4$scores[r222[1],1:2]), mapping=aes(x=pca4$scores[r222[1],1],y=pca4$scores[r222[1],2]), colour="violet", shape = 17, size=4)+
-      xlab("Component 1") +     ylab("Component 2") + ggtitle("Paths and Hybrid3")+  theme(plot.title = element_text(hjust = 0.5))
-    
-    
-    
-    #if(state==1) title = paste0(rat,", box E")
-    #if(state==2) title = paste0(rat,", box I")
-    
-    legend = gtable_filter(ggplot_gtable(ggplot_build(p1)), "guide-box")
-    grid.arrange(arrangeGrob(p1 + theme(legend.position="none"), p2+ theme(legend.position="none"),p3+ theme(legend.position="none"), p4+ theme(legend.position="none"),nrow=2),legend, ncol=1,heights=c(6,1))
-    #grid.arrange(arrangeGrob(p1 + theme(legend.position="none"), p2+ theme(legend.position="none"),p3+ theme(legend.position="none"), p4+ theme(legend.position="none"),nrow=2),legend, ncol=1,heights=c(6,1),top = textGrob(title,gp=gpar(fontsize=20,font=3)))
-    
+    #file4 <- tempfile("file4", fileext = ".pdf")
+    #save_plot(file4, p4, ncol = 2, base_asp = 1.1)
+    setwd(plot.dir)
+    ggsave(paste("PCA_",rat,"_state",state,".pdf",sep=""), P4,width=11, height=12)
     dev.off()
   }
   
   #ggsave(paste("PCA_",rat,".pdf",sep=""),width=11, height=11)
 }
+
+plotPCA2=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*resList.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  allmodelRes <- new("AllModelRes")
+  models.populated = c()
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  
+  
+  df_s1 <- data.frame(Comp.1=double(),
+                   Comp.2=double(), 
+                   Model=character(), 
+                   PathIdx = integer(),
+                   PlotPoint = integer(),
+                   stringsAsFactors=FALSE)
+  
+  df_s2 <- data.frame(Comp.1=double(),
+                      Comp.2=double(), 
+                      Model=character(), 
+                      PathIdx = integer(),
+                      PlotPoint = integer(),
+                      stringsAsFactors=FALSE)
+  
+  for(k in c(1:length(combinedResList)))
+  {
+    ##Extracting generator model from resList[[k]][[1]]
+    genData = combinedResList[[k]][[1]]$data
+    genModel = genData@simModel
+    ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+    index = which(models==genModel)
+    testModelData = combinedResList[[k]][[index]]$res
+    testModel = testModelData@Model
+    #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
+    
+    if(genModel=="Paths")
+    {
+      models.populated = c(models.populated,genModel)
+      state1_idx = which(genData@allpaths[,2] == 0)
+      state2_idx = which(genData@allpaths[,2] == 1)
+      
+      X_s1=testModelData@probMatrix[state1_idx,c(1:6)]
+      X_s1=X_s1[,c(1:5)]
+      n=length(X_s1[,1]) 
+      Xtilde=apply(X_s1,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+      pca_path_s1=princomp(Xtilde)
+      df_s1 <- rbind(df_s1, cbind(pca_path_s1$scores[,c(1:2)],rep("Paths",n),state1_idx,rep(0,n)))
+      df_s1[1,5] = 1
+      df_s1[min(which(state1_idx >= 801)),5] = 1
+      df_s1[length(df_s1[,1]),5] = 1
+      
+      X_s2=testModelData@probMatrix[state2_idx,c(7:12)]
+      X_s2=X_s2[,c(1:5)]
+      n=length(X_s2[,1]) 
+      Xtilde=apply(X_s2,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+      pca_path_s2=princomp(Xtilde)
+      df_s2 <- rbind(df_s2, cbind(pca_path_s2$scores[,c(1:2)],rep("Paths",n),state2_idx,rep(0,n)))
+      df_s2[1,5] = 1
+      df_s2[min(which(state2_idx >= 801)),5] = 1
+      df_s2[length(df_s2[,1]),5] = 1
+      
+      break
+    }
+  }
+  
+  for(k in c(1:length(combinedResList)))
+  {
+    ##Extracting generator model from resList[[k]][[1]]
+    genData = combinedResList[[k]][[1]]$data
+    genModel = combinedResList[[k]][[1]]$data@simModel
+    ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+    index = which(models==genModel)
+    testModelData = combinedResList[[k]][[index]]$res
+    testModel = testModelData@Model
+    #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
+    if(!testModel %in% models.populated)
+    {
+      models.populated = c(models.populated,genModel)
+      print(sprintf("testModel=%s",testModel))
+      #modelData <- slot(slot(allmodelRes,"Paths"),"aca2")
+
+      state1_idx = which(genData@allpaths[,2] == 0)
+      state2_idx = which(genData@allpaths[,2] == 1)
+      
+      X_s1=testModelData@probMatrix[state1_idx,c(1:6)]
+      X_s1=X_s1[,c(1:5)]
+      n=length(X_s1[,1]) 
+      Xtilde=apply(X_s1,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+      pca_s1 = predict(pca_path_s1, Xtilde)
+      curr_idx = length((df_s1[,1]))
+      df_s1 <- rbind(df_s1, cbind(pca_s1[,c(1:2)],rep(testModel,n),state1_idx,rep(0,n)))
+      idx1 = curr_idx+1
+      df_s1[idx1,5] = 1
+      idx2 = curr_idx+min(which(state1_idx >= 801))
+      df_s1[idx2,5] = 1
+      idx3 = length(df_s1[,1])
+      df_s1[idx3,5] = 1
+      
+      #print(sprintf("S1 idx1=%i,idx2=%i",idx1,idx2))
+      
+      X_s2=testModelData@probMatrix[state2_idx,c(7:12)]
+      X_s2=X_s2[,c(1:5)]
+      n=length(X_s2[,1]) 
+      Xtilde=apply(X_s2,2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+      pca_s2 = predict(pca_path_s2, Xtilde)
+      curr_idx = length((df_s2[,1]))
+      df_s2 <- rbind(df_s2, cbind(pca_s2[,c(1:2)],rep(testModel,n),state2_idx,rep(0,n)))
+      idx1 = curr_idx+1
+      df_s2[idx1,5] = 1
+      idx2 = curr_idx+min(which(state2_idx >= 801))
+      df_s2[idx2,5] = 1
+      idx3 = length(df_s2[,1])
+      df_s2[idx3,5] = 1
+      
+      #print(sprintf("S2 idx1=%i,idx2=%i",idx1,idx2))
+      
+    }
+    
+    if(length(models.populated)==6)
+    {
+      break
+    }
+  }
+  
+ 
+  df_s1[,1] <- as.numeric(df_s1[,1])
+  df_s1[,2] <- as.numeric(df_s1[,2])
+  df_s1[,4] <- as.numeric(df_s1[,4])
+  df_s1[,5] <- as.numeric(df_s1[,5])
+  p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2,color=df_s1[,4]))+ geom_text(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(~df_s1$V3)+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-E PCA")
+  
+  
+  df_s2[,1] <- as.numeric(df_s2[,1])
+  df_s2[,2] <- as.numeric(df_s2[,2])
+  df_s2[,4] <- as.numeric(df_s2[,4])
+  df_s2[,5] <- as.numeric(df_s2[,5])
+  p2<-ggplot(data = df_s2)+geom_path(aes_(x=df_s2$Comp.1, y=df_s2$Comp.2,color=df_s2[,4]))+ geom_text(aes_(x=df_s2$Comp.1, y=df_s2$Comp.2),label = ifelse(df_s2$V5==1, df_s2[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(~df_s2$V3)+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-I PCA")
+  
+  P2<-grid.arrange(p1,p2,nrow=2)
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P2,width=11, height=12)
+}
+
+
+
+plotPCA3=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*resList.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  allmodelRes <- new("AllModelRes")
+  models.populated = c()
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  
+  probMat_S1 <- data.frame(matrix(0,0,9))
+  probMat_S2 <- data.frame(matrix(0,0,9))
+  
+  for(k in c(1:length(combinedResList)))
+  {
+    ##Extracting generator model from resList[[k]][[1]]
+    genData = combinedResList[[k]][[1]]$data
+    genModel = combinedResList[[k]][[1]]$data@simModel
+    ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+    index = which(models==genModel)
+    testModelData = combinedResList[[k]][[index]]$res
+    testModel = testModelData@Model
+    #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
+    if(!testModel %in% models.populated)
+    {
+      models.populated = c(models.populated,genModel)
+      print(sprintf("testModel=%s",testModel))
+      #modelData <- slot(slot(allmodelRes,"Paths"),"aca2")
+      
+      state1_idx = which(genData@allpaths[,2] == 0)
+      state2_idx = which(genData@allpaths[,2] == 1)
+      
+      probMatS1_model=testModelData@probMatrix[state1_idx,c(1:6)]
+      n=length(probMatS1_model[,1])
+      probMatS1_model = cbind(probMatS1_model,rep(testModel,n),state1_idx,rep(0,n))
+      
+      curr_idx = length(probMat_S1[,1])
+      probMat_S1 <- rbind(probMat_S1, probMatS1_model)
+      idx1 = curr_idx+1
+      probMat_S1[idx1,9] = 1
+      idx2 = curr_idx+min(which(state1_idx >= 801))
+      probMat_S1[idx2,9] = 1
+      idx3 = length(probMat_S1[,1])
+      probMat_S1[idx3,9] = 1
+      
+      #print(sprintf("S1 idx1=%i,idx2=%i",idx1,idx2))
+      
+      
+      probMatS2_model=testModelData@probMatrix[state2_idx,c(7:12)]
+      n=length(probMatS2_model[,1])
+      probMatS2_model = cbind(probMatS2_model,rep(testModel,n),state2_idx,rep(0,n))
+      
+      curr_idx = length(probMat_S2[,1])
+      probMat_S2 <- rbind(probMat_S2, probMatS2_model)
+      idx1 = curr_idx+1
+      probMat_S2[idx1,9] = 1
+      idx2 = curr_idx+min(which(state2_idx >= 801))
+      probMat_S2[idx2,9] = 1
+      idx3 = length(probMat_S2[,1])
+      probMat_S2[idx3,9] = 1
+      
+      #print(sprintf("S2 idx1=%i,idx2=%i",idx1,idx2))
+      
+    }
+    
+    if(length(models.populated)==6)
+    {
+      break
+    }
+  }
+  probMat_S1 <- rbind(probMat_S1,c(0,0,0,1,0,0,"Asymptotic",0,0))
+  probMat_S2 <- rbind(probMat_S2,c(0,0,0,1,0,0,"Asymptotic",0,0))
+  
+  cols.num <- c(1,2,3,4,5,6,8,9)
+  probMat_S1[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S1[[x]]))
+  probMat_S2[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S2[[x]]))
+
+
+  n=length(probMat_S1[,1])
+  Xtilde=apply(probMat_S1[,c(1:6)],2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+  pca_s1=princomp(Xtilde[,c(1:5)])
+
+  df_s1 <- data.frame(Comp.1=double(),
+                      Comp.2=double(), 
+                      Model=character(), 
+                      PathIdx = integer(),
+                      PlotPoint = integer(),
+                      stringsAsFactors=FALSE)
+ 
+  
+  df_s1 <- as.data.frame(cbind(pca_s1$scores[c(1:n-1),c(1:2)],V3=probMat_S1[c(1:n-1),7],V4=probMat_S1[c(1:n-1),8],V5=probMat_S1[c(1:n-1),9]))
+  
+  cols.num <- c(1,2,4,5)
+  df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  
+  p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2,color=df_s1[,4]))+ geom_text(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + facet_grid(~df_s1$V3) + geom_point(aes_(x=pca_s1$scores[n,1], y=pca_s1$scores[n,2]))+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-E PCA")
+  
+
+  
+  n=length(probMat_S2[,1]) 
+  Xtilde=apply(probMat_S2[,c(1:6)],2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+  pca_s2=princomp(Xtilde[,c(1:5)])
+  
+  
+  df_s2 <- data.frame(Comp.1=double(),
+                      Comp.2=double(), 
+                      Model=character(), 
+                      PathIdx = integer(),
+                      PlotPoint = integer(),
+                      stringsAsFactors=FALSE)
+  
+
+  df_s2 <- as.data.frame(cbind(pca_s2$scores[c(1:n-1),c(1:2)],V3=probMat_S2[c(1:n-1),7],V4=probMat_S2[c(1:n-1),8],V5=probMat_S2[c(1:n-1),9]))
+  
+  cols.num <- c(1,2,4,5)
+  df_s2[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s2[[x]]))
+  
+  p2<-ggplot(data = df_s2)+geom_path(aes_(x=df_s2$Comp.1, y=df_s2$Comp.2,color=df_s2[,4]))+ geom_text(aes_(x=df_s2$Comp.1, y=df_s2$Comp.2),label = ifelse(df_s2$V5==1, df_s2[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(~df_s2$V3)+ geom_point(aes_(x=pca_s2$scores[n,1], y=pca_s2$scores[n,2]))+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-I PCA")
+  
+  P2<-grid.arrange(p1,p2,nrow=2)
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P2,width=11, height=12)
+}
+
+
+testPCA=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*resList.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  allmodelRes <- new("AllModelRes")
+  models.populated = c()
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  
+  testConditions <- c("Hybrid3-Selected", "Paths-Selected", "Hybrid2-Selected")
+  
+  probMat_S1 <- data.frame(matrix(0,0,10))
+  probMat_S2 <- data.frame(matrix(0,0,10))
+  
+  for(k in c(1:length(combinedResList)))
+  {
+    ##Extracting generator model from resList[[k]][[1]]
+    genData = combinedResList[[k]][[1]]$data
+    genModel = combinedResList[[k]][[1]]$data@simModel
+    ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+    index = which(models==genModel)
+    testModelData = combinedResList[[k]][[index]]$res
+    testModel = testModelData@Model
+    #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
+    
+    min_method = ""
+    min_score = 100000
+    gen_model = combinedResList[[k]][[1]]$data@simModel
+    gen_method = combinedResList[[k]][[1]]$data@simMethod
+    gen_modelname = paste(gen_model, gen_method, sep=".")
+    
+    for(m in 1:length(models))
+    {
+      res_model = combinedResList[[k]][[m]]$res@Model
+      res_method = combinedResList[[k]][[m]]$res@creditAssignment
+      likelihood = combinedResList[[k]][[m]]$res@likelihood
+      res_modelname = paste(res_model, res_method, sep=".")
+      model_score = sum(likelihood[-(1:800)]) * -1
+      print(sprintf("res_model=%s, model_score=%f",res_model,model_score))
+      if(model_score < min_score)
+      {
+        min_method = res_modelname
+        min_score = model_score
+        
+      }
+      
+    }
+    print(sprintf("testModel=%s, selectedModel=%s,k=%i",testModel,min_method,k))
+    condition = ""
+    
+    if(gen_model == "Hybrid3" && min_method=="Hybrid3.aca2")
+    {
+      condition = "Hybrid3-Selected"
+    }
+    else if(gen_model == "Hybrid3" && min_method=="Hybrid2.aca2")
+    {
+      condition = "Hybrid2-Selected"
+    }
+    else if(gen_model == "Hybrid3" && min_method=="Paths.aca2")
+    {
+      condition = "Paths-Selected"
+    }
+    else
+    {
+      next
+    }
+    
+    if((!condition %in% models.populated) && (condition != ""))
+    {
+      models.populated = c(models.populated,condition)
+      print(sprintf("condition=%s",condition))
+      state1_idx = which(genData@allpaths[,2] == 0)
+      state2_idx = which(genData@allpaths[,2] == 1)
+      for(m in 1:length(models))
+      {
+        probMatS1_model=combinedResList[[k]][[m]]$res@probMatrix[state1_idx,c(1:6)]
+        n=length(probMatS1_model[,1])
+        probMatS1_model = cbind(probMatS1_model,rep(models[m],n),state1_idx, rep(0,n), rep(condition,n))
+        
+        curr_idx = length(probMat_S1[,1])
+        probMat_S1 <- rbind(probMat_S1, probMatS1_model)
+        idx1 = curr_idx+1
+        probMat_S1[idx1,9] = 1
+        idx2 = curr_idx+min(which(state1_idx >= 801))
+        probMat_S1[idx2,9] = 1
+        idx3 = length(probMat_S1[,1])
+        probMat_S1[idx3,9] = 1
+        
+        
+        probMatS2_model=combinedResList[[k]][[m]]$res@probMatrix[state2_idx,c(7:12)]
+        n=length(probMatS2_model[,1])
+        probMatS2_model = cbind(probMatS2_model,rep(models[m],n),state2_idx, rep(0,n),rep(condition,n))
+        
+        curr_idx = length(probMat_S2[,1])
+        probMat_S2 <- rbind(probMat_S2, probMatS2_model)
+        idx1 = curr_idx+1
+        probMat_S2[idx1,9] = 1
+        idx2 = curr_idx+min(which(state2_idx >= 801))
+        probMat_S2[idx2,9] = 1
+        idx3 = length(probMat_S2[,1])
+        probMat_S2[idx3,9] = 1
+      }
+    }
+    
+    if(length(models.populated)==3)
+    {
+      break
+    }
+  }
+  
+  probMat_S1 <- rbind(probMat_S1,c(0,0,0,1,0,0,"Asymptotic",0,0,0))
+  probMat_S2 <- rbind(probMat_S2,c(0,0,0,1,0,0,"Asymptotic",0,0,0))
+  
+  cols.num <- c(1,2,3,4,5,6,8,9)
+  probMat_S1[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S1[[x]]))
+  probMat_S2[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S2[[x]]))
+  
+  
+  n=length(probMat_S1[,1]) 
+  Xtilde=apply(probMat_S1[,c(1:6)],2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+  pca_s1=princomp(Xtilde[,c(1:5)])
+  
+  df_s1 <- data.frame(Comp.1=double(),
+                      Comp.2=double(), 
+                      Model=character(), 
+                      PathIdx = integer(),
+                      PlotPoint = integer(),
+                      Condition = character(),
+                      stringsAsFactors=FALSE)
+  
+  
+  df_s1 <- as.data.frame(cbind(pca_s1$scores[c(1:n-1),c(1:2)],V3=probMat_S1[,7],V4=probMat_S1[,8],V5=probMat_S1[,9],V6=probMat_S1[,10]))
+  
+  cols.num <- c(1,2,4,5)
+  df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  
+  p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2,color=df_s1[,4]))+ geom_text(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(df_s1$V6~df_s1$V3)+ geom_point(aes_(x=pca_s1$scores[n,1], y=pca_s1$scores[n,2]))+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-E PCA")
+  
+  
+  
+  n=length(probMat_S2[,1]) 
+  Xtilde=apply(probMat_S2[,c(1:6)],2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+  pca_s2=princomp(Xtilde[,c(1:5)])
+  
+  
+  df_s2 <- data.frame(Comp.1=double(),
+                      Comp.2=double(), 
+                      Model=character(), 
+                      PathIdx = integer(),
+                      PlotPoint = integer(),
+                      Condition = character(),
+                      stringsAsFactors=FALSE)
+  
+  
+  df_s2 <- as.data.frame(cbind(pca_s2$scores[c(1:n-1),c(1:2)],V3=probMat_S2[c(1:n-1),7],V4=probMat_S2[c(1:n-1),8],V5=probMat_S2[c(1:n-1),9],V6=probMat_S2[c(1:n-1),10]))
+  
+  cols.num <- c(1,2,4,5)
+  df_s2[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s2[[x]]))
+  
+  p2<-ggplot(data = df_s2)+geom_path(aes_(x=df_s2$Comp.1, y=df_s2$Comp.2,color=df_s2[,4]))+ geom_text(aes_(x=df_s2$Comp.1, y=df_s2$Comp.2),label = ifelse(df_s2$V5==1, df_s2[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(df_s2$V6~df_s2$V3) + geom_point(aes_(x=pca_s2$scores[n,1], y=pca_s2$scores[n,2]))+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-I PCA")
+  
+  #P2<-grid.arrange(p1,p2,nrow=2)
+  setwd(plot.dir)
+  ggsave(paste("PCA_boxE_",rat,".pdf",sep=""), p1,width=11, height=12)
+  ggsave(paste("PCA_boxI_",rat,".pdf",sep=""), p2,width=11, height=12)
+}
+
+
 
 getEmpProbMat=function(allpaths,window,sim){
   totalActions = length(allpaths[,1])

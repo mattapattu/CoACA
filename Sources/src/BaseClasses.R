@@ -109,7 +109,7 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
           definition=function(x,ratdata)
           {
             ratName = ratdata@rat
-            endLearningStage = getEndIndex(ratName, ratdata@allpaths,sim=x@sim, limit=0.95)
+            endLearningStage = getEndIndex2(ratName, ratdata@allpaths,sim=x@sim, limit=0.95)
             model = x@Model
             testModel = slot(allModels,model)
             endLearningStage = endLearningStage/2

@@ -33,7 +33,8 @@ validateHoldout = FALSE
 printHoldoutRes = F
 paramEstTest = F
 thetaHatTest = F
-pcaPlot = F
+pcaPlot = T
+dumpModelParams = F
 
 successPlot = F
 ratSpeedPlot = FALSE
@@ -82,7 +83,9 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
-for (i in c(3)) {
+allmodelResList <- list()
+
+for (i in c(7)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
   
@@ -165,10 +168,13 @@ for (i in c(3)) {
   
   if(plotProb)
   {
-    setwd(plot.dir)
+    setwd(file.path(plot.dir,"New"))
     #debug(generatePlots)
-    generatePlots(ratdata,allmodelRes,window=20,plot.dir)
-    
+    dir <- file.path(plot.dir,"New")
+    #generatePlots(ratdata,allmodelRes,window=30,dir)
+    debug(plotPathProbs2)
+    allmodelRes = readModelParams(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
+    plotPathProbs2(ratdata,allmodelRes,plot.dir)
     #debug(generateEmpiricalPlots)
     #generateEmpiricalPlots(ratdata,window=20)
     #plotTurnProb(ratdata,allmodelRes,Hybrid3)
@@ -219,16 +225,31 @@ for (i in c(3)) {
   
   if(pcaPlot)
   {
-    debug(plotPCA3)
-    plotPCA3(ratdata,"C:/Users/matta/Downloads",plot.dir)
+    debug(plotPCA7)
+    allmodelRes = readModelParams(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
+    plotPCA7(ratdata,allmodelRes,model.data.dir)
     #debug(testPCA)
     #testPCA(ratdata,"C:/Users/matta/Downloads",plot.dir)
   }
   
+  if(dumpModelParams)
+  {
+    allmodelRes = readModelParams(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
+    allmodelResList[[i]] <- allmodelRes
+  }
+  
 }
+
+if(dumpModelParams)
+{
+  debug(printModelParams)
+  printModelParams(testData,allmodelResList)
+}
+
 
 if(successPlot)
 {
+  setwd(plot.dir)
   debug(plotSuccessRates)
   plotSuccessRates(ratDataList)
   

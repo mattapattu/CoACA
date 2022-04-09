@@ -743,12 +743,12 @@ boxplotMse = function(mat_res, model,rat){
 generatePlots=function(ratdata,allmodelRes,window,plot.dir){
   
   allpaths = ratdata@allpaths
-  rle_sess = rle(allpaths[,5])
-  last_paths<-cumsum(rle_sess$lengths)
-  allpaths1<-allpaths[-last_paths,]
+  #rle_sess = rle(allpaths[,5])
+  #last_paths<-cumsum(rle_sess$lengths)
+  #allpaths1<-allpaths[-last_paths,]
   
   #empiricalProbMat = baseModels::empiricalProbMat(allpaths1, window = window)
-  empiricalProbMat = getEmpProbMat(allpaths,window)
+  empiricalProbMat = getEmpProbMat(allpaths,window,sim=2)
   TurnsMat = allmodelRes@Turns@aca2@probMatrix
   PathsMat = allmodelRes@Paths@aca2@probMatrix
   Hybrid1Mat = allmodelRes@Hybrid1@aca2@probMatrix
@@ -822,8 +822,6 @@ generatePlots=function(ratdata,allmodelRes,window,plot.dir){
 generateLikelihoodPlots=function(ratdata,allmodelRes,testData,plot.dir){
   
   allpaths = ratdata@allpaths
-  
-  
   
   TurnsLik = allmodelRes@Turns@aca2@likelihood
   PathsLik = allmodelRes@Paths@aca2@likelihood
@@ -1197,8 +1195,6 @@ printMatRes=function(ratdata,testData,res.dir)
     mat_res_f <- mat_res_f + mat_res
   }
   print(mat_res_f)
-  
-  
   
 }
 
@@ -1584,6 +1580,143 @@ verifySimDataProbPlots=function(ratdata,res.dir,plot.dir)
     
   }
   
+  
+}
+
+
+plotPathProbs=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*modelParamRes.Rdata"), full.names=FALSE)
+  setwd(plot.dir)
+  #pdf(file=paste("PathProb",rat,".pdf",sep=""),width=11, height=7)
+  models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+  
+  for (path in c(1:6))
+  {
+    pathNbS1 <- path
+    pathNbS2 <- path + 6
+    p <- list()
+    plotIdx=0
+    combDf <- data.frame()
+    
+    for(model in models)
+    {
+      paramTestData=list.files(res.dir, pattern=paste0(rat,".*modelParamRes.Rdata"), full.names=TRUE)
+      print(paramTestData)
+      load(paramTestData)
+      index = which(models %in% model)
+      print(sprintf("model=%s, index=%i", model, index))
+      resMat <- paramTest[[index]][[1]]
+      n.rows <- length(resMat[,1])
+      alpha =  resMat[n.rows,2]
+      gamma1 = resMat[n.rows,3]
+      modelData <- new("ModelData", Model = model, creditAssignment = "aca2", sim = 1, alpha=alpha,gamma1=gamma1)
+      
+      testMOdel = slot(allModels, model)
+      probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testMOdel, sim=2)
+      empiricalProbMat <- getEmpProbMat(ratdata@allpaths,30,sim=2)
+      # par(mar=c(1,1,1,1))
+      s1Idx <- which(probMat[,pathNbS1]>0)
+      # plot(s1Idx,probMat[s1Idx,4],col="red",type='l',lty=1,ylim=c(0,1),ylab="Probability", main=paste0(model,".Left-Feeder"),xaxt='n')
+      # lines(s1Idx,empiricalProbMat[s1Idx,4],col='black',type='l')
+      s2Idx <- which(probMat[,pathNbS2]>0)
+      # plot(s2Idx,probMat[s2Idx,10],col="blue",type="l",ylab="Probability",ylim=c(0,1),main=paste0(model,".Right-Feeder"),xaxt='n')
+      # lines(s2Idx,empiricalProbMat[s2Idx,10],col="black")
+      
+      df1<-data.frame(index=s1Idx,prob=probMat[s1Idx,pathNbS1],type="model.prob",state="s1",model=rep(model,length(s1Idx)))
+      df2<-data.frame(index=s1Idx,prob=empiricalProbMat[s1Idx,pathNbS1],type="empirical.prob",state="s1",model=rep(model,length(s1Idx)))
+      
+      #df.s1<-rbind(df,df2)
+      #plotIdx=plotIdx+1
+      # p[[plotIdx]] <- ggplot()+geom_line(data=df.s1,aes_(x=df.s1$index,y=df.s1$prob,color=df.s1$type))+labs(
+      #   title = paste0(model,".Left-Feeder"),
+      #   y = "", x = ""
+      # )+theme(plot.title = element_text(size=8))
+      
+      
+      #df3<-data.frame(index=s2Idx,prob=probMat[s2Idx,10],type="model.prob",state="s2",model=rep(model,length(s2Idx)))
+      #df4<-data.frame(index=s2Idx,prob=empiricalProbMat[s2Idx,10],type="empirical.prob",state="s2",model=rep(model,length(s2Idx)))
+      
+      df3<-data.frame(index=s2Idx,prob=probMat[s2Idx,pathNbS2],type="model.prob",state="s2",model=rep(model,length(s2Idx)))
+      df4<-data.frame(index=s2Idx,prob=empiricalProbMat[s2Idx,pathNbS2],type="empirical.prob",state="s2",model=rep(model,length(s2Idx)))
+      
+      
+      #df.s2<-rbind(df,df2)
+      #plotIdx=plotIdx+1
+      # p[[plotIdx]] <- ggplot()+geom_line(data=df.s2,aes_(x=df.s2$index,y=df.s2$prob,color=df.s2$type))+labs(
+      #   title = paste0(model,".Right-Feeder"),
+      #   y = "", x = ""    )+theme(plot.title = element_text(size=8))
+      
+      combDf <- rbind(combDf,df1,df2,df3,df4)
+    }
+    
+    p <- ggplot()+geom_line(data=combDf,aes_(x=combDf$index,y=combDf$prob,color=combDf$type))+labs(color = "Probability Plots")+facet_grid(combDf$model~combDf$state)+    labs(
+      y = "Probability Of Reward", x = "Trials"
+    ) + ggtitle(paste0("Path ",path))
+    
+    pdf(file=paste("PathProb_Path",path,"_",rat,".pdf",sep=""),width=11, height=7)
+    
+    print(p)
+    
+    dev.off()
+    
+  }
+  
+}
+
+
+plotPathProbs2=function(ratdata,allmodelRes,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(model.data.dir)
+  dfData=list.files(".", pattern=paste0("allmodelRes_",rat,".Rdata"), full.names=FALSE)
+  
+  
+  selectedModels = list("rat_101"="Hybrid3","rat_103"="Hybrid2","rat_106"="Hybrid3","rat_112"="Hybrid3","rat_113"="Hybrid3","rat_114"="Hybrid3","robert"="Hybrid3")
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  count = list("rat_101"=50,"rat_103"=200,"rat_106"=200,"rat_112"=200,"rat_113"=100,"rat_114"=100,"robert"=50)
+  
+  modelProbMats <- data.frame(matrix(0,0,15))
+  
+  for(m in models)
+  {
+    modelData = getModelData(allmodelRes,m,"aca2")
+    testModel = slot(allModels,m)
+    
+    probMat <- TurnsNew::getProbMatrix2(ratdata, modelData, testModel, sim=2)
+    
+    #print(sprintf("S2 idx1=%i,idx2=%i",idx1,idx2))
+    n=length(probMat[,1])
+    modelProbMats=rbind(modelProbMats,cbind(probMat,rep(m,n)))
+    
+  }
+  
+  empProbMat <- getEmpProbMat3(ratdata@allpaths,30,2)
+  
+  
+  cols.num <- c(1:13)
+  modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
+  
+
+  df1 <- as.data.frame(cbind(modelProbMats[,1:12], model=modelProbMats[,14],trial=modelProbMats[,13]))
+  df2 <- as.data.frame(cbind(empProbMat[,1:12], model=rep("Empirical",length(empProbMat[,1])),trial=empProbMat[,13]))
+  names(df2) <- names(df1)
+  df1 <- rbind(df1,df2)  
+  
+  cols.num <- c(1:12,14)
+  df1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df1[[x]]))
+  
+  df1<-df1[(df1$model=="Paths")||(df1$model=="Hybrid3")||(df1$model=="Empirical"),]
+  df1.melt<-melt(df1,measure.vars = c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12"))
+  
+  
+  p <- ggplot()+geom_line(data=df1.melt,aes_(x=df1.melt$trial,y=df1.melt$value,color=df1.melt$model))+labs(color = "Probability Plots")+facet_wrap(~df1.melt$variable)
+    
+    #pdf(file=paste("PathProb_Path",path,"_",rat,".pdf",sep=""),width=11, height=7)
+    
+    print(p)
   
 }
 
@@ -2083,7 +2216,7 @@ plotPCA2=function(ratdata,res.dir,plot.dir)
 
 
 
-plotPCA3=function(ratdata,res.dir,plot.dir)
+plotPCA3=function(ratdata,res.dir,allModelRes,plot.dir)
 {
   rat=ratdata@rat
   setwd(res.dir)
@@ -2099,8 +2232,8 @@ plotPCA3=function(ratdata,res.dir,plot.dir)
   models.populated = c()
   models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
   
-  probMat_S1 <- data.frame(matrix(0,0,9))
-  probMat_S2 <- data.frame(matrix(0,0,9))
+  probMat_S1 <- data.frame(matrix(0,0,10))
+  probMat_S2 <- data.frame(matrix(0,0,10))
   
   for(k in c(1:length(combinedResList)))
   {
@@ -2123,7 +2256,7 @@ plotPCA3=function(ratdata,res.dir,plot.dir)
       
       probMatS1_model=testModelData@probMatrix[state1_idx,c(1:6)]
       n=length(probMatS1_model[,1])
-      probMatS1_model = cbind(probMatS1_model,rep(testModel,n),state1_idx,rep(0,n))
+      probMatS1_model = cbind(probMatS1_model,rep(testModel,n),state1_idx,rep(0,n),rep("SimProb",n))
       
       curr_idx = length(probMat_S1[,1])
       probMat_S1 <- rbind(probMat_S1, probMatS1_model)
@@ -2139,7 +2272,7 @@ plotPCA3=function(ratdata,res.dir,plot.dir)
       
       probMatS2_model=testModelData@probMatrix[state2_idx,c(7:12)]
       n=length(probMatS2_model[,1])
-      probMatS2_model = cbind(probMatS2_model,rep(testModel,n),state2_idx,rep(0,n))
+      probMatS2_model = cbind(probMatS2_model,rep(testModel,n),state2_idx,rep(0,n),rep("SimProb",n))
       
       curr_idx = length(probMat_S2[,1])
       probMat_S2 <- rbind(probMat_S2, probMatS2_model)
@@ -2159,6 +2292,48 @@ plotPCA3=function(ratdata,res.dir,plot.dir)
       break
     }
   }
+  
+  for(m in models)
+  {
+    if(m %in% models.populated)
+    {
+      creditAssignment = "aca2"
+      trueModelData = slot(slot(allModelRes,m),creditAssignment)
+      #testModel = slot(allModels,m)
+      #trueProbMat <- TurnsNew::getProbMatrix(ratdata, trueModelData, testModel, sim=2)
+      trueProbMat <- slot(slot(slot(allModelRes,m),creditAssignment),"probMatrix")
+      state1_idx = which(ratdata@allpaths[,2] == 1)
+      state2_idx = which(ratdata@allpaths[,2] == 2)
+      
+      probMatS1_model=trueProbMat[state1_idx,c(1:6)]
+      n=length(probMatS1_model[,1])
+      probMatS1_model = cbind(probMatS1_model,rep(m,n),state1_idx,rep(0,n),rep("TrueProb",n))
+      
+      curr_idx = length(probMat_S1[,1])
+      probMat_S1 <- rbind(probMat_S1, probMatS1_model)
+      idx1 = curr_idx+1
+      probMat_S1[idx1,9] = 1
+      idx2 = curr_idx+min(which(state1_idx >= 801))
+      probMat_S1[idx2,9] = 1
+      idx3 = length(probMat_S1[,1])
+      probMat_S1[idx3,9] = 1
+      
+      probMatS2_model=trueProbMat[state2_idx,c(7:12)]
+      n=length(probMatS2_model[,1])
+      probMatS2_model = cbind(probMatS2_model,rep(m,n),state2_idx,rep(0,n),rep("TrueProb",n))
+      
+      curr_idx = length(probMat_S2[,1])
+      probMat_S2 <- rbind(probMat_S2, probMatS2_model)
+      idx1 = curr_idx+1
+      probMat_S2[idx1,9] = 1
+      idx2 = curr_idx+min(which(state2_idx >= 801))
+      probMat_S2[idx2,9] = 1
+      idx3 = length(probMat_S2[,1])
+      probMat_S2[idx3,9] = 1
+    }
+    
+  }
+  
   probMat_S1 <- rbind(probMat_S1,c(0,0,0,1,0,0,"Asymptotic",0,0))
   probMat_S2 <- rbind(probMat_S2,c(0,0,0,1,0,0,"Asymptotic",0,0))
   
@@ -2176,16 +2351,17 @@ plotPCA3=function(ratdata,res.dir,plot.dir)
                       Model=character(), 
                       PathIdx = integer(),
                       PlotPoint = integer(),
+                      IsSim = character(),
                       stringsAsFactors=FALSE)
  
   
-  df_s1 <- as.data.frame(cbind(pca_s1$scores[c(1:n-1),c(1:2)],V3=probMat_S1[c(1:n-1),7],V4=probMat_S1[c(1:n-1),8],V5=probMat_S1[c(1:n-1),9]))
+  df_s1 <- as.data.frame(cbind(pca_s1$scores[c(1:n-1),c(1:2)],V3=probMat_S1[c(1:n-1),7],V4=probMat_S1[c(1:n-1),8],V5=probMat_S1[c(1:n-1),9],V6=probMat_S1[c(1:n-1),10]))
   
   cols.num <- c(1,2,4,5)
   df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
   
   p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2,color=df_s1[,4]))+ geom_text(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),hjust = 0, nudge_x = 0.1)+
-    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + facet_grid(~df_s1$V3) + geom_point(aes_(x=pca_s1$scores[n,1], y=pca_s1$scores[n,2]))+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + facet_grid(df_s1$V6~df_s1$V3) + geom_point(aes_(x=pca_s1$scores[n,1], y=pca_s1$scores[n,2]))+
     xlab("Component 1") + ylab("Component 2")+ggtitle("Box-E PCA")
   
 
@@ -2200,10 +2376,214 @@ plotPCA3=function(ratdata,res.dir,plot.dir)
                       Model=character(), 
                       PathIdx = integer(),
                       PlotPoint = integer(),
+                      IsSim = character(),
                       stringsAsFactors=FALSE)
   
 
-  df_s2 <- as.data.frame(cbind(pca_s2$scores[c(1:n-1),c(1:2)],V3=probMat_S2[c(1:n-1),7],V4=probMat_S2[c(1:n-1),8],V5=probMat_S2[c(1:n-1),9]))
+  df_s2 <- as.data.frame(cbind(pca_s2$scores[c(1:n-1),c(1:2)],V3=probMat_S2[c(1:n-1),7],V4=probMat_S2[c(1:n-1),8],V5=probMat_S2[c(1:n-1),9],V6=probMat_S2[c(1:n-1),10]))
+  
+  cols.num <- c(1,2,4,5)
+  df_s2[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s2[[x]]))
+  
+  p2<-ggplot(data = df_s2)+geom_path(aes_(x=df_s2$Comp.1, y=df_s2$Comp.2,color=df_s2[,4]))+ geom_text(aes_(x=df_s2$Comp.1, y=df_s2$Comp.2),label = ifelse(df_s2$V5==1, df_s2[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(df_s2$V6~df_s2$V3)+ geom_point(aes_(x=pca_s2$scores[n,1], y=pca_s2$scores[n,2]))+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-I PCA")
+  
+  P2<-grid.arrange(p1,p2,nrow=2)
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P2,width=11, height=12)
+}
+
+
+plotPCA4=function(ratdata,res.dir,allModelRes,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*resList.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  allmodelRes <- new("AllModelRes")
+  models.populated = c()
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  
+  probMat_S1 <- data.frame(matrix(0,0,10))
+  probMat_S2 <- data.frame(matrix(0,0,10))
+  
+  for(k in c(1:length(combinedResList)))
+  {
+    ##Extracting generator model from resList[[k]][[1]]
+    genData = combinedResList[[k]][[1]]$data
+    genModel = combinedResList[[k]][[1]]$data@simModel
+    ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+    index = which(models==genModel)
+    testModelData = combinedResList[[k]][[index]]$res
+    testModel = testModelData@Model
+    #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
+    if(!testModel %in% models.populated)
+    {
+      models.populated = c(models.populated,genModel)
+      print(sprintf("testModel=%s",testModel))
+      #modelData <- slot(slot(allmodelRes,"Paths"),"aca2")
+      
+      state1_idx = which(genData@allpaths[,2] == 0)
+      state2_idx = which(genData@allpaths[,2] == 1)
+      
+      probMatS1_model=testModelData@probMatrix[state1_idx,c(1:6)]
+      n=length(probMatS1_model[,1])
+      probMatS1_model = cbind(probMatS1_model,rep(testModel,n),state1_idx,rep(0,n),rep("SimProb",n))
+      
+      curr_idx = length(probMat_S1[,1])
+      probMat_S1 <- rbind(probMat_S1, probMatS1_model)
+      idx1 = curr_idx+1
+      probMat_S1[idx1,9] = 1
+      idx2 = curr_idx+min(which(state1_idx >= 801))
+      probMat_S1[idx2,9] = 1
+      idx3 = length(probMat_S1[,1])
+      probMat_S1[idx3,9] = 1
+      
+      #print(sprintf("S1 idx1=%i,idx2=%i",idx1,idx2))
+      
+      
+      probMatS2_model=testModelData@probMatrix[state2_idx,c(7:12)]
+      n=length(probMatS2_model[,1])
+      probMatS2_model = cbind(probMatS2_model,rep(testModel,n),state2_idx,rep(0,n),rep("SimProb",n))
+      
+      curr_idx = length(probMat_S2[,1])
+      probMat_S2 <- rbind(probMat_S2, probMatS2_model)
+      idx1 = curr_idx+1
+      probMat_S2[idx1,9] = 1
+      idx2 = curr_idx+min(which(state2_idx >= 801))
+      probMat_S2[idx2,9] = 1
+      idx3 = length(probMat_S2[,1])
+      probMat_S2[idx3,9] = 1
+      
+      #print(sprintf("S2 idx1=%i,idx2=%i",idx1,idx2))
+      
+    }
+    
+    if(length(models.populated)==6)
+    {
+      break
+    }
+  }
+  
+
+  
+  trueProbMat <- slot(slot(slot(allModelRes,"Hybrid3"),"aca2"),"probMatrix")
+  state1_idx = which(ratdata@allpaths[,2] == 1)
+  state2_idx = which(ratdata@allpaths[,2] == 2)
+  
+  probMatS1_model=trueProbMat[state1_idx,c(1:6)]
+  n=length(probMatS1_model[,1])
+  probMatS1_model = cbind(probMatS1_model,rep("TrueProb",n),state1_idx,rep(0,n),rep("TrueProb",n))
+  
+  curr_idx = length(probMat_S1[,1])
+  probMat_S1 <- rbind(probMat_S1, probMatS1_model)
+  idx1 = curr_idx+1
+  probMat_S1[idx1,9] = 1
+  idx2 = curr_idx+min(which(state1_idx >= 801))
+  probMat_S1[idx2,9] = 1
+  idx3 = length(probMat_S1[,1])
+  probMat_S1[idx3,9] = 1
+  
+  probMatS2_model=trueProbMat[state2_idx,c(7:12)]
+  n=length(probMatS2_model[,1])
+  probMatS2_model = cbind(probMatS2_model,rep("TrueProb",n),state2_idx,rep(0,n),rep("TrueProb",n))
+  
+  curr_idx = length(probMat_S2[,1])
+  probMat_S2 <- rbind(probMat_S2, probMatS2_model)
+  idx1 = curr_idx+1
+  probMat_S2[idx1,9] = 1
+  idx2 = curr_idx+min(which(state2_idx >= 801))
+  probMat_S2[idx2,9] = 1
+  idx3 = length(probMat_S2[,1])
+  probMat_S2[idx3,9] = 1
+  
+  
+
+  empProbMat <- getEmpProbMat(ratdata@allpaths,30,2)
+  state1_idx = which(ratdata@allpaths[,2] == 1)
+  state2_idx = which(ratdata@allpaths[,2] == 2)
+  
+  probMatS1_model=empProbMat[state1_idx,c(1:6)]
+  n=length(probMatS1_model[,1])
+  probMatS1_model = cbind(probMatS1_model,rep("EmpProb",n),state1_idx,rep(0,n),rep("TrueProb",n))
+  
+  curr_idx = length(probMat_S1[,1])
+  probMat_S1 <- rbind(probMat_S1, probMatS1_model)
+  idx1 = curr_idx+1
+  probMat_S1[idx1,9] = 1
+  idx2 = curr_idx+min(which(state1_idx >= 801))
+  probMat_S1[idx2,9] = 1
+  idx3 = length(probMat_S1[,1])
+  probMat_S1[idx3,9] = 1
+  
+  probMatS2_model=empProbMat[state2_idx,c(7:12)]
+  n=length(probMatS2_model[,1])
+  probMatS2_model = cbind(probMatS2_model,rep("EmpProb",n),state2_idx,rep(0,n),rep("TrueProb",n))
+  
+  curr_idx = length(probMat_S2[,1])
+  probMat_S2 <- rbind(probMat_S2, probMatS2_model)
+  idx1 = curr_idx+1
+  probMat_S2[idx1,9] = 1
+  idx2 = curr_idx+min(which(state2_idx >= 801))
+  probMat_S2[idx2,9] = 1
+  idx3 = length(probMat_S2[,1])
+  probMat_S2[idx3,9] = 1
+  
+  
+  probMat_S1 <- rbind(probMat_S1,c(0,0,0,1,0,0,"Asymptotic",0,0))
+  probMat_S2 <- rbind(probMat_S2,c(0,0,0,1,0,0,"Asymptotic",0,0))
+  
+  cols.num <- c(1,2,3,4,5,6,8,9)
+  probMat_S1[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S1[[x]]))
+  probMat_S2[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S2[[x]]))
+  
+  
+  n=length(probMat_S1[,1])
+  Xtilde=apply(probMat_S1[,c(1:6)],2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+  pca_s1=princomp(Xtilde[,c(1:5)])
+  
+  df_s1 <- data.frame(Comp.1=double(),
+                      Comp.2=double(), 
+                      Model=character(), 
+                      PathIdx = integer(),
+                      PlotPoint = integer(),
+                      IsSim = character(),
+                      stringsAsFactors=FALSE)
+  
+  
+  df_s1 <- as.data.frame(cbind(pca_s1$scores[c(1:n-1),c(1:2)],V3=probMat_S1[c(1:n-1),7],V4=probMat_S1[c(1:n-1),8],V5=probMat_S1[c(1:n-1),9],V6=probMat_S1[c(1:n-1),10]))
+  
+  cols.num <- c(1,2,4,5)
+  df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  
+  p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2,color=df_s1[,4]))+ geom_text(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + facet_grid(~df_s1$V3) + geom_point(aes_(x=pca_s1$scores[n,1], y=pca_s1$scores[n,2]))+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-E PCA")
+  
+  
+  
+  n=length(probMat_S2[,1]) 
+  Xtilde=apply(probMat_S2[,c(1:6)],2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+  pca_s2=princomp(Xtilde[,c(1:5)])
+  
+  
+  df_s2 <- data.frame(Comp.1=double(),
+                      Comp.2=double(), 
+                      Model=character(), 
+                      PathIdx = integer(),
+                      PlotPoint = integer(),
+                      IsSim = character(),
+                      stringsAsFactors=FALSE)
+  
+  
+  df_s2 <- as.data.frame(cbind(pca_s2$scores[c(1:n-1),c(1:2)],V3=probMat_S2[c(1:n-1),7],V4=probMat_S2[c(1:n-1),8],V5=probMat_S2[c(1:n-1),9],V6=probMat_S2[c(1:n-1),10]))
   
   cols.num <- c(1,2,4,5)
   df_s2[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s2[[x]]))
@@ -2217,6 +2597,370 @@ plotPCA3=function(ratdata,res.dir,plot.dir)
   ggsave(paste("PCA_",rat,".pdf",sep=""), P2,width=11, height=12)
 }
 
+
+plotPCA5=function(ratdata,allModelRes,model.data.dir)
+{
+  rat=ratdata@rat
+  setwd(model.data.dir)
+  dfData=list.files(".", pattern=paste0("allmodelRes_",rat,".Rdata"), full.names=FALSE)
+  
+  
+  selectedModels = list("rat_101"="Hybrid3","rat_103"="Hybrid2","rat_106"="Hybrid3","rat_112"="Hybrid3","rat_113"="Hybrid3","rat_114"="Hybrid3","robert"="Hybrid3")
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  count = list("rat_101"=50,"rat_103"=200,"rat_106"=200,"rat_112"=200,"rat_113"=100,"rat_114"=100,"robert"=50)
+  
+  probMat_S1 <- data.frame(matrix(0,0,10))
+  probMat_S2 <- data.frame(matrix(0,0,10))
+  
+  for(m in models)
+  {
+    modelData = getModelData(allModelRes,m,"aca2")
+    
+    state1_idx = which(ratdata@allpaths[,2] == 1)
+    state2_idx = which(ratdata@allpaths[,2] == 2)
+    
+    probMatS1_model=modelData@probMatrix[state1_idx,c(1:6)]
+    n=length(probMatS1_model[,1])
+    probMatS1_model = cbind(probMatS1_model,rep(m,n),state1_idx,rep(0,n),rep("TrueProb",n))
+    
+    curr_idx = length(probMat_S1[,1])
+    probMat_S1 <- rbind(probMat_S1, probMatS1_model)
+    idx1 = curr_idx+1
+    probMat_S1[idx1,9] = 1
+    idx2 = curr_idx+min(which(state1_idx >= 801))
+    probMat_S1[idx2,9] = 1
+    idx3 = length(probMat_S1[,1])
+    probMat_S1[idx3,9] = 1
+    
+    #print(sprintf("S1 idx1=%i,idx2=%i",idx1,idx2))
+    
+    
+    probMatS2_model=modelData@probMatrix[state2_idx,c(7:12)]
+    n=length(probMatS2_model[,1])
+    probMatS2_model = cbind(probMatS2_model,rep(m,n),state2_idx,rep(0,n),rep("TrueProb",n))
+    
+    curr_idx = length(probMat_S2[,1])
+    probMat_S2 <- rbind(probMat_S2, probMatS2_model)
+    idx1 = curr_idx+1
+    probMat_S2[idx1,9] = 1
+    idx2 = curr_idx+min(which(state2_idx >= 801))
+    probMat_S2[idx2,9] = 1
+    idx3 = length(probMat_S2[,1])
+    probMat_S2[idx3,9] = 1
+    
+    #print(sprintf("S2 idx1=%i,idx2=%i",idx1,idx2))
+    
+  }
+  
+  
+  probMatRowsS1 <- length(probMat_S1[,1]) 
+  probMatRowsS2 <- length(probMat_S2[,1]) 
+  
+  empProbMat <- getEmpProbMat(ratdata@allpaths,15,2)
+  state1_idx = which(ratdata@allpaths[,2] == 1)
+  state2_idx = which(ratdata@allpaths[,2] == 2)
+  
+  
+  cols.num <- c(1,2,3,4,5,6,8,9)
+  probMat_S1[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S1[[x]]))
+  probMat_S2[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S2[[x]]))
+  
+  
+  #empPCAS1<-scale(empS1[,c(1:5)], pca_res$center, pca_res$scale) %*% pca_res$rotation
+  #emp_pca<-predict(object=pca_res, newdata = empS1[,c(1:5)])
+  pca_s1 = prcomp(probMat_S1[1:probMatRowsS1,c(1:5)],scale=T,center = T)
+  empPCAS1 = scale(empProbMat[state1_idx,c(1:5)], pca_s1$center, pca_s1$scale) %*% pca_s1$rotation
+  
+  #n=length(probMat_S1[1:probMatRowsS1,1])
+  #Xtilde=apply(probMat_S1[1:probMatRowsS1,c(1:6)],2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+  #pca_s1=princomp(Xtilde[1:probMatRowsS1,c(1:5)])
+  
+  
+  pca_s2 = prcomp(probMat_S2[1:probMatRowsS2,c(1:5)],scale=T,center = T)
+  empPCAS2 = scale(empProbMat[state2_idx,c(7:11)], pca_s2$center, pca_s2$scale) %*% pca_s2$rotation
+  
+  empProbMatS1 <- empProbMat[state1_idx,c(1:6)]
+  empProbMatS2 <- empProbMat[state2_idx,c(7:12)]
+  
+  
+  selModelIdx <- which(probMat_S1[,7]==selectedModels[[ratdata@rat]])
+  remove800 <- which(probMat_S1[selModelIdx,8] < 800)
+  selModelIdx <- selModelIdx[-c(remove800)]
+  
+  
+  #df_s1 <- as.data.frame(cbind(pca_s1$x[selModelIdx,c(1:2)],V3=rep(selectedModels[[ratdata@rat]],length(selModelIdx)),V4=probMat_S1[selModelIdx,8],V5=probMat_S1[selModelIdx,9],V6=probMat_S1[selModelIdx,10]))
+  #df_s1 <- rbind(df_s1,cbind(empPCAS1[-c(1:length(remove800)),c(1:2)],V3=rep("Empirical",length(selModelIdx)),V4=probMat_S1[selModelIdx,8],V5=probMat_S1[selModelIdx,9],V6=probMat_S1[selModelIdx,10]))
+  ###df_s1 <- rbind(df_s1,cbind(empPCAS1[,c(1:2)],V3=rep("Empirical",length(selModelIdx)),V4=probMat_S1[selModelIdx,8],V5=probMat_S1[selModelIdx,9],V6=probMat_S1[selModelIdx,10]))
+  #cols.num <- c(1,2,4,5)
+  #df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  
+  #p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$PC1, y=df_s1$PC2,color=df_s1[,4]))+ geom_text(aes_(x=df_s1$PC1, y=df_s1$PC2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),hjust = 0, nudge_x = 0.1)+
+  #  scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + facet_grid(~df_s1$V3) +     xlab("Component 1") + ylab("Component 2")+ggtitle("Box-E PCA")
+  
+  path.probs.s1 <- apply(round(probMat_S1[selModelIdx,c(1,2,3,4,5)],2), 1, paste, collapse=",")
+  path.empprobs.s1 <- apply(round(empProbMatS1[-c(1:length(remove800)),c(1,2,3,4,5)],2), 1, paste, collapse=",")
+  
+  df_s1 <- as.data.frame(cbind(pca_s1$x[selModelIdx,c(1:2)],V3=rep(selectedModels[[ratdata@rat]],length(selModelIdx)),V4=probMat_S1[selModelIdx,8],V5=probMat_S1[selModelIdx,9],V6=probMat_S1[selModelIdx,10],V7=path.probs.s1))
+  df_s1 <- rbind(df_s1,cbind(empPCAS1[-c(1:length(remove800)),c(1:2)],V3=rep("Empirical",length(selModelIdx)),V4=probMat_S1[selModelIdx,8],V5=probMat_S1[selModelIdx,9],V6=probMat_S1[selModelIdx,10],V7=path.empprobs.s1))
+  cols.num <- c(1,2,4,5)
+  df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$PC1, y=df_s1$PC2,color=df_s1[,4]))+ 
+    geom_text(size=3,aes_(x=df_s1$PC1, y=df_s1$PC2),
+              label = ifelse(as.numeric(df_s1$V4%%count[[ratdata@rat]]==0)==1, df_s1$V7, ""),,
+              hjust = 0, 
+              nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + 
+    facet_grid(~df_s1$V3) +     
+    coord_cartesian(xlim = c(min(df_s1$PC1),max(df_s1$PC1)), ylim=c(min(df_s1$PC2),max(df_s1$PC2)))+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-E PCA")
+  
+  
+  #plot(df_s1[1:length(selModelIdx),c(1:2)],type='l',xlim = c(min(df_s1$PC1),max(df_s1$PC1)), ylim=c(min(df_s1$PC2),max(df_s1$PC2)))
+  #lines(df_s1[(length(selModelIdx)+1):length(df_s1[,1]),c(1:2)],type='l',col='red')
+  
+  
+  selModelIdx <- which(probMat_S2[,7]==selectedModels[[ratdata@rat]])
+  remove800 <- which(probMat_S2[selModelIdx,8] < 800)
+  selModelIdx <- selModelIdx[-c(remove800)]
+  
+  #df_s2 <- as.data.frame(cbind(pca_s2$x[selModelIdx,c(1:2)],V3=rep(selectedModels[[ratdata@rat]],length(selModelIdx)),V4=probMat_S2[selModelIdx,8],V5=probMat_S2[selModelIdx,9],V6=probMat_S2[selModelIdx,10]))
+  #df_s2 <- rbind(df_s2,cbind(empPCAS2[-c(1:length(remove800)),c(1:2)],V3=rep("Empirical",length(selModelIdx)),V4=probMat_S2[selModelIdx,8],V5=probMat_S2[selModelIdx,9],V6=probMat_S2[selModelIdx,10]))
+  ###df_s2 <- rbind(df_s2,cbind(empPCAS2[,c(1:2)],V3=rep("Empirical",length(selModelIdx)),V4=probMat_S2[selModelIdx,8],V5=probMat_S2[selModelIdx,9],V6=probMat_S2[selModelIdx,10]))
+  #cols.num <- c(1,2,4,5)
+  #df_s2[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s2[[x]]))
+  
+  #p2<-ggplot(data = df_s2)+geom_path(aes_(x=df_s2$PC1, y=df_s2$PC2,color=df_s2[,4]))+ geom_text(aes_(x=df_s2$PC1, y=df_s2$PC2),label = ifelse(df_s2$V5==1, df_s2[,4], ""),hjust = 0, nudge_x = 0.1)+
+  # scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(~df_s2$V3)+     xlab("Component 1") + ylab("Component 2")+ggtitle("Box-I PCA")
+  
+  path.probs.s2 <- apply(round(probMat_S2[selModelIdx,c(1,2,3,4,5)],2), 1, paste, collapse=",")
+  path.empprobs.s2 <- apply(round(empProbMatS2[-c(1:length(remove800)),c(1,2,3,4,5)],2), 1, paste, collapse=",")
+  
+  df_s2 <- as.data.frame(cbind(pca_s2$x[selModelIdx,c(1:2)],V3=rep(selectedModels[[ratdata@rat]],length(selModelIdx)),V4=probMat_S2[selModelIdx,8],V5=probMat_S2[selModelIdx,9],V6=probMat_S2[selModelIdx,10],V7=path.probs.s2))
+  df_s2 <- rbind(df_s2,cbind(empPCAS2[-c(1:length(remove800)),c(1:2)],V3=rep("Empirical",length(selModelIdx)),V4=probMat_S2[selModelIdx,8],V5=probMat_S2[selModelIdx,9],V6=probMat_S2[selModelIdx,10],V7=path.empprobs.s2))
+  cols.num <- c(1,2,4,5)
+  df_s2[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s2[[x]]))
+  p2<-ggplot(data = df_s2)+geom_path(aes_(x=df_s2$PC1, y=df_s2$PC2,color=df_s2[,4]))+ 
+    geom_text(size=3,aes_(x=df_s2$PC1, y=df_s2$PC2),
+              label = ifelse(as.numeric(df_s2$V4%%count[[ratdata@rat]]==0)==1, df_s2$V7, ""),,
+              hjust = 0, 
+              nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + 
+    facet_grid(~df_s2$V3) +     
+    coord_cartesian(xlim = c(min(df_s2$PC1),max(df_s2$PC1)), ylim=c(min(df_s2$PC2),max(df_s2$PC2)))+
+    xlab("Component 1") + ylab("Component 2")+ggtitle("Box-I PCA")
+  
+  #plot(df_s2[1:length(selModelIdx),c(1:2)],type='l',xlim = c(min(df_s2$PC1),max(df_s2$PC1)), ylim=c(min(df_s2$PC2),max(df_s2$PC2)))
+  #lines(df_s2[(length(selModelIdx)+1):length(df_s2[,1]),c(1:2)],type='l',col='red')
+  
+  
+  
+  
+  P2<-grid.arrange(p1,p2,nrow=2,top=textGrob(ratdata@rat,gp=gpar(fontsize=20,font=3)))
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P2,width=11, height=12)
+}
+
+plotPCA7=function(ratdata,allModelRes,model.data.dir)
+{
+  rat=ratdata@rat
+  setwd(model.data.dir)
+  dfData=list.files(".", pattern=paste0("allmodelRes_",rat,".Rdata"), full.names=FALSE)
+  
+  
+  selectedModels = list("rat_101"="Hybrid3","rat_103"="Hybrid2","rat_106"="Hybrid3","rat_112"="Hybrid3","rat_113"="Hybrid3","rat_114"="Hybrid3","robert"="Hybrid3")
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  count = list("rat_101"=50,"rat_103"=200,"rat_106"=200,"rat_112"=200,"rat_113"=100,"rat_114"=100,"robert"=50)
+  
+  modelProbMats <- data.frame(matrix(0,0,15))
+
+  for(m in models)
+  {
+    modelData = getModelData(allModelRes,m,"aca2")
+    testModel = slot(allModels,m)
+
+    probMat <- TurnsNew::getProbMatrix2(ratdata, modelData, testModel, sim=2)
+    
+    #print(sprintf("S2 idx1=%i,idx2=%i",idx1,idx2))
+    n=length(probMat[,1])
+    modelProbMats=rbind(modelProbMats,cbind(probMat,rep(m,n)))
+    
+  }
+
+  empProbMat <- getEmpProbMat3(ratdata@allpaths,30,2)
+  
+  cols.num <- c(1:13)
+  modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
+  
+  pca = prcomp(modelProbMats[,1:12],scale=T,center = T)
+  empPCA = scale(empProbMat[,c(1:12)], pca$center, pca$scale) %*% pca$rotation
+  
+  selModelIdx <- which(modelProbMats[,14]==selectedModels[[ratdata@rat]])
+  
+  df_s1 <- as.data.frame(cbind(pca$x[,1:2], modelProbMats[,14],modelProbMats[,13]))
+  df_s1 <- rbind(df_s1,cbind(empPCA[,1:2], rep("Empirical",length(selModelIdx)),empProbMat[,13]))
+  
+  cols.num <- c(1,2,4)
+  df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  
+  cols=c("red", "blue","green","yellow","violet","brown","black")
+  df_s1 <- df_s1[which(df_s1$V4 > 800),]
+   P <- ggplot(data = df_s1) + geom_point(size=3,aes(x=df_s1$PC1,y=df_s1$PC2,color=df_s1$V3))+ geom_point(data = subset(df_s1, V3 == selectedModels[[ratdata@rat]]),size=3,aes(x=PC1,y=PC2,color = V3)) + scale_color_manual(values = cols)+
+    labs(x="PCA Component 1", y="PCA Component 2", col="Models")
+  
+  
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P,width=11, height=12)
+}
+
+
+plotPCA6=function(ratdata,allModelRes,model.data.dir)
+{
+  rat=ratdata@rat
+  setwd(model.data.dir)
+  dfData=list.files(".", pattern=paste0("allmodelRes_",rat,".Rdata"), full.names=FALSE)
+  
+  
+  selectedModels = list("rat_101"="Hybrid3","rat_103"="Hybrid2","rat_106"="Hybrid3","rat_112"="Hybrid3","rat_113"="Hybrid3","rat_114"="Hybrid3","robert"="Hybrid3")
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  
+  probMat_S1 <- data.frame(matrix(0,0,10))
+  probMat_S2 <- data.frame(matrix(0,0,10))
+  
+  for(m in models)
+  {
+    modelData = getModelData(allModelRes,m,"aca2")
+    
+    state1_idx = which(ratdata@allpaths[,2] == 1)
+    state2_idx = which(ratdata@allpaths[,2] == 2)
+    
+    probMatS1_model=modelData@probMatrix[state1_idx,c(1:6)]
+    n=length(probMatS1_model[,1])
+    probMatS1_model = cbind(probMatS1_model,rep(m,n),state1_idx,rep(0,n),rep("TrueProb",n))
+    
+    curr_idx = length(probMat_S1[,1])
+    probMat_S1 <- rbind(probMat_S1, probMatS1_model)
+    idx1 = curr_idx+1
+    probMat_S1[idx1,9] = 1
+    idx2 = curr_idx+min(which(state1_idx >= 801))
+    probMat_S1[idx2,9] = 1
+    idx3 = length(probMat_S1[,1])
+    probMat_S1[idx3,9] = 1
+    
+    probMatS2_model=modelData@probMatrix[state2_idx,c(7:12)]
+    n=length(probMatS2_model[,1])
+    probMatS2_model = cbind(probMatS2_model,rep(m,n),state2_idx,rep(0,n),rep("TrueProb",n))
+    
+    curr_idx = length(probMat_S2[,1])
+    probMat_S2 <- rbind(probMat_S2, probMatS2_model)
+    idx1 = curr_idx+1
+    probMat_S2[idx1,9] = 1
+    idx2 = curr_idx+min(which(state2_idx >= 801))
+    probMat_S2[idx2,9] = 1
+    idx3 = length(probMat_S2[,1])
+    probMat_S2[idx3,9] = 1
+    
+  }
+  
+  
+  probMatRowsS1 <- length(probMat_S1[,1]) 
+  probMatRowsS2 <- length(probMat_S2[,1]) 
+  
+  empProbMat <- getEmpProbMat(ratdata@allpaths,100,2)
+  state1_idx = which(ratdata@allpaths[,2] == 1)
+  state2_idx = which(ratdata@allpaths[,2] == 2)
+  
+  cols.num <- c(1,2,3,4,5,6,8,9)
+  probMat_S1[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S1[[x]]))
+  probMat_S2[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_S2[[x]]))
+  
+  
+  #empPCAS1<-scale(empS1[,c(1:5)], pca_res$center, pca_res$scale) %*% pca_res$rotation
+  #emp_pca<-predict(object=pca_res, newdata = empS1[,c(1:5)])
+  pca_s1 = prcomp(probMat_S1[1:probMatRowsS1,c(1:5)],scale=T,center = T)
+  empPCAS1 = scale(empProbMat[state1_idx,c(1:5)], pca_s1$center, pca_s1$scale) %*% pca_s1$rotation
+  
+  #n=length(probMat_S1[1:probMatRowsS1,1])
+  #Xtilde=apply(probMat_S1[1:probMatRowsS1,c(1:6)],2,function(x){(x-mean(x))/(sd(x)*sqrt(n-1)/sqrt(n))})
+  #pca_s1=princomp(Xtilde[1:probMatRowsS1,c(1:5)])
+  
+  
+  Xtilde=apply(probMat_S1[1:probMatRowsS1,c(1:5)],2,function(x){(x-mean(x))/sd(x)})
+  
+  
+  pca_s2 = prcomp(probMat_S2[1:probMatRowsS2,c(1:5)],scale=T,center = T)
+  empPCAS2 = scale(empProbMat[state2_idx,c(7:11)], pca_s2$center, pca_s2$scale) %*% pca_s2$rotation
+  
+  empProbMatS1 <- empProbMat[state1_idx,c(1:6)]
+  empProbMatS2 <- empProbMat[state2_idx,c(7:12)]
+  
+  selModelIdx <- which(probMat_S1[,7]==selectedModels[[ratdata@rat]])
+  #remove800 <- which(probMat_S1[selModelIdx,8] < 800)
+  #selModelIdx <- selModelIdx[-c(remove800)]
+  
+  pca_s1.coords <-apply(round(pca_s1$x[selModelIdx,c(1,2)],2), 1, paste, collapse=",")
+  empPcaS1.coords <- apply(round(empPCAS1[,c(1,2)],2), 1, paste, collapse=",")
+  
+  df_s1 <- as.data.frame(cbind(Path1=probMat_S1[selModelIdx,1], Path2=probMat_S1[selModelIdx,2], Path3=probMat_S1[selModelIdx,3], Path4=probMat_S1[selModelIdx,4], Path5=probMat_S1[selModelIdx,5], Path6=probMat_S1[selModelIdx,6],V3=rep(selectedModels[[ratdata@rat]],length(selModelIdx)),V4=probMat_S1[selModelIdx,8],PCA=pca_s1.coords,Index=c(1:length(selModelIdx)) ))
+  df_s1 <- rbind(df_s1,cbind(Path1=empProbMatS1[,1], Path2=empProbMatS1[,2], Path3=empProbMatS1[,3], Path4=empProbMatS1[,4], Path5=empProbMatS1[,5], Path6=empProbMatS1[,6], V3=rep("Empirical",length(selModelIdx)),V4=probMat_S1[selModelIdx,8],PCA=empPcaS1.coords,Index=c(1:length(selModelIdx))))
+  #df_s1 <- rbind(df_s1,cbind(empPCAS1[,c(1:2)],V3=rep("Empirical",length(selModelIdx)),V4=probMat_S1[selModelIdx,8],V5=probMat_S1[selModelIdx,9],V6=probMat_S1[selModelIdx,10]))
+  
+  df_s1.melt <- melt(df_s1,measure.vars = c("Path1","Path2","Path3","Path4","Path5","Path6"))
+  
+  cols.num <- c(2,4,6)
+  df_s1.melt[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1.melt[[x]]))
+  
+  
+  p1<-ggplot(data = df_s1.melt, aes(x=df_s1.melt$V4)) + geom_line(aes(y=df_s1.melt$value,group=df_s1.melt$V3,color=df_s1.melt$V3)) + 
+    geom_text(aes(x=df_s1.melt$V4,y=df_s1.melt$value,fontface = "bold",fill=factor(df_s1.melt$V3)),
+              label = ifelse(as.numeric(df_s1.melt$Index%%200==0)==1, df_s1.melt$PCA, ""),
+              vjust = ifelse(df_s1.melt$V3=="Empirical", 0,0.75 ), 
+              position = position_dodge(width=2),size=2.5,
+              color=ifelse(df_s1.melt$V3=="Empirical","black","blue")) + 
+    facet_wrap(~df_s1.melt$variable)+xlab("Probability") + ylab("Trial Nb")+ggtitle("Box-E Probability Curves")
+  
+  
+  selModelIdx <- which(probMat_S2[,7]==selectedModels[[ratdata@rat]])
+  #remove800 <- which(probMat_S2[selModelIdx,8] < 800)
+  #selModelIdx <- selModelIdx[-c(remove800)]
+  
+  
+  pca_s2.coords <-apply(round(pca_s2$x[selModelIdx,c(1,2)],2), 1, paste, collapse=",")
+  empPcaS2.coords <- apply(round(empPCAS2[,c(1,2)],2), 1, paste, collapse=",")
+  
+  df_s2 <- as.data.frame(cbind(Path1=probMat_S2[selModelIdx,1], Path2=probMat_S2[selModelIdx,2], Path3=probMat_S2[selModelIdx,3], Path4=probMat_S2[selModelIdx,4], Path5=probMat_S2[selModelIdx,5], Path6=probMat_S2[selModelIdx,6],V3=rep(selectedModels[[ratdata@rat]],length(selModelIdx)),V4=probMat_S2[selModelIdx,8],PCA=pca_s2.coords,Index=c(1:length(selModelIdx)) ))
+  df_s2 <- rbind(df_s2,cbind(Path1=empProbMatS2[,1], Path2=empProbMatS2[,2], Path3=empProbMatS2[,3], Path4=empProbMatS2[,4], Path5=empProbMatS2[,5], Path6=empProbMatS2[,6], V3=rep("Empirical",length(selModelIdx)),V4=probMat_S2[selModelIdx,8],PCA=empPcaS2.coords,Index=c(1:length(selModelIdx))))
+  #df_s1 <- rbind(df_s1,cbind(empPCAS1[,c(1:2)],V3=rep("Empirical",length(selModelIdx)),V4=probMat_S1[selModelIdx,8],V5=probMat_S1[selModelIdx,9],V6=probMat_S1[selModelIdx,10]))
+  
+  df_s2.melt <- melt(df_s2,measure.vars = c("Path1","Path2","Path3","Path4","Path5","Path6"))
+  
+  cols.num <- c(2,4,6)
+  df_s2.melt[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s2.melt[[x]]))
+  
+  
+  p2<-ggplot(data = df_s2.melt, aes(x=df_s2.melt$V4)) + geom_line(aes(y=df_s2.melt$value,group=df_s2.melt$V3,color=df_s2.melt$V3)) + 
+    geom_text(size=2,aes(x=df_s2.melt$V4,y=df_s2.melt$value,fontface = "bold"),
+              label = ifelse(as.numeric(df_s2.melt$V4%%200==0)==1, df_s2.melt$PCA, ""),
+              vjust = ifelse(df_s2.melt$V3=="Empirical", 0,0.75 ), 
+              position = position_dodge(width=2),size=2.5,
+              color=ifelse(df_s2.melt$V3=="Empirical","black","blue")) + 
+    facet_wrap(~df_s2.melt$variable)+xlab("Probability") + ylab("Trial Nb")+ggtitle("Box-I Probability Curves")
+  
+  P2<-grid.arrange(p1,p2,nrow=2,top=textGrob(ratdata@rat,gp=gpar(fontsize=20,font=3)))
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P2,width=11, height=12)
+}
+
+
+meanVal=function(resList,pathNb,startIdx)
+{
+  totLen = 0
+  for(i in c(startIdx:(startIdx+19)))
+  {
+    totLen = totLen + length(which(resList[[i]][[1]]$data@allpaths[,1]==pathNb))
+  }
+  meanVal = totLen/20
+  return(meanVal)
+}
 
 testPCA=function(ratdata,res.dir,plot.dir)
 {
@@ -2396,8 +3140,6 @@ testPCA=function(ratdata,res.dir,plot.dir)
   ggsave(paste("PCA_boxI_",rat,".pdf",sep=""), p2,width=11, height=12)
 }
 
-
-
 getEmpProbMat=function(allpaths,window,sim){
   totalActions = length(allpaths[,1])
   empProbMat = matrix(-1,totalActions,13)
@@ -2426,6 +3168,87 @@ getEmpProbMat=function(allpaths,window,sim){
     {
       empProbMat[trial,(path+6*(currState-1))] = mean(as.numeric(allpaths[stateIdx,1] %in% path))
     }
+  }
+  
+  return(empProbMat)
+}
+
+getEmpProbMat2=function(allpaths,window,sim){
+  totalActions = length(allpaths[,1])
+  empProbMat = matrix(-1,totalActions,13)
+  
+  if(sim==1)
+  {
+    allpaths[,c(1:2)] = allpaths[,c(1:2)] + 1
+  }
+  
+  for(trial in c(1:totalActions)){
+    empProbMat[trial,13]= allpaths[trial,6]
+    currState = allpaths[trial,2]
+    
+    stateIdx <- which(allpaths[1:trial,2]==currState)
+     
+    
+    if(length(stateIdx) <= window)
+    {
+      trialSet = stateIdx
+    }
+    else
+    {
+      trialSet = tail(stateIdx,window)
+    }
+    
+
+    for(path in c(1:6))
+    {
+      empProbMat[trial,(path+6*(currState-1))] = mean(as.numeric(allpaths[trialSet,1] %in% path))
+    }
+  }
+  
+  return(empProbMat)
+}
+
+getEmpProbMat3=function(allpaths,window,sim){
+  totalActions = length(allpaths[,1])
+  empProbMat = matrix(-1,totalActions,13)
+  
+  if(sim==1)
+  {
+    allpaths[,c(1:2)] = allpaths[,c(1:2)] + 1
+  }
+  
+  for(trial in c(1:totalActions))
+  {
+    empProbMat[trial,13]= allpaths[trial,6]
+
+    for(state in c(1:2))
+    {
+      stateIdx <- which(allpaths[1:trial,2]==state)
+      if(length(stateIdx) <= window)
+      {
+        trialSet = stateIdx
+      }
+      else
+      {
+        trialSet = tail(stateIdx,window)
+      }
+      
+      
+      for(path in c(1:6))
+      {
+        if(length(trialSet)==0)
+        {
+          empProbMat[trial,(path+6*(state-1))] = 0
+        }
+        else
+        {
+          empProbMat[trial,(path+6*(state-1))] = mean(as.numeric(allpaths[trialSet,1] %in% path)) 
+        }
+        
+      }
+      
+    }
+    
   }
   
   return(empProbMat)

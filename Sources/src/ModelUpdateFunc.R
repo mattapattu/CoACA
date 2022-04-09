@@ -237,6 +237,66 @@ getAllModelResults <- function(ratdata, resMatrix, testingdata, sim) {
   return(allmodelRes)
 }
 
+readModelParams <- function(ratdata,res.dir,testingdata, sim){
+  
+  print(sprintf("Inside readModelParams"))
+  models <- testingdata@Models
+  methods <- testingdata@creditAssignment
+  allmodelRes <- new("AllModelRes")
+  setwd(res.dir)
+  rat=ratdata@rat
+  paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+  print(paramTestData)
+  load(paramTestData)
+  
+  
+  for (i in 1:length(models))
+  {
+    for (j in 1:length(methods))
+    {
+      modelData <- new("ModelData", Model = models[i], creditAssignment = methods[j], sim = sim)
+      index <- length(methods) * (i - 1) + j
+      resMatrix <- paramTest[[index]][[1]]
+      rowlen <- length(resMatrix[,1])
+      #modelData <- setModelParams(modelData, resMatrix[rowlen, ])
+      modelData@alpha <- resMatrix[rowlen, 2]
+      modelData@gamma1 <- resMatrix[rowlen, 3]
+      #debug(setModelResults)
+      modelData <- setModelResults(modelData, ratdata, allModels)
+      allmodelRes <- addModelData(allmodelRes, modelData)
+    }
+  }
+  
+  return(allmodelRes)
+}
+
+
+printModelParams <- function(testingdata,allmodelResList){
+  
+  print(sprintf("Inside printModelParams"))
+  models <- testingdata@Models
+  methods <- testingdata@creditAssignment
+  allmodelRes <- new("AllModelRes")
+  mat <- matrix("",7,6)
+  colnames(mat) <- models
+  
+  for(i in c(1:7))
+  {
+    allModelRes = allmodelResList[[i]]
+    for (m in 1:length(models))
+    {
+      modelData <- slot(slot(allModelRes,models[m]),"aca2")
+      alpha = modelData@alpha
+      gamma1 = modelData@gamma1
+      mat[i,m] = paste0("\u03b1=",round(alpha,3),",\u03b3=",round(gamma1,3))
+    }
+  }
+  
+  pdf("modelparams.pdf", height=11, width=8.5)
+  grid.table(mat)
+  dev.off()
+  
+}
 
 negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   

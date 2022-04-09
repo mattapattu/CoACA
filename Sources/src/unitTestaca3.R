@@ -425,7 +425,162 @@ getNodeCredits=function(ratdata, modelData, testModel,sim=1)
   return(list(likelihood=lik,probMatrix=probMatrix,nodes = list(S0=as_ids(V(S0)),S1=as_ids(V(S1))),credits=list(S0=V(S0)$credit,S1=V(S1)$credit)))
 }
 
+printEpisodes=function(ratdata, testModel,sim=2)
+{
 
+  trials = length(ratdata@allpaths[,1])
+  
+  
+  #H <- matrix(0,2,6)
+  probMatrix <- matrix(0,trials,13)
+  
+  episodeNb = 0
+  episodeActions <- c()
+  episodeStates <- c()
+  episodeTurnTimes <- c()
+  
+  allpaths <- ratdata@allpaths
+  model <- testModel@Name
+  
+  if(model == "PathModel")
+  {
+    turnTimes = slot(ratdata,"allpaths")
+  }
+  else if(model == "TurnModel")
+  {
+    turnTimes = slot(ratdata,"turnTimes")
+  }
+  else if(model == "Hybrid1")
+  {
+    turnTimes = slot(ratdata,"hybridModel1")
+  }
+  else if(model == "Hybrid2")
+  {
+    turnTimes = slot(ratdata,"hybridModel2")
+  }
+  else if(model == "Hybrid3")
+  {
+    turnTimes = slot(ratdata,"hybridModel3")
+  }
+  else if(model == "Hybrid4")
+  {
+    turnTimes = slot(ratdata,"hybridModel4")
+  }
+
+  
+  trialId = 1
+  uniqueses = unique(allpaths[,5])
+  for(ses in uniqueses)
+  {
+    allpaths_ses <- allpaths[which(allpaths[,5]==ses),]
+    trials_ses <- length(allpaths_ses[,1])
+    turnTimes_ses <- turnTimes[which(turnTimes[,5]==ses),]
+    turnTimeId = 0
+    episodeDuration = 0
+    score_episode  = 0
+    resetVector = T
+    changeState = F
+    returnToInitState = F
+    
+    if(sim==2)
+    {
+      S = allpaths_ses[1,2] - 1
+    }
+    else
+    {
+      S = allpaths_ses[1,2]
+    }
+    for(i in c(1:trials_ses))
+    {
+      if(resetVector)
+      {
+        initState = S
+        resetVector = F;
+      }
+      
+      if(sim == 2)
+      {
+        A=allpaths_ses[i,1]
+      }
+      else
+      {
+        A=allpaths_ses[i,1]
+      }
+      
+      
+      if(i < trials_ses)
+      {
+        if(sim == 2)
+        {
+          S_prime=allpaths_ses[(i+1),2]
+        }
+        else
+        {
+          S_prime=allpaths_ses[(i+1),2]
+        }
+        
+      }
+      else
+      {
+        S_prime = -1
+      }
+      
+      episodeActions <- c(episodeActions, A)
+      episodeStates <- c(episodeStates,S)
+      
+      #print(sprintf("ses=%i,i=%i,S=%i,A=%i,S_prime=%i",ses,i,S,A,S_prime))
+      
+      R=allpaths[i,3]
+      if(A == 3)
+      {
+        R = 1
+        score_episode = score_episode + 1
+      }
+      
+      # if(A > 5)
+      # {
+      #   S = S_prime
+      #   #next
+      # }
+      
+
+      
+      trialId = trialId + 1
+      
+      #print(sprintf("Current state = %i, Action = %i", S,A))
+      if(S_prime!=initState)
+      {
+        changeState = T
+      }else if(S_prime==initState && changeState){
+        returnToInitState = T
+      }
+      
+      ## Check if episode ended
+      if(returnToInitState)
+      {
+        changeState = F
+        returnToInitState = F
+        resetVector = T
+        episodeNb  = episodeNb + 1
+
+        print(sprintf("episodeNb=%i, actions: %s, states: %s",episodeNb,paste(episodeActions, collapse=" "),paste(episodeStates, collapse=" ")))
+        
+
+        #print(H)
+        ## reset rewards
+        score_episode = 0
+        episodeDuration = 0
+        episodeActions <- c()
+        episodeStates <- c()
+        episodeTurnTimes <- c()
+      }
+      ### End of episode checkd
+      S=S_prime
+    }
+    
+  }
+  
+}
 
 generateGraph=function(testModel,state)
 {

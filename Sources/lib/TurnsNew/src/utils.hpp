@@ -223,7 +223,7 @@ arma::vec simulateTurnDuration(arma::mat turnTimes, arma::mat allpaths, int turn
   arma::uword sampled_id = Rcpp::RcppArmadillo::sample(final_sample_ids, 1, true, pvec)[0];
     msg.str("");
     msg << "sampled_id=" <<sampled_id;
-   logger.Print(msg.str()); 
+   //logger.Print(msg.str()); 
 
   arma::rowvec turnRow = submat_sample.row(sampled_id);
   arma::uvec cols; //3 = ActionNb, 5 = actionNb
@@ -235,7 +235,7 @@ arma::vec simulateTurnDuration(arma::mat turnTimes, arma::mat allpaths, int turn
 
     msg.str("");
    msg << "turnDurations=";
-   logger.PrintArmaVec(msg.str(),turnDurations); 
+   //logger.PrintArmaVec(msg.str(),turnDurations); 
 
   return(turnDurations);
 }

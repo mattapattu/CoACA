@@ -85,9 +85,10 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 ratDataList = list()
 allmodelResList <- list()
 
-for (i in c(7)) {
+for (i in c(2)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
+  #model = "Model2"
   
   
   if(unitTest1)
@@ -146,7 +147,7 @@ for (i in c(7)) {
   
   if(computeModelLik)
   {
-    debug(getModelResults)
+    #debug(getModelResults)
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
     save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   }
@@ -168,13 +169,15 @@ for (i in c(7)) {
   
   if(plotProb)
   {
-    setwd(file.path(plot.dir,"New"))
+    #setwd(file.path(plot.dir,"New"))
     #debug(generatePlots)
-    dir <- file.path(plot.dir,"New")
+    #dir <- file.path(plot.dir,"New")
     #generatePlots(ratdata,allmodelRes,window=30,dir)
     debug(plotPathProbs2)
-    allmodelRes = readModelParams(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
+    load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
     plotPathProbs2(ratdata,allmodelRes,plot.dir)
+    
+    
     #debug(generateEmpiricalPlots)
     #generateEmpiricalPlots(ratdata,window=20)
     #plotTurnProb(ratdata,allmodelRes,Hybrid3)
@@ -226,7 +229,7 @@ for (i in c(7)) {
   if(pcaPlot)
   {
     debug(plotPCA7)
-    allmodelRes = readModelParams(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
+    load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
     plotPCA7(ratdata,allmodelRes,model.data.dir)
     #debug(testPCA)
     #testPCA(ratdata,"C:/Users/matta/Downloads",plot.dir)
@@ -234,7 +237,8 @@ for (i in c(7)) {
   
   if(dumpModelParams)
   {
-    allmodelRes = readModelParams(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
+    #allmodelRes = readModelParams(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
+    load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
     allmodelResList[[i]] <- allmodelRes
   }
   

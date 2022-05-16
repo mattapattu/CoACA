@@ -269,7 +269,11 @@ std::vector<double> getSarsaLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 t
   std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
   arma::mat turnTimes;
 
-  if (model == "Turns")
+  if(model == "Paths")
+  {
+    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
+  }
+  else if (model == "Turns")
   {
     turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));
   }
@@ -345,9 +349,6 @@ std::vector<double> getSarsaLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 t
 
     arma::vec rewards_sess = allpath_rewards.elem(sessionIdx);
 
-    arma::uvec turnTimes_idx = arma::find(turnTimes.col(4) == sessId);
-    arma::vec turn_times_session = turnTime_method.elem(turnTimes_idx);
-
     int initState = 0;
     bool changeState = false;
     bool endOfCurrEpisode = false;
@@ -364,13 +365,12 @@ std::vector<double> getSarsaLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 t
     int prevTurnReward = 0;
     int currTurnReward = 0;
     int i = 0;
-    while (i < (nrow - 1))
+    while (i < (nrow))
     {
       initState = states_sess(i);
       while (!endOfCurrEpisode && i < (nrow - 1))
       {
 
-        
         S = states_sess(i);
         A = actions_sess(i);
         int S_prime = states_sess(i + 1);
@@ -388,7 +388,7 @@ std::vector<double> getSarsaLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 t
         int R = rewards_sess(i);
         if(R==1)
         {
-          R = 2;
+          R = 1;
         }
         //Rcpp::Rcout << "S=" <<S << ", R="<< R << std::endl;
        
@@ -461,6 +461,9 @@ std::vector<double> getSarsaLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 t
         {
          double logProb = log(pathProb);
          mseMatrix.push_back(logProb);
+        }
+        else{
+          mseMatrix.push_back(0);
         }
         
         S = S_prime;

@@ -288,13 +288,13 @@ printModelParams <- function(testingdata,allmodelResList){
       modelData <- slot(slot(allModelRes,models[m]),"aca2")
       alpha = modelData@alpha
       gamma1 = modelData@gamma1
-      mat[i,m] = paste0("\u03b1=",round(alpha,3),",\u03b3=",round(gamma1,3))
+      mat[i,m] = paste0("\u03b1=",round(alpha,2),",\u03b3=",round(gamma1,2))
     }
   }
-  
-  pdf("modelparams.pdf", height=11, width=8.5)
+  mat<-cbind(c("rat1","rat2","rat3","rat4","rat5", "rat6","rat7"),mat)
+  #pdf("modelparams.pdf", height=11, width=8.5)
   grid.table(mat)
-  dev.off()
+  #dev.off()
   
 }
 

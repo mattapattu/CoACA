@@ -92,8 +92,8 @@
         double prevCredit = currNode->credit;
         currNode->credit = currNode->credit + deltaH;
         
-        //double partialCredit = score_episode * activity;
-        //Rcpp::Rcout <<  "Turn="<< currNode->node  <<", S=" <<state  << ", turnTime=" <<turnTime << ", activity=" << activity  << ", prevNodeCred=" << prevCredit << ", deltaH=" << deltaH  <<", nodeCredit=" << currNode->credit <<std::endl;
+        double partialCredit = score_episode * activity;
+        Rcpp::Rcout <<  "Turn="<< currNode->node  <<", S=" <<state  << ", turnTime=" <<turnTime << ", activity=" << activity  << ", prevNodeCred=" << prevCredit << ", deltaH=" << deltaH  <<", nodeCredit=" << currNode->credit <<std::endl;
         
       }
     }

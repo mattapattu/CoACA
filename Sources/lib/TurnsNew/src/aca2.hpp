@@ -1067,6 +1067,7 @@ arma::mat getAca2ProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
   
   Graph S0(testModel, 0);
   Graph S1(testModel, 1);
+
   
   Debugger logger;
   logger.setDebug(debug);
@@ -1174,7 +1175,7 @@ arma::mat getAca2ProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
       }
       
       
-      //Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A << ", ses=" << sessId<<std::endl;
+      Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A << ", ses=" << sessId<<std::endl;
       std::ostringstream msg; 
       msg << "i="<< i << ", S=" << S <<", A=" << A <<", pathNb=" << allpaths_pathNb_sess(i);;
       //logger.Print(msg.str()); 
@@ -1296,7 +1297,7 @@ arma::mat getAca2ProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
       //Check if episode ended
       if (returnToInitState || (i==nrow-1))
       {
-        //Rcpp::Rcout << "Inside end episode, episodeNb=" << episodeNb << std::endl;
+        Rcpp::Rcout << "Inside end episode, episodeNb=" << episodeNb << std::endl;
         msg.str("");
         msg <<"Inside end episode";
         //logger.Print(msg.str()); 
@@ -1306,17 +1307,20 @@ arma::mat getAca2ProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
         episodeNb = episodeNb+1;
         double alpha_prime = getAlphaPrime(alpha,episodeNb);
         
-        // for(unsigned int m=0; m<episodeTurns.size(); m++)
-        // {
-        //   Rcpp::Rcout << episodeTurns[m] << "," <<episodeTurnStates[m] << "," <<episodeTurnTimes[m] << std::endl;
-        // }
+        for(unsigned int m=0; m<episodeTurns.size(); m++)
+        {
+           Rcpp::Rcout << episodeTurns[m] << "," <<episodeTurnStates[m] << "," <<episodeTurnTimes[m] << std::endl;
+        }
         
-        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
+        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
         S0.updateEdgeProbs();
         S1.updateEdgeProbs();
         
-        S0.printCredits(false);
-        S1.printCredits(false);
+        S0.printCredits(true);
+        S1.printCredits(true);
+        
+        //S0.printProbabilities();
+        //S1.printProbabilities();
         
         score_episode = 0;
         episode = episode + 1;

@@ -10,7 +10,7 @@ library(grid)
 library(gridExtra)
 library(gtable)
 library(reshape)
-
+library(ggtext)
 
 getPathNumber=function(path){
   #path  = gsub("^, ","",path)
@@ -1074,7 +1074,7 @@ generateEmpiricalPlots=function(ratdata,window){
 plotSuccessRates=function(ratDataList)
 {
   successRateList = list()
-  for(i in c(1:7))
+  for(i in c(1:6))
   {
     ratdata = ratDataList[[i]]
     rat = ratdata@rat
@@ -1092,14 +1092,16 @@ plotSuccessRates=function(ratDataList)
   maxlen <- max(lengths(successRateList))
   successRateList2 <- lapply(successRateList, function(lst) c(lst, rep(0, maxlen - length(lst))))
   df <- data.frame(matrix(unlist(successRateList2), ncol=length(successRateList2), byrow=FALSE))
-  df[df==0] <- NA
-  pdf(file=paste("SuccessRate.pdf",sep=""),width=11, height=7)
-  colors=c("black","red","blue","green","orange","violet","brown")
-  matplot(df[,1:7],type='l',col=colors,lty=c(1,1,1,1,1,1,1),lwd=c(2,2,2,2,2,2), xlab = "Session", ylab="", cex.lab=1.6,cex.axis=1.5)
-  title(ylab="Success Rate", line=2.95, cex.lab=1.6,cex.axis=1.5)
-  legend=c("rat1", "rat2","rat3","rat4", "rat5","rat6","rat7")
-  legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2,2,2),lty=c(1,1,1,1,1,1,1), bg="white")
-  dev.off()
+  zeros<-which(df==0,arr.ind = T)
+  df[rbind(zeros[which(zeros[,1] > 10),])] <- NA
+  #df[df==0] <- NA
+  #pdf(file=paste("SuccessRate.pdf",sep=""),width=11, height=7)
+  colors=c("black","red","blue","green","orange","violet")
+  matplot(df[,1:6],type='l',col=colors,lty=c(1,1,1,1,1,1),lwd=c(2,2,2,2,2,2), xlab = "", ylab="", cex.lab=1.6,cex.axis=1.7)
+  title(ylab="% Success", xlab = "Session",line=2.5, cex.lab=1.9,cex.axis=1.5)
+  legend=c("rat1", "rat2","rat3","rat4", "rat5","rat6")
+  legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2,2),lty=c(1,1,1,1,1,1), bg="white")
+  #dev.off()
 }
 
 plotThetaHat=function(ratdata,res.dir,plot.dir)
@@ -1671,7 +1673,7 @@ plotPathProbs2=function(ratdata,allmodelRes,plot.dir)
 {
   rat=ratdata@rat
   setwd(model.data.dir)
-  dfData=list.files(".", pattern=paste0("allmodelRes_",rat,".Rdata"), full.names=FALSE)
+  #dfData=list.files(".", pattern=paste0("allmodelRes_",rat,".Rdata"), full.names=FALSE)
   
   
   selectedModels = list("rat_101"="Hybrid3","rat_103"="Hybrid2","rat_106"="Hybrid3","rat_112"="Hybrid3","rat_113"="Hybrid3","rat_114"="Hybrid3","robert"="Hybrid3")
@@ -1680,7 +1682,7 @@ plotPathProbs2=function(ratdata,allmodelRes,plot.dir)
   
   modelProbMats <- data.frame(matrix(0,0,15))
   
-  for(m in models)
+  for(m in selectedModels[[ratdata@rat]])
   {
     modelData = getModelData(allmodelRes,m,"aca2")
     testModel = slot(allModels,m)
@@ -1708,16 +1710,36 @@ plotPathProbs2=function(ratdata,allmodelRes,plot.dir)
   cols.num <- c(1:12,14)
   df1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df1[[x]]))
   
-  df1<-df1[(df1$model=="Paths")||(df1$model=="Hybrid3")||(df1$model=="Empirical"),]
+  #df1<-df1[(df1$model=="Paths")||(df1$model=="Hybrid3")||(df1$model=="Empirical"),]
   df1.melt<-melt(df1,measure.vars = c("V1","V2","V3","V4","V5","V6","V7","V8","V9","V10","V11","V12"))
   
+  labels <- c(
+    # Image labels for number of gears variable
+    `V1` = "<img src='v1.jpg' width='30'/>",
+    `V2` = "<img src='v2.jpg' width='30'/>",
+    `V3` = "<img src='v3.jpg' width='30'/>",
+    `V4` = "<img src='v4.jpg' width='30'/>",
+    `V5` = "<img src='v5.jpg' width='30'/>",
+    `V6` = "<img src='v6.jpg' width='30'/>", 
+    # text labels for am variable
+    `V7` = "<img src='v7.jpg' width='30'/>",
+    `V8` = "<img src='v8.jpg' width='30'/>",
+    `V9` = "<img src='v9.jpg' width='30'/>",
+    `V10` = "<img src='v10.jpg' width='30'/>",
+    `V11` = "<img src='v11.jpg' width='30'/>",
+    `V12` = "<img src='v12.jpg' width='30'/>"
+  )
   
-  p <- ggplot()+geom_line(data=df1.melt,aes_(x=df1.melt$trial,y=df1.melt$value,color=df1.melt$model))+labs(color = "Probability Plots")+facet_wrap(~df1.melt$variable)
+  p <- ggplot()+geom_line(data=df1.melt,aes_(x=df1.melt$trial,y=df1.melt$value,color=df1.melt$model))+
+    labs(color = "Probability Plots")+facet_wrap(~df1.melt$variable,ncol=3,labeller = as_labeller(labels))+
+    theme(strip.text = element_markdown(colour = "black"))+ xlab("Trials") + ylab("Probability")
+  
     
-    #pdf(file=paste("PathProb_Path",path,"_",rat,".pdf",sep=""),width=11, height=7)
     
     print(p)
   
+    pdf(file=paste("PathProb_Path","_",rat,".pdf",sep=""),width=8, height=8)
+    
 }
 
 boxDistances = function(path,state)
@@ -2656,7 +2678,7 @@ plotPCA5=function(ratdata,allModelRes,model.data.dir)
   probMatRowsS1 <- length(probMat_S1[,1]) 
   probMatRowsS2 <- length(probMat_S2[,1]) 
   
-  empProbMat <- getEmpProbMat(ratdata@allpaths,15,2)
+  empProbMat <- getEmpProbMat(ratdata@allpaths,100,2)
   state1_idx = which(ratdata@allpaths[,2] == 1)
   state2_idx = which(ratdata@allpaths[,2] == 2)
   
@@ -2786,7 +2808,8 @@ plotPCA7=function(ratdata,allModelRes,model.data.dir)
     
   }
 
-  empProbMat <- getEmpProbMat3(ratdata@allpaths,30,2)
+  #empProbMat <- getEmpProbMat4(ratdata@allpaths,50,2)
+  empProbMat <- getEmpProbMat3(ratdata@allpaths,40,2)
   
   cols.num <- c(1:13)
   modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
@@ -2802,14 +2825,23 @@ plotPCA7=function(ratdata,allModelRes,model.data.dir)
   cols.num <- c(1,2,4)
   df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
   
-  cols=c("red", "blue","green","yellow","violet","brown","black")
+  cols=c("black", "blue","green","yellow","violet","brown","red")
   df_s1 <- df_s1[which(df_s1$V4 > 800),]
-   P <- ggplot(data = df_s1) + geom_point(size=3,aes(x=df_s1$PC1,y=df_s1$PC2,color=df_s1$V3))+ geom_point(data = subset(df_s1, V3 == selectedModels[[ratdata@rat]]),size=3,aes(x=PC1,y=PC2,color = V3)) + scale_color_manual(values = cols)+
-    labs(x="PCA Component 1", y="PCA Component 2", col="Models")
+   # P <- ggplot(data = df_s1) + geom_point(size=1,aes(x=df_s1$PC1,y=df_s1$PC2,color=df_s1$V3))+ 
+   #   scale_color_manual(values = cols)+
+   #  labs(x="PCA Component 1", y="PCA Component 2", col="Models")+ggtitle(ratdata@rat)
   
-  
+  P <- ggplot(data = df_s1) + geom_point(data = subset(df_s1, V3 != "Empirical"),size=2,aes(x=PC1,y=PC2,color = V3))+
+    geom_point(data = subset(df_s1, V3 == selectedModels[[ratdata@rat]]),size=2,aes(x=PC1,y=PC2,color = V3))+
+    geom_point(shape=1,data = subset(df_s1, V3 == "Empirical"),size=2,aes(x=PC1,y=PC2,color = V3))+
+    scale_color_manual(values = cols)+
+    labs(x="PCA Component 1", y="PCA Component 2", col="Models")+
+    theme( axis.text = element_text( size = 12), axis.title = element_text( size = 12),
+           legend.title = element_text( size = 12),
+           legend.text = element_text( size = 12))
+  print(P)
   setwd(plot.dir)
-  ggsave(paste("PCA_",rat,".pdf",sep=""), P,width=11, height=12)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P,width=8, height=8)
 }
 
 
@@ -3210,49 +3242,213 @@ getEmpProbMat2=function(allpaths,window,sim){
 
 getEmpProbMat3=function(allpaths,window,sim){
   totalActions = length(allpaths[,1])
-  empProbMat = matrix(-1,totalActions,13)
+  empProbMat = matrix(0,totalActions,13)
   
   if(sim==1)
   {
     allpaths[,c(1:2)] = allpaths[,c(1:2)] + 1
   }
   
-  for(trial in c(1:totalActions))
+  sessions = unique(allpaths[,5])
+  trial = 0
+  
+  for(ses in sessions)
   {
-    empProbMat[trial,13]= allpaths[trial,6]
-
-    for(state in c(1:2))
+    
+    allpaths_ses = allpaths[which(allpaths[,5] == ses),]
+    
+    for(trial_ses in c(1:length(allpaths_ses[,1])))
     {
-      stateIdx <- which(allpaths[1:trial,2]==state)
-      if(length(stateIdx) <= window)
+      trial = trial + 1 
+      empProbMat[trial,13]= allpaths_ses[trial_ses,6]
+      
+      if(trial > 1 )
       {
-        trialSet = stateIdx
+        empProbMat[trial,1:12] = empProbMat[trial-1,1:12]
       }
-      else
+      
+      
+      
+      curr_state <- allpaths_ses[trial_ses,2]
+      ses_currStateIndices <- which(allpaths_ses[,2] == curr_state)
+      
+      curr_stateId <- which(allpaths_ses[ses_currStateIndices,6]==trial)
+      
+
+      startId = curr_stateId - window/2
+      if(startId <= 0)
       {
-        trialSet = tail(stateIdx,window)
+        startId = 1
       }
+      endId = curr_stateId + window/2
+      if(endId > length(ses_currStateIndices))
+      {
+        endId = length(ses_currStateIndices)
+      }
+      
+      trialSet <- ses_currStateIndices[startId:endId]
+      undefinedPaths <- which(allpaths_ses[trialSet,1] == 7)
+      trialSet <- trialSet[! trialSet %in% trialSet[undefinedPaths]]
       
       
       for(path in c(1:6))
       {
-        if(length(trialSet)==0)
-        {
-          empProbMat[trial,(path+6*(state-1))] = 0
-        }
-        else
-        {
-          empProbMat[trial,(path+6*(state-1))] = mean(as.numeric(allpaths[trialSet,1] %in% path)) 
-        }
+        empProbMat[trial,(path+6*(curr_state-1))] = mean(as.numeric(allpaths_ses[trialSet,1] %in% path)) 
         
+      }
+      
+      
+    }
+   
+  }
+  
+  
+  return(empProbMat)
+}
+
+getStartIndex = function(generated_data){
+  start_index=0
+  l<-which(SMA(generated_data[,3],20)>=0.6)
+  k<-split(l, cumsum(c(1, diff(l) != 1)))
+  for(set in 1:length(k)){
+    if(length(k[[set]])>20){
+      start_index=k[[set]][1]
+      break
+    }
+  }
+  return(start_index)
+}
+
+### Session-wise running average prob
+getEmpProbMat4=function(allpaths,window,sim){
+  totalActions = length(allpaths[,1])
+  empProbMat = matrix(0,totalActions,13)
+  
+  if(sim==1)
+  {
+    allpaths[,c(1:2)] = allpaths[,c(1:2)] + 1
+  }
+  
+  sessions = unique(allpaths[,5])
+  trial = 0
+  
+  for(ses in sessions)
+  {
+    
+    allpaths_ses = allpaths[which(allpaths[,5] == ses),]
+    
+    for(trial_ses in c(1:length(allpaths_ses[,1])))
+    {
+      trial = trial + 1 
+      empProbMat[trial,13]= allpaths_ses[trial_ses,6]
+      
+      if(trial > 1 )
+      {
+        empProbMat[trial,1:12] = empProbMat[trial-1,1:12]
+      }
+      
+      
+      curr_state <- allpaths_ses[trial_ses,2]
+      ses_currStateIndices <- which(allpaths_ses[,2] == curr_state)
+      
+      curr_stateId <- which(allpaths_ses[ses_currStateIndices,6]==trial)
+      
+      
+      startId = curr_stateId - window
+      if(startId <= 0)
+      {
+        startId = 1
+      }
+      endId = curr_stateId
+      
+      
+      trialSet <- ses_currStateIndices[startId:endId]
+      undefinedPaths <- which(allpaths_ses[trialSet,1] == 7)
+      trialSet <- trialSet[! trialSet %in% trialSet[undefinedPaths]]
+      
+      
+      for(path in c(1:6))
+      {
+        empProbMat[trial,(path+6*(curr_state-1))] = mean(as.numeric(allpaths_ses[trialSet,1] %in% path)) 
+        
+      }
+      
+      
+    }
+    
+  }
+  
+  
+  return(empProbMat)
+}
+
+
+### Session-wise  running average prob without path7
+getEmpProbMat6=function(allpaths,window,sim){
+  totalActions = length(allpaths[,1])
+  empProbMat = matrix(0,totalActions,13)
+  
+  if(sim==1)
+  {
+    allpaths[,c(1:2)] = allpaths[,c(1:2)] + 1
+  }
+  
+  sessions = unique(allpaths[,5])
+  trial = 0
+  
+  for(ses in sessions)
+  {
+    
+    allpaths_ses = allpaths[which(allpaths[,5] == ses),]
+    
+    for(trial_ses in c(1:length(allpaths_ses[,1])))
+    {
+      trial = trial + 1 
+      empProbMat[trial,13]= allpaths_ses[trial_ses,6]
+      
+      if(trial > 1 )
+      {
+        empProbMat[trial,1:12] = empProbMat[trial-1,1:12]
+      }
+      
+      
+      curr_state <- allpaths_ses[trial_ses,2]
+      ses_currStateIndices <- which(allpaths_ses[,2] == curr_state)
+      
+      curr_stateId <- which(allpaths_ses[ses_currStateIndices,6]==trial)
+      
+      
+      startId = curr_stateId - window
+      if(startId <= 0)
+      {
+        startId = 1
+      }
+      endId = curr_stateId
+      
+      
+      trialSet <- ses_currStateIndices[startId:endId]
+      undefinedPaths <- which(allpaths_ses[trialSet,1] == 7)
+      trialSet <- trialSet[! trialSet %in% trialSet[undefinedPaths]]
+      
+      if(length(trialSet) > 0)
+      {
+        for(path in c(1:6))
+        {
+          empProbMat[trial,(path+6*(curr_state-1))] = mean(as.numeric(allpaths_ses[trialSet,1] %in% path)) 
+          
+        }
       }
       
     }
     
   }
   
+  
   return(empProbMat)
 }
+      
+      
+      
 
 getStartIndex = function(generated_data){
   start_index=0

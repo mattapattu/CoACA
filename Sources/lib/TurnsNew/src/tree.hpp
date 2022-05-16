@@ -68,6 +68,8 @@ public:
 
         return (nullptr);
     }
+    
+    
 
     Graph() {}
 
@@ -169,6 +171,22 @@ public:
             std::cout << std::endl;
         }
     }
+    
+    void printProbabilities()
+    {
+      int N = nodes.size();
+      Rcpp::Rcout <<"N=" << N<<std::endl;
+      for (int i = 0; i < N; i++)
+      {
+
+        // print all neighboring vertices of a vertex `i`
+        for (auto v : adjList[i])
+        {
+          Rcpp::Rcout <<"v.src=" << v.src->node << ", v.dest=" << v.dest->node << ", v.probability=" << v.probability <<std::endl;
+          std::cout << "i=" << i << ", " << nodes[i].node << " ——> " << v.dest->node << ":" <<v.probability << std::endl;
+        }
+      }
+    }
 
     void decayCredits(double gamma)
     {
@@ -184,12 +202,14 @@ public:
         {
             for (auto &node : nodes)
             {
-                Rcpp::Rcout << "node = " << node.node << ", credit = " << node.credit << "; " ;
+                Rcpp::Rcout << "node = " << node.node << ", credit = " << node.credit << std::endl;
             }
-            Rcpp::Rcout << std::endl;
+            //Rcpp::Rcout << std::endl;
         }
         
     }
+    
+    
     
     void printPaths()
     {
@@ -346,6 +366,10 @@ public:
 
         return(nodeIds);
     }
+    
+    
 };
+
+
 
 #endif

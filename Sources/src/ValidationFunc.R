@@ -227,6 +227,7 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.d
 
 testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.dir,seed,count)
 {
+  StabilityTest = FALSE 
   models = testData@Models
   creditAssignment = testData@creditAssignment
   
@@ -276,6 +277,10 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
        modelName = strsplit(model,"\\.")[[1]][1]
        creditAssignment = strsplit(model,"\\.")[[1]][2]
        trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
+       if(StabilityTest)
+       {
+        trueModelData = modifyModelData(trueModelData)
+       }
        #trueModelData = modifyModelData(trueModelData) 
        simLearns = FALSE 
        missedOptimalIter = 0
@@ -424,7 +429,15 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
    
 
    rat = ratdata@rat
-   save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_ParamEs_df.Rdata"))
+
+   if(StabilityTest)
+   {
+    save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_ParamEs_Stability_df.Rdata"))
+   }
+   else
+   {
+    save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_ParamEs_Conv_df.Rdata"))
+   }
    
    
   if(setup.hpc)

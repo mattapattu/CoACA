@@ -1074,7 +1074,7 @@ generateEmpiricalPlots=function(ratdata,window){
 plotSuccessRates=function(ratDataList)
 {
   successRateList = list()
-  for(i in c(1:6))
+  for(i in c(3,4,5,6))
   {
     ratdata = ratDataList[[i]]
     rat = ratdata@rat
@@ -1097,49 +1097,39 @@ plotSuccessRates=function(ratDataList)
   #df[df==0] <- NA
   #pdf(file=paste("SuccessRate.pdf",sep=""),width=11, height=7)
   colors=c("black","red","blue","green","orange","violet")
-  matplot(df[,1:6],type='l',col=colors,lty=c(1,1,1,1,1,1),lwd=c(2,2,2,2,2,2), xlab = "", ylab="", cex.lab=1.6,cex.axis=1.7)
-  title(ylab="% Success", xlab = "Session",line=2.5, cex.lab=1.9,cex.axis=1.5)
-  legend=c("rat1", "rat2","rat3","rat4", "rat5","rat6")
+  matplot(df[,3:6],type='l',col=colors,lty=c(1,1,1,1,1,1),lwd=c(2,2,2,2,2,2), xlab = "", ylab="", cex.lab=1.6,cex.axis=1.7)
+  title(ylab="% Success", xlab = "Session",line=2.7, cex.lab=1.9,cex.axis=1.5)
+  #legend=c("rat1", "rat2","rat3","rat4", "rat5","rat6")
+  #legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2,2),lty=c(1,1,1,1,1,1), bg="white")
+  legend=c("rat1", "rat2","rat3","rat4")
   legend("bottomright", legend=legend, cex=1.7, col=colors, lwd = c(2,2,2,2,2,2),lty=c(1,1,1,1,1,1), bg="white")
+  
   #dev.off()
 }
 
-plotThetaHat=function(ratdata,res.dir,plot.dir)
+plotThetaHat=function(ratdata,dfThetahat,plot.dir)
 {
   rat=ratdata@rat
   end_index80 = getEndIndex(ratdata@allpaths, sim=2, limit=0.80)
   #end_index95 = getEndIndex(ratdata@allpaths, sim=2, limit=0.95)
   
+  cols.num <- c(1,2,3)
+  dfThetahat[,cols.num] <- lapply(cols.num,function(x) as.numeric(dfThetahat[[x]]))
+  colnames(dfThetahat) <- c("rowEnd","alpha" ,"gamma", "model",  "V5")
+  dfThetahat<-melt(dfThetahat,id.vars = c("rowEnd","model","V5"))
+  
+  colnames(dfThetahat) <- c("rowEnd", "model", "V5","Parameter", "value")
+  dfThetahat[which(dfThetahat[,3]=="rat_106"),3] <- "rat1"
+  dfThetahat[which(dfThetahat[,3]=="rat_112"),3] <- "rat2"
+  dfThetahat[which(dfThetahat[,3]=="rat_113"),3] <- "rat3"
+  dfThetahat[which(dfThetahat[,3]=="rat_114"),3] <- "rat4"
+  p<-ggplot() + geom_line(data=dfThetahat, aes(x=rowEnd,y=value,group=Parameter,col=Parameter))+
+    scale_color_manual(values=c("black","red")) +
+    facet_grid(model~V5,scales = "free_x")+labs(y = "Parameter value", x = "Path Nb")
+  
   #rat.dir = file.path(paste(res.dir,rat,sep="/"))
   setwd(res.dir)
-  paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
-  load(paramTestData)
-  setwd(plot.dir)
-  pdf(file=paste("Params_",rat,".pdf",sep=""),width=11, height=7)
-  models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
-  par(mfrow=c(3,2))
-  for(i in c(1:length(paramTest)))
-  {
-    trials = paramTest[[i]]$resMat[,1]
-    alpha = paramTest[[i]]$resMat[,2]
-    gamma1 = paramTest[[i]]$resMat[,3]
-    #gamma2 = paramTest[[i]]$model@gamma2
-    model = models[i]
-    plot(trials, alpha,type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials", main=model,lty=1,lwd=1)
-    lines(trials, gamma1,type='l',col='red',lty=1,lwd=1)
-    
-    abline(v=end_index80,col='green',lty=1,lwd=2)
-    #abline(v=end_index95,col='green',lty=1,lwd=2)
-    #lines(unname(paramTest[[i]]$resMat[,4]),type='l',col='green',lty=1,lwd=1)
-    #abline(h=paramTest[[i]]$model@gamma2,col='3',lty=1,lwd=2)
-    
-  }
-  #plot.new()
-  #par(xpd=TRUE)
   
-  #legend=c(expression(alpha),expression(gamma[1])) 
-  #legend("center", legend=legend, cex=1.5, col=c("black","red"), lwd = c(1,1),lty=c(1,1),horiz=FALSE,y.intersp=1.2)
-  title(paste0("Parameter estimation, ",rat), line = -1, outer = TRUE)
   #par(xpd=FALSE)
   dev.off()
 }
@@ -1201,122 +1191,49 @@ printMatRes=function(ratdata,testData,res.dir)
 }
 
 
-plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
+plotSimParamEstimation=function(dfParamEstTest,plot.dir)
 {
-  rat=ratdata@rat
-  setwd(res.dir)
-  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_df.Rdata"), full.names=FALSE)
-  eightyCI <- getSimLearningEndIndices(rat,dfData,res.dir)
-  listDfData <- list()
-  for(i in c(1:length(dfData)))
-  {
-    print(dfData[i])
-    load(dfData[i])
-    listDfData[[i]] <- df
-  }
-  dfcombined <- bind_rows(listDfData)
-  #load(paramTestData)
-  #setwd(plot.dir)
-  #pdf(file=paste(plot.dir,"/","SimParamEstimation_",rat,".pdf",sep=""),width=11, height=7)
+  setwd(plot.dir)
+  cols.num <- c(1,2,3)
+  dfParamEstTest[,cols.num] <- lapply(cols.num,function(x) as.numeric(dfParamEstTest[[x]]))
+  colnames(dfParamEstTest) <- c("AlphaDiff","GammaDiff" ,"Iter", "Model",  "Rat")
+  df<- data.frame(Model=character(),
+                  Rat=character(),
+                  label=character(),
+                  stringsAsFactors=FALSE)
+  ratTrials<-c("rat_106"=2204,"rat_112"=4102,"rat_113"=2085,"rat_114"=2278)
   models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
-  par(mfrow=c(3,2))
-  
-  iterations=as.integer(floor(length(ratdata@allpaths[,1])/100))
-  for(model in models)
+  for(r in c("rat_106","rat_112","rat_113","rat_114"))
   {
-    dfModel <- dfcombined[which(dfcombined[,1]==model),]
-    nbSims <- length(which(dfModel[,2]==100))
-    print(sprintf("model=%s, nbSims=%i",model,nbSims)) 
-    if(nbSims > 0)
+    for(m in models)
     {
-      alpha_upper_bounds <- c()
-      alpha_lower_bounds <- c()
-      gamma_upper_bounds <- c()
-      gamma_lower_bounds <- c()
-      for(iter in c(1:iterations))
-      {
-        if(iter==iterations)
-        {
-          #rowEnd = length(ratdata@allpaths[,1])
-          rowEnd = iter*100
-        }else{
-          rowEnd = iter*100
-        }
-        
-        simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),4]
-        simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),5]
-        
-        alpha_bounds <- getCI(simulation_alphas)
-        
-        
-        alpha_upper_bounds <- c(alpha_upper_bounds,alpha_bounds[2])
-        alpha_lower_bounds <- c(alpha_lower_bounds,alpha_bounds[1])
-        
-        gamma_bounds <- getCI(simulation_gammas)
-        
-        gamma_upper_bounds <- c(gamma_upper_bounds,gamma_bounds[2])
-        gamma_lower_bounds <- c(gamma_lower_bounds,gamma_bounds[1])
-        
-        if(any(is.nan(alpha_bounds)) || any(is.nan(gamma_bounds)))
-        {
-          print(sprintf("NaN found, model=%s, rowEnd=%i",model,rowEnd))
-          print(sprintf("alpha_bounds:"))
-          print(alpha_bounds)
-          print(sprintf("gamma_bounds:"))
-          print(gamma_bounds)
-          
-        } 
-        
-        if(any((gamma_bounds)<0) || any((gamma_bounds)>1))
-        {
-          print(sprintf("gamma out of range, model=%s, rowEnd=%i, mean=%f, simulation_gammas:",model,rowEnd, mean(simulation_gammas)))
-          #print(sprintf("alpha_bounds:"))
-          print(simulation_gammas)
-          print(sprintf("gamma_bounds:"))
-          print(gamma_bounds)
-          
-        }
-      }
-      
-      paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
-      print(paramTestData)
-      load(paramTestData)
-      index = which(models %in% model)
-      print(sprintf("model=%s, index=%i", model, index))
-      resMat <- paramTest[[index]][[1]]
-      n.rows <- length(resMat[,1])
-      alpha =  resMat[n.rows,2]
-      gamma1 = resMat[n.rows,3]
-      
-      true80 <- getEndIndex(ratdata@allpaths,sim=2,limit=0.8)
-      upperbound80 <- eightyCI[[index]][2]
-      lowerbound80 <- eightyCI[[index]][1]
-      
-      #print(sprintf("alpha=%f,gamma1=%s, model=%s, index=%i",alpha,gamma1,model,index))
-      #print(sprintf("alpha_upper_bounds len = %i",length(alpha_upper_bounds)))
-      #print(sprintf("gamma_upper_bounds:"))
-      #print(gamma_upper_bounds)
-      #print(sprintf("gamma_lower_bounds:"))
-      #print(gamma_lower_bounds)
-      xaxis <- c(1:iterations)*100
-      title <- paste(model, ", nbSim=",nbSims,collapse="")
-      plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters")
-      lines(xaxis,alpha_lower_bounds, lty=2, col="black")
-      lines(xaxis,gamma_upper_bounds, lty=2, col='red')
-      lines(xaxis,gamma_lower_bounds, lty=2, col='red')
-      abline(h=alpha,col="black")
-      abline(h=gamma1, col='red')
-      
-      abline(v=true80,col='green')  
-      abline(v=lowerbound80, col='green', lty=2)
-      abline(v=upperbound80, col='green', lty=2)
-      
-      #ggplot((dfModel[,c(2,4,5)]),aes(x=iter,y=alpha)) + geom_boxplot(aes(fill=factor(iter)))
-      #ggplot((dfModel[,c(2,4,5)]),aes(x=iter,y=gamma)) + geom_boxplot(aes(fill=factor(iter)))
-      
-    }  
-    
+      NbSim = length(which(dfParamEstTest[,4]==m & dfParamEstTest[,5]==r &  dfParamEstTest[,3]==ratTrials[[r]]))
+      df<-rbind(df,cbind(m,r,paste0("NbSim=",NbSim)))
+    }
   }
+  
+  df[which(df[,2]=="rat_106"),2] <- "rat1"
+  df[which(df[,2]=="rat_112"),2] <- "rat2"
+  df[which(df[,2]=="rat_113"),2] <- "rat3"
+  df[which(df[,2]=="rat_114"),2] <- "rat4"
+  
+  dfParamEstTest<-  melt(dfParamEstTest,id.vars = c("Iter","Model","Rat"))
+  
+  #dfParamEstTest.melt = dfParamEstTest.melt %>% 
+  #  mutate(variable = recode_factor(variable, `AlphaDiff` = "hat(alpha)[MLE]-(alpha[true]%+-%0.05)", `GammaDiff` = "hat(gamma)[MLE]-(gamma[true]%+-%0.05)"))
+  
+  dfParamEstTest = dfParamEstTest %>% 
+    mutate(variable = recode_factor(variable, `AlphaDiff` = "hat(alpha)[MLE]-alpha[true]", `GammaDiff` = "hat(gamma)[MLE]-gamma[true]"))
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_106"),3] <- "rat1"
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_112"),3] <- "rat2"
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_113"),3] <- "rat3"
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_114"),3] <- "rat4"
+  ggplot(data=dfParamEstTest) + geom_boxplot(aes(x=as.factor(Iter),y=value,fill=factor(variable)))+
+    scale_fill_manual("Model parameters",values = c("royalblue", "orange"),labels = parse_format()) +
+    facet_grid(Model~Rat,scales = "free_x")+
+    theme(legend.spacing.x = unit(1.0, 'cm'),axis.text.x = element_text(size = 6))+
+    geom_text(data = df,x = Inf, y = Inf, aes(label = label),size=2,hjust   = 1.05,vjust   = 1.5)+
+    labs(y = "Estimated - True Parameter Values", x = "Path Nb")
   #plot.new()
   #par(xpd=TRUE)
   
@@ -1695,7 +1612,7 @@ plotPathProbs2=function(ratdata,allmodelRes,plot.dir)
     
   }
   
-  empProbMat <- getEmpProbMat3(ratdata@allpaths,30,2)
+  empProbMat <- getEmpProbMat3(ratdata@allpaths,40,2)
   
   
   cols.num <- c(1:13)
@@ -2382,8 +2299,10 @@ plotPCA3=function(ratdata,res.dir,allModelRes,plot.dir)
   cols.num <- c(1,2,4,5)
   df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
   
-  p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2,color=df_s1[,4]))+ geom_text(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),hjust = 0, nudge_x = 0.1)+
-    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + facet_grid(df_s1$V6~df_s1$V3) + geom_point(aes_(x=pca_s1$scores[n,1], y=pca_s1$scores[n,2]))+
+  p1<-ggplot(data = df_s1)+geom_path(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2,color=df_s1[,4]))+ 
+    geom_text(aes_(x=df_s1$Comp.1, y=df_s1$Comp.2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),hjust = 0, nudge_x = 0.1)+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials") + 
+    facet_grid(df_s1$V6~df_s1$V3) + geom_point(aes_(x=pca_s1$scores[n,1], y=pca_s1$scores[n,2]))+
     xlab("Component 1") + ylab("Component 2")+ggtitle("Box-E PCA")
   
 
@@ -2414,6 +2333,124 @@ plotPCA3=function(ratdata,res.dir,allModelRes,plot.dir)
   P2<-grid.arrange(p1,p2,nrow=2)
   setwd(plot.dir)
   ggsave(paste("PCA_",rat,".pdf",sep=""), P2,width=11, height=12)
+}
+
+plotPCAComb=function(dfPCA,plot.dir)
+{
+  setwd(plot.dir)
+  dfPCA[which(dfPCA[,6]=="rat_106"),6] <- "rat1"
+  dfPCA[which(dfPCA[,6]=="rat_112"),6] <- "rat2"
+  dfPCA[which(dfPCA[,6]=="rat_113"),6] <- "rat3"
+  dfPCA[which(dfPCA[,6]=="rat_114"),6] <- "rat4"
+  cols=c("black", "blue","green","red","violet","brown","yellow")
+  ggplot(data = dfPCA)+
+    geom_path(aes(x=PC1, y=PC2,color=V3,alpha=ifelse(V4 > 800, 0.8,0.4))) +
+    geom_path(data = subset(dfPCA, V3 == "Empirical"),aes(x=PC1, y=PC2,alpha=ifelse(V4 > 800, 0.8,0.4))) +
+    guides(alpha=guide_legend(title="Brightness scale"))+
+    scale_alpha_continuous(limits = c(0.4,0.8), breaks = c(0.4,0.8), label=c("Path Nb <= 800","Path Nb > 800"))+
+    scale_color_manual(values = cols)+
+    facet_grid(~V6,scale="free")+theme(panel.spacing.x = unit(4, "mm"))+
+    labs(y = "PCA Component 1", x = "PCA Component 2")
+}
+
+plotPCA3a=function(ratdata,model.data.dir,allmodelRes,plot.dir)
+{
+  rat=ratdata@rat
+  setwd(res.dir)
+  dfData=list.files(".", pattern=paste0(rat,".*resList.Rdata"), full.names=FALSE)
+  combinedResList <- list()
+  for(i in c(1))
+  {
+    print(dfData[i])
+    load(dfData[i])
+    combinedResList <- append(combinedResList,resList)
+  }
+  allmodelRes <- new("AllModelRes")
+  models.populated = c()
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  
+  modelProbMats <- data.frame(matrix(0,0,16))
+
+  for(k in c(1:length(combinedResList)))
+  {
+    ##Extracting generator model from resList[[k]][[1]]
+    genData = combinedResList[[k]][[1]]$data
+    genModel = combinedResList[[k]][[1]]$data@simModel
+    ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+    index = which(models==genModel)
+    testModelData = combinedResList[[k]][[index]]$res
+    testModelName = testModelData@Model
+    #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
+    if(!testModelName %in% models.populated)
+    {
+      models.populated = c(models.populated,genModel)
+      print(sprintf("testModel=%s",testModelName))
+      #modelData <- slot(slot(allmodelRes,"Paths"),"aca2")
+      
+
+      #probMat_model=testModelData@probMatrix[,c(1:12)]
+      testModel=slot(allModels,testModelName)
+      probMat_model=TurnsNew::getProbMatrix2(genData, testModelData, testModel, sim=1)
+      n=length(probMat_model[,1])
+      probMat_model = cbind(probMat_model,c(1:n),rep(testModelName,n),rep(0,n),rep("SimProb",n))
+      
+      curr_idx = length(modelProbMats[,1])
+      modelProbMats <- rbind(modelProbMats, probMat_model)
+      idx1 = curr_idx+1
+      modelProbMats[idx1,16] = 1
+      idx2 = curr_idx+801
+      modelProbMats[idx2,16] = 1
+      idx3 = length(modelProbMats[,1])
+      modelProbMats[idx3,16] = 1
+      
+    }
+    
+    if(length(models.populated)==6)
+    {
+      break
+    }
+  }
+  
+  empProbMat <- getEmpProbMat3(ratdata@allpaths,40,2)
+  empProbMat <- rbind(empProbMat,c(0,0,0,1,0,0,0,0,0,1,0,0))
+
+  
+  cols.num <- c(1:13)
+  modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
+  
+  pca = prcomp(modelProbMats[,1:12],scale=T,center = T)
+  empPCA = scale(empProbMat[,c(1:12)], pca$center, pca$scale) %*% pca$rotation
+  
+  textVec <- rep(0,length(empProbMat[,1]))
+  textVec[1]=1
+  textVec[801]=1
+  textVec[length(empProbMat[,1])-1]=1
+  df_s1 <- as.data.frame(cbind(pca$x[,1:2], modelProbMats[,15],modelProbMats[,13],modelProbMats[,16]))
+  df_s1 <- rbind(df_s1,cbind(empPCA[,1:2], rep("Empirical",length(empPCA[,1])),empProbMat[,13],V5=textVec))
+  
+
+  cols=c("black", "blue","green","red","violet","brown","yellow")
+  df_s1 <- df_s1[which(df_s1$V4 > 800),]
+  # P <- ggplot(data = df_s1) + geom_point(size=1,aes(x=df_s1$PC1,y=df_s1$PC2,color=df_s1$V3))+ 
+  #   scale_color_manual(values = cols)+
+  #  labs(x="PCA Component 1", y="PCA Component 2", col="Models")+ggtitle(ratdata@rat)
+  
+  # P <- ggplot(data = df_s1)+geom_path(aes_(x=df_s1$PC1, y=df_s1$PC2,color=df_s1$V4))+
+  #   scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(~df_s1$V3)+ 
+  #   coord_cartesian(xlim = c(min(df_s1$PC1),max(df_s1$PC1)), ylim=c(min(df_s1$PC2),max(df_s1$PC2)))+
+  #   xlab("Component 1") + ylab("Component 2")
+  
+  n=length(df_s1[,1])
+  P <- ggplot(data = df_s1)+ geom_path(aes_(x=df_s1$PC1, y=df_s1$PC2,color=df_s1$V4))+
+    geom_text(aes_(x=df_s1$PC1, y=df_s1$PC2),label = ifelse(df_s1$V5==1, df_s1[,4], ""),vjust = 1,hjust = 1)+
+    geom_point(aes(x=df_s1$PC1[n], y=df_s1$PC2[n]))+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(~df_s1$V3)+ 
+    coord_cartesian(xlim = c(min(df_s1$PC1),max(df_s1$PC1)), ylim=c(min(df_s1$PC2),max(df_s1$PC2)))+
+    xlab("Component 1") + ylab("Component 2")
+  
+  print(P)
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P,width=8, height=8)
 }
 
 
@@ -2825,7 +2862,7 @@ plotPCA7=function(ratdata,allModelRes,model.data.dir)
   cols.num <- c(1,2,4)
   df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
   
-  cols=c("black", "blue","green","yellow","violet","brown","red")
+  cols=c("black", "blue","green","red","violet","brown","yellow")
   df_s1 <- df_s1[which(df_s1$V4 > 800),]
    # P <- ggplot(data = df_s1) + geom_point(size=1,aes(x=df_s1$PC1,y=df_s1$PC2,color=df_s1$V3))+ 
    #   scale_color_manual(values = cols)+
@@ -3381,6 +3418,9 @@ getEmpProbMat4=function(allpaths,window,sim){
   
   return(empProbMat)
 }
+
+
+
 
 
 ### Session-wise  running average prob without path7

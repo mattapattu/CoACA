@@ -24,12 +24,12 @@ library(rlist)
 getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hpc)
 {
   ratName = ratdata@rat
-  end_index <- getEndIndex(ratName, ratdata@allpaths, sim, limit = 0.95)
-  start_index = round(end_index/2)
-  if(start_index >= end_index){
-    print(sprintf("start_index >= end_index. Check if rat learns optimal behavior"))
-    return()
-  }
+  # end_index <- getEndIndex(ratName, ratdata@allpaths, sim, limit = 0.95)
+  # start_index = round(end_index/2)
+  # if(start_index >= end_index){
+  #   print(sprintf("start_index >= end_index. Check if rat learns optimal behavior"))
+  #   return()
+  # }
   
   models = testingdata@Models
   creditAssignment = testingdata@creditAssignment
@@ -92,32 +92,15 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
           modelData <- new("ModelData", Model = model, creditAssignment = method, sim = sim)
           argList <- getArgList(modelData, ratdata)
           nvars <- length(argList$lower)
-          cl2 <- makeCluster(5)
-          clusterExport(cl2, varlist = c("src.dir","model.src"))
-          clusterCall(cl2, function() {
-            source(paste(src.dir, "ModelClasses.R", sep = "/"))
-            source(paste(model.src, "PathModel.R", sep = "/"))
-            source(paste(model.src, "TurnModel.R", sep = "/"))
-            source(paste(model.src, "HybridModel1.R", sep = "/"))
-            source(paste(model.src, "HybridModel2.R", sep = "/"))
-            source(paste(model.src, "HybridModel3.R", sep = "/"))
-            source(paste(model.src, "HybridModel4.R", sep = "/"))
-            source(paste(src.dir, "BaseClasses.R", sep = "/"))
-            NULL
-          })
-          registerDoParallel(cl2)
           np.val <- length(argList$lower) * 10
           myList <- DEoptim.control(NP = 30, F = 0.8, CR = 0.9, trace = FALSE, itermax = 200)
           out <- do.call("DEoptim", list.append(argList, fn = negLogLikFunc, myList))
-          stopCluster(cl2)
           if(out$optim$bestval < 100000)
           {
+            print(out$optim$bestmem)
             return(out$optim$bestmem)
           }
-          else
-          {
-            return()
-          }
+          
           
         }
       
@@ -280,7 +263,7 @@ printModelParams <- function(testingdata,allmodelResList){
   mat <- matrix("",7,6)
   colnames(mat) <- models
   
-  for(i in c(1:7))
+  for(i in c(3:6))
   {
     allModelRes = allmodelResList[[i]]
     for (m in 1:length(models))
@@ -298,6 +281,29 @@ printModelParams <- function(testingdata,allmodelResList){
   
 }
 
+checkSimLearns=function(allpaths,sim,limit)
+{
+  #end_index = -1
+  simLearns = FALSE
+  sessions <- allpaths[,5]
+  uniqueSessIds <- unique(sessions)
+  
+  for(sess in uniqueSessIds)
+  {
+    sessIdx <- which(allpaths[,5]==sess)
+    rewards_sess <- allpaths[sessIdx,3]
+    successRate <- sum(rewards_sess)/length(sessIdx)
+    if(successRate >= limit)
+    {
+      end_index = sessIdx[length(sessIdx)]
+      simLearns = TRUE
+      break
+    }
+  }
+  
+  return(simLearns)
+}
+
 negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   
   alpha <- par[1]
@@ -309,6 +315,7 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   # reward = par[4]
   # reward = 1+reward*9
   reward <- 1
+  #print(sprintf("alpha=%f",alpha))
   #
   modelData@alpha <- alpha
   modelData@gamma1 <- gamma1
@@ -326,11 +333,19 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
     negLogLik = 1000000
   }
   
+  probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
+  
+  if(!(length(which(probMat[,4] > 0.8)) > 100 && length(which(probMat[,10] > 0.8)) > 100))
+  {
+    negLogLik = 1000000
+  }
+  
+  
   # print(sprintf("negLogLik = %f",negLogLik))
   if (is.infinite(negLogLik)) {
     return(1000000)
   } else if (is.nan(negLogLik)) {
-    print(sprintf("Alpha = %f", alpha))
+    #print(sprintf("Alpha = %f", alpha))
     return(1000000)
   }
   else {

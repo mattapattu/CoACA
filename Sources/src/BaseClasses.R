@@ -52,7 +52,8 @@ setClass("ModelDataList",
            aca2 = "ModelData",
            aca3 = "ModelData",
            gb = "ModelData",
-           sarsa = "ModelData"
+           sarsa = "ModelData",
+           qlearning = "ModelData"
          )
 )
 
@@ -146,6 +147,18 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
                              testModel = testModel,
                              sim = x@sim)
             }
+            else if(x@creditAssignment == "qlearning")
+            {
+              argList = list(lower = c(0,0), 
+                             upper = c(1,1),
+                             ratdata = ratdata,
+                             half_index = endLearningStage, 
+                             modelData = x,
+                             testModel = testModel,
+                             sim = x@sim)
+              
+            }
+            
             
             return(argList)
           }
@@ -193,42 +206,11 @@ setMethod("simulateData",  signature=c("ModelData","RatData","AllModels"),
           definition=function(x,ratdata,allModels)
           {
             ratName = ratdata@rat
-            endStage1 = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.5)
-            endStage2 = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.85)
+            endStage1 = getEndIndex(ratdata@allpaths,sim=2,limit=0.5)
+            endStage2 = getEndIndex(ratdata@allpaths,sim=2,limit=0.85)
             endStage3 = length(ratdata@allpaths[,1])
             #pathstages=c(1,endStage1,endStage2,endStage3)
             
-            
-            # if(x@Model == "Paths")
-            # {
-            #   testModel = PathModel
-            #   turnstages = pathstages
-            # }
-            # else if(x@Model == "Turns")
-            # {
-            #   
-            #   testModel = TurnModel
-            #   turnIdxStage1 = last(which(ratdata@turnTimes[,1]<=endStage1))
-            #   turnIdxStage2 = last(which(ratdata@turnTimes[,1]<=endStage2))
-            #   turnIdxStage3 = length(ratdata@turnTimes[,1])
-            #   turnstages = c(1,turnIdxStage1,turnIdxStage2,turnIdxStage3)
-            # }
-            # else
-            # {
-            #   model = x@Model
-            #   testModel = slot(allModels,model)
-            #   testTurnTimes = convertTurnTimes(ratdata,TurnModel,testModel,sim=x@sim)
-            #   
-            #   turnIdxStage1 = last(which(testTurnTimes[,1]<=endStage1))
-            #   turnIdxStage2 = last(which(testTurnTimes[,1]<=endStage2))
-            #   turnIdxStage3 = length(testTurnTimes[,1])
-            #   turnstages = c(1,turnIdxStage1,turnIdxStage2,turnIdxStage3)
-            #   
-            # }
-            # argList = list(ratdata = ratdata, 
-            #                modelData = x,
-            #                testModel = testModel,
-            #                turnstages = turnstages)
             
             model = x@Model
             testModel = slot(allModels,model)
@@ -240,33 +222,6 @@ setMethod("simulateData",  signature=c("ModelData","RatData","AllModels"),
             generated_data = TurnsNew::simulateTurnsModels(ratdata,x,testModel,TurnModel,turnstages)
             
             simData = new("RatData", rat = "simulation",allpaths = generated_data$PathData, turnTimes = generated_data$TurnData)
-            
-            
-            # if(x@Model=="Paths")
-            # {
-            #   slot(simData, "turnTimes") = generated_data$TurnData 
-            # }
-            # else if(x@Model == "Turns")
-            # {
-            #   slot(simData, "turnTimes") = generated_data$TurnData
-            # }
-            # else if(x@Model == "Hybrid1")
-            # {
-            #   slot(simData, "hybridModel1") = generated_data$TurnData
-            # }
-            # else if(x@Model == "Hybrid2")
-            # {
-            #   slot(simData, "hybridModel2") = generated_data$TurnData
-            # }
-            # else if(x@Model == "Hybrid3")
-            # {
-            #   slot(simData, "hybridModel3") = generated_data$TurnData
-            # }
-            # else if(x@Model == "Hybrid4")
-            # {
-            #   slot(simData, "hybridModel4") = generated_data$TurnData
-            # }
-            
             
             return(simData)
           }

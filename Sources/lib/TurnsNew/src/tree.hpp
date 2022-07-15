@@ -106,6 +106,7 @@ public:
         for (int i = 0; i < rcppNodeList.size(); i++)
         {
             Node n = {Rcpp::as<std::string>(rcppNodeList[i]), 0};
+            n.credit = 0;   // Initialize all node credits to zero.
             //Rcpp::Rcout <<"i=" << i <<", node="<<n.node<<std::endl;
             nodes.push_back(n);
         }
@@ -209,8 +210,7 @@ public:
         
     }
     
-    
-    
+
     void printPaths()
     {
       Rcpp::Rcout <<  mazePaths.Path0 << std::endl;

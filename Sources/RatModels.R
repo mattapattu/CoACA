@@ -31,9 +31,9 @@ plotLik = F
 validateHoldout = FALSE
 
 printHoldoutRes = F
-paramEstTest = F
+paramEstTest = T
 thetaHatTest = F
-pcaPlot = T
+pcaPlot = F
 dumpModelParams = F
 
 successPlot = F
@@ -59,7 +59,8 @@ load(data.path)
 #load(data.path2)
 
 plot.dir = file.path("C:/Users/matta/OneDrive/Documents/Projects/Rats-Credit/Plots")
-model.data.dir = file.path("C:/Projects/Rats-Credits/Data")
+#model.data.dir = file.path("C:/Projects/Rats-Credits/Data")
+model.data.dir = file.path("C:/Projects/Rats-Credits/Data/qlearning")
 #plot.dir = file.path("/home/ajames/Rats-Credit")
 
 model = "Model2"  ## {Model1,Model2,Model3}
@@ -84,10 +85,32 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
 allmodelResList <- list()
+dfThetahat<- data.frame(rowEnd=integer(),
+                        alpha=double(),
+                        gamma1=double(),
+                        model=character(),
+                        rat=character(),
+                        stringsAsFactors=FALSE)
 
-for (i in c(2)) {
+dfParamEstTest<- data.frame(rowEnd=integer(),
+                            alphaDiff=double(),
+                            gammaDiff=double(),
+                            model=character(),
+                            rat=character(),
+                            stringsAsFactors=FALSE)
+
+dfPCA<- data.frame(PC1=double(),
+                   PC2=double(),
+                   Model=character(),
+                   PathNb =character(),
+                   TextVec=integer(),
+                   Rat=character(),
+                   stringsAsFactors=FALSE)
+
+for (i in c(6)) {
   
-  testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
+  #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
+  testData = new("TestModels", Models=c("Paths"), creditAssignment=c("qlearning"))
   #model = "Model2"
   
   
@@ -137,6 +160,8 @@ for (i in c(2)) {
   # 
   ratDataList[[i]] = ratdata
   
+  
+  
   ############### Likelihood Computation and Model Selection ###########################################
   
   if(printHoldoutRes)
@@ -147,7 +172,7 @@ for (i in c(2)) {
   
   if(computeModelLik)
   {
-    #debug(getModelResults)
+    debug(getModelResults)
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc)
     save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
   }
@@ -214,8 +239,58 @@ for (i in c(2)) {
   
   if(paramEstTest)
   {
-    #debug(testParamEstimation)
-    #testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
+    debug(readModelParams)
+    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    debug(testParamEstimation)
+    testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
+    
+    
+    rat=ratdata@rat
+    setwd(model.data.dir)
+    dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Stability_df.Rdata"), full.names=FALSE)
+    listDfData <- list()
+    for(i in c(1:length(dfData)))
+    {
+      print(dfData[i])
+      load(dfData[i])
+      listDfData[[i]] <- df
+    }
+    dfcombined <- bind_rows(listDfData)
+    iterations=as.integer(floor(length(ratdata@allpaths[,1])/100))
+    n = 8
+    sessions<-unique(ratdata@allpaths[,5])
+    session_grps<-split(sessions, sort(sessions%%8))
+    maxVecs <- c()
+    for(grp in c(1:n))
+    {
+      print(grp)
+      begin_ses <- min(session_grps[[grp]])
+      end_ses <- max(session_grps[[grp]])
+      indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
+      maxVecs <- c(maxVecs,max(indices_of_ses))
+    }
+    models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+    for(model in models)
+    {
+      dfModel <- dfcombined[which(dfcombined[,1]==model),]
+      nbSims <- length(which(dfModel[,2]==maxVecs[1]))
+      print(sprintf("model=%s, nbSims=%i",model,nbSims))
+      if(nbSims > 0)
+      {
+        for(iter in maxVecs)
+        {
+          rowEnd = iter
+          simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),4]
+          simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),5]
+          
+          true_random_alphas <- dfModel[which(dfModel[,2]==rowEnd),6]
+          true_random_gammas <- dfModel[which(dfModel[,2]==rowEnd),7]
+          
+          dfParamEstTest <- rbind(dfParamEstTest,cbind(simulation_alphas-true_random_alphas, simulation_gammas-true_random_gammas,rep(iter,length(simulation_alphas)),rep(model,length(simulation_alphas)),rep(rat,length(simulation_alphas)) ))
+          
+        }
+      }
+    }
     
   }
   
@@ -223,22 +298,117 @@ for (i in c(2)) {
   {
     #res.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data")
     #debug(plotThetaHat)
-    plotThetaHat(ratdata,model.data.dir,plot.dir)
+    #plotThetaHat(ratdata,model.data.dir,plot.dir)
+    
+    
+    rat=ratdata@rat
+    setwd(model.data.dir)
+    paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+    load(paramTestData)
+    models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+    
+    for(i in c(1:6))
+    {
+      rowEnd = paramTest[[i]][[1]][,1]
+      alpha = paramTest[[i]][[1]][,2]
+      gamma1 = paramTest[[i]][[1]][,3]
+      #gamma2 = paramTest[[i]]$model@gamma2
+      model = models[i]
+      dfThetahat<-rbind(dfThetahat,cbind(rowEnd,alpha,gamma1,model,rep(rat,length(model))))
+    }
+    
   }
   
   if(pcaPlot)
   {
-    debug(plotPCA7)
-    load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
-    plotPCA7(ratdata,allmodelRes,model.data.dir)
+    #load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    #debug(plotPCA7)
+    #plotPCA7(ratdata,allmodelRes,model.data.dir)
+    
+    #debug(plotPCA3a)
+    #plotPCA3a(ratdata,"C:/Users/matta/Downloads",allmodelRes,model.data.dir)
     #debug(testPCA)
     #testPCA(ratdata,"C:/Users/matta/Downloads",plot.dir)
+    
+    rat=ratdata@rat
+    setwd(model.data.dir)
+    dfData=list.files(".", pattern=paste0(rat,".*resList.Rdata"), full.names=FALSE)
+    combinedResList <- list()
+    for(i in c(1))
+    {
+      print(dfData[i])
+      load(dfData[i])
+      combinedResList <- append(combinedResList,resList)
+    }
+    allmodelRes <- new("AllModelRes")
+    models.populated = c()
+    models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+    modelProbMats <- data.frame(matrix(0,0,16))
+    for(k in c(1:length(combinedResList)))
+    {
+      ##Extracting generator model from resList[[k]][[1]]
+      genData = combinedResList[[k]][[1]]$data
+      genModel = combinedResList[[k]][[1]]$data@simModel
+      ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+      index = which(models==genModel)
+      testModelData = combinedResList[[k]][[index]]$res
+      testModelName = testModelData@Model
+      #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
+      if(!testModelName %in% models.populated)
+      {
+        models.populated = c(models.populated,genModel)
+        print(sprintf("testModel=%s",testModelName))
+        #modelData <- slot(slot(allmodelRes,"Paths"),"aca2")
+        
+        
+        #probMat_model=testModelData@probMatrix[,c(1:12)]
+        testModel=slot(allModels,testModelName)
+        probMat_model=TurnsNew::getProbMatrix2(genData, testModelData, testModel, sim=1)
+        n=length(probMat_model[,1])
+        probMat_model = cbind(probMat_model,c(1:n),rep(testModelName,n),rep(0,n),rep("SimProb",n))
+        
+        curr_idx = length(modelProbMats[,1])
+        modelProbMats <- rbind(modelProbMats, probMat_model)
+        idx1 = curr_idx+1
+        modelProbMats[idx1,16] = 1
+        idx2 = curr_idx+801
+        modelProbMats[idx2,16] = 1
+        idx3 = length(modelProbMats[,1])
+        modelProbMats[idx3,16] = 1
+        
+      }
+      
+      if(length(models.populated)==6)
+      {
+        break
+      }
+    }
+    
+    empProbMat <- getEmpProbMat3(ratdata@allpaths,40,2)
+    empProbMat <- rbind(empProbMat,c(0,0,0,1,0,0,0,0,0,1,0,0))
+    
+    cols.num <- c(1:13)
+    modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
+    
+    pca = prcomp(modelProbMats[,1:12],scale=T,center = T)
+    empPCA = scale(empProbMat[,c(1:12)], pca$center, pca$scale) %*% pca$rotation
+    
+    textVec <- rep(0,length(empProbMat[,1]))
+    textVec[1]=1
+    textVec[801]=1
+    textVec[length(empProbMat[,1])-1]=1
+    df_s1 <- as.data.frame(cbind(pca$x[,1:2], modelProbMats[,15],modelProbMats[,13],modelProbMats[,16],rep(rat,length(pca$x[,1]))))
+    df_s1 <- rbind(df_s1,cbind(empPCA[,1:2], rep("Empirical",length(empPCA[,1])),empProbMat[,13],V5=textVec,rep(rat,length(empPCA[,1]))))
+    
+    cols.num <- c(1,2,4,5)
+    df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+    dfPCA=rbind(dfPCA,df_s1)
   }
   
   if(dumpModelParams)
   {
-    #allmodelRes = readModelParams(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
-    load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
     allmodelResList[[i]] <- allmodelRes
   }
   
@@ -265,6 +435,27 @@ if(ratSpeedPlot)
   plotRatSpeed(ratDataList,donnees_ash,plot.dir)
   
 }
+
+if(thetaHatTest)
+{
+  debug(plotThetaHat)
+  plotThetaHat(ratdata,dfThetahat,plot.dir)
+  
+}
+
+if(paramEstTest)
+{
+  debug(plotSimParamEstimation)
+  plotSimParamEstimation(dfParamEstTest,plot.dir)
+  
+}
+
+if(pcaPlot)
+{
+  debug(plotPCAComb)
+  plotPCAComb(dfPCA,plot.dir)
+}
+
 
 
 print(sprintf("End of script"))

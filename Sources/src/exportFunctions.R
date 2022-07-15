@@ -215,6 +215,7 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   #modelData@gamma2 <- gamma2
   
   simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
+  
   if(simLearns)
   {
    lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
@@ -225,6 +226,15 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   {
    negLogLik = 1000000
   }
+
+
+  probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
+ 
+  if(!(length(which(probMat[,4] > 0.8)) > 100 && length(which(probMat[,10] > 0.8)) > 100))
+  {
+    negLogLik = 1000000
+  }
+  
 
   # print(sprintf("negLogLik = %f",negLogLik))
   if (is.infinite(negLogLik)) {

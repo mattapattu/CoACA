@@ -68,6 +68,8 @@ public:
 
         return (nullptr);
     }
+    
+    
 
     Graph() {}
 
@@ -104,6 +106,7 @@ public:
         for (int i = 0; i < rcppNodeList.size(); i++)
         {
             Node n = {Rcpp::as<std::string>(rcppNodeList[i]), 0};
+            n.credit = 0;   // Initialize all node credits to zero.
             //Rcpp::Rcout <<"i=" << i <<", node="<<n.node<<std::endl;
             nodes.push_back(n);
         }
@@ -169,6 +172,22 @@ public:
             std::cout << std::endl;
         }
     }
+    
+    void printProbabilities()
+    {
+      int N = nodes.size();
+      Rcpp::Rcout <<"N=" << N<<std::endl;
+      for (int i = 0; i < N; i++)
+      {
+
+        // print all neighboring vertices of a vertex `i`
+        for (auto v : adjList[i])
+        {
+          Rcpp::Rcout <<"v.src=" << v.src->node << ", v.dest=" << v.dest->node << ", v.probability=" << v.probability <<std::endl;
+          std::cout << "i=" << i << ", " << nodes[i].node << " ——> " << v.dest->node << ":" <<v.probability << std::endl;
+        }
+      }
+    }
 
     void decayCredits(double gamma)
     {
@@ -184,13 +203,14 @@ public:
         {
             for (auto &node : nodes)
             {
-                std::cout << "node = " << node.node << ", credit = " << node.credit << "; " ;
+                Rcpp::Rcout << "node = " << node.node << ", credit = " << node.credit << std::endl;
             }
-            std::cout << std::endl;
+            //Rcpp::Rcout << std::endl;
         }
         
     }
     
+
     void printPaths()
     {
       Rcpp::Rcout <<  mazePaths.Path0 << std::endl;
@@ -346,6 +366,10 @@ public:
 
         return(nodeIds);
     }
+    
+    
 };
+
+
 
 #endif

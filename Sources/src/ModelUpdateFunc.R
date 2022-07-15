@@ -77,7 +77,7 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
           modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
           argList<-getArgList(modelData,ratdata)
           np.val = length(argList$lower) * 10
-          myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
+          myList <- DEoptim.control(NP=30, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
           out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
           modelData = setModelParams(modelData, unname(out$optim$bestmem))
           cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
@@ -116,7 +116,9 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   
   forloops = length(models) * length(creditAssignment)
   
-  cl <- startMPIcluster(count=count)
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+
   exportDoMPI(cl, c("src.dir","model.src")) 
   #exportDoMPI(cl, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
   registerDoMPI(cl)

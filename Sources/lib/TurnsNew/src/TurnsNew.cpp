@@ -1,6 +1,8 @@
 #include "aca3.hpp"
 #include "sarsa.hpp"
 #include "aca2.hpp"
+#include "avgRewardQLearning.hpp"
+
 
 // [[Rcpp::export()]]
 Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, Rcpp::S4 turnModel, arma::vec turnStages, bool debug = false)
@@ -18,6 +20,10 @@ Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
     else if(creditAssignment == "sarsa")
     {
 
+    }
+    else if(creditAssignment == "qlearning")
+    {
+      //ret =   simulateQlearning(ratdata, modelData, testModel, turnModel,turnStages, debug);
     }
     return(ret);
 }
@@ -40,6 +46,10 @@ std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcp
     {
         ret =   getSarsaLik(ratdata, modelData, testModel, sim);
     }
+    else if(creditAssignment == "qlearning")
+    {
+      ret =   getQLearningLik(ratdata, modelData, testModel, sim);
+    }
     return(ret);
 }
 
@@ -61,8 +71,13 @@ arma::mat getProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel
     {
         ret =   getSarsaProbMat(ratdata, modelData, testModel, sim);
     }
+    else if(creditAssignment == "qlearning")
+    {
+      ret =   getQLearningProbMat(ratdata, modelData, testModel, sim);
+    }
     return(ret);
 }
+
 
 // [[Rcpp::export()]]
 arma::mat getProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug = false)

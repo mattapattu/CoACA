@@ -10,6 +10,8 @@ select_rat <- as.integer(args[1])
 seed <- as.numeric(args[2])
 count <- as.integer(args[3])
 #options(error=recover)
+options(error=function()traceback(2))
+
 
 rats = c("rat_101","rat_103","rat_106","rat_112","rat_113","rat_114","robert")
 names=c('e','f','g','c','d','h','i','j','a','b','k')
@@ -27,16 +29,18 @@ setup.hpc = TRUE
 unitTest1 = FALSE
 unitTest3 = F 
 
-validateHoldout = F
-
-paramEstTest = T
-thetaHatTest = F
-pcaPlot = FALSE
-
+### Test1: Parameter Tstimation ############
 computeModelParams = F
+thetaHatTest = F
+########
+
+paramEstTest = F
+pcaPlot = T
 
 computeModelLik = F
 loadAllModelRes = F
+
+validateHoldout = F
 
 plotProb = F
 plotLik = F
@@ -67,6 +71,7 @@ load(data.path)
 
 plot.dir = file.path("/home/amoongat/Projects/Rats-Credit/Plots")
 model.data.dir = file.path("/home/amoongat/Projects/Rats-Credit/Data/Rat_Model_Data")
+#model.data.dir = file.path("/home/amoongat/Projects/Rats-Credit/Data/Rat_Model_Data/qlearning")
 
 model = "Model2"  ## {Model1,Model2,Model3}
 source(paste(src.dir,"ModelClasses.R", sep="/"))
@@ -92,6 +97,7 @@ ratDataList = list()
 for (i in c(select_rat)) {
   
   testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
+ # testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("qlearning"))
    #testData = new("TestModels", Models=c("Paths"), creditAssignment=c("aca2"))
   
   
@@ -150,10 +156,10 @@ for (i in c(select_rat)) {
 
   if(paramEstTest)
   {
-    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
     #plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
-    plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
+    #plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
 
   }  
 
@@ -170,8 +176,8 @@ for (i in c(select_rat)) {
   if(validateHoldout)
   {
     #debug(HoldoutTest)
-    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    #HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
     printMatRes(ratdata,testData,model.data.dir)
   }
 
@@ -182,7 +188,8 @@ for (i in c(select_rat)) {
   {
     #debug(getModelResults)
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc,count)
-    save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    #save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    save(allmodelRes,file=paste0(model.data.dir,paste0("/qlearning_",model,"_allmodelRes_",rats[i],".Rdata")))
     min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
     print(sprintf("%s is best model for %s",min_method,rats[i]))
   }
@@ -198,6 +205,7 @@ for (i in c(select_rat)) {
   {
     setwd(plot.dir)
     #debug(generatePlots)
+    load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
     generatePlots(ratdata,allmodelRes,window=20,plot.dir)
     
     #debug(generateEmpiricalPlots)
@@ -222,7 +230,12 @@ for (i in c(select_rat)) {
   if(pcaPlot)
   {
     #debug(plotPCA)
-    plotPCA(ratdata, allmodelRes)
+    #plotPCA(ratdata, allmodelRes)
+    #plotPCA3(ratdata,model.data.dir,allmodelRes,plot.dir)
+     load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+     plotPCA3a(ratdata,model.data.dir,allmodelRes,plot.dir)
+ 
+     #plotPCA7(ratdata,allmodelRes,model.data.dir,plot.dir)
     
   }
   

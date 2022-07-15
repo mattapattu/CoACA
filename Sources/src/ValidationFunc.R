@@ -227,7 +227,7 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.d
 
 testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.dir,seed,count)
 {
-  StabilityTest = FALSE 
+  StabilityTest = TRUE 
   models = testData@Models
   creditAssignment = testData@creditAssignment
   
@@ -235,7 +235,9 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
   modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   
   ratName = ratdata@rat 
-  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
+  timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+ 
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
@@ -395,19 +397,21 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
       #likSum <- (-1) *sum(lik[1:rowEnd])
       #cat(sprintf("likSum=%f\n", likSum)) 
       #cat(sprintf('Success: rowEnd = %i, alpha = %f, gamma = %f\n',rowEnd, modelData@alpha, modelData@gamma1))
-       list(iter = rowEnd, genDataIndex = j,data=generated_data,res=modelData,probRow=probRow)
+       list(iter = rowEnd, genDataIndex = j,data=generated_data,res=modelData,probRow=probRow,trueModelData=trueModelData)
      }
    
    
 
    rat = ratdata@rat
-   #save(resList,  file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_ParamEstResList.Rdata"))
+   save(resList,  file = paste0(model.data.dir,"/",rat, timestamp,"_ParamEstResList.Rdata"))
    
    df <- data.frame(model=character(),
                     iter=integer(),
                     genIndex=integer(),
                     alpha=double(),
                     gamma=double(),
+                    trueAlpha=double(),
+                    trueGamma=double(),
                     stringsAsFactors=FALSE)
    
    for(k in c(1:length(resList)))
@@ -416,12 +420,15 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
      genIndex = resList[[k]]$genDataIndex
      generated_data = resList[[k]]$data
      modelDataRes = resList[[k]]$res
+     trueModelData = resList[[k]]$trueModelData
      
      df[k,1] <- modelDataRes@Model
      df[k,2] <- iter
      df[k,3] <- genIndex
      df[k,4] <- modelDataRes@alpha
      df[k,5] <- modelDataRes@gamma1
+     df[k,6] <- trueModelData@alpha
+     df[k,7] <- trueModelData@gamma1 
 
   }
 
@@ -432,11 +439,11 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
 
    if(StabilityTest)
    {
-    save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_ParamEs_Stability_df.Rdata"))
+    save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
    }
    else
    {
-    save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_ParamEs_Conv_df.Rdata"))
+    save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
    }
    
    

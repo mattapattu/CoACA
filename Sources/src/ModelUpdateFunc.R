@@ -85,7 +85,7 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
           
         }   
         modelRes <- setNames(list(resMat),model)
-        save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_",paste(modelname,creditAssignment,sep="."),"_ParamRes.Rdata")) 
+        save(modelRes, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_",paste(modelname,creditAssignment,sep="."),"_ParamRes.Rdata")) 
 
         paramTest = list.append(paramTest,modelRes)
 

@@ -97,7 +97,7 @@ ratDataList = list()
 for (i in c(select_rat)) {
   
   #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
-  testData = new("TestModels", Models=c("Paths.qlearning","Hybrid1.qlearning","Hybrid2.qlearning","Hybrid3.qlearning","Hybrid4.qlearning","Turns.qlearning")))
+  testData = new("TestModels", Models=c("Paths.qlearning","Hybrid1.qlearning","Hybrid2.qlearning","Hybrid3.qlearning","Hybrid4.qlearning","Turns.qlearning"))
    #testData = new("TestModels", Models=c("Paths"), creditAssignment=c("aca2"))
   
   

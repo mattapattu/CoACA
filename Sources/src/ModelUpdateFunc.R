@@ -26,10 +26,10 @@ library(rlist)
 getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
   models = testData@Models
-  creditAssignment = testData@creditAssignment
+  #creditAssignment = testData@creditAssignment
   
-  paramTest = list()
-  modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  #paramTest = list()
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   
   ratName = ratdata@rat 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
@@ -56,9 +56,9 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
    
     opts <- list(initEnvir=initWorkers) 
   
-  for(i in 1:length(modelNames))
+  for(i in 1:length(models))
   {
-    model = modelNames[i] 
+    model = models[i] 
     print(sprintf('Model is %s\n', model))
     modelName = strsplit(model,"\\.")[[1]][1]
     creditAssignment = strsplit(model,"\\.")[[1]][2]
@@ -85,12 +85,15 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
           
         }   
         modelRes <- setNames(list(resMat),model)
+        save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_",paste(modelname,creditAssignment,sep="."),"_ParamRes.Rdata")) 
+
         paramTest = list.append(paramTest,modelRes)
+
     
    }
   
   rat = ratdata@rat
-  save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_modelParamRes.Rdata")) 
+  #save(paramTest, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_modelParamRes.Rdata")) 
   
   if(setup.hpc)
   {
@@ -297,6 +300,43 @@ readModelParams <- function(ratdata,res.dir,testingdata, sim){
     }
   }
   
+  return(allmodelRes)
+  
+}
+
+readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
+  
+  print(sprintf("Inside readModelParams"))
+  models <- testingdata@Models
+  
+
+
+  allmodelRes <- new("AllModelRes")
+  setwd(res.dir)
+  rat=ratdata@rat
+  paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+  print(paramTestData)
+  load(paramTestData)
+  
+  
+  for (i in 1:length(models))
+  {
+    modelName = strsplit(model,"\\.")[[1]][1]
+    creditAssignment = strsplit(model,"\\.")[[1]][2]
+    modelData <- new("ModelData", Model = models[i], creditAssignment = methods[j], sim = sim)
+
+    paramTestData=list.files(".", pattern=paste0(rat,".*.",modelName,".",creditAssignment,"modelParamRes.Rdata"), full.names=FALSE)
+    load(paramTestData)
+    rowlen <- length(paramTest[,1])
+    modelData@alpha <- paramTest[rowlen, 2]
+    modelData@gamma1 <- paramTest[rowlen, 3]
+    modelData <- setModelResults(modelData, ratdata, allModels)
+    allmodelRes <- addModelData(allmodelRes, modelData)
+
+  }
+  
+  
+
   return(allmodelRes)
   
 }

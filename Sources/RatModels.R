@@ -30,12 +30,12 @@ unitTest1 = FALSE
 unitTest3 = F 
 
 ### Test1: Parameter Tstimation ############
-computeModelParams = F
+computeModelParams = T
 thetaHatTest = F
 ########
 
 paramEstTest = F
-pcaPlot = T
+pcaPlot = F
 
 computeModelLik = F
 loadAllModelRes = F

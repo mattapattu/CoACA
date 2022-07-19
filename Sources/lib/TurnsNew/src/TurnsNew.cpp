@@ -23,7 +23,7 @@ Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
     }
     else if(creditAssignment == "qlearningAvgRwd")
     {
-      ret =   simulateQlearning(ratdata, modelData, testModel, turnModel,turnStages, debug);
+      ret =   simulateQLearn(ratdata, modelData, testModel, turnModel,turnStages, debug);
     }
     return(ret);
 }

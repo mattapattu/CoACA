@@ -217,8 +217,8 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
      foreach(generation=1:20) %dopar%
      {
        model = models[i] 
-       modelName = strsplit(model,"\\.")[[1]][1]
-       creditAssignment = strsplit(model,"\\.")[[1]][2]
+       modelName = strsplit(models[i],"\\.")[[1]][1]
+       creditAssignment = strsplit(models[i],"\\.")[[1]][2]
        trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
        if(StabilityTest)
        {

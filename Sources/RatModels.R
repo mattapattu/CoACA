@@ -90,6 +90,7 @@ source(paste(model.src,"HybridModel4.R", sep="/"))
 source(paste(src.dir,"BaseClasses.R", sep="/"))
 source(paste(src.dir,"ModelUpdateFunc.R", sep="/"))
 source(paste(src.dir,"ValidationFunc.R", sep="/"))
+source(paste(src.dir,"ValidationFunc2.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 ### Loop through the enreg of all 6 rats
@@ -156,8 +157,11 @@ for (i in c(select_rat)) {
 
   if(paramEstTest)
   {
-    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    
+    testParamEstimationNew(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    
     #plotSimParamEstimation(ratdata,model.data.dir,plot.dir)
     #plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
 

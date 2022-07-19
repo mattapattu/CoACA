@@ -337,8 +337,6 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
 
   }
   
-  
-
   return(allmodelRes)
   
 }

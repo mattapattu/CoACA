@@ -41,7 +41,7 @@ setClass("ModelDataList",
            aca3 = "ModelData",
            gb = "ModelData",
            sarsa = "ModelData",
-           qlearning1 = "ModelData"
+           qlearningAvgRwd = "ModelData"
          )
 )
 
@@ -104,7 +104,7 @@ setMethod("setModelParams",  signature=c("ModelData","numeric"),
               x@alpha = modelParams[1]
               x@gamma1 = modelParams[2]
             }
-            else if(x@creditAssignment == "qlearning1")
+            else if(x@creditAssignment == "qlearningAvgRwd")
             {
               x@alpha = modelParams[1]
               x@gamma1 = modelParams[2]
@@ -157,7 +157,7 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
                              testModel = testModel,
                              sim = x@sim)
             }
-            else if(x@creditAssignment == "qlearning1")
+            else if(x@creditAssignment == "qlearningAvgRwd")
             {
               argList = list(lower = c(0,0),
                              upper = c(1,1),

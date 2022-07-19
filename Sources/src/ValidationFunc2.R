@@ -172,7 +172,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
   #paramTest = list()
   #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   ratName = ratdata@rat
-  model.data.dir=paste(model.data.dir,"modelParams",ratName),sep="/")
+  model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
   allmodelRes = readModelParamsNew(ratdata,model.data.dir,testData, sim=2)
 
    

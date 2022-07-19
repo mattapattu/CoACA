@@ -325,7 +325,7 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
   {
     modelName = strsplit(model,"\\.")[[1]][1]
     creditAssignment = strsplit(model,"\\.")[[1]][2]
-    modelData <- new("ModelData", Model = models[i], creditAssignment = methods[j], sim = sim)
+    modelData <- new("ModelData", Model = models[i], creditAssignment = creditAssignment, sim = sim)
 
     paramTestData=list.files(".", pattern=paste0(rat,".*",modelName,".",creditAssignment,"_ParamRes.Rdata"), full.names=FALSE)
     load(paramTestData)

@@ -331,9 +331,9 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
     paramTestData=list.files(".", pattern=paste0(rat,".*",modelName,".",creditAssignment,"_ParamRes.Rdata"), full.names=FALSE)
     print(paramTestData)
     load(paramTestData)
-    rowlen <- length(paramTest[,1])
-    modelData@alpha <- paramTest[rowlen, 2]
-    modelData@gamma1 <- paramTest[rowlen, 3]
+    rowlen <- length(modelRes[,1])
+    modelData@alpha <- modelRes[rowlen, 2]
+    modelData@gamma1 <- modelRes[rowlen, 3]
     modelData <- setModelResults(modelData, ratdata, allModels)
     allmodelRes <- addModelData(allmodelRes, modelData)
 

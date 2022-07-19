@@ -5,43 +5,24 @@ using namespace Rcpp;
 
 //using namespace Rcpp;
 
-//namespace sarsa{
-Rcpp::List simulateQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, arma::vec turnStages, bool debug)
+Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, Rcpp::S4 turnModel, arma::vec turnStages, bool debug)
 {
+  //Rcpp::Rcout << "Inside simulateAca2TurnsModels" << std::endl;
   arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
   std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
-  arma::mat turnTimes;
-  if (model == "Turns")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));
-  }
-  else if (model == "Hybrid1")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel1"));
-  }
-  else if (model == "Hybrid2")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel2"));
-  }
-  else if (model == "Hybrid3")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel3"));
-  }
-  else if (model == "Hybrid4")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
-  }
-  Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
+  //Rcpp::Rcout << "model=" << model << std::endl;
+  arma::mat turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));;
+  arma::mat mseMatrix;
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
-  double gamma = Rcpp::as<double>(modelData.slot("gamma"));
-  //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
+  double beta = Rcpp::as<double>(modelData.slot("gamma1"));  
+  //Rcpp::Rcout << "alpha=" << alpha << ", beta=" << beta << std::endl;
   
-  //Rcpp::Rcout << "model=" << model << ", turnMethod=" << turnMethod << std::endl;
+  Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(turnModel.slot("nodeGroups"));
+  
   arma::mat R = arma::zeros(2, 6);
   R(0, 3) = 1;
   R(1, 3) = 1;
-  
   arma::mat generated_PathData;
   arma::mat generated_TurnData;
   arma::vec allpath_actions = allpaths.col(0);
@@ -52,16 +33,21 @@ Rcpp::List simulateQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
   arma::vec uniqSessIdx = arma::unique(sessionVec);
   arma::vec pathNb = allpaths.col(5);
   
-  arma::vec all_turns = turnTimes.col(3);
-  arma::vec turns_sessions = turnTimes.col(4);
-  
-  //Rcpp::Rcout << "sessionVec=" << sessionVec << std::endl;
-  //Rcpp::Rcout << "uniqSessIdx=" << uniqSessIdx << std::endl;
   Graph S0(testModel, 0);
   Graph S1(testModel, 1);
   
-  int actionNb = 0;
+  Graph turnsS0(turnModel, 0);
+  Graph turnsS1(turnModel, 1);
   
+  std::vector<int> rewardTurnsS0{2,5,6};
+  std::vector<int> rewardTurnsS1{2,5,10};
+  
+  int actionNb = 0;
+  double averageReward = 0;
+  double rewardSum = 0;
+  double durationSum = 0;
+  
+
   // Loop through each session
   for (unsigned int session = 0; session < (uniqSessIdx.n_elem); session++)
   {
@@ -72,22 +58,13 @@ Rcpp::List simulateQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
     arma::vec actions_sess = allpath_actions.elem(sessionIdx);
     arma::vec states_sess = allpath_states.elem(sessionIdx);
     
-    arma::uvec turns_sessIdx = arma::find(turns_sessions == (sessId));
-    arma::vec turns_sess = all_turns.elem(turns_sessIdx);
-    
-    int initState = 0;
-    bool changeState = false;
-    bool returnToInitState = false;
-    bool resetVector = true;
+    //int initState = 0;
     int nrow = actions_sess.n_rows;
-    double avg_score = 0;
-    double score_episode = 0;
-    int episode = 1;
-    
+
     int S = states_sess(0) - 1;
     std::vector<std::string> episodeTurns;
-    std::vector<int> episodeTurnStates;
-    std::vector<double> episodeTurnTimes;
+    //std::vector<int> episodeTurnStates;
+    //std::vector<double> episodeTurnTimes;
     
     arma::mat generated_PathData_sess(nrow, 7);
     arma::mat generated_TurnsData_sess((nrow * 3), 7);
@@ -96,172 +73,380 @@ Rcpp::List simulateQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
     unsigned int turnIdx = 0; // counter for turn model
     //All episodes in new session
     //Rcpp::Rcout << "nrow=" << nrow << std::endl;
-    int totalPaths = nrow;
-    while (actionNb <= totalPaths)
+    for (int i = 0; i < nrow; i++)
     {
       actionNb++;
-      if (resetVector)
-      {
-        initState = S;
-        //Rcpp::Rcout <<"initState="<<initState<<std::endl;
-        resetVector = false;
-      }
-      //Rcpp::Rcout <<"i=" <<i <<", S=" <<S  << std::endl;
-      Node *currNode;
-      Node *prevNode;
+      Rcpp::Rcout <<"i=" <<i <<", S=" <<S  << std::endl;
       std::vector<Edge> *edges;
       Rcpp::StringVector turnNames;
+      Rcpp::StringVector testTurnNames;
       Graph graph;
+      Graph turnsGraph;
+      Node *prevNode=nullptr;
+      Node *currNode=nullptr;
+      Node * rootNode=nullptr; 
+      std::vector<int> turnsVector;
+      std::vector<int>  rewardVec;
       
-      Rcpp::IntegerVector turns_index;
-      double pathDuration = 0;
-      int turnReward = 0;
-      int last_turn = 0;
-      int S_prime = 0;
-      
-      //simulate an episode
-      while (!returnToInitState)
+      if (S == 0)
       {
-        if (S == 0)
-        {
-          graph = S0;
-          edges = graph.getOutgoingEdges("E");
-        }
-        else
-        {
-          graph = S1;
-          edges = graph.getOutgoingEdges("I");
-        }
+        //Rcpp::Rcout <<"Rat in box E"<< std::endl;
+        graph = S0;
+        edges = graph.getOutgoingEdges("E");
+        turnsGraph = turnsS0;
+        rewardVec = rewardTurnsS0;
+        rootNode = graph.getNode("E"); 
         
-        if (!edges->empty())
+      }
+      else
+      {
+        //Rcpp::Rcout <<"Rat in box I"<< std::endl;
+        graph = S1;
+        edges = graph.getOutgoingEdges("I");
+        turnsGraph = turnsS1;
+        rewardVec = rewardTurnsS1;
+        rootNode = graph.getNode("I"); 
+      }
+      
+      //Rcpp::Rcout <<"Selecting actions until reaching reward box."<< std::endl;
+      double pathDuration = 0;
+      //HERE  the nodes based on testModel from one reward box to another are selected 
+      while (!edges->empty())
+      {
+        Edge edgeSelected = softmax_action_sel(graph, *edges);
+        std::string turnSelected = edgeSelected.dest->node;
+        //Rcpp::Rcout << "Turn=" << turnSelected <<std::endl;
+        
+        //Convert the selected edge to TurnModel components
+        //Rcpp::Rcout << "Turn=" << turnSelected  << ", turnNb=" << turnNb <<std::endl;
+        currNode = edgeSelected.dest;
+        //Rcpp::Rcout << "turnSelected =" << turnSelected <<std::endl;
+        
+        //Rcpp::Rcout << "turnTime=" << turnTime <<std::endl;
+        testTurnNames.push_back(turnSelected);
+        //episodeTurns.push_back(currNode->node);
+        //episodeTurnStates.push_back(S);
+        //Rcpp::Rcout << "model=" << model <<std::endl;
+        double testNodeDuration = 0;
+        int turnReward = 0;
+        
+        if(model == "Turns")
         {
-          Edge edgeSelected = softmax_action_sel(graph, *edges);
-          std::string turnSelected = edgeSelected.dest->node;
-          int turnNb = graph.getNodeIndex(turnSelected);
-          currNode = edgeSelected.dest;
-          arma::vec durationVec = simulateTurnDuration(turnTimes, allpaths, turnNb, (turnIdx + 1), turnStages, nodeGroups, debug);
+          //std::string turnName = currNode->node;
+          //turnNames.push_back(turnSelected);
+          //Rcpp::Rcout << "Model is Turns"<<std::endl; 
+          int componentId = turnsGraph.getNodeIndex(turnSelected);     
+          turnsVector.push_back(componentId);
+          arma::vec durationVec = simulateTurnDuration(turnTimes, allpaths, componentId, (turnIdx+1), turnStages,nodeGroups,false);
           double turnTime = durationVec(1);
-          turnNames.push_back(turnSelected);
-          episodeTurns.push_back(currNode->node);
-          episodeTurnStates.push_back(S);
-          episodeTurnTimes.push_back(0);
-          turns_index.push_back(turnIdx);
+          testNodeDuration = turnTime;
+          //Rcpp::Rcout << "Turn duration="<< turnTime<<std::endl; 
           pathDuration = pathDuration + turnTime;
+          //episodeTurnTimes.push_back(turnTime);
           
-          generated_TurnsData_sess(turnIdx, 0) = turnNb;
+          
+          if(turnsVector==rewardVec)
+          {
+            turnReward = 1;
+          }
+          
+          generated_TurnsData_sess(turnIdx, 0) = componentId;
           generated_TurnsData_sess(turnIdx, 1) = S;
-          generated_TurnsData_sess(turnIdx, 2) = 0;
+          generated_TurnsData_sess(turnIdx, 2) = turnReward;
           generated_TurnsData_sess(turnIdx, 3) = turnTime;
-          //Rcpp::Rcout << "Turn=" << currTurn <<", turn duration="<< generated_TurnsData_sess(turnIdx, 3)<<std::endl;
+          //Rcpp::Rcout << "Turn=" << turnSelected <<", turnDuration="<< turnTime<<std::endl;
           generated_TurnsData_sess(turnIdx, 4) = sessId;
           generated_TurnsData_sess(turnIdx, 5) = actionNb;
           generated_TurnsData_sess(turnIdx, 6) = durationVec(0);
           turnIdx++;
           
-          edges = graph.getOutgoingEdges(currNode->node);
+        }
+        else{
+          //Rcpp::Rcout << "Model is "<< model << " , splitting "<< currNode->node << " into turns."<<std::endl; 
+          Rcpp::StringVector turnNodes  = graph.getTurnNodes(currNode->node);
+          Rcpp::IntegerVector turnNodeIds = turnsGraph.getNodeIds(turnNodes);
+          
+          //Rcpp::Rcout << "turnDurationMat is" << std::endl << turnDurationMat << std::endl;
+          //Rcpp::Rcout << "turnNodes:" <<  turnNodes << std::endl;
+          //Rcpp::Rcout << "turnNodeIds:" <<  turnNodeIds << std::endl;
+          
+          for(int j=0; j<turnNodeIds.size();j++)
+          {
+            turnsVector.push_back(turnNodeIds[j]);
+            arma::vec durationVec = simulateTurnDuration(turnTimes, allpaths, turnNodeIds[j], (turnIdx+1), turnStages,nodeGroups,false);
+            double turnTime = durationVec(1);
+            pathDuration = pathDuration + turnTime;
+            testNodeDuration = testNodeDuration + turnTime;
+            //Rcpp::Rcout << "turnNodeId=" << turnNodeIds[j] <<", turnDuration="<< turnTime<<std::endl;
+            
+            
+            if(turnsVector==rewardVec)
+            {
+              turnReward = 1;
+            }
+            generated_TurnsData_sess(turnIdx, 0) = turnNodeIds[j];
+            generated_TurnsData_sess(turnIdx, 1) = S;
+            generated_TurnsData_sess(turnIdx, 2) = turnReward;
+            generated_TurnsData_sess(turnIdx, 3) = turnTime;
+            generated_TurnsData_sess(turnIdx, 4) = sessId;
+            generated_TurnsData_sess(turnIdx, 5) = actionNb;
+            generated_TurnsData_sess(turnIdx, 6) = durationVec(0);
+            
+            turnIdx++;
+          }
+        }
+        
+
+        double actionDuration = testNodeDuration/ (double) 1000;
+        edges = graph.getOutgoingEdges(currNode->node);
+        
+        
+        Edge edge;
+        std::vector<Edge> *siblings = nullptr;
+        if(prevNode==nullptr)
+        {
+          //Rcpp::Rcout << "prevNode is null. This is the first node of the path."<< model<<std::endl; 
+          edge = graph.getEdge(rootNode->node, currNode->node);
+          siblings = graph.getOutgoingEdges(rootNode->node);
         }
         else
         {
-          int A;
+          //Rcpp::Rcout << "prevNode is not null. prevNode="<< prevNode->node<<std::endl; 
+          edge = graph.getEdge(prevNode->node, currNode->node);
+          siblings = graph.getOutgoingEdges(prevNode->node);
+        }
+        
+        
+        //Determine sibling with maxQVal to check if selected action is greedy
+        bool isCurrTurnGreedy = false;
+        double maxProb = 0;
+        Node* maxSibling = nullptr;
+        for (auto it = siblings->begin(); it != siblings->end(); ++it)
+        {
+          double prob = it->probability;
+          if((prob - maxProb) >= 1e-9)
+          {
+            maxSibling = it->dest;
+            maxProb = prob;
+          }
+          
+        }
+        
+        if(maxSibling->node == currNode->node)
+        {
+          //Rcpp::Rcout <<"Max Sibling is curr node, action is greedy" << std::endl;
+          isCurrTurnGreedy = true;
+        }
+        else
+        {
+          //Rcpp::Rcout <<"Action selected is not greedy" << std::endl;
+        }
+
+        double qMax = 0;
+        std::vector<Edge> *edges = graph.getOutgoingEdges(currNode->node);
+        
+        if(edges->size() > 0) //If curr turn is an intermediate turn in the maze, determine qmax using edges
+        {
+          //Rcpp::Rcout <<"Number of edges greater than zero for current turn " << currNode->node << std::endl;
+          Node* selectedNode = nullptr;
+          for (auto it = edges->begin(); it != edges->end(); ++it)
+          {
+            
+            double destNodeCredit = it->dest->credit;
+            if((destNodeCredit - qMax) >= 1e-9)
+            {
+              qMax = destNodeCredit;
+              selectedNode = it->dest;
+            }
+            
+          }
+          if(selectedNode == nullptr)
+          {
+            //Rcpp::Rcout <<"No edge is selected because all edges have 0 value " << std::endl;
+            Edge selectedEdge =  edges->at(0);
+            selectedNode = selectedEdge.dest;
+          }
+          qMax = selectedNode->credit;
+          //Rcpp::Rcout <<"Edge with max value is: " << selectedNode->node << std::endl;
+        }
+        else if(edges->empty())  //If curr turn leads to next box, then select qmax using actions from next box
+        {
+          //Rcpp::Rcout <<"Final turn of the path" << std::endl;
+          if(i != (nrow-1))
+          {
+            //Rcpp::Rcout <<"Not the final path of the session" << std::endl;
+            int A = graph.getPathFromTurns(testTurnNames);
+            int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
+            int S_prime = aca_getNextState(S, A, last_turn);
+            Node * newRootNode;
+            Graph * newGraph=nullptr;
+            if (S_prime == 0)
+            {
+              //Rcpp::Rcout <<"Next state is box E" << std::endl;
+              newGraph = &S0;
+              newRootNode = newGraph->getNode("E"); 
+            }
+            else
+            {
+              //Rcpp::Rcout <<"Next state is box I" << std::endl;
+              newGraph = &S1;
+              newRootNode = newGraph->getNode("I"); 
+            }
+            std::vector<Edge> *edges = newGraph->getOutgoingEdges(newRootNode->node);
+            
+            Node* selectedNode=nullptr;
+            for (auto it = edges->begin(); it != edges->end(); ++it)
+            {
+              double destNodeCredit = it->dest->credit;
+              if((destNodeCredit - qMax) >= 1e-9)
+              {
+                qMax = destNodeCredit;
+                selectedNode = it->dest;
+              }
+              
+            }
+            if(selectedNode == nullptr)
+            {
+              //Rcpp::Rcout <<"All actions is box "<< rootNode->node << " have value 0." << std::endl;
+              // If all edges have same qval, select edge[0]
+              Edge selectedEdge =  edges->at(0);
+              selectedNode = selectedEdge.dest;
+            }
+            qMax = selectedNode->credit;
+            //Rcpp::Rcout <<"Max value action in box "<< rootNode->node << " is: " << selectedNode->node << std::endl;
+          }
+        }
+        
+        
+        //rewardSum = rewardSum + turnReward;
+        //durationSum = durationSum + actionDuration;
+        
+        //double avgRewardEst = rewardSum/durationSum;
+        
+        
+        double td_err = turnReward - (averageReward*actionDuration) + qMax - currNode->credit;
+        //Rcpp::Rcout <<"currTurn="  << currNode->node <<", turnReward=" << turnReward  << ", turntime=" <<actionDuration <<  ", averageReward=" <<averageReward <<  ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
+        
+        double alpha_prime = alpha/(double) std::pow(actionNb,0);
+        currNode->credit = currNode->credit + (alpha_prime * td_err);
+
+        //if(isCurrTurnGreedy)
+        //{
+        //  rewardSum = rewardSum + turnReward;
+        //  durationSum = durationSum + actionDuration;
+        //  averageReward = rewardSum/(double) durationSum;
+        //}
+        
+        double beta_prime = beta/(double) std::pow(actionNb,0);
+        averageReward = averageReward + (beta_prime*td_err);
+        
+        S0.updateEdgeProbs();
+        S1.updateEdgeProbs();
+        
+        //S0.printCredits(true);
+        //S1.printCredits(true);
+        
+        //S0.printProbabilities();
+        //S1.printProbabilities();
+        
+        
+        prevNode = currNode;
+      }
+      
+      turnsVector.clear();
+      //Rcpp::Rcout << "testTurnNames=" << testTurnNames <<std::endl;
+      //graph.printPaths();
+      int A = graph.getPathFromTurns(testTurnNames);
+      //Rcpp::Rcout << "S=" <<S << ", A=" << A <<std::endl;
+      
+
+      //arma::mat durationMat = simulatePathTime(turnTimes, allpaths, actionNb, A, pathStages,nodeGroups);
+      
+      //Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A << ", ses=" << sessId<<std::endl;
+      
+      generated_PathData_sess(i, 0) = A;
+      generated_PathData_sess(i, 1) = S;
+      //Rcpp::Rcout <<"R(S, A)=" <<R(S, A)<< std::endl;
+      generated_PathData_sess(i, 2) = R(S, A);
+      generated_PathData_sess(i, 3) = pathDuration;
+      generated_PathData_sess(i, 4) = sessId;
+      generated_PathData_sess(i, 5) = actionNb;
+      
+      
+      int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
+      
+      int S_prime = aca_getNextState(S, A, last_turn);
+      
+
+      if(debug)
+      {
+        arma::rowvec probRow(13);
+        probRow.fill(-1);
+        probRow(12) = 0;
+        
+        for (int path = 0; path < 6; path++)
+        {
+          //Rcpp::Rcout << "path=" << path << ", state=" << S << std::endl;
+          
+          Rcpp::StringVector turnVec;
           if (S == 0)
           {
-            A = S0.getPathFromTurns(turnNames);
+            turnVec = S0.getTurnsFromPaths(path);
+            turnVec.push_front("E");
           }
           else
           {
-            A = S1.getPathFromTurns(turnNames);
+            turnVec = S1.getTurnsFromPaths(path);
+            turnVec.push_front("I");
           }
-          
-          generated_PathData_sess(actionNb, 0) = A;
-          generated_PathData_sess(actionNb, 1) = S;
-          //Rcpp::Rcout <<"R(S, A)=" <<R(S, A)<< std::endl;
-          generated_PathData_sess(actionNb, 2) = R(S, A);
-          generated_PathData_sess(actionNb, 3) = pathDuration;
-          generated_PathData_sess(actionNb, 4) = sessId;
-          generated_PathData_sess(actionNb, 5) = actionNb;
-          
-          if (R(S, A) == 1)
+          //Rcpp::Rcout << "turnVec=" << turnVec << std::endl;
+          // msg.str("");
+          // msg << "turnVec=";
+          // logger.PrintRcppVec(msg.str(),turnVec); 
+          double pathProb = 1;
+          for (int k = 0; k < (turnVec.length() - 1); k++)
           {
-            turnReward = 1;
-            generated_TurnsData_sess((turnIdx - 1), 2) = 1;
-            score_episode = score_episode + 1;
+            std::string turn1 = Rcpp::as<std::string>(turnVec[k]);
+            std::string turn2 = Rcpp::as<std::string>(turnVec[k + 1]);
+            //Rcpp::Rcout << "turn1=" << turn1 << ", turn2=" << turn2 << std::endl;
+            
+            Edge e;
+            if (S == 0)
+            {
+              e = S0.getEdge(turn1, turn2);
+            }
+            else
+            {
+              e = S1.getEdge(turn1, turn2);
+            }
+            
+            //Rcpp::Rcout << "Edge prob=" << e.probability << std::endl;
+            pathProb = e.probability * pathProb;
           }
-          
-          actionNb++;
-          
-          last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
-          S_prime = aca_getNextState(S, A, last_turn);
-          
-          if (S_prime != initState)
-          {
-            changeState = true;
-          }
-          else if (S_prime == initState && changeState)
-          {
-            returnToInitState = true;
-          }
+          int index = path + (6 * S);
+          //Rcpp::Rcout << "index=" << index << ", pathProb=" << pathProb << std::endl;
+          probRow[index] = pathProb;
         }
+        //Rcpp::Rcout << "probRow=" << probRow << std::endl;
+        mseMatrix = arma::join_vert(mseMatrix, probRow);
         
-        if (prevNode)
-        {
-          double prediction = gamma * currNode->credit;
-          double td_err = turnReward + prediction - prevNode->credit;
-          prevNode->credit = prevNode->credit + (alpha * td_err);
-          turnReward = 0;
-        }
-        
-        graph.updateEdgeProbs();
-        
-        prevNode = currNode;
-        S = S_prime;
       }
       
-      //arma::mat durationMat = simulatePathTime(turnTimes, allpaths, actionNb, A, pathStages,nodeGroups);
-      
-      //Rcpp::Rcout <<"A=" << A << ", S=" << S << ", sessId=" <<sessId<< std::endl;
-      
-      if (returnToInitState)
-      {
-        //Rcpp::Rcout << "Inside end episode" << std::endl;
-        changeState = false;
-        returnToInitState = false;
-        avg_score = (avg_score * (episode - 1) + (score_episode - avg_score)) / episode;
-        //Rcpp::Rcout << "episodeTurns.size=" <<episodeTurns.size() << ", episodeTurnStates.size()=" <<episodeTurnStates.size() << ", episodeTurnTimes.size=" << episodeTurnTimes.size()<< std::endl;
-        // for(unsigned int i=0; i<episodeTurns.size(); i++)
-        // {
-        //   std::cout << episodeTurns[i] << "," <<episodeTurnStates[i] << "," <<episodeTurnTimes[i] << "; ";
-        // }
-        
-        //Rcpp::Rcout << "Here7" << std::endl;
-        //Rcpp::Rcout <<  "H="<<H<<std::endl;
-        score_episode = 0;
-        episode = episode + 1;
-        resetVector = true;
-        episodeTurns.clear();
-        episodeTurnStates.clear();
-        episodeTurnTimes.clear();
-      }
-      
-      //Rcpp::Rcout << "Here1" << std::endl;
-      //Rcpp::Rcout << "Here2" << std::endl;
+      S = S_prime;
     }
-    
-    //Rcpp::Rcout << "Here3" << std::endl;
-    
+
+
     // if (turnIdx < (nrow * 2) - 1)
     // {
     //   generated_TurnsData_sess.shed_rows((turnIdx), ((nrow * 2) - 1));
     // }
-    //Rcpp::Rcout << "Here4" << std::endl;
     generated_TurnData = arma::join_cols(generated_TurnData, generated_TurnsData_sess.rows(0, (turnIdx - 1)));
-    //Rcpp::Rcout <<  "H after session=" << H<<std::endl;
-    //Rcpp::Rcout << "Here5" << std::endl;
     generated_PathData = arma::join_cols(generated_PathData, generated_PathData_sess);
-    //Rcpp::Rcout << "Here6" << std::endl;
-    //Rcpp::Rcout <<  "likelihoodVec=" << likelihoodVec<<std::endl;
   }
-  return (Rcpp::List::create(Named("PathData") = generated_PathData, _["TurnData"] = generated_TurnData));
+  //Rcpp::Rcout << "generated_PathData is" << std::endl << generated_PathData.rows(0,10) << std::endl;
+  return (Rcpp::List::create(Named("PathData") = generated_PathData, _["TurnData"] = generated_TurnData, _["probMat"] = mseMatrix));
 }
+
 
 std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim)
 {
@@ -545,7 +730,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
         double alpha_prime = alpha/(double) std::pow(actionCounter,0);
         currNode->credit = currNode->credit + (alpha_prime * td_err);
         
-	double beta_prime = beta/(double) std::pow(actionCounter,0);
+	      double beta_prime = beta/(double) std::pow(actionCounter,0);
         averageReward = averageReward + (beta_prime*td_err);
 
         //if(isCurrTurnGreedy)

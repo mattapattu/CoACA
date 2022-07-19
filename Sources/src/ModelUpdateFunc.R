@@ -30,8 +30,9 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
   
   #paramTest = list()
   #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
-  
-  ratName = ratdata@rat 
+  ratName = ratdata@rat
+  model.data.dir = paste(model.data.dir,"modelParams",ratName),sep="/")
+   
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=1234)
@@ -315,9 +316,9 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
   allmodelRes <- new("AllModelRes")
   setwd(res.dir)
   rat=ratdata@rat
-  paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
-  print(paramTestData)
-  load(paramTestData)
+  #paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+  #print(paramTestData)
+  #load(paramTestData)
   
   
   for (i in 1:length(models))
@@ -326,7 +327,7 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
     creditAssignment = strsplit(model,"\\.")[[1]][2]
     modelData <- new("ModelData", Model = models[i], creditAssignment = methods[j], sim = sim)
 
-    paramTestData=list.files(".", pattern=paste0(rat,".*.",modelName,".",creditAssignment,"modelParamRes.Rdata"), full.names=FALSE)
+    paramTestData=list.files(".", pattern=paste0(rat,".*",modelName,".",creditAssignment,"_ParamRes.Rdata"), full.names=FALSE)
     load(paramTestData)
     rowlen <- length(paramTest[,1])
     modelData@alpha <- paramTest[rowlen, 2]

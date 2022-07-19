@@ -21,9 +21,9 @@ Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
     {
 
     }
-    else if(creditAssignment == "qlearning")
+    else if(creditAssignment == "qlearningAvgRwd")
     {
-      //ret =   simulateQlearning(ratdata, modelData, testModel, turnModel,turnStages, debug);
+      ret =   simulateQlearning(ratdata, modelData, testModel, turnModel,turnStages, debug);
     }
     return(ret);
 }
@@ -46,7 +46,7 @@ std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcp
     {
         ret =   getSarsaLik(ratdata, modelData, testModel, sim);
     }
-    else if(creditAssignment == "qlearning")
+    else if(creditAssignment == "qlearningAvgRwd")
     {
       ret =   getQLearningLik(ratdata, modelData, testModel, sim);
     }
@@ -71,7 +71,7 @@ arma::mat getProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel
     {
         ret =   getSarsaProbMat(ratdata, modelData, testModel, sim);
     }
-    else if(creditAssignment == "qlearning")
+    else if(creditAssignment == "qlearningAvgRwd")
     {
       ret =   getQLearningProbMat(ratdata, modelData, testModel, sim);
     }

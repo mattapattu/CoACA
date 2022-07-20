@@ -264,6 +264,8 @@ getAllModelResults <- function(ratdata, resList, testingdata, sim) {
 
     modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = sim)
     #index <- length(methods) * (i - 1) + j
+    print(resList[[i]])
+    print(resList[[i]]$res)
     modelData <- setModelParams(modelData, resList[[i]]$res)
      #debug(setModelResults)
     modelData <- setModelResults(modelData, ratdata, allModels)

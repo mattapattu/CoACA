@@ -98,7 +98,7 @@ ratDataList = list()
 for (i in c(select_rat)) {
   
   #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
-  testData = new("TestModels", Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
+  testData = new("TestModels", Name = "QlearningAvgReward",Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
    #testData = new("TestModels", Models=c("Paths"), creditAssignment=c("aca2"))
   
   
@@ -194,7 +194,8 @@ for (i in c(select_rat)) {
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc,count)
     #save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
     model.data.dir=paste(model.data.dir,"modelParams",ratdata@rat,sep="/")
-    save(allmodelRes,file=paste0(model.data.dir,paste0("/qlearning_",model,"_allmodelRes_",rats[i],".Rdata")))
+    testDataName = testData@Name
+    save(allmodelRes,file=paste0(model.data.dir,paste0("/",testDataName,"_",model,"_allmodelRes_",rats[i],".Rdata")))
     min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
     print(sprintf("%s is best model for %s",min_method,rats[i]))
   }

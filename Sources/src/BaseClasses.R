@@ -4,6 +4,7 @@ allModels = new("AllModels",Paths = PathModel, Turns = TurnModel,Hybrid1 = Hybri
 
 setClass("TestModels", 
          slots = list(
+           Name = "character",
            Models="character",
            creditAssignment = "character"
          )

@@ -173,7 +173,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
   #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   ratName = ratdata@rat
   model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
-  allmodelRes = readModelParamsNew(ratdata,model.data.dir,testData, sim=2)
+  allModelRes = readModelParamsNew(ratdata,model.data.dir,testData, sim=2)
 
    
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))

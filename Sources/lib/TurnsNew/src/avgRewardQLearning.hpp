@@ -76,7 +76,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
     for (int i = 0; i < nrow; i++)
     {
       actionNb++;
-      Rcpp::Rcout <<"i=" <<i <<", S=" <<S  << std::endl;
+      //Rcpp::Rcout <<"i=" <<i <<", S=" <<S  << std::endl;
       std::vector<Edge> *edges;
       Rcpp::StringVector turnNames;
       Rcpp::StringVector testTurnNames;

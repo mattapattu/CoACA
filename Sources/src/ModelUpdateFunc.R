@@ -118,7 +118,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   
   models = testData@Models
   
-  forloops = length(models) * length(creditAssignment)
+  #forloops = length(models) * length(creditAssignment)
   
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)

@@ -262,9 +262,8 @@ getAllModelResults <- function(ratdata, resList, testingdata, sim) {
     modelName = strsplit(models[i],"\\.")[[1]][1]
     creditAssignment = strsplit(models[i],"\\.")[[1]][2]
 
-
     modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = sim)
-    index <- length(methods) * (i - 1) + j
+    #index <- length(methods) * (i - 1) + j
     modelData <- setModelParams(modelData, resList[[i]]$res)
      #debug(setModelResults)
     modelData <- setModelResults(modelData, ratdata, allModels)

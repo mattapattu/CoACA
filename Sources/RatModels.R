@@ -35,7 +35,7 @@ thetaHatTest = F
 ########
 
 paramEstTest = F
-pcaPlot = 
+pcaPlot = F
 
 computeModelLik = T
 loadAllModelRes = F

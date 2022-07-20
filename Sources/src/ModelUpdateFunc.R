@@ -116,8 +116,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   #  return()
   #}
   
-  models = testingdata@Models
-  creditAssignment = testingdata@creditAssignment
+  models = testData@Models
   
   forloops = length(models) * length(creditAssignment)
   
@@ -146,11 +145,13 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   print("Spawned cluster")
   time <- system.time(
   resMatrix <-
-      foreach(model=models, .combine='rbind',.options.mpi=opts,.packages = c("rlist","DEoptim","doMPI")) %:%
-      foreach(method=creditAssignment, .combine='rbind') %dopar% {
+      foreach(model=models, .combine='rbind',.options.mpi=opts,.packages = c("rlist","DEoptim","doMPI")) %dopar% {
           #envir = ls() 
         cat('model =',model,'\n',sep = '')
-        modelData =  new("ModelData", Model=model, creditAssignment = method, sim=sim)
+        modelName = strsplit(model,"\\.")[[1]][1]
+        creditAssignment = strsplit(model,"\\.")[[1]][2]
+
+        modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=sim)
         argList<-getArgList(modelData,ratdata)
         cat('Create new cluster\n') 
           #cl2 <- getDoMpiCluster()

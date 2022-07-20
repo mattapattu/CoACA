@@ -30,14 +30,14 @@ unitTest1 = FALSE
 unitTest3 = F 
 
 ### Test1: Parameter Tstimation ############
-computeModelParams = T
+computeModelParams = F
 thetaHatTest = F
 ########
 
 paramEstTest = F
 pcaPlot = 
 
-computeModelLik = F
+computeModelLik = T
 loadAllModelRes = F
 
 validateHoldout = F
@@ -193,6 +193,7 @@ for (i in c(select_rat)) {
     #debug(getModelResults)
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc,count)
     #save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    model.data.dir=paste(model.data.dir,"modelParams",rat@ratdata,sep="/")
     save(allmodelRes,file=paste0(model.data.dir,paste0("/qlearning_",model,"_allmodelRes_",rats[i],".Rdata")))
     min_method = getMinimumLikelihood(ratdata,allmodelRes,testData,sim=2)
     print(sprintf("%s is best model for %s",min_method,rats[i]))

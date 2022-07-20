@@ -165,16 +165,17 @@ HoldoutTestNew=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.dat
 
 testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
 {
-  StabilityTest = TRUE 
+  StabilityTest = FALSE 
   models = testData@Models
   #creditAssignment = testData@creditAssignment
   
   #paramTest = list()
   #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   ratName = ratdata@rat
-  model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
-  allModelRes = readModelParamsNew(ratdata,model.data.dir,testData, sim=2)
+  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
+  res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
    
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
@@ -344,7 +345,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
    
 
    rat = ratdata@rat
-   save(resList,  file = paste0(model.data.dir,"/",rat, timestamp,"_ParamEstResList.Rdata"))
+   save(resList,  file = paste0(res.model.data.dir,"/",rat, timestamp,"_ParamEstResList.Rdata"))
    
    df <- data.frame(model=character(),
                     iter=integer(),
@@ -380,11 +381,11 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
    if(StabilityTest)
    {
-    save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
+    save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
    }
    else
    {
-    save(df, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
+    save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
    }
    
    

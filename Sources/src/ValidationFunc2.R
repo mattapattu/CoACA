@@ -213,7 +213,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
 
    generatedDataList <-  
-     foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
+     foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData","allModelRes")) %:%
      foreach(generation=1:20) %dopar%
      {
        model = models[i] 

@@ -257,7 +257,7 @@ getAllModelResults <- function(ratdata, resList, testingdata, sim) {
   models <- testingdata@Models
   #methods <- testingdata@creditAssignment
   allmodelRes <- new("AllModelRes")
-  for (i in 1:length(resList))
+  for (i in 1:length(resList[,1]))
   {
     modelName = strsplit(resList[i,]$model,"\\.")[[1]][1]
     creditAssignment = strsplit(resList[i,]$model,"\\.")[[1]][2]

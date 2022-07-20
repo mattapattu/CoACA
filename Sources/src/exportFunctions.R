@@ -305,7 +305,7 @@ getMinimumLikelihood=function(ratdata, allmodelRes,testingdata,sim)
   {
     modelName = strsplit(m,"\\.")[[1]][1]
     creditAssignment = strsplit(m,"\\.")[[1]][2]
-    modelData = getModelData(allmodelRes,m,crAssgn)
+    modelData = getModelData(allmodelRes,modelName,creditAssignment)
     lik = modelData@likelihood
     lik = (-1)*sum(lik[-(1:half_stage)])
       #lik = (-1)*sum(lik[(half_stage:endLearningStage)])

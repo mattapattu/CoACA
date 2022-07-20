@@ -145,7 +145,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   print("Spawned cluster")
   time <- system.time(
   resList <-
-      foreach(model=models, .combine='rbind',.options.mpi=opts,.packages = c("rlist","DEoptim","doMPI")) %dopar% {
+      foreach(model=models, .combine='rbind',.options.mpi=opts,.packages = c("rlist","DEoptim","doMPI"), .inorder=TRUE) %dopar% {
           #envir = ls() 
         cat('model =',model,'\n',sep = '')
         modelName = strsplit(model,"\\.")[[1]][1]
@@ -259,14 +259,14 @@ getAllModelResults <- function(ratdata, resList, testingdata, sim) {
   allmodelRes <- new("AllModelRes")
   for (i in 1:length(resList))
   {
-    modelName = strsplit(models[i],"\\.")[[1]][1]
-    creditAssignment = strsplit(models[i],"\\.")[[1]][2]
+    modelName = strsplit(resList[i,]$model,"\\.")[[1]][1]
+    creditAssignment = strsplit(resList[i,]$model,"\\.")[[1]][2]
 
     modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = sim)
     #index <- length(methods) * (i - 1) + j
-    print(resList[[i]])
-    print(resList[[i]]$res)
-    modelData <- setModelParams(modelData, resList[[i]]$res)
+    print(sprintf("modelName=%s,creditAssignment=%s",modelName,creditAssignment))
+    print(resList[i,]$res)
+    modelData <- setModelParams(modelData, resList[i,]$res)
      #debug(setModelResults)
     modelData <- setModelResults(modelData, ratdata, allModels)
     allmodelRes <- addModelData(allmodelRes, modelData)

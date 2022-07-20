@@ -323,7 +323,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         
         //double avgRewardEst = rewardSum/durationSum;
         
-        
+        turnReward=turnReward*4;
         double td_err = turnReward - (averageReward*actionDuration) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currNode->node <<", turnReward=" << turnReward  << ", turntime=" <<actionDuration <<  ", averageReward=" <<averageReward <<  ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
@@ -723,7 +723,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
           }
         }
         
-          
+        currTurnReward = currTurnReward*4; 
         double td_err = currTurnReward - (averageReward*turntime) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime <<  ", averageReward=" <<averageReward << ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
@@ -1050,7 +1050,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
           }
         }
         
-        
+        currTurnReward = currTurnReward*4;
         double td_err = currTurnReward - (averageReward*turntime) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime <<  ", averageReward=" <<averageReward << ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         

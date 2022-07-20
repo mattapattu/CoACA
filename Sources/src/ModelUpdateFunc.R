@@ -144,7 +144,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   opts <- list(initEnvir=initWorkers)
   print("Spawned cluster")
   time <- system.time(
-  resMatrix <-
+  resList <-
       foreach(model=models, .combine='rbind',.options.mpi=opts,.packages = c("rlist","DEoptim","doMPI")) %dopar% {
           #envir = ls() 
         cat('model =',model,'\n',sep = '')
@@ -158,13 +158,13 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
         np.val = length(argList$lower)*10
         myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
         out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=800,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
-        unname(out$optim$bestmem)		
+        list(res=unname(out$optim$bestmem),	model=model)	
       }
   )
   print(time)
   
   #modelData = updateModelData(ratdata,resMatrix, models)
-  allmodelRes = getAllModelResults(ratdata, resMatrix,testingdata, sim) 
+  allmodelRes = getAllModelResults(ratdata, resList,testingdata, sim) 
   #save(allmodelRes,  file = paste0(ratdata@rat,"_allmodelRes.Rdata"))
   
   if(setup.hpc)
@@ -252,24 +252,26 @@ getModelResultsSeq <- function(ratdata, testingdata, sim, src.dir) {
   return(allmodelRes)
 }
 
-getAllModelResults <- function(ratdata, resMatrix, testingdata, sim) {
+getAllModelResults <- function(ratdata, resList, testingdata, sim) {
   # res = callOptimize(modelData,ratdata,allModels)
   models <- testingdata@Models
-  methods <- testingdata@creditAssignment
+  #methods <- testingdata@creditAssignment
   allmodelRes <- new("AllModelRes")
-  for (i in 1:length(models))
+  for (i in 1:length(resList))
   {
-    for (j in 1:length(methods))
-    {
-      modelData <- new("ModelData", Model = models[i], creditAssignment = methods[j], sim = sim)
-      index <- length(methods) * (i - 1) + j
-      modelData <- setModelParams(modelData, resMatrix[index, ])
-      #debug(setModelResults)
-      modelData <- setModelResults(modelData, ratdata, allModels)
-      allmodelRes <- addModelData(allmodelRes, modelData)
-    }
+    modelName = strsplit(models[i],"\\.")[[1]][1]
+    creditAssignment = strsplit(models[i],"\\.")[[1]][2]
+
+
+    modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = sim)
+    index <- length(methods) * (i - 1) + j
+    modelData <- setModelParams(modelData, resList[[i]]$res)
+     #debug(setModelResults)
+    modelData <- setModelResults(modelData, ratdata, allModels)
+    allmodelRes <- addModelData(allmodelRes, modelData)
+    
   }
-  
+ 
   return(allmodelRes)
 }
 

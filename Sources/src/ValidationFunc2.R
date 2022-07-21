@@ -11,6 +11,8 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
   allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
   
+  res.model.data.dir=paste(model.data.dir,"holdoutTest",ratName,sep="/")
+
   mat_res = matrix(0, length(models), length(models))
   colnames(mat_res) <- models
   rownames(mat_res) <- models

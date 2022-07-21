@@ -1528,11 +1528,11 @@ printMatRes=function(ratdata,testData,res.dir)
 {
   rat=ratdata@rat
   print(sprintf("Rat is %s", rat))
-  models = testData@Models
-  creditAssignment = testData@creditAssignment
+  #models = testData@Models
+  #creditAssignment = testData@creditAssignment
   
-  modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
-  
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  modelNames = testData@Models
   mat_res_f = matrix(0, length(modelNames), length(modelNames))
   colnames(mat_res_f) <- modelNames
   rownames(mat_res_f) <- modelNames
@@ -1546,8 +1546,6 @@ printMatRes=function(ratdata,testData,res.dir)
     mat_res_f <- mat_res_f + mat_res
   }
   print(mat_res_f)
-  
-  
   
 }
 

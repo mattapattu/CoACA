@@ -3,10 +3,9 @@ library(rlist)
 
 
 
-HoldoutTestNew=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.dir,seed,count)
+HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
 {
   
-
   models = testData@Models
   ratName = ratdata@rat
   param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")

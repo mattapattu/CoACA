@@ -180,8 +180,11 @@ for (i in c(select_rat)) {
   if(validateHoldout)
   {
     #debug(HoldoutTest)
-    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    
+    HoldoutTestNew(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    model.data.dir = paste(model.data.dir,"holdoutTest",ratdata@rat,sep="/")
     printMatRes(ratdata,testData,model.data.dir)
   }
 

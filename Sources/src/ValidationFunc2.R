@@ -214,7 +214,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
 
    generatedDataList <-  
-     foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData","allModelRes")) %:%
+     foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
      foreach(generation=1:20) %dopar%
      {
        model = models[i] 
@@ -288,7 +288,9 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
        #}
        rowEnd = i
        model = generated_data@simModel
-       cat(sprintf('model = %s, rowEnd = %i\n', model,rowEnd))
+       creditAssignment = generated_data@simMethod
+
+       cat(sprintf('model = %s, creditAssignment=%s, rowEnd = %i\n', model,creditAssignment,rowEnd))
        modelData =  new("ModelData", Model=model, creditAssignment = creditAssignment, sim=1)
        argList<-getArgList(modelData,generated_data)
        np.val = length(argList$lower) * 10

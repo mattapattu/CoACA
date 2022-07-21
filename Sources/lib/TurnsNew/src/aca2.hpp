@@ -280,8 +280,8 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
       if (R(S, A) == 1)
       {
         //Rcpp::Rcout << "turnNb=" << generated_TurnsData_sess((turnIdx - 1), 0) << ", receives reward"<< std::endl;
-        generated_TurnsData_sess((turnIdx - 1), 2) = 1;
-        score_episode = score_episode + 1;
+        generated_TurnsData_sess((turnIdx - 1), 2) = 4;
+        score_episode = score_episode + 4;
       }
       
       int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
@@ -472,7 +472,7 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
       
       if (R > 0)
       {
-        score_episode = score_episode + 1;
+        score_episode = score_episode + 4;
       }
       
       if (sim == 1)
@@ -754,7 +754,7 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
       
       if (R > 0)
       {
-        score_episode = score_episode + 1;
+        score_episode = score_episode + 4;
       }
       
       

@@ -5,19 +5,19 @@ library(rlist)
 
 HoldoutTestNew=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.dir,seed,count)
 {
+  
+
   models = testData@Models
-  creditAssignment = testData@creditAssignment
-  
-  modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
-  
   ratName = ratdata@rat
+  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
   
-  mat_res = matrix(0, length(modelNames), length(modelNames))
-  colnames(mat_res) <- modelNames
-  rownames(mat_res) <- modelNames
+  mat_res = matrix(0, length(models), length(models))
+  colnames(mat_res) <- models
+  rownames(mat_res) <- models
   
   
-  print(sprintf("models: %s",toString(modelNames)))
+  print(sprintf("models: %s",toString(models)))
   
   
     #worker.nodes = mpi.universe.size()-1
@@ -48,13 +48,14 @@ HoldoutTestNew=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.dat
     
   
    generatedDataList <-  
-     foreach(i=1:length(modelNames), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
+     foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
      foreach(generation=1:20) %dopar%
      {
-       model = modelNames[i] 
-       modelName = strsplit(model,"\\.")[[1]][1]
-       creditAssignment = strsplit(model,"\\.")[[1]][2]
+       model = models[i] 
+       modelName = strsplit(models[i],"\\.")[[1]][1]
+       creditAssignment = strsplit(models[i],"\\.")[[1]][2]
        trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
+
        #trueModelData = modifyModelData(trueModelData) 
        simLearns = FALSE 
        missedOptimalIter = 0
@@ -91,7 +92,7 @@ HoldoutTestNew=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.dat
   time2<- system.time(  
     resList<-
       foreach(i = 1:modelNum, .options.mpi=opts) %:%
-      foreach(model = modelNames) %dopar% {
+      foreach(model = models) %dopar% {
         generated_data = allData[[i]]
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
@@ -108,7 +109,7 @@ HoldoutTestNew=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.dat
   
   print(time2)
   rat = ratdata@rat
-  save(resList,  file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resList.Rdata"))
+  save(resList,  file = paste0(res.model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resList.Rdata"))
   for(i in 1:modelNum)
   {
     min_method = ""
@@ -137,7 +138,7 @@ HoldoutTestNew=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.dat
   }
   
   rat = ratdata@rat
-  save(mat_res, generatedDataList,resList,  file = paste0(model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_mat_res.Rdata"))
+  save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_mat_res.Rdata"))
   
   
   if(setup.hpc)

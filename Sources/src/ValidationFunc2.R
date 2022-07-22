@@ -126,7 +126,6 @@ rat=ratdata@rat
     gen_model = resList[[i]][[1]]$data@simModel
     gen_method = resList[[i]][[1]]$data@simMethod
     gen_modelname = paste(gen_model, gen_method, sep=".")
-    
     for(m in 1:length(models))
     {
       res_model = resList[[i]][[m]]$res@Model
@@ -134,7 +133,7 @@ rat=ratdata@rat
       likelihood = resList[[i]][[m]]$res@likelihood
       res_modelname = paste(res_model, res_method, sep=".")
       model_score = sum(likelihood[-(1:800)]) * -1
-      print(sprintf("res_modelname=%s,model_score=%f,min_score=%f",res_modelname,model_score,min_score))
+      print(sprintf("i=%i,m=%s,res_modelname=%s,model_score=%f,gen_modelname=%s",i,m,res_modelname,model_score,gen_modelname))
   
       if(model_score < min_score)
       {

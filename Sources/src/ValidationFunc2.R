@@ -116,6 +116,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   resData=list.files(".",pattern=paste0(ratName, ".*_resList.Rdata"))
   load(resData)
   modelNum=length(resList)
+  generatedDataList <- list()
   for(i in 1:modelNum)
   {
     min_method = ""

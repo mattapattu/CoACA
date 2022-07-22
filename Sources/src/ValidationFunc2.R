@@ -144,7 +144,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   }
   
   rat = ratdata@rat
-  save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_mat_res.Rdata"))
+#  save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_mat_res.Rdata"))
   
   
   # if(setup.hpc)

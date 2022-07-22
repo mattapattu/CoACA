@@ -86,8 +86,8 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
        
   #    }    
  
-  allData<-unlist(generatedDataList)
-  modelNum =  length(allData)
+  #allData<-unlist(generatedDataList)
+  #modelNum =  length(allData)
   
   
   # time2<- system.time(  
@@ -115,6 +115,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   setwd(res.model.data.dir)
   resData=list.files(".",pattern=paste0(ratName, ".*_resList.Rdata"))
   load(resData)
+  modelNum=length(resList)
   for(i in 1:modelNum)
   {
     min_method = ""

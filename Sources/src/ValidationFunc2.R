@@ -112,7 +112,9 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   # rat = ratdata@rat
   # save(resList,  file = paste0(res.model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resList.Rdata"))
 
-  load(paste0(res.model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resList.Rdata"))
+  setwd(res.model.data.dir)
+  resData=list.files(".",pattern=paste0(ratName, ".*_resList.Rdata"))
+  load(resData)
   for(i in 1:modelNum)
   {
     min_method = ""

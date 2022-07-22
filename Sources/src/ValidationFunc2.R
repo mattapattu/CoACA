@@ -87,7 +87,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   #    }    
  
   # allData<-unlist(generatedDataList)
-  # modelNum =  length(allData)
+  modelNum =  length(allData)
   
   
   # time2<- system.time(  

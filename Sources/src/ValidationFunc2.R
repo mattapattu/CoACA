@@ -5,7 +5,7 @@ library(rlist)
 
 HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
 {
-  
+  testDataName = testData@Name
   models = testData@Models
   ratName = ratdata@rat
   param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
@@ -110,7 +110,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   
   print(time2)
   rat = ratdata@rat
-  save(resList,  file = paste0(res.model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resList.Rdata"))
+  save(resList,  file = paste0(res.model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_resList.Rdata"))
 
   for(i in 1:modelNum)
   {
@@ -140,7 +140,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   }
   
   rat = ratdata@rat
-  save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_mat_res.Rdata"))
+  save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_mat_res.Rdata"))
   
   
   if(setup.hpc)

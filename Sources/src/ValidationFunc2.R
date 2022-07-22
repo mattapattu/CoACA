@@ -134,6 +134,7 @@ rat=ratdata@rat
       likelihood = resList[[i]][[m]]$res@likelihood
       res_modelname = paste(res_model, res_method, sep=".")
       model_score = sum(likelihood[-(1:800)]) * -1
+      print(sprintf("res_modelname=%s,model_score=%f,min_score=%f",res_modelname,model_score,min_score))
   
       if(model_score < min_score)
       {

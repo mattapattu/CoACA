@@ -112,8 +112,10 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   # rat = ratdata@rat
   # save(resList,  file = paste0(res.model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_resList.Rdata"))
 setwd(res.model.data.dir)
+print(resData)
 rat=ratdata@rat
- resData=list.files(".", pattern = paste0(rat, ".*_resList.Rdata"))
+ resData=list.files(".", pattern = paste0(rat, ".*Mix_resList.Rdata"))
+ print(resData)
  load(resData)
  modelNum=length(resList)
   

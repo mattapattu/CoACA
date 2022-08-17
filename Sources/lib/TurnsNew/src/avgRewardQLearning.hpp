@@ -242,7 +242,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
           //Rcpp::Rcout <<"Action selected is not greedy" << std::endl;
         }
 
-        double qMax = 0;
+        double qMax = -100000;
         std::vector<Edge> *edges = graph.getOutgoingEdges(currNode->node);
         
         if(edges->size() > 0) //If curr turn is an intermediate turn in the maze, determine qmax using edges
@@ -650,7 +650,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
         }
 
         
-        double qMax = 0;
+        double qMax = -100000;
         std::vector<Edge> *edges = graph->getOutgoingEdges(currTurn);
         
         if(edges->size() > 0) //If curr turn is an intermediate turn in the maze, determine qmax using edges
@@ -976,7 +976,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
         }
         
         
-        double qMax = 0;
+        double qMax = -100000;
         std::vector<Edge> *edges = graph->getOutgoingEdges(currTurn);
         
         if(edges->size() > 0) //If curr turn is an intermediate turn in the maze, determine qmax using edges

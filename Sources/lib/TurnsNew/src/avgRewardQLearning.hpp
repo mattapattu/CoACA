@@ -314,6 +314,8 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
             }
             qMax = selectedNode->credit;
             //Rcpp::Rcout <<"Max value action in box "<< rootNode->node << " is: " << selectedNode->node << std::endl;
+          }else{
+            qMax = 0;
           }
         }
         
@@ -629,8 +631,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
         
         double prob_a = edge.probability;
         pathProb = pathProb * prob_a;
-        
-        
+                
         bool isCurrTurnGreedy = false;
         double maxProb = 0;
         Node* maxSibling = nullptr;
@@ -639,9 +640,9 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
           double prob = it->probability;
           if((prob - maxProb) >= 1e-9)
           {
+            maxProb = prob;
             maxSibling = it->dest;
           }
-
         }
         if(maxSibling->node == currNode->node)
         {
@@ -720,6 +721,8 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
             }
             qMax = selectedNode->credit;
             //Rcpp::Rcout <<"Max value action in box "<< rootNode->node << " is: " << selectedNode->node << std::endl;
+          }else{
+            qMax = 0;
           }
         }
         
@@ -965,6 +968,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
           double prob = it->probability;
           if((prob - maxProb) >= 1e-9)
           {
+            maxProb = prob;
             maxSibling = it->dest;
           }
           
@@ -1047,6 +1051,9 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
             }
             qMax = selectedNode->credit;
             //Rcpp::Rcout <<"Max value action in box "<< rootNode->node << " is: " << selectedNode->node << std::endl;
+          }
+          else{
+            qMax = 0;
           }
         }
         

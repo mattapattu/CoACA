@@ -81,8 +81,17 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
           myList <- DEoptim.control(NP=30, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
           out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
           modelData = setModelParams(modelData, unname(out$optim$bestmem))
-          cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
-          c(rowEnd,modelData@alpha, modelData@gamma1)
+          if(qlearningAvgRwd == "qlearningAvgRwd")
+          {
+            cat(sprintf('Success: alpha = %f, gamma1 = %f, gamma2 = %f\n', modelData@alpha, modelData@gamma1,modelData@gamma2))
+            c(rowEnd,modelData@alpha, modelData@gamma1,modelData@gamma2)
+
+          }
+          else{
+            cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
+            c(rowEnd,modelData@alpha, modelData@gamma1)
+
+          }
           
         }   
         modelRes <- setNames(list(resMat),model)
@@ -300,6 +309,10 @@ readModelParams <- function(ratdata,res.dir,testingdata, sim){
       #modelData <- setModelParams(modelData, resMatrix[rowlen, ])
       modelData@alpha <- resMatrix[rowlen, 2]
       modelData@gamma1 <- resMatrix[rowlen, 3]
+      if(ncol(resMatrix) == 4)
+      {
+        modelData@gamma2 <- resMatrix[rowlen, 4]
+      }
       #debug(setModelResults)
       modelData <- setModelResults(modelData, ratdata, allModels)
       allmodelRes <- addModelData(allmodelRes, modelData)
@@ -338,6 +351,10 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
     rowlen <- length(modelRes[[1]][,1])
     modelData@alpha <- modelRes[[1]][rowlen, 2]
     modelData@gamma1 <- modelRes[[1]][rowlen, 3]
+    if(ncol(resMatrix) == 4)
+    {
+      modelData@gamma2 <- resMatrix[rowlen, 4]
+    }
     modelData <- setModelResults(modelData, ratdata, allModels)
     allmodelRes <- addModelData(allmodelRes, modelData)
 
@@ -363,6 +380,11 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   modelData@alpha <- alpha
   modelData@gamma1 <- gamma1
   #modelData@gamma2 <- gamma2
+   
+  if(length(par)==3)
+  {
+    modelData@gamma2 <- par[3]
+  }
 
   simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
   if(simLearns)
@@ -374,6 +396,13 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   else
   {
    negLogLik = 1000000
+  }
+
+  probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
+ 
+  if(!(length(which(probMat[,4] > 0.8)) > 100 && length(which(probMat[,10] > 0.8)) > 100))
+  {
+    negLogLik = 1000000
   }
 
 

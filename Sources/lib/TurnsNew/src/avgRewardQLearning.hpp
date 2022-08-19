@@ -16,6 +16,8 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));  
+  double reward = Rcpp::as<double>(modelData.slot("gamma2"));
+  reward = reward * 20;
   //Rcpp::Rcout << "alpha=" << alpha << ", beta=" << beta << std::endl;
   
   Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(turnModel.slot("nodeGroups"));
@@ -147,7 +149,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
           
           if(turnsVector==rewardVec)
           {
-            turnReward = 1;
+            turnReward = reward;
           }
           
           generated_TurnsData_sess(turnIdx, 0) = componentId;
@@ -182,7 +184,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
             
             if(turnsVector==rewardVec)
             {
-              turnReward = 1;
+              turnReward = reward;
             }
             generated_TurnsData_sess(turnIdx, 0) = turnNodeIds[j];
             generated_TurnsData_sess(turnIdx, 1) = S;
@@ -325,7 +327,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         
         //double avgRewardEst = rewardSum/durationSum;
         
-        turnReward=turnReward*4;
+        //turnReward=turnReward*4;
         double td_err = turnReward - (averageReward*actionDuration) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currNode->node <<", turnReward=" << turnReward  << ", turntime=" <<actionDuration <<  ", averageReward=" <<averageReward <<  ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
@@ -485,6 +487,8 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));
+  double reward = Rcpp::as<double>(modelData.slot("gamma2"));
+  reward = reward * 20;
   //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
   
   //Rcpp::Rcout <<  "alpha="<<alpha << ", beta=" <<beta  <<std::endl;
@@ -591,7 +595,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
       int R = rewards_sess(i);
       if(R==1)
       {
-        R = 1;
+        R = reward;
       }
 
       Rcpp::StringVector turns;
@@ -726,7 +730,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
           }
         }
         
-        currTurnReward = currTurnReward*4; 
+        //currTurnReward = currTurnReward*4; 
         double td_err = currTurnReward - (averageReward*turntime) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime <<  ", averageReward=" <<averageReward << ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
@@ -809,6 +813,8 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
 
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));
+  double reward = Rcpp::as<double>(modelData.slot("gamma2"));
+  reward = reward * 20;
   //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
   
 
@@ -911,7 +917,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
       int R = rewards_sess(i);
       if(R==1)
       {
-        R = 1;
+        R = reward;
       }
       //Rcpp::Rcout <<"ses=" << sessId << ", i=" << i << ", S=" <<S <<  ", A=" << A << ", R="<< R << std::endl;
       
@@ -1057,7 +1063,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
           }
         }
         
-        currTurnReward = currTurnReward*4;
+        //currTurnReward = currTurnReward*4;
         double td_err = currTurnReward - (averageReward*turntime) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime <<  ", averageReward=" <<averageReward << ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         

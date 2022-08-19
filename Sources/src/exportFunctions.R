@@ -213,6 +213,10 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   modelData@alpha <- alpha
   modelData@gamma1 <- gamma1
   #modelData@gamma2 <- gamma2
+  if(length(par)==3)
+  {
+    modelData@gamma2 <- par[3]
+  }
   
   simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
   
@@ -287,6 +291,11 @@ modifyModelData=function(modelData)
   modelData@alpha = modifyParam(modelData@alpha)
   modelData@gamma1 = modifyParam(modelData@gamma1)
   #modelData@gamma2 = modifyParam(modelData@gamma2)
+
+  if(modelData@creditAssignment == "qlearningAvgRwd")
+  {
+    modelData@gamma2 = modifyParam(modelData@gamma2)
+  }
 
   return(modelData)
 }

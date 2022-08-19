@@ -330,10 +330,10 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
        #diff2 <-  (trueProbMat[index,] - probMat[index,])
        #diff <- diff1 + diff2
         
-      alphahat = modelData@alpha
-      gammahat = modelData@gamma1
-      alpha = trueModelData@alpha
-      gamma = trueModelData@gamma1
+      #alphahat = modelData@alpha
+      #gammahat = modelData@gamma1
+      #alpha = trueModelData@alpha
+      #gamma = trueModelData@gamma1
 
        #cat(sprintf("model=%s, iter=%i, alphahat=%f, alpha=%f, gammahat=%f, gamma=%f\n",model,rowEnd,alphahat,alpha,gammahat,gamma)) 
        #cat(sprintf("trueProbMat: %s\n",toString(round(trueProbMat[rowEnd,],2))))
@@ -359,7 +359,54 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
    rat = ratdata@rat
    save(resList,  file = paste0(res.model.data.dir,"/",rat, timestamp,"_ParamEstResList.Rdata"))
    
-   df <- data.frame(model=character(),
+   
+   if(creditAssignment=="qlearningAvgRwd")
+   {
+      df <- data.frame(model=character(),
+                    iter=integer(),
+                    genIndex=integer(),
+                    alpha=double(),
+                    gamma1=double(),
+                    gamma2=double(),
+                    trueAlpha=double(),
+                    trueGamma1=double(),
+                    trueGamma2=double(),
+                    stringsAsFactors=FALSE)
+
+      for(k in c(1:length(resList)))
+      {
+        iter = resList[[k]]$iter
+        genIndex = resList[[k]]$genDataIndex
+        generated_data = resList[[k]]$data
+        modelDataRes = resList[[k]]$res
+        trueModelData = resList[[k]]$trueModelData
+        
+        df[k,1] <- modelDataRes@Model
+        df[k,2] <- iter
+        df[k,3] <- genIndex
+        df[k,4] <- modelDataRes@alpha
+        df[k,5] <- modelDataRes@gamma1
+        df[k,6] <- modelDataRes@gamma2
+        df[k,7] <- trueModelData@alpha
+        df[k,8] <- trueModelData@gamma1
+        df[k,9] <- trueModelData@gamma2
+         
+
+      }
+
+      if(StabilityTest)
+      {
+        save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
+      }
+      else
+      {
+        save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
+      }
+
+   }
+   else
+   {
+      df <- data.frame(model=character(),
                     iter=integer(),
                     genIndex=integer(),
                     alpha=double(),
@@ -367,39 +414,38 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
                     trueAlpha=double(),
                     trueGamma=double(),
                     stringsAsFactors=FALSE)
+      
+      for(k in c(1:length(resList)))
+      {
+        iter = resList[[k]]$iter
+        genIndex = resList[[k]]$genDataIndex
+        generated_data = resList[[k]]$data
+        modelDataRes = resList[[k]]$res
+        trueModelData = resList[[k]]$trueModelData
+        
+        df[k,1] <- modelDataRes@Model
+        df[k,2] <- iter
+        df[k,3] <- genIndex
+        df[k,4] <- modelDataRes@alpha
+        df[k,5] <- modelDataRes@gamma1
+        df[k,6] <- trueModelData@alpha
+        df[k,7] <- trueModelData@gamma1 
+
+      }
+       rat = ratdata@rat
+
+      if(StabilityTest)
+      {
+        save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
+      }
+      else
+      {
+        save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
+      }
    
-   for(k in c(1:length(resList)))
-   {
-     iter = resList[[k]]$iter
-     genIndex = resList[[k]]$genDataIndex
-     generated_data = resList[[k]]$data
-     modelDataRes = resList[[k]]$res
-     trueModelData = resList[[k]]$trueModelData
-     
-     df[k,1] <- modelDataRes@Model
-     df[k,2] <- iter
-     df[k,3] <- genIndex
-     df[k,4] <- modelDataRes@alpha
-     df[k,5] <- modelDataRes@gamma1
-     df[k,6] <- trueModelData@alpha
-     df[k,7] <- trueModelData@gamma1 
-
-  }
-
-  
-   
-
-   rat = ratdata@rat
-
-   if(StabilityTest)
-   {
-    save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
-   }
-   else
-   {
-    save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
    }
    
+    
    
   if(setup.hpc)
   {

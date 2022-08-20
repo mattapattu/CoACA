@@ -331,7 +331,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         double td_err = turnReward - (averageReward*actionDuration) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currNode->node <<", turnReward=" << turnReward  << ", turntime=" <<actionDuration <<  ", averageReward=" <<averageReward <<  ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
-        double alpha_prime = alpha/(double) std::pow(actionNb,0.5);
+        double alpha_prime = alpha/(double) std::pow(actionNb,0);
         currNode->credit = currNode->credit + (alpha_prime * td_err);
 
         //if(isCurrTurnGreedy)
@@ -341,7 +341,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         //  averageReward = rewardSum/(double) durationSum;
         //}
         
-        double beta_prime = beta/(double) std::pow(actionNb,0.5);
+        double beta_prime = beta/(double) std::pow(actionNb,0);
         averageReward = averageReward + (beta_prime*td_err);
         
         S0.updateEdgeProbs();
@@ -734,10 +734,10 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
         double td_err = currTurnReward - (averageReward*turntime) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime <<  ", averageReward=" <<averageReward << ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
-        double alpha_prime = alpha/(double) std::pow(actionCounter,0.5);
+        double alpha_prime = alpha/(double) std::pow(actionCounter,0);
         currNode->credit = currNode->credit + (alpha_prime * td_err);
         
-	      double beta_prime = beta/(double) std::pow(actionCounter,0.5);
+	      double beta_prime = beta/(double) std::pow(actionCounter,0);
         averageReward = averageReward + (beta_prime*td_err);
 
         //if(isCurrTurnGreedy)
@@ -1067,9 +1067,9 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
         double td_err = currTurnReward - (averageReward*turntime) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime <<  ", averageReward=" <<averageReward << ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
-        double alpha_prime = alpha/(double) std::pow(actionCounter,0.5);
+        double alpha_prime = alpha/(double) std::pow(actionCounter,0);
         currNode->credit = currNode->credit + (alpha_prime * td_err);
-        double beta_prime = beta/(double) std::pow(actionCounter,0.5);
+        double beta_prime = beta/(double) std::pow(actionCounter,0);
         averageReward = averageReward + (beta_prime*td_err);
         //if(isCurrTurnGreedy)
         //{

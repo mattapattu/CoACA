@@ -199,7 +199,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         }
         
 
-        double actionDuration = testNodeDuration/ (double) 2000;
+        double actionDuration = testNodeDuration/ (double) 500;
         edges = graph.getOutgoingEdges(currNode->node);
         
         
@@ -618,7 +618,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
         std::string currTurn = Rcpp::as<std::string>(turns(j));
         currNode = graph->getNode(currTurn);
         double turntime = turn_times_session(session_turn_count);
-        turntime = turntime/(double) 2000;
+        turntime = turntime/(double) 500;
 
         Edge edge;
         std::vector<Edge> *siblings = nullptr;
@@ -946,7 +946,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
         std::string currTurn = Rcpp::as<std::string>(turns(j));
         currNode = graph->getNode(currTurn);
         double turntime = turn_times_session(session_turn_count);
-        turntime = turntime/(double) 2000;
+        turntime = turntime/(double) 500;
         //Rcpp::Rcout <<"currTurn="<< currTurn << ", currTurnReward=" <<currTurnReward<<std::endl;
         
         Edge edge;

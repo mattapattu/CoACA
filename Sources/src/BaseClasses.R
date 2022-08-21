@@ -110,6 +110,7 @@ setMethod("setModelParams",  signature=c("ModelData","numeric"),
               x@alpha = modelParams[1]
               x@gamma1 = modelParams[2]
               x@gamma2 = modelParams[3]
+              x@lambda = modelParams[3]
             }
 
             
@@ -161,8 +162,8 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
             }
             else if(x@creditAssignment == "qlearningAvgRwd")
             {
-              argList = list(lower = c(0,0,0),
-                             upper = c(1,1,1),
+              argList = list(lower = c(0,0,0,0),
+                             upper = c(1,1,1,1),
                              ratdata = ratdata,
                              half_index = 0,
                              modelData = x,

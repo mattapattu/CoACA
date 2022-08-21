@@ -489,6 +489,8 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));
   double reward = Rcpp::as<double>(modelData.slot("gamma2"));
   reward = reward * 5;
+  double power = Rcpp::as<double>(modelData.slot("lambda"));
+
   //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
   
   //Rcpp::Rcout <<  "alpha="<<alpha << ", beta=" <<beta  <<std::endl;
@@ -734,10 +736,10 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
         double td_err = currTurnReward - (averageReward*turntime) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime <<  ", averageReward=" <<averageReward << ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
-        double alpha_prime = alpha/(double) std::pow(actionCounter,0);
+        double alpha_prime = alpha/(double) std::pow(actionCounter,power);
         currNode->credit = currNode->credit + (alpha_prime * td_err);
         
-	      double beta_prime = beta/(double) std::pow(actionCounter,0);
+	      double beta_prime = beta/(double) std::pow(actionCounter,power);
         averageReward = averageReward + (beta_prime*td_err);
 
         //if(isCurrTurnGreedy)
@@ -815,6 +817,8 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));
   double reward = Rcpp::as<double>(modelData.slot("gamma2"));
   reward = reward * 5;
+  double power = Rcpp::as<double>(modelData.slot("lambda"));
+
   //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
   
 
@@ -1067,9 +1071,9 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
         double td_err = currTurnReward - (averageReward*turntime) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime <<  ", averageReward=" <<averageReward << ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
-        double alpha_prime = alpha/(double) std::pow(actionCounter,0);
+        double alpha_prime = alpha/(double) std::pow(actionCounter,power);
         currNode->credit = currNode->credit + (alpha_prime * td_err);
-        double beta_prime = beta/(double) std::pow(actionCounter,0);
+        double beta_prime = beta/(double) std::pow(actionCounter,power);
         averageReward = averageReward + (beta_prime*td_err);
         //if(isCurrTurnGreedy)
         //{

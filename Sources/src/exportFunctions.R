@@ -213,9 +213,10 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   modelData@alpha <- alpha
   modelData@gamma1 <- gamma1
   #modelData@gamma2 <- gamma2
-  if(length(par)==3)
+  if(length(par)==4)
   {
     modelData@gamma2 <- par[3]
+    modelData@lambda <- par[4]
   }
   
   simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)

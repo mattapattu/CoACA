@@ -84,7 +84,7 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
           if(qlearningAvgRwd == "qlearningAvgRwd")
           {
             cat(sprintf('Success: alpha = %f, gamma1 = %f, gamma2 = %f\n', modelData@alpha, modelData@gamma1,modelData@gamma2))
-            c(rowEnd,modelData@alpha, modelData@gamma1,modelData@gamma2)
+            c(rowEnd,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda)
 
           }
           else{
@@ -312,6 +312,7 @@ readModelParams <- function(ratdata,res.dir,testingdata, sim){
       if(ncol(resMatrix) == 4)
       {
         modelData@gamma2 <- resMatrix[rowlen, 4]
+        modelData@lambda <- resMatrix[rowlen, 5]
       }
       #debug(setModelResults)
       modelData <- setModelResults(modelData, ratdata, allModels)
@@ -354,6 +355,7 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
     if(ncol(resMatrix) == 4)
     {
       modelData@gamma2 <- resMatrix[rowlen, 4]
+      modelData@lambda <- resMatrix[rowlen, 5]
     }
     modelData <- setModelResults(modelData, ratdata, allModels)
     allmodelRes <- addModelData(allmodelRes, modelData)
@@ -381,9 +383,10 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   modelData@gamma1 <- gamma1
   #modelData@gamma2 <- gamma2
    
-  if(length(par)==3)
+  if(length(par)==4)
   {
     modelData@gamma2 <- par[3]
+    modelData@lambda <- par[4]
   }
 
   simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)

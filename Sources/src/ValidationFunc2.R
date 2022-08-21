@@ -368,9 +368,11 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
                     alpha=double(),
                     gamma1=double(),
                     gamma2=double(),
+                    lambda=double(),
                     trueAlpha=double(),
                     trueGamma1=double(),
                     trueGamma2=double(),
+                    trueLambda=double(),
                     stringsAsFactors=FALSE)
 
       for(k in c(1:length(resList)))
@@ -387,10 +389,11 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
         df[k,4] <- modelDataRes@alpha
         df[k,5] <- modelDataRes@gamma1
         df[k,6] <- modelDataRes@gamma2
-        df[k,7] <- trueModelData@alpha
-        df[k,8] <- trueModelData@gamma1
-        df[k,9] <- trueModelData@gamma2
-         
+        df[k,7] <- modelDataRes@lambda
+        df[k,8] <- trueModelData@alpha
+        df[k,9] <- trueModelData@gamma1
+        df[k,10] <- trueModelData@gamma2
+        df[k,11] <- trueModelData@lambda
 
       }
 

@@ -194,6 +194,7 @@ for (i in c(select_rat)) {
   if(computeModelLik)
   {
     #debug(getModelResults)
+    print(sprintf("Rat is %s",rats[i]))
     allmodelRes = getModelResults(ratdata,testData,sim=2,src.dir, model.src, setup.hpc,count)
     #save(allmodelRes,file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
     model.data.dir=paste(model.data.dir,"modelParams",ratdata@rat,sep="/")

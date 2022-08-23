@@ -245,7 +245,7 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   if (is.infinite(negLogLik)) {
     return(1000000)
   } else if (is.nan(negLogLik)) {
-    print(sprintf("Alpha = %f", alpha))
+    #print(sprintf("Alpha = %f", alpha))
     return(1000000)
   }
   else {
@@ -296,6 +296,7 @@ modifyModelData=function(modelData)
   if(modelData@creditAssignment == "qlearningAvgRwd")
   {
     modelData@gamma2 = modifyParam(modelData@gamma2)
+    modelData@lambda = modifyParam(modelData@lambda)
   }
 
   return(modelData)

@@ -255,15 +255,19 @@ public:
                 }
                 arma::vec v(edgeCredits);
                 
-                double m = arma::max(v);
+                arma::vec v_new=v-max;
+                arma::vec exp_v_new= exp(v_new);
+                double exp_v_new_sum = arma::accu(exp_v_new);
+                arma::vec probVec = exp_v_new / exp_v_new_sum;
+
                 // if(debug)
                 // {
                 //    Rcpp::Rcout << "v-m=" << v-m<< std::endl; 
                 // }
                 //v = exp(v - m);
                 // //Rcpp::Rcout << "m=" << m<< std::endl;
-                double exp_sum = arma::accu(exp(v));
-                arma::vec probVec = exp(v) / exp_sum;
+                //double exp_sum = arma::accu(exp(v));
+                //arma::vec probVec = exp(v) / exp_sum;
                 if(debug)
                 {
                     Rcpp::Rcout << "nodeNames=" << nodeNames << std::endl;

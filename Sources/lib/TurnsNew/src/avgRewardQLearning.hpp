@@ -18,6 +18,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));  
   double reward = Rcpp::as<double>(modelData.slot("gamma2"));
   reward = reward * 5;
+  double power = Rcpp::as<double>(modelData.slot("lambda"));
   //Rcpp::Rcout << "alpha=" << alpha << ", beta=" << beta << std::endl;
   
   Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(turnModel.slot("nodeGroups"));

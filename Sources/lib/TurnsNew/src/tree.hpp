@@ -254,7 +254,7 @@ public:
                     }
                 }
                 arma::vec v(edgeCredits);
-                
+                double max = v.max();
                 arma::vec v_new=v-max;
                 arma::vec exp_v_new= exp(v_new);
                 double exp_v_new_sum = arma::accu(exp_v_new);

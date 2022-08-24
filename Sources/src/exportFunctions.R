@@ -235,7 +235,7 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
 
   probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
  
-  if(!(length(which(probMat[,4] > 0.8)) > 100 && length(which(probMat[,10] > 0.8)) > 100))
+  if(!(length(which(probMat[,4] > 0.8)) > 10 && length(which(probMat[,10] > 0.8)) > 10))
   {
     negLogLik = 1000000
   }

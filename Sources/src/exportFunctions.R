@@ -244,7 +244,7 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   # print(sprintf("negLogLik = %f",negLogLik))
   if (is.infinite(negLogLik)) {
     return(1000000)
-  } else if (is.nan(negLogLik)) {
+  }else if (is.nan(negLogLik)) {
     #print(sprintf("Alpha = %f", alpha))
     return(1000000)
   }

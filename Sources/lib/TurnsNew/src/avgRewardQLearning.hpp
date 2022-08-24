@@ -17,7 +17,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));  
   double reward = Rcpp::as<double>(modelData.slot("gamma2"));
-  reward = reward * 5;
+  reward = reward * 10;
   double power = Rcpp::as<double>(modelData.slot("lambda"));
   //Rcpp::Rcout << "alpha=" << alpha << ", beta=" << beta << std::endl;
   
@@ -131,7 +131,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         //episodeTurnStates.push_back(S);
         //Rcpp::Rcout << "model=" << model <<std::endl;
         double testNodeDuration = 0;
-        int turnReward = 0;
+        double turnReward = 0;
         
         if(model == "Turns")
         {
@@ -489,7 +489,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));
   double reward = Rcpp::as<double>(modelData.slot("gamma2"));
-  reward = reward * 5;
+  reward = reward * 10;
   double power = Rcpp::as<double>(modelData.slot("lambda"));
 
   //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
@@ -575,7 +575,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
     Node * rootNode=nullptr; 
     Graph * graph=nullptr;
     //int prevTurnReward = 0;
-    int currTurnReward = 0;
+    double currTurnReward = 0;
     int i = 0;
     while(i < (nrow))
     {
@@ -595,7 +595,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
         graph = &S1;
         rootNode = graph->getNode("I"); 
       }
-      int R = rewards_sess(i);
+      double R = rewards_sess(i);
       if(R==1)
       {
         R = reward;
@@ -817,7 +817,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));
   double reward = Rcpp::as<double>(modelData.slot("gamma2"));
-  reward = reward * 5;
+  reward = reward * 10;
   double power = Rcpp::as<double>(modelData.slot("lambda"));
 
   //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
@@ -899,7 +899,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
     Node * rootNode=nullptr; 
     Graph * graph=nullptr;
     //int prevTurnReward = 0;
-    int currTurnReward = 0;
+    double currTurnReward = 0;
     int i = 0;
     while(i < (nrow))
     {
@@ -919,7 +919,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
         graph = &S1;
         rootNode = graph->getNode("I"); 
       }
-      int R = rewards_sess(i);
+      double R = rewards_sess(i);
       if(R==1)
       {
         R = reward;

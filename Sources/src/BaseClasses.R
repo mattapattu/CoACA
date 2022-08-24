@@ -110,7 +110,7 @@ setMethod("setModelParams",  signature=c("ModelData","numeric"),
               x@alpha = modelParams[1]
               x@gamma1 = modelParams[2]
               x@gamma2 = modelParams[3]
-              x@lambda = modelParams[3]
+              x@lambda = modelParams[4]
             }
 
             

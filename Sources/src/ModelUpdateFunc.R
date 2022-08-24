@@ -167,6 +167,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
         np.val = length(argList$lower)*10
         myList <- DEoptim.control(NP=50, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
         out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=800,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
+        cat('model = ',model, ', bestval=',unname(out$optim$bestme),'\n',sep = '')
         cat('model = ',model, ', bestval=',unname(out$optim$bestval),'\n',sep = '')
         list(res=unname(out$optim$bestmem),	model=model)	
       }
@@ -369,55 +370,55 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
 
 
 
-negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
-  alpha <- par[1]
-  Model <- modelData@Model
-  creditAssignment <- modelData@creditAssignment
+# negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
+#   alpha <- par[1]
+#   Model <- modelData@Model
+#   creditAssignment <- modelData@creditAssignment
   
-  gamma1 <- par[2]
-  #gamma2 <- par[3]
-  # reward = par[4]
-  # reward = 1+reward*9
-  reward <- 1
-  #
-  modelData@alpha <- alpha
-  modelData@gamma1 <- gamma1
-  #modelData@gamma2 <- gamma2
+#   gamma1 <- par[2]
+#   #gamma2 <- par[3]
+#   # reward = par[4]
+#   # reward = 1+reward*9
+#   reward <- 1
+#   #
+#   modelData@alpha <- alpha
+#   modelData@gamma1 <- gamma1
+#   #modelData@gamma2 <- gamma2
    
-  if(length(par)==4)
-  {
-    modelData@gamma2 <- par[3]
-    modelData@lambda <- par[4]
-  }
+#   if(length(par)==4)
+#   {
+#     modelData@gamma2 <- par[3]
+#     modelData@lambda <- par[4]
+#   }
 
-  simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
-  if(simLearns)
-  {
-   lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
-   lik <- lik[1:half_index]
-   negLogLik <- (-1) * sum(lik)
-  }
-  else
-  {
-   negLogLik = 1000000
-  }
+#   simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
+#   if(simLearns)
+#   {
+#    lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
+#    lik <- lik[1:half_index]
+#    negLogLik <- (-1) * sum(lik)
+#   }
+#   else
+#   {
+#    negLogLik = 1000000
+#   }
 
-  probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
+#   probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
  
-  if(!(length(which(probMat[,4] > 0.8)) > 100 && length(which(probMat[,10] > 0.8)) > 100))
-  {
-    negLogLik = 1000000
-  }
+#   if(!(length(which(probMat[,4] > 0.8)) > 100 && length(which(probMat[,10] > 0.8)) > 100))
+#   {
+#     negLogLik = 1000000
+#   }
 
 
-  # print(sprintf("negLogLik = %f",negLogLik))
-  if (is.infinite(negLogLik)) {
-    return(1000000)
-  } else if (is.nan(negLogLik)) {
-    print(sprintf("Alpha = %f", alpha))
-    return(1000000)
-  }
-  else {
-    return(negLogLik)
-  }
-}
+#   # print(sprintf("negLogLik = %f",negLogLik))
+#   if (is.infinite(negLogLik)) {
+#     return(1000000)
+#   } else if (is.nan(negLogLik)) {
+#     print(sprintf("Alpha = %f", alpha))
+#     return(1000000)
+#   }
+#   else {
+#     return(negLogLik)
+#   }
+# }

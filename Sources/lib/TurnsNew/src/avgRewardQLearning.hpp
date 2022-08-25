@@ -20,7 +20,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
   //reward = reward * 10;
   //double power = Rcpp::as<double>(modelData.slot("lambda"));
   double reward = 4;
-  double lambda = 0.5;
+  double power = 0.5;
   
   //Rcpp::Rcout << "alpha=" << alpha << ", beta=" << beta << std::endl;
   
@@ -495,7 +495,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
   //reward = reward * 10;
   //double power = Rcpp::as<double>(modelData.slot("lambda"));
    double reward = 4;
-   double lambda = 0.5;
+   double power = 0.5;
 
   //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
   
@@ -825,7 +825,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
   //reward = reward * 10;
   //double power = Rcpp::as<double>(modelData.slot("lambda"));
   double reward = 4;
-  double lambda = 0.5;
+  double power = 0.5;
 
   //double gamma2 = Rcpp::as<double>(modelData.slot("gamma2"));
   

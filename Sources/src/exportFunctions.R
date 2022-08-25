@@ -324,6 +324,11 @@ getMinimumLikelihood=function(ratdata, allmodelRes,testingdata,sim)
 
     print(sprintf("model=%s,likelihood=%f",m,lik))
 
+    if(is.nan(lik))
+    {
+       next
+    }
+    
     if(lik < min)
     {
       min = lik

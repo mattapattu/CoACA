@@ -167,7 +167,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
         np.val = length(argList$lower)*10
         myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
         out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=800,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
-        cat('model = ',model, ', bestval=',unname(out$optim$bestme),'\n',sep = '')
+        cat('model = ',model, ', bestmem=',unname(out$optim$bestmem),'\n',sep = '')
         cat('model = ',model, ', bestval=',unname(out$optim$bestval),'\n',sep = '')
         list(res=unname(out$optim$bestmem),	model=model)	
       }

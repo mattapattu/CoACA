@@ -311,7 +311,7 @@ readModelParams <- function(ratdata,res.dir,testingdata, sim){
       #modelData <- setModelParams(modelData, resMatrix[rowlen, ])
       modelData@alpha <- resMatrix[rowlen, 2]
       modelData@gamma1 <- resMatrix[rowlen, 3]
-      if(ncol(resMatrix) == 4)
+      if(ncol(resMatrix) == 5)
       {
         modelData@gamma2 <- resMatrix[rowlen, 4]
         modelData@lambda <- resMatrix[rowlen, 5]
@@ -354,10 +354,10 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
     rowlen <- length(modelRes[[1]][,1])
     modelData@alpha <- modelRes[[1]][rowlen, 2]
     modelData@gamma1 <- modelRes[[1]][rowlen, 3]
-    if(ncol(resMatrix) == 4)
+    if(ncol(modelRes[[1]]) == 5)
     {
-      modelData@gamma2 <- resMatrix[rowlen, 4]
-      modelData@lambda <- resMatrix[rowlen, 5]
+      modelData@gamma2 <- modelRes[[1]][rowlen, 4]
+      modelData@lambda <- modelRes[[1]][rowlen, 5]
     }
     modelData <- setModelResults(modelData, ratdata, allModels)
     allmodelRes <- addModelData(allmodelRes, modelData)

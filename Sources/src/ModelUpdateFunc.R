@@ -81,7 +81,7 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
           myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
           out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
           modelData = setModelParams(modelData, unname(out$optim$bestmem))
-          if(qlearningAvgRwd == "qlearningAvgRwd")
+          if(creditAssignment == "qlearningAvgRwd")
           {
             cat(sprintf('Success: alpha = %f, gamma1 = %f, gamma2 = %f\n', modelData@alpha, modelData@gamma1,modelData@gamma2))
             c(rowEnd,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda)

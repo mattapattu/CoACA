@@ -345,7 +345,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         //  averageReward = rewardSum/(double) durationSum;
         //}
         
-        double beta_prime = beta/(double) std::pow(actionNb,0);
+        double beta_prime = beta/(double) std::pow(actionNb,power);
         averageReward = averageReward + (beta_prime*td_err);
         
         S0.updateEdgeProbs();

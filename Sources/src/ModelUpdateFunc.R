@@ -246,7 +246,7 @@ getModelResultsSeq <- function(ratdata, testingdata, sim, src.dir) {
         modelData <- new("ModelData", Model = model, creditAssignment = method, sim = sim)
         argList <- getArgList(modelData, ratdata)
         np.val <- length(argList$lower) * 10
-        myList <- DEoptim.control(NP = np.val, F = 2, CR = 0.9, trace = FALSE, itermax = 200, cluster = cl)
+        myList <- DEoptim.control(NP = np.val, F = 8, CR = 0.9, trace = FALSE, itermax = 200, cluster = cl)
         out <- do.call("DEoptim", list.append(argList, fn = negLogLikFunc, myList))
         resMatrix <- rbind(resMatrix, unname(out$optim$bestmem))
       }

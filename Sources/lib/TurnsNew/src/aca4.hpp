@@ -1,4 +1,3 @@
-
 #ifndef __ACA4__
 #define __ACA4__
 
@@ -13,31 +12,6 @@ Rcpp::List simulateAca4TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   //Rcpp::Rcout << "model=" << model << std::endl;
   arma::mat turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));;
   
- /* if(model == "Paths")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
-  }
-  else if(model == "Turns")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));
-  }
-  else if(model == "Hybrid1")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel1"));
-  }
-  else if(model == "Hybrid2")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel2"));
-  }
-  else if(model == "Hybrid3")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel3"));
-  }
-  else if(model == "Hybrid4")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
-  }
-   */
   //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));

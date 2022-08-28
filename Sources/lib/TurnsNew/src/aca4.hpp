@@ -256,7 +256,7 @@ Rcpp::List simulateAca4TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
       {
         //Rcpp::Rcout << "turnNb=" << generated_TurnsData_sess((turnIdx - 1), 0) << ", receives reward"<< std::endl;
         generated_TurnsData_sess((turnIdx - 1), 2) = 1;
-        score_episode = score_episode + 1;
+        score_episode = score_episode + reward;
       }
       
       int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
@@ -285,7 +285,7 @@ Rcpp::List simulateAca4TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
         
         episodeNb = episodeNb+1;
         //alpha_prime = getAlphaPrime(alpha,episodeNb);       
-       double alpha_prime = alpha/(double) std::pow(actionCounter,power); 
+       double alpha_prime = alpha/(double) std::pow(episodeNb,power); 
        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         //Rcpp::Rcout << "Here7" << std::endl;
         S0.updateEdgeProbs(false);
@@ -386,6 +386,7 @@ std::vector<double> getAca4Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
   
   int episode = 1;
   int actionCounter = 0;
+  int episodeNb = 0;
   
   Graph S0(testModel, 0);
   //S0.printGraph();
@@ -567,9 +568,9 @@ std::vector<double> getAca4Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
         std::copy(episodeStates.begin(), episodeStates.end(), std::ostream_iterator<int>(stateString, " "));
         //Rcpp::Rcout << "episodeNb=" << episode <<  "Paths:" << actionString.str() <<  "States:" << stateString.str() << std::endl;
         
-        
+        episodeNb = episodeNb+1;
         //double alpha_prime = getAlphaPrime(alpha,episodeNb);
-        double alpha_prime = alpha/(double) std::pow(actionCounter,power);
+        double alpha_prime = alpha/(double) std::pow(episodeNb,power);
         Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         //Rcpp::Rcout << "Update S0 probabilities"<<std::endl;
         S0.updateEdgeProbs();
@@ -920,7 +921,7 @@ arma::mat getAca4ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
         // {
         //   Rcpp::Rcout << episodeTurns[m] << "," <<episodeTurnStates[m] << "," <<episodeTurnTimes[m] << std::endl;
         // }
-        double alpha_prime = alpha/(double) std::pow(actionCounter,power);
+        double alpha_prime = alpha/(double) std::pow(episodeNb,power);
         Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
         S0.updateEdgeProbs();
         S1.updateEdgeProbs();

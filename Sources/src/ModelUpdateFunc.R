@@ -83,8 +83,10 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
           modelData = setModelParams(modelData, unname(out$optim$bestmem))
           if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
           {
+            lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+            lik <- sum(lik)*-1
             cat(sprintf('Success: alpha = %f, gamma1 = %f, gamma2 = %f\n', modelData@alpha, modelData@gamma1,modelData@gamma2))
-            c(rowEnd,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda)
+            c(rowEnd,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik)
 
           }
           else{
@@ -354,7 +356,7 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
     rowlen <- length(modelRes[[1]][,1])
     modelData@alpha <- modelRes[[1]][rowlen, 2]
     modelData@gamma1 <- modelRes[[1]][rowlen, 3]
-    if(ncol(modelRes[[1]]) == 5)
+    if(ncol(modelRes[[1]]) >= 5)
     {
       modelData@gamma2 <- modelRes[[1]][rowlen, 4]
       modelData@lambda <- modelRes[[1]][rowlen, 5]

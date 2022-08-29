@@ -181,8 +181,8 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
             }
             else if(x@creditAssignment == "qlearningAvgRwd")
             {
-              argList = list(lower = c(0,0, 0.5,0),
-                             upper = c(1,0.001, 0.5,1),
+              argList = list(lower = c(0,0,0,0),
+                             upper = c(1,0.001, 0,1),
                              ratdata = ratdata,
                              half_index = 0,
                              modelData = x,

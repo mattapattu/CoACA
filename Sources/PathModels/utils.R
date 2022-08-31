@@ -1144,7 +1144,7 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
   dev.off()
 }
 
-plotThetaHat2=function(ratdata,res.dir,plot.dir)
+plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
 {
   rat=ratdata@rat
   #end_index80 = getEndIndex2(ratdata@allpaths, sim=2, limit=0.80)
@@ -1157,7 +1157,7 @@ plotThetaHat2=function(ratdata,res.dir,plot.dir)
   pdf(file=paste("ParameterTest_",rat,".pdf",sep=""),width=8, height=8)
   par(mfrow=c(3,2))
   #models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
-  
+  models <- testData@Models
   for (i in 1:length(models))
   {
     modelName = strsplit(models[i],"\\.")[[1]][1]

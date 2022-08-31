@@ -1148,11 +1148,14 @@ plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
 {
   rat=ratdata@rat
   #end_index80 = getEndIndex2(ratdata@allpaths, sim=2, limit=0.80)
-  setwd(res.dir)
+  
+  ratName = ratdata@rat
+  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  setwd(param.model.data.dir)
   paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
-  paramTestData = paramTestData[length(paramTestData)]
-  print(paramTestData)
-  load(paramTestData)
+  paramTestData1 = paramTestData[length(paramTestData)]
+  print(paramTestData1)
+  load(paramTestData1)
   setwd(plot.dir)
   pdf(file=paste("ParameterTest_",rat,".pdf",sep=""),width=8, height=8)
   par(mfrow=c(3,2))

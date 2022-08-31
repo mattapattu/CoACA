@@ -1108,7 +1108,7 @@ plotSuccessRates=function(ratDataList)
 plotThetaHat=function(ratdata,res.dir,plot.dir)
 {
   rat=ratdata@rat
-  end_index80 = getEndIndex2(ratdata@allpaths, sim=2, limit=0.80)
+  #end_index80 = getEndIndex2(ratdata@allpaths, sim=2, limit=0.80)
   setwd(res.dir)
   paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
   load(paramTestData)
@@ -1132,6 +1132,56 @@ plotThetaHat=function(ratdata,res.dir,plot.dir)
  
    par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
    plot(0, 0, type = 'l', bty = 'n', xaxt = 'n', yaxt = 'n')
+
+  legend=c(expression(alpha), expression(gamma))
+  legend("bottom", legend=legend, cex=1.5, col=c("black","red"), lwd = c(1,1),lty=c(1,1),horiz=T,xpd = T)
+
+  
+  #legend=c(expression(hat(alpha)), expression(alpha),expression(hat(gamma[1])), expression(gamma[1]),expression(hat(gamma[2])), expression(gamma[2])) 
+  #legend("center", legend=legend, cex=1.5, col=c("black","black","green","green","red","red"), lwd = c(1,2,1,2,1,2),lty=c(1,2,1,2,1,2),horiz=FALSE,y.intersp=1.2)
+  #title(paste0("Parameter estimation, ",rat), line = -1, outer = TRUE)
+  #par(xpd=FALSE)
+  dev.off()
+}
+
+plotThetaHat2=function(ratdata,res.dir,plot.dir)
+{
+  rat=ratdata@rat
+  #end_index80 = getEndIndex2(ratdata@allpaths, sim=2, limit=0.80)
+  setwd(res.dir)
+  paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+  paramTestData = paramTestData[length(paramTestData)]
+  print(paramTestData)
+  load(paramTestData)
+  setwd(plot.dir)
+  pdf(file=paste("ParameterTest_",rat,".pdf",sep=""),width=8, height=8)
+  par(mfrow=c(3,2))
+  #models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+  
+  for (i in 1:length(models))
+  {
+    modelName = strsplit(models[i],"\\.")[[1]][1]
+    creditAssignment = strsplit(models[i],"\\.")[[1]][2]
+    print(sprintf("modelName=%s,creditAssignment=%s",modelName,creditAssignment))
+    paramTestData=list.files(".", pattern=paste0(rat,".*",modelName,".",creditAssignment,"_ParamRes.Rdata"), full.names=FALSE)
+    print(paramTestData)
+    load(paramTestData)
+    rowEnd <- modelRes[[1]][,1]
+    alpha <- modelRes[[1]][, 2]
+    gamma1 <- modelRes[[1]][, 3]
+    if(ncol(modelRes[[1]]) >= 5)
+    {
+      gamma2 <- modelRes[[1]][, 4]
+      lambda <- modelRes[[1]][, 5]
+    }
+    plot(rowEnd, alpha,type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials", main=model,lty=1,lwd=1,cex.axis = 1.5, cex.lab = 1.3)
+    lines(rowEnd, gamma1,type='l',col='red',lty=1,lwd=1)
+
+
+  }
+ 
+  par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+  plot(0, 0, type = 'l', bty = 'n', xaxt = 'n', yaxt = 'n')
 
   legend=c(expression(alpha), expression(gamma))
   legend("bottom", legend=legend, cex=1.5, col=c("black","red"), lwd = c(1,1),lty=c(1,1),horiz=T,xpd = T)

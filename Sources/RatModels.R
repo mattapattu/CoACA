@@ -98,7 +98,10 @@ ratDataList = list()
 for (i in c(select_rat)) {
   
   #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
-  testData = new("TestModels", Name = "Mix",Models=c("Hybrid3.aca2","Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
+  #testData = new("TestModels", Name = "Aca2",Models=c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2"))
+# testData = new("TestModels", Name = "Aca4",Models=c("Paths.aca4","Hybrid1.aca4","Hybrid2.aca4","Hybrid3.aca4","Hybrid4.aca4","Turns.aca4"))
+  testData = new("TestModels", Name = "AvgRwd",Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
+ #testData = new("TestModels", Name = "acaAndQLearning",Models=c("Hybrid3.aca2","Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
    #testData = new("TestModels", Models=c("Paths"), creditAssignment=c("aca2"))
   
   
@@ -151,7 +154,8 @@ for (i in c(select_rat)) {
    {
      #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
      #debug(plotThetaHat)
-     plotThetaHat(ratdata,model.data.dir,plot.dir)
+     #plotThetaHat(ratdata,model.data.dir,plot.dir)
+     plotThetaHat2(ratdata,model.data.dir,plot.dir)
    }
 
 

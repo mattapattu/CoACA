@@ -1176,6 +1176,8 @@ plotThetaHat2=function(ratdata,res.dir,plot.dir)
     }
     plot(rowEnd, alpha,type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials", main=model,lty=1,lwd=1,cex.axis = 1.5, cex.lab = 1.3)
     lines(rowEnd, gamma1,type='l',col='red',lty=1,lwd=1)
+    lines(rowEnd, gamma2,type='l',col='green',lty=1,lwd=1)
+    lines(rowEnd, lambda,type='l',col='blue',lty=1,lwd=1)
 
 
   }

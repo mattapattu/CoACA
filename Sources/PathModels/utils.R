@@ -1154,7 +1154,7 @@ plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
   setwd(param.model.data.dir)
   paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
   #paramTestData1 = paramTestData[length(paramTestData)]
-  print(paramTestData1)
+  #print(paramTestData1)
   #load(paramTestData1)
   #setwd(plot.dir)
   pdf(file=paste(plot.dir,"ParameterTest_",rat,".pdf",sep=""),width=8, height=8)

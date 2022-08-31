@@ -1166,9 +1166,13 @@ plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
     modelName = strsplit(models[i],"\\.")[[1]][1]
     creditAssignment = strsplit(models[i],"\\.")[[1]][2]
     print(sprintf("modelName=%s,creditAssignment=%s",modelName,creditAssignment))
-    paramTestData=list.files(".", pattern=paste0(rat,".*",modelName,".",creditAssignment,"_ParamRes.Rdata"), full.names=FALSE)
-    print(paramTestData)
-    load(paramTestData)
+    #details =  file.info( list.files(".", pattern=paste0("rat_106",".*","Paths",".","qlearningAvgRwd","_ParamRes.Rdata"), full.names=FALSE))
+    details =  file.info(list.files(".", pattern=paste0(rat,".*",modelName,".",creditAssignment,"_ParamRes.Rdata"), full.names=FALSE))
+    details = details[with(details, order(as.POSIXct(mtime))), ]
+    files = rownames(details)
+
+    print(files)
+    load(files[length(files)])
     rowEnd <- modelRes[[1]][,1]
     alpha <- modelRes[[1]][, 2]
     gamma1 <- modelRes[[1]][, 3]

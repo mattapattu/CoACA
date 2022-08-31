@@ -155,7 +155,7 @@ for (i in c(select_rat)) {
      #res.dir = file.path("C:/Users/matta/Downloads/thetahat_res")
      #debug(plotThetaHat)
      #plotThetaHat(ratdata,model.data.dir,plot.dir)
-     plotThetaHat2(ratdata,model.data.dir,plot.dir)
+     plotThetaHat2(ratdata,testData,model.data.dir,plot.dir)
    }
 
 

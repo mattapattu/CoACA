@@ -1150,8 +1150,8 @@ plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
   #end_index80 = getEndIndex2(ratdata@allpaths, sim=2, limit=0.80)
   
   ratName = ratdata@rat
-  #param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
-  param.model.data.dir="C:/Users/matta/Downloads"
+  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  #param.model.data.dir="C:/Users/matta/Downloads"
   setwd(param.model.data.dir)
   paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
   #paramTestData1 = paramTestData[length(paramTestData)]

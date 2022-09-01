@@ -1150,14 +1150,15 @@ plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
   #end_index80 = getEndIndex2(ratdata@allpaths, sim=2, limit=0.80)
   
   ratName = ratdata@rat
-  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  #param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  param.model.data.dir="C:/Users/matta/Downloads"
   setwd(param.model.data.dir)
   paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
   #paramTestData1 = paramTestData[length(paramTestData)]
   #print(paramTestData1)
   #load(paramTestData1)
   #setwd(plot.dir)
-  pdf(file=paste(plot.dir,"ParameterTest_",rat,".pdf",sep=""),width=8, height=8)
+  #pdf(file=paste(plot.dir,"ParameterTest_",rat,".pdf",sep=""),width=8, height=8)
   par(mfrow=c(3,2))
   #models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
   models <- testData@Models
@@ -1170,7 +1171,7 @@ plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
     details =  file.info(list.files(".", pattern=paste0(rat,".*",modelName,".",creditAssignment,"_ParamRes.Rdata"), full.names=FALSE))
     details = details[with(details, order(as.POSIXct(mtime))), ]
     files = rownames(details)
-
+    
     print(files)
     load(files[length(files)])
     rowEnd <- modelRes[[1]][,1]
@@ -1181,20 +1182,62 @@ plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
       gamma2 <- modelRes[[1]][, 4]
       lambda <- modelRes[[1]][, 5]
     }
-    plot(rowEnd, alpha,type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials", main=model,lty=1,lwd=1,cex.axis = 1.5, cex.lab = 1.3)
+    
+    
+    if(modelName=="Paths")
+    {
+      denom = rowEnd^lambda
+    }else if(modelName=="Turns")
+    {
+      rlist<-which(ratdata@turnTimes[,1] %in% rowEnd)
+      denom=c(rlist[which(diff(rlist)>1)],rlist[length(rlist)])
+      denom=denom^lambda
+    }
+    else if(modelName=="Hybrid1")
+    {
+      rlist<-which(ratdata@hybridModel1[,1] %in% rowEnd)
+      denom=c(rlist[which(diff(rlist)>1)],rlist[length(rlist)])
+      denom=denom^lambda
+    }
+    else if(modelName=="Hybrid2")
+    {
+      rlist<-which(ratdata@hybridModel2[,1] %in% rowEnd)
+      denom=c(rlist[which(diff(rlist)>1)],rlist[length(rlist)])
+      denom=denom^lambda
+    }
+    else if(modelName=="Hybrid3")
+    {
+      rlist<-which(ratdata@hybridModel3[,1] %in% rowEnd)
+      denom=c(rlist[which(diff(rlist)>1)],rlist[length(rlist)])
+      denom=denom^lambda
+    }
+    else if(modelName=="Hybrid4")
+    {
+      rlist<-which(ratdata@hybridModel4[,1] %in% rowEnd)
+      denom=c(rlist[which(diff(rlist)>1)],rlist[length(rlist)])
+      denom=denom^lambda
+    }
+    
+    
+    
+    alpha=alpha/denom
+    gamma1 = gamma1/denom
+    
+    
+    plot(rowEnd, alpha,type='l',ylim = c(0,1),col='black', ylab = "Parameter value",xlab="Trials", main=models[i],lty=1,lwd=1,cex.axis = 1.5, cex.lab = 1.3)
     lines(rowEnd, gamma1,type='l',col='red',lty=1,lwd=1)
     lines(rowEnd, gamma2,type='l',col='green',lty=1,lwd=1)
     lines(rowEnd, lambda,type='l',col='blue',lty=1,lwd=1)
-
-
+    
+    
   }
- 
-  par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
-  plot(0, 0, type = 'l', bty = 'n', xaxt = 'n', yaxt = 'n')
-
-  legend=c(expression(alpha), expression(gamma))
-  legend("bottom", legend=legend, cex=1.5, col=c("black","red"), lwd = c(1,1),lty=c(1,1),horiz=T,xpd = T)
-
+  
+  #par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+  #plot(0, 0, type = 'l', bty = 'n', xaxt = 'n', yaxt = 'n')
+  
+  #legend=c(expression(alpha), expression(beta),"reward","power")
+  #legend("bottom", legend=legend, cex=1.5, col=c("black","red","green","blue"), lwd = c(1,1),lty=c(1,1),horiz=T,xpd = T)
+  
   
   #legend=c(expression(hat(alpha)), expression(alpha),expression(hat(gamma[1])), expression(gamma[1]),expression(hat(gamma[2])), expression(gamma[2])) 
   #legend("center", legend=legend, cex=1.5, col=c("black","black","green","green","red","red"), lwd = c(1,2,1,2,1,2),lty=c(1,2,1,2,1,2),horiz=FALSE,y.intersp=1.2)

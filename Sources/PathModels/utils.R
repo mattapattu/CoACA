@@ -1158,7 +1158,7 @@ plotThetaHat2=function(ratdata,testData,res.dir,plot.dir)
   #print(paramTestData1)
   #load(paramTestData1)
   #setwd(plot.dir)
-  #pdf(file=paste(plot.dir,"ParameterTest_",rat,".pdf",sep=""),width=8, height=8)
+  pdf(file=paste(plot.dir,"/ParameterTest_",rat,".pdf",sep=""),width=8, height=8)
   par(mfrow=c(3,2))
   #models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
   models <- testData@Models

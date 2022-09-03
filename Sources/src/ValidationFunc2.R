@@ -360,7 +360,10 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
    
    print(getwd())
    print(paste0(res.model.data.dir,"/",rat, ".*_ParamEstResList.Rdata"))
-   load(paste0(res.model.data.dir,"/",rat, ".*_ParamEstResList.Rdata"))
+   setwd(paste0(res.model.data.dir,"/",rat)
+   paramTestData=list.files(".",pattern="rat.*ParamEstResList.Rdata")
+   print(paramTestData)
+   load(paramTestData)
 
    if(any(grepl("qlearningAvgRwd",models)))
    {

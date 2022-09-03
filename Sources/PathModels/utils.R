@@ -1385,19 +1385,26 @@ plotSimParamEstimation=function(ratdata,model.data.dir,plot.dir)
        #  rowEnd = iter*100
        #}
        rowEnd = iter
-       simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),4]
-       simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),5]
+       simulation_alpha <- dfModel[which(dfModel[,2]==rowEnd),4]
+       simulation_gamma1 <- dfModel[which(dfModel[,2]==rowEnd),5]
+       simulation_gamma2 <- dfModel[which(dfModel[,2]==rowEnd),6]
+       simulation_lambda <- dfModel[which(dfModel[,2]==rowEnd),7]
 
-       alpha_bounds <- getCI(simulation_alphas)
-
-
+       alpha_bounds <- getCI(simulation_alpha)
        alpha_upper_bounds <- c(alpha_upper_bounds,alpha_bounds[2])
        alpha_lower_bounds <- c(alpha_lower_bounds,alpha_bounds[1])
 
-       gamma_bounds <- getCI(simulation_gammas)
+       gamma1_bounds <- getCI(simulation_gamma1)
+       gamma1_upper_bounds <- c(gamma1_upper_bounds,gamma1_bounds[2])
+       gamma1_lower_bounds <- c(gamma1_lower_bounds,gamma1_bounds[1])
 
-       gamma_upper_bounds <- c(gamma_upper_bounds,gamma_bounds[2])
-       gamma_lower_bounds <- c(gamma_lower_bounds,gamma_bounds[1])
+       gamma2_bounds <- getCI(simulation_gamma2)
+       gamma2_upper_bounds <- c(gamma2_upper_bounds,gamma2_bounds[2])
+       gamma2_lower_bounds <- c(gamma2_lower_bounds,gamma2_bounds[1])
+
+       lambda_bounds <- getCI(simulation_lambda)
+       lambda_upper_bounds <- c(lambda_upper_bounds,lambda_bounds[2])
+       lambda_lower_bounds <- c(lambda_lower_bounds,lambda_bounds[1])
 
   #     if(any(is.nan(alpha_bounds)) || any(is.nan(gamma_bounds)))
   #     {
@@ -1425,16 +1432,15 @@ plotSimParamEstimation=function(ratdata,model.data.dir,plot.dir)
       #param.model.data.dir="C:/Users/matta/Downloads"
       setwd(param.model.data.dir)
 
-     paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+     paramTestData=list.files(".", pattern=paste0(rat,".*",model,".*.ParamRes.Rdata"), full.names=FALSE)
      print(paramTestData)
      load(paramTestData)
-     index = which(models %in% model)
      print(sprintf("model=%s, index=%i", model, index))
-     resMat <- paramTest[[index]][[1]]
-     n.rows <- length(resMat[,1])
-     alpha =  resMat[n.rows,2]
-     gamma1 = resMat[n.rows,3]
-    
+     n.rows <- length(modelRes[[1]])
+     alpha =  modelRes[[1]][n.rows,2]
+     gamma1 = modelRes[[1]][n.rows,3]
+     gamma2 = modelRes[[1]][n.rows,4]
+     lambda = modelRes[[1]][n.rows,5]
      #true80 <- getEndIndex2(ratdata@allpaths,sim=2,limit=0.8)
      #upperbound80 <- eightyCI[[index]][2]
      #lowerbound80 <- eightyCI[[index]][1]
@@ -1450,10 +1456,20 @@ plotSimParamEstimation=function(ratdata,model.data.dir,plot.dir)
      title <- paste(model, ", nbSim=",nbSims,collapse="")
      plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters",cex.axis = 1.5, cex.lab = 1.3)
      lines(xaxis,alpha_lower_bounds, lty=2, col="black")
-     lines(xaxis,gamma_upper_bounds, lty=2, col='red')
-     lines(xaxis,gamma_lower_bounds, lty=2, col='red')
      abline(h=alpha,col="black")
+
+     lines(xaxis,gamma1_upper_bounds, lty=2, col='red')
+     lines(xaxis,gamma1_lower_bounds, lty=2, col='red')
      abline(h=gamma1, col='red')
+
+     lines(xaxis,gamma2_upper_bounds, lty=2, col='blue')
+     lines(xaxis,gamma2_lower_bounds, lty=2, col='blue')
+     abline(h=gamma2, col='blue')
+
+     lines(xaxis,lambda_upper_bounds, lty=2, col='green')
+     lines(xaxis,lambda_lower_bounds, lty=2, col='green')
+     abline(h=lambda, col='green')
+
      
      #abline(v=true80,col='green')  
      #abline(v=lowerbound80, col='green', lty=2)

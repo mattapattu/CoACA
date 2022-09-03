@@ -359,8 +359,10 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
   #  save(resList,  file = paste0(res.model.data.dir,"/",rat, timestamp,"_ParamEstResList.Rdata"))
    
    print(getwd())
-   print(paste0(res.model.data.dir,"/",rat, ".*_ParamEstResList.Rdata"))
+   print(paste0(res.model.data.dir,"/",rat))
    setwd(paste0(res.model.data.dir,"/",rat))
+   #print(paste0(res.model.data.dir,"/",rat, ".*_ParamEstResList.Rdata"))
+   
    paramTestData=list.files(".",pattern="rat.*ParamEstResList.Rdata")
    print(paramTestData)
    load(paramTestData)

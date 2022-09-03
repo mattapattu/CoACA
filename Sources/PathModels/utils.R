@@ -1398,6 +1398,65 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
        simulation_gamma2 <- dfModel[which(dfModel[,2]==rowEnd),6]
        simulation_lambda <- dfModel[which(dfModel[,2]==rowEnd),7]
 
+        if(modelName=="Paths")
+        {
+          denom = rowEnd^simulation_lambda
+        }else if(modelName=="Turns")
+        {
+          rlist <-which(ratdata@turnTimes[,1] %in% rowEnd)
+            if(length(rlist)==0)
+            {
+              rlist <-which(ratdata@turnTimes[,1] %in% (rowEnd-1))
+            }
+            rowEnd = max(rlist)
+            denom=rowEnd^lambda
+        } 
+        else if(modelName=="Hybrid1")
+        {
+            rlist <-which(ratdata@hybridModel1[,1] %in% rowEnd)
+            if(length(rlist)==0)
+            {
+              rlist <-which(ratdata@hybridModel1[,1] %in% (rowEnd-1))
+            }
+            rowEnd = max(rlist)
+            denom=rowEnd^lambda
+        }
+        else if(modelName=="Hybrid2")
+        {
+          rlist <-which(ratdata@hybridModel2[,1] %in% rowEnd)
+            if(length(rlist)==0)
+            {
+              rlist <-which(ratdata@hybridModel2[,1] %in% (rowEnd-1))
+            }
+            rowEnd = max(rlist)
+            denom=rowEnd^lambda
+          
+        }
+        else if(modelName=="Hybrid3")
+        {
+          rlist <-which(ratdata@hybridModel3[,1] %in% rowEnd)
+            if(length(rlist)==0)
+            {
+              rlist <-which(ratdata@hybridModel3[,1] %in% (rowEnd-1))
+            }
+            rowEnd = max(rlist)
+            denom=rowEnd^lambda
+          
+        }
+        else if(modelName=="Hybrid4")
+        {
+          rlist <-which(ratdata@hybridModel4[,1] %in% rowEnd)
+            if(length(rlist)==0)
+            {
+              rlist <-which(ratdata@hybridModel4[,1] %in% (rowEnd-1))
+            }
+            rowEnd = max(rlist)
+            denom=rowEnd^lambda
+          
+        }
+        simulation_alpha = simulation_alpha/denom
+        simulation_gamma1 = simulation_gamma1/denom
+
        alpha_bounds <- getCI(simulation_alpha)
        alpha_upper_bounds <- c(alpha_upper_bounds,alpha_bounds[2])
        alpha_lower_bounds <- c(alpha_lower_bounds,alpha_bounds[1])

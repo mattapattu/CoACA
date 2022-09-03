@@ -1602,19 +1602,19 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      title <- paste(model, ", nbSim=",nbSims,collapse="")
      plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters",cex.axis = 1.5, cex.lab = 1.3)
      lines(xaxis,alpha_lower_bounds, lty=2, col="black")
-     abline(h=alpha,col="black")
+     lines(xaxis,alpha,col="black")
 
      lines(xaxis,gamma1_upper_bounds, lty=2, col='red')
      lines(xaxis,gamma1_lower_bounds, lty=2, col='red')
-     abline(h=gamma1, col='red')
+     lines(xaxis,gamma1, col='red')
 
      lines(xaxis,gamma2_upper_bounds, lty=2, col='blue')
      lines(xaxis,gamma2_lower_bounds, lty=2, col='blue')
-     abline(h=gamma2, col='blue')
+     lines(xaxis,gamma2, col='blue')
 
      lines(xaxis,lambda_upper_bounds, lty=2, col='green')
      lines(xaxis,lambda_lower_bounds, lty=2, col='green')
-     abline(h=lambda, col='green')
+     lines(xaxis,lambda, col='green')
 
      
      #abline(v=true80,col='green')  

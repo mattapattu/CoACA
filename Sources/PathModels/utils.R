@@ -1398,10 +1398,10 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
        simulation_gamma2 <- dfModel[which(dfModel[,2]==rowEnd),6]
        simulation_lambda <- dfModel[which(dfModel[,2]==rowEnd),7]
 
-        if(modelName=="Paths")
+        if(model=="Paths")
         {
           denom = rowEnd^simulation_lambda
-        }else if(modelName=="Turns")
+        }else if(model=="Turns")
         {
           rlist <-which(ratdata@turnTimes[,1] %in% rowEnd)
             if(length(rlist)==0)
@@ -1411,7 +1411,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
             rowEnd = max(rlist)
             denom=rowEnd^lambda
         } 
-        else if(modelName=="Hybrid1")
+        else if(model=="Hybrid1")
         {
             rlist <-which(ratdata@hybridModel1[,1] %in% rowEnd)
             if(length(rlist)==0)
@@ -1421,7 +1421,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
             rowEnd = max(rlist)
             denom=rowEnd^lambda
         }
-        else if(modelName=="Hybrid2")
+        else if(model=="Hybrid2")
         {
           rlist <-which(ratdata@hybridModel2[,1] %in% rowEnd)
             if(length(rlist)==0)
@@ -1432,7 +1432,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
             denom=rowEnd^lambda
           
         }
-        else if(modelName=="Hybrid3")
+        else if(model=="Hybrid3")
         {
           rlist <-which(ratdata@hybridModel3[,1] %in% rowEnd)
             if(length(rlist)==0)
@@ -1443,7 +1443,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
             denom=rowEnd^lambda
           
         }
-        else if(modelName=="Hybrid4")
+        else if(model=="Hybrid4")
         {
           rlist <-which(ratdata@hybridModel4[,1] %in% rowEnd)
             if(length(rlist)==0)

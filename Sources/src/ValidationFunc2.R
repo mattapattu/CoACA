@@ -403,7 +403,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
         df[k,11] <- trueModelData@lambda
 
       }
-
+      rat = ratdata@rat
       if(StabilityTest)
       {
         save(df, file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
@@ -442,7 +442,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
         df[k,7] <- trueModelData@gamma1 
 
       }
-       rat = ratdata@rat
+      rat = ratdata@rat
 
       if(StabilityTest)
       {

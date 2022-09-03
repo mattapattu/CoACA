@@ -1595,6 +1595,9 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
       
     }
 
+    alpha = alpha/denom
+    gamma1 = gamma1/denom
+
      xaxis <- maxVecs
      title <- paste(model, ", nbSim=",nbSims,collapse="")
      plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters",cex.axis = 1.5, cex.lab = 1.3)

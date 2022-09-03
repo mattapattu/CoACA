@@ -188,7 +188,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
   res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
    
   # dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
-  # timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+  timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
  
   # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   # setRngDoMPI(cl, seed=seed)

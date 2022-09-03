@@ -1443,7 +1443,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      paramTestData=list.files(".", pattern=paste0(rat,".*",model,".",creditAssignment,".*.ParamRes.Rdata"), full.names=FALSE)
      print(paramTestData)
      load(paramTestData)
-     print(sprintf("model=%s, index=%i", model, index))
+     #print(sprintf("model=%s, index=%i", model, index))
      n.rows <- length(modelRes[[1]])
      alpha =  modelRes[[1]][n.rows,2]
      gamma1 = modelRes[[1]][n.rows,3]

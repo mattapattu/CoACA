@@ -1322,9 +1322,10 @@ getCI=function(X)
 }
   
 
-plotSimParamEstimation=function(ratdata,model.data.dir,plot.dir)
+plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
 {
   rat=ratdata@rat
+  models <- testData@Models
   #res.model.data.dir=paste(res.dir,"paramEstTest",rat,sep="/")
   res.dir = paste(model.data.dir,"paramEstTest",ratdata@rat,sep="/")
   print(res.dir)
@@ -1343,7 +1344,7 @@ plotSimParamEstimation=function(ratdata,model.data.dir,plot.dir)
   #load(paramTestData)
   #setwd(plot.dir)
   pdf(file=paste(plot.dir,"/","SimParamEstimation_",rat,".pdf",sep=""),width=8, height=8)
-  models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+  #models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
   #par(mfrow=c(2,2))
   
   #layout( matrix(c(1,3,0,2,0,0),ncol=2,nrow=3), heights=c(2,2,0.2) ) 
@@ -1364,8 +1365,11 @@ plotSimParamEstimation=function(ratdata,model.data.dir,plot.dir)
    maxVecs <- c(maxVecs,max(indices_of_ses))
   }
 
-  for(model in models)
+  for(m in models)
   {
+    model = strsplit(m,"\\.")[[1]][1]
+    creditAssignment = strsplit(m,"\\.")[[1]][2]
+
     dfModel <- dfcombined[which(dfcombined[,1]==model),]
     nbSims <- length(which(dfModel[,2]==maxVecs[1]))
     print(sprintf("model=%s, nbSims=%i",model,nbSims)) 
@@ -1436,7 +1440,7 @@ plotSimParamEstimation=function(ratdata,model.data.dir,plot.dir)
       #param.model.data.dir="C:/Users/matta/Downloads"
       setwd(param.model.data.dir)
 
-     paramTestData=list.files(".", pattern=paste0(rat,".*",model,".*.ParamRes.Rdata"), full.names=FALSE)
+     paramTestData=list.files(".", pattern=paste0(rat,".*",model,".",creditAssignment,".*.ParamRes.Rdata"), full.names=FALSE)
      print(paramTestData)
      load(paramTestData)
      print(sprintf("model=%s, index=%i", model, index))

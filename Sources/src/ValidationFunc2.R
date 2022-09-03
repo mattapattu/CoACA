@@ -406,11 +406,11 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
       if(StabilityTest)
       {
-        save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
       }
       else
       {
-        save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
+        save(df,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
       }
 
    }
@@ -446,11 +446,11 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
       if(StabilityTest)
       {
-        save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
       }
       else
       {
-        save(df, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
       }
    
    }

@@ -457,10 +457,10 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
    
     
    
-  if(setup.hpc)
-  {
-    closeCluster(cl)
-  }
+  # if(setup.hpc)
+  # {
+  #   closeCluster(cl)
+  # }
   
 }
 

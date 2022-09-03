@@ -1322,14 +1322,15 @@ getCI=function(X)
 }
   
 
-plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
+plotSimParamEstimation=function(ratdata,model.data.dir,plot.dir)
 {
   rat=ratdata@rat
   #res.model.data.dir=paste(res.dir,"paramEstTest",rat,sep="/")
+  res.dir = paste(model.data.dir,"paramEstTest",ratdata@rat,sep="/")
   print(res.dir)
   setwd(res.dir)
   dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Conv_df.Rdata"), full.names=FALSE)
-  print(dfData)
+  #print(dfData)
   #eightyCI <- getSimLearningEndIndices(rat,dfData,res.dir)
   listDfData <- list()
   for(i in c(1:length(dfData)))
@@ -1419,6 +1420,11 @@ plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
   #     }
      }
      
+      ratName = ratdata@rat
+      param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+      #param.model.data.dir="C:/Users/matta/Downloads"
+      setwd(param.model.data.dir)
+
      paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
      print(paramTestData)
      load(paramTestData)

@@ -1329,7 +1329,8 @@ plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
   print(res.dir)
   setwd(res.dir)
   dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Conv_df.Rdata"), full.names=FALSE)
-  eightyCI <- getSimLearningEndIndices(rat,dfData,res.dir)
+  print(dfData)
+  #eightyCI <- getSimLearningEndIndices(rat,dfData,res.dir)
   listDfData <- list()
   for(i in c(1:length(dfData)))
   {
@@ -1428,9 +1429,9 @@ plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
      alpha =  resMat[n.rows,2]
      gamma1 = resMat[n.rows,3]
     
-     true80 <- getEndIndex2(ratdata@allpaths,sim=2,limit=0.8)
-     upperbound80 <- eightyCI[[index]][2]
-     lowerbound80 <- eightyCI[[index]][1]
+     #true80 <- getEndIndex2(ratdata@allpaths,sim=2,limit=0.8)
+     #upperbound80 <- eightyCI[[index]][2]
+     #lowerbound80 <- eightyCI[[index]][1]
 
      print(sprintf("alpha=%f,gamma1=%s, model=%s, index=%i",alpha,gamma1,model,index))
      #print(sprintf("alpha_upper_bounds len = %i",length(alpha_upper_bounds)))

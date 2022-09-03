@@ -1325,7 +1325,9 @@ getCI=function(X)
 plotSimParamEstimation=function(ratdata,res.dir,plot.dir)
 {
   rat=ratdata@rat
-  setwd(res.dir)
+  res.model.data.dir=paste(res.dir,"paramEstTest",ratName,sep="/")
+  print(res.model.data.dir)
+  setwd(res.model.data.dir)
   dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Stability_df.Rdata"), full.names=FALSE)
   eightyCI <- getSimLearningEndIndices(rat,dfData,res.dir)
   listDfData <- list()

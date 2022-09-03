@@ -1508,17 +1508,92 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      gamma1 = modelRes[[1]][n.rows,3]
      gamma2 = modelRes[[1]][n.rows,4]
      lambda = modelRes[[1]][n.rows,5]
-     #true80 <- getEndIndex2(ratdata@allpaths,sim=2,limit=0.8)
-     #upperbound80 <- eightyCI[[index]][2]
-     #lowerbound80 <- eightyCI[[index]][1]
 
-     #print(sprintf("alpha=%f,gamma1=%s, model=%s, index=%i",alpha,gamma1,model,index))
-     #print(sprintf("alpha_upper_bounds len = %i",length(alpha_upper_bounds)))
-     #print(sprintf("gamma_upper_bounds:"))
-     #print(gamma_upper_bounds)
-     #print(sprintf("gamma_lower_bounds:"))
-     #print(gamma_lower_bounds)
-     #xaxis <- c(1:iterations)*100
+    if(model=="Paths")
+    {
+      denom = rowEnd^lambda
+    }else if(model=="Turns")
+    {
+      turnList <- c() 
+      for(k in 1:length(rowEnd))
+      {
+        rlist <-which(ratdata@turnTimes[,1] %in% rowEnd[k])
+        if(length(rlist)==0)
+        {
+          rlist <-which(ratdata@turnTimes[,1] %in% (rowEnd[k]-1))
+        }
+        turnList<-c(turnList,max(rlist))
+      }
+      
+      denom=turnList^lambda
+    }
+    else if(model=="Hybrid1")
+    {
+      turnList <- c() 
+      for(k in 1:length(rowEnd))
+      {
+        rlist <-which(ratdata@hybridModel1[,1] %in% rowEnd[k])
+        if(length(rlist)==0)
+        {
+          rlist <-which(ratdata@hybridModel1[,1] %in% (rowEnd[k]-1))
+        }
+        turnList<-c(turnList,max(rlist))
+      }
+      
+      
+      denom=turnList^lambda
+    }
+    else if(model=="Hybrid2")
+    {
+      turnList <- c() 
+      for(k in 1:length(rowEnd))
+      {
+        rlist <-which(ratdata@hybridModel2[,1] %in% rowEnd[k])
+        if(length(rlist)==0)
+        {
+          rlist <-which(ratdata@hybridModel2[,1] %in% (rowEnd[k]-1))
+        }
+        turnList<-c(turnList,max(rlist))
+      }
+      
+      
+      denom=turnList^lambda
+      
+    }
+    else if(model=="Hybrid3")
+    {
+      turnList <- c() 
+      for(k in 1:length(rowEnd))
+      {
+        rlist <-which(ratdata@hybridModel3[,1] %in% rowEnd[k])
+        if(length(rlist)==0)
+        {
+          rlist <-which(ratdata@hybridModel3[,1] %in% (rowEnd[k]-1))
+        }
+        turnList<-c(turnList,max(rlist))
+      }
+      
+      
+      denom=turnList^lambda
+      
+    }
+    else if(model=="Hybrid4")
+    {
+      turnList <- c() 
+      for(k in 1:length(rowEnd))
+      {
+        rlist <-which(ratdata@hybridModel4[,1] %in% rowEnd[k])
+        if(length(rlist)==0)
+        {
+          rlist <-which(ratdata@hybridModel4[,1] %in% (rowEnd[k]-1))
+        }
+        turnList<-c(turnList,max(rlist))
+      }
+
+      denom=turnList^lambda
+      
+    }
+
      xaxis <- maxVecs
      title <- paste(model, ", nbSim=",nbSims,collapse="")
      plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters",cex.axis = 1.5, cex.lab = 1.3)

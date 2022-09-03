@@ -1516,7 +1516,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
     }else if(model=="Turns")
     {
       turnList <- c() 
-      for(k in 1:length(rowEnd))
+      for(k in length(rowEnd))
       {
         rlist <-which(ratdata@turnTimes[,1] %in% rowEnd[k])
         if(length(rlist)==0)
@@ -1531,7 +1531,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
     else if(model=="Hybrid1")
     {
       turnList <- c() 
-      for(k in 1:length(rowEnd))
+      for(k in length(rowEnd))
       {
         rlist <-which(ratdata@hybridModel1[,1] %in% rowEnd[k])
         if(length(rlist)==0)
@@ -1547,7 +1547,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
     else if(model=="Hybrid2")
     {
       turnList <- c() 
-      for(k in 1:length(rowEnd))
+      for(k in length(rowEnd))
       {
         rlist <-which(ratdata@hybridModel2[,1] %in% rowEnd[k])
         if(length(rlist)==0)
@@ -1564,7 +1564,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
     else if(model=="Hybrid3")
     {
       turnList <- c() 
-      for(k in 1:length(rowEnd))
+      for(k in length(rowEnd))
       {
         rlist <-which(ratdata@hybridModel3[,1] %in% rowEnd[k])
         if(length(rlist)==0)
@@ -1581,7 +1581,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
     else if(model=="Hybrid4")
     {
       turnList <- c() 
-      for(k in 1:length(rowEnd))
+      for(k in length(rowEnd))
       {
         rlist <-which(ratdata@hybridModel4[,1] %in% rowEnd[k])
         if(length(rlist)==0)
@@ -1602,19 +1602,19 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      title <- paste(model, ", nbSim=",nbSims,collapse="")
      plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters",cex.axis = 1.5, cex.lab = 1.3)
      lines(xaxis,alpha_lower_bounds, lty=2, col="black")
-     lines(rowEnd,alpha,col="black")
+     lines(h=alpha,col="black")
 
      lines(xaxis,gamma1_upper_bounds, lty=2, col='red')
      lines(xaxis,gamma1_lower_bounds, lty=2, col='red')
-     lines(rowEnd,gamma1, col='red')
+     lines(h=gamma1, col='red')
 
      lines(xaxis,gamma2_upper_bounds, lty=2, col='blue')
      lines(xaxis,gamma2_lower_bounds, lty=2, col='blue')
-     lines(rowEnd,gamma2, col='blue')
+     lines(h=gamma2, col='blue')
 
      lines(xaxis,lambda_upper_bounds, lty=2, col='green')
      lines(xaxis,lambda_lower_bounds, lty=2, col='green')
-     lines(rowEnd,lambda, col='green')
+     lines(h=lambda, col='green')
 
      
      #abline(v=true80,col='green')  

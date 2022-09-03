@@ -1453,7 +1453,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      #upperbound80 <- eightyCI[[index]][2]
      #lowerbound80 <- eightyCI[[index]][1]
 
-     print(sprintf("alpha=%f,gamma1=%s, model=%s, index=%i",alpha,gamma1,model,index))
+     #print(sprintf("alpha=%f,gamma1=%s, model=%s, index=%i",alpha,gamma1,model,index))
      #print(sprintf("alpha_upper_bounds len = %i",length(alpha_upper_bounds)))
      #print(sprintf("gamma_upper_bounds:"))
      #print(gamma_upper_bounds)

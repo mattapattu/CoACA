@@ -1730,7 +1730,7 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   {
     print(dfData[i])
     load(dfData[i])
-    combinedResList <- append(combinedResList,resList)
+    combinedResList <- append(combinedResList,modelRes)
   }
   #combinedResList <- bind_rows(listDfData)
   #load(paramTestData)

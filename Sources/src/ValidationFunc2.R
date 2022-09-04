@@ -264,6 +264,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
        
      } 
    
+   rat=ratdata@rat
    print(sprintf("Generated DataList"))   
    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat, timestamp,"_generatedDataList.Rdata"))
    allData<-unlist(generatedDataList)

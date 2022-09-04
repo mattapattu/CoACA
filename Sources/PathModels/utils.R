@@ -1722,7 +1722,7 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   res.dir = paste(model.data.dir,"paramEstTest",ratdata@rat,sep="/")
   print(res.dir)
   setwd(res.dir)
-  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Conv_df.Rdata"), full.names=FALSE)
+  dfData=list.files(".", pattern=paste0(rat,".*ParamEstResList.Rdata"), full.names=FALSE)
 
   
   combinedResList <- list()
@@ -1730,7 +1730,7 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   {
     print(dfData[i])
     load(dfData[i])
-    combinedResList <- append(combinedResList,modelRes)
+    combinedResList <- append(combinedResList,resList)
   }
   #combinedResList <- bind_rows(listDfData)
   #load(paramTestData)

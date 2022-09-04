@@ -314,8 +314,6 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
        trueModelData <- generated_data@simModelData
        trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
        
-       # qlearningAvgRwd has gamma1 parameter in the range ~ 10^-6, so decimal points are rounded to 6 digits.
-       # check if this works for aca 
        row1 <- round((trueProbMat[rowEnd,] - probMat[rowEnd,]),6)/round(trueProbMat[rowEnd,],6) 
        if(trueProbMat[rowEnd,1] == -1)
        {
@@ -325,10 +323,11 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
        }
        #print(sprintf("index=%i",index))
       
-       row2 <- round((trueProbMat[index,] - probMat[index,]),6)/round(trueProbMat[index,],6)
+       row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
        row1[is.nan(row1)] <- 0
        row2[is.nan(row2)] <- 0
        probRow <- row1 + row2  
+       probRow[is.infinite(probRow)] <- 0
        
        #diff1 <-  (trueProbMat[rowEnd,] - probMat[rowEnd,])
        #diff2 <-  (trueProbMat[index,] - probMat[index,])

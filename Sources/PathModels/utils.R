@@ -1717,9 +1717,14 @@ getSimLearningEndIndices=function(rat, dfData, res.dir)
 
 plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
 {
-  rat=ratdata@rat
+    rat=ratdata@rat
+  models <- testData@Models
+  res.dir = paste(model.data.dir,"paramEstTest",ratdata@rat,sep="/")
+  print(res.dir)
   setwd(res.dir)
-  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_df.Rdata"), full.names=FALSE)
+  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Conv_df.Rdata"), full.names=FALSE)
+
+  
   combinedResList <- list()
   for(i in c(1:length(dfData)))
   {

@@ -48,6 +48,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
   std::vector<int> rewardTurnsS0{2,5,6};
   std::vector<int> rewardTurnsS1{2,5,10};
   
+  int actionCounter = 0;
   int actionNb = 0;
   double averageReward = 0;
   double rewardSum = 0;
@@ -119,6 +120,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
       //HERE  the nodes based on testModel from one reward box to another are selected 
       while (!edges->empty())
       {
+        actionCounter = actionCounter+1;
         Edge edgeSelected = softmax_action_sel(graph, *edges);
         std::string turnSelected = edgeSelected.dest->node;
         //Rcpp::Rcout << "Turn=" << turnSelected <<std::endl;
@@ -335,7 +337,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         double td_err = turnReward - (averageReward*actionDuration) + qMax - currNode->credit;
         //Rcpp::Rcout <<"currTurn="  << currNode->node <<", turnReward=" << turnReward  << ", turntime=" <<actionDuration <<  ", averageReward=" <<averageReward <<  ", qMax=" <<  qMax << ", td_err=" <<td_err << std::endl;
         
-        double alpha_prime = alpha/(double) std::pow(actionNb,power);
+        double alpha_prime = alpha/(double) std::pow(actionCounter,power);
         currNode->credit = currNode->credit + (alpha_prime * td_err);
 
         //if(isCurrTurnGreedy)
@@ -345,7 +347,7 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         //  averageReward = rewardSum/(double) durationSum;
         //}
         
-        double beta_prime = beta/(double) std::pow(actionNb,power);
+        double beta_prime = beta/(double) std::pow(actionCounter,power);
         averageReward = averageReward + (beta_prime*td_err);
         
         S0.updateEdgeProbs();

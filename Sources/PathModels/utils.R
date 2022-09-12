@@ -1760,7 +1760,7 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   for(k in c(1:length(combinedResList)))
   {
     iter = combinedResList[[k]]$iter
-    print(sprintf("iter=%i",iter))
+    #print(sprintf("iter=%i",iter))
     modelDataRes = combinedResList[[k]]$res
     model = modelDataRes@Model
     probRow = combinedResList[[k]]$probRow
@@ -1812,7 +1812,7 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
   X<-do.call("rbind", list(PathProbMat.df[-1,],Hybrid1ProbMat.df[-1,],Hybrid2ProbMat.df[-1,],Hybrid3ProbMat.df[-1,],Hybrid4ProbMat.df[-1,],TurnsProbMat.df[-1,]))
  
   iter_unique = unique(X[,13])
-  print(sprintf("iter_unique=%s",paste(iter_unique, collapse=" "))) 
+  #print(sprintf("iter_unique=%s",paste(iter_unique, collapse=" "))) 
   X.melt<- melt(X,id.vars = c("iter","model"))
   
   #p <- ggplot(data = PathProbMat.df)+geom_boxplot(aes(x=as.factor(iter), y=value))+facet_wrap(~as.factor(variable), nrow=5)

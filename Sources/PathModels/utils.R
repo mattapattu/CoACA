@@ -1454,8 +1454,8 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
             denom=rowEnd^lambda
           
         }
-        simulation_alpha = simulation_alpha/denom
-        simulation_gamma1 = simulation_gamma1/denom
+      #simulation_alpha = simulation_alpha/denom
+      #simulation_gamma1 = simulation_gamma1/denom
 
        alpha_bounds <- getCI(simulation_alpha)
        alpha_upper_bounds <- c(alpha_upper_bounds,alpha_bounds[2])
@@ -1473,25 +1473,6 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
        lambda_upper_bounds <- c(lambda_upper_bounds,lambda_bounds[2])
        lambda_lower_bounds <- c(lambda_lower_bounds,lambda_bounds[1])
 
-  #     if(any(is.nan(alpha_bounds)) || any(is.nan(gamma_bounds)))
-  #     {
-  #       print(sprintf("NaN found, model=%s, rowEnd=%i",model,rowEnd))
-  #       print(sprintf("alpha_bounds:"))
-  #       print(alpha_bounds)
-  #       print(sprintf("gamma_bounds:"))
-  #       print(gamma_bounds)
-  #
-  #     } 
-       
-  #     if(any((gamma_bounds)<0) || any((gamma_bounds)>1))
-  #     {
-  #       print(sprintf("gamma out of range, model=%s, rowEnd=%i, mean=%f, simulation_gammas:",model,rowEnd, mean(simulation_gammas)))
-  #       #print(sprintf("alpha_bounds:"))
-  #       print(simulation_gammas)
-  #       print(sprintf("gamma_bounds:"))
-  #       print(gamma_bounds)
-  #
-  #     }
      }
      
       ratName = ratdata@rat
@@ -1595,8 +1576,8 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
       
     }
 
-    alpha = alpha/denom
-    gamma1 = gamma1/denom
+    #alpha = alpha/denom
+    #gamma1 = gamma1/denom
 
      xaxis <- maxVecs
      title <- paste(model, ", nbSim=",nbSims,collapse="")

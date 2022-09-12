@@ -1767,7 +1767,7 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
     probRow = probRow[1:12]
     probRow[13] = iter
     probRow[14] = model
-    print(sprintf("model=%s, iter=%i",model,iter))
+    #print(sprintf("model=%s, iter=%i",model,iter))
     if(model == "Paths")
     {
       PathProbMat = rbind(PathProbMat,probRow)

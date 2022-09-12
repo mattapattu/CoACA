@@ -1491,6 +1491,8 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      lambda = modelRes[[1]][n.rows,5]
      rowEnd <- modelRes[[1]][n.rows,1]
 
+     print(sprintf("alpha=%f, gamma1=%f, gamma2=%f, lambda=%f", alpha, gamma1, gamma2, lambda))
+
     if(model=="Paths")
     {
       denom = rowEnd^lambda

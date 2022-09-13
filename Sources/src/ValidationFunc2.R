@@ -314,7 +314,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
        trueModelData <- generated_data@simModelData
        trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
        
-       row1 <- round((trueProbMat[rowEnd,] - probMat[rowEnd,]),6)/round(trueProbMat[rowEnd,],6) 
+       row1 <- round((trueProbMat[rowEnd,] - probMat[rowEnd,]),2)/round(trueProbMat[rowEnd,],2) 
        if(trueProbMat[rowEnd,1] == -1)
        {
          index <- max(which(probMat[1:rowEnd,1] != -1))

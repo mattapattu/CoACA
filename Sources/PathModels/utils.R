@@ -1385,75 +1385,69 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      lambda_lower_bounds <- c()
      for(iter in maxVecs)
      {
-       #if(iter==iterations)
-       #{
-         #rowEnd = length(ratdata@allpaths[,1])
-       #   rowEnd = iter*100
-       #}else{
-       #  rowEnd = iter*100
-       #}
+       
        rowEnd = iter
        simulation_alpha <- dfModel[which(dfModel[,2]==rowEnd),4]
        simulation_gamma1 <- dfModel[which(dfModel[,2]==rowEnd),5]
-       simulation_gamma2 <- dfModel[which(dfModel[,2]==rowEnd),6]
-       simulation_lambda <- dfModel[which(dfModel[,2]==rowEnd),7]
+      #  simulation_gamma2 <- dfModel[which(dfModel[,2]==rowEnd),6]
+      #  simulation_lambda <- dfModel[which(dfModel[,2]==rowEnd),7]
 
-        if(model=="Paths")
-        {
-          denom = rowEnd^simulation_lambda
-        }else if(model=="Turns")
-        {
-          rlist <-which(ratdata@turnTimes[,1] %in% rowEnd)
-            if(length(rlist)==0)
-            {
-              rlist <-which(ratdata@turnTimes[,1] %in% (rowEnd-1))
-            }
-            rowEnd = max(rlist)
-            denom=rowEnd^lambda
-        } 
-        else if(model=="Hybrid1")
-        {
-            rlist <-which(ratdata@hybridModel1[,1] %in% rowEnd)
-            if(length(rlist)==0)
-            {
-              rlist <-which(ratdata@hybridModel1[,1] %in% (rowEnd-1))
-            }
-            rowEnd = max(rlist)
-            denom=rowEnd^lambda
-        }
-        else if(model=="Hybrid2")
-        {
-          rlist <-which(ratdata@hybridModel2[,1] %in% rowEnd)
-            if(length(rlist)==0)
-            {
-              rlist <-which(ratdata@hybridModel2[,1] %in% (rowEnd-1))
-            }
-            rowEnd = max(rlist)
-            denom=rowEnd^lambda
+        # if(model=="Paths")
+        # {
+        #   denom = rowEnd^simulation_lambda
+        # }else if(model=="Turns")
+        # {
+        #   rlist <-which(ratdata@turnTimes[,1] %in% rowEnd)
+        #     if(length(rlist)==0)
+        #     {
+        #       rlist <-which(ratdata@turnTimes[,1] %in% (rowEnd-1))
+        #     }
+        #     rowEnd = max(rlist)
+        #     denom=rowEnd^lambda
+        # } 
+        # else if(model=="Hybrid1")
+        # {
+        #     rlist <-which(ratdata@hybridModel1[,1] %in% rowEnd)
+        #     if(length(rlist)==0)
+        #     {
+        #       rlist <-which(ratdata@hybridModel1[,1] %in% (rowEnd-1))
+        #     }
+        #     rowEnd = max(rlist)
+        #     denom=rowEnd^lambda
+        # }
+        # else if(model=="Hybrid2")
+        # {
+        #   rlist <-which(ratdata@hybridModel2[,1] %in% rowEnd)
+        #     if(length(rlist)==0)
+        #     {
+        #       rlist <-which(ratdata@hybridModel2[,1] %in% (rowEnd-1))
+        #     }
+        #     rowEnd = max(rlist)
+        #     denom=rowEnd^lambda
           
-        }
-        else if(model=="Hybrid3")
-        {
-          rlist <-which(ratdata@hybridModel3[,1] %in% rowEnd)
-            if(length(rlist)==0)
-            {
-              rlist <-which(ratdata@hybridModel3[,1] %in% (rowEnd-1))
-            }
-            rowEnd = max(rlist)
-            denom=rowEnd^lambda
+        # }
+        # else if(model=="Hybrid3")
+        # {
+        #   rlist <-which(ratdata@hybridModel3[,1] %in% rowEnd)
+        #     if(length(rlist)==0)
+        #     {
+        #       rlist <-which(ratdata@hybridModel3[,1] %in% (rowEnd-1))
+        #     }
+        #     rowEnd = max(rlist)
+        #     denom=rowEnd^lambda
           
-        }
-        else if(model=="Hybrid4")
-        {
-          rlist <-which(ratdata@hybridModel4[,1] %in% rowEnd)
-            if(length(rlist)==0)
-            {
-              rlist <-which(ratdata@hybridModel4[,1] %in% (rowEnd-1))
-            }
-            rowEnd = max(rlist)
-            denom=rowEnd^lambda
+        # }
+        # else if(model=="Hybrid4")
+        # {
+        #   rlist <-which(ratdata@hybridModel4[,1] %in% rowEnd)
+        #     if(length(rlist)==0)
+        #     {
+        #       rlist <-which(ratdata@hybridModel4[,1] %in% (rowEnd-1))
+        #     }
+        #     rowEnd = max(rlist)
+        #     denom=rowEnd^lambda
           
-        }
+        # }
       #simulation_alpha = simulation_alpha/denom
       #simulation_gamma1 = simulation_gamma1/denom
 
@@ -1465,13 +1459,13 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
        gamma1_upper_bounds <- c(gamma1_upper_bounds,gamma1_bounds[2])
        gamma1_lower_bounds <- c(gamma1_lower_bounds,gamma1_bounds[1])
 
-       gamma2_bounds <- getCI(simulation_gamma2)
-       gamma2_upper_bounds <- c(gamma2_upper_bounds,gamma2_bounds[2])
-       gamma2_lower_bounds <- c(gamma2_lower_bounds,gamma2_bounds[1])
+      #  gamma2_bounds <- getCI(simulation_gamma2)
+      #  gamma2_upper_bounds <- c(gamma2_upper_bounds,gamma2_bounds[2])
+      #  gamma2_lower_bounds <- c(gamma2_lower_bounds,gamma2_bounds[1])
 
-       lambda_bounds <- getCI(simulation_lambda)
-       lambda_upper_bounds <- c(lambda_upper_bounds,lambda_bounds[2])
-       lambda_lower_bounds <- c(lambda_lower_bounds,lambda_bounds[1])
+      #  lambda_bounds <- getCI(simulation_lambda)
+      #  lambda_upper_bounds <- c(lambda_upper_bounds,lambda_bounds[2])
+      #  lambda_lower_bounds <- c(lambda_lower_bounds,lambda_bounds[1])
 
      }
      
@@ -1487,96 +1481,96 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      n.rows <- length(modelRes[[1]][,1])
      alpha =  modelRes[[1]][n.rows,2]
      gamma1 = modelRes[[1]][n.rows,3]
-     gamma2 = modelRes[[1]][n.rows,4]
-     lambda = modelRes[[1]][n.rows,5]
+    #  gamma2 = modelRes[[1]][n.rows,4]
+    #  lambda = modelRes[[1]][n.rows,5]
      rowEnd <- modelRes[[1]][n.rows,1]
 
-     print(sprintf("alpha=%f, gamma1=%f, gamma2=%f, lambda=%f", alpha, gamma1, gamma2, lambda))
+    #  print(sprintf("alpha=%f, gamma1=%f, gamma2=%f, lambda=%f", alpha, gamma1, gamma2, lambda))
 
-    if(model=="Paths")
-    {
-      denom = rowEnd^lambda
-    }else if(model=="Turns")
-    {
-      turnList <- c() 
-      for(k in length(rowEnd))
-      {
-        rlist <-which(ratdata@turnTimes[,1] %in% rowEnd[k])
-        if(length(rlist)==0)
-        {
-          rlist <-which(ratdata@turnTimes[,1] %in% (rowEnd[k]-1))
-        }
-        turnList<-c(turnList,max(rlist))
-      }
+    # if(model=="Paths")
+    # {
+    #   denom = rowEnd^lambda
+    # }else if(model=="Turns")
+    # {
+    #   turnList <- c() 
+    #   for(k in length(rowEnd))
+    #   {
+    #     rlist <-which(ratdata@turnTimes[,1] %in% rowEnd[k])
+    #     if(length(rlist)==0)
+    #     {
+    #       rlist <-which(ratdata@turnTimes[,1] %in% (rowEnd[k]-1))
+    #     }
+    #     turnList<-c(turnList,max(rlist))
+    #   }
       
-      denom=turnList^lambda
-    }
-    else if(model=="Hybrid1")
-    {
-      turnList <- c() 
-      for(k in length(rowEnd))
-      {
-        rlist <-which(ratdata@hybridModel1[,1] %in% rowEnd[k])
-        if(length(rlist)==0)
-        {
-          rlist <-which(ratdata@hybridModel1[,1] %in% (rowEnd[k]-1))
-        }
-        turnList<-c(turnList,max(rlist))
-      }
-      
-      
-      denom=turnList^lambda
-    }
-    else if(model=="Hybrid2")
-    {
-      turnList <- c() 
-      for(k in length(rowEnd))
-      {
-        rlist <-which(ratdata@hybridModel2[,1] %in% rowEnd[k])
-        if(length(rlist)==0)
-        {
-          rlist <-which(ratdata@hybridModel2[,1] %in% (rowEnd[k]-1))
-        }
-        turnList<-c(turnList,max(rlist))
-      }
+    #   denom=turnList^lambda
+    # }
+    # else if(model=="Hybrid1")
+    # {
+    #   turnList <- c() 
+    #   for(k in length(rowEnd))
+    #   {
+    #     rlist <-which(ratdata@hybridModel1[,1] %in% rowEnd[k])
+    #     if(length(rlist)==0)
+    #     {
+    #       rlist <-which(ratdata@hybridModel1[,1] %in% (rowEnd[k]-1))
+    #     }
+    #     turnList<-c(turnList,max(rlist))
+    #   }
       
       
-      denom=turnList^lambda
+    #   denom=turnList^lambda
+    # }
+    # else if(model=="Hybrid2")
+    # {
+    #   turnList <- c() 
+    #   for(k in length(rowEnd))
+    #   {
+    #     rlist <-which(ratdata@hybridModel2[,1] %in% rowEnd[k])
+    #     if(length(rlist)==0)
+    #     {
+    #       rlist <-which(ratdata@hybridModel2[,1] %in% (rowEnd[k]-1))
+    #     }
+    #     turnList<-c(turnList,max(rlist))
+    #   }
       
-    }
-    else if(model=="Hybrid3")
-    {
-      turnList <- c() 
-      for(k in length(rowEnd))
-      {
-        rlist <-which(ratdata@hybridModel3[,1] %in% rowEnd[k])
-        if(length(rlist)==0)
-        {
-          rlist <-which(ratdata@hybridModel3[,1] %in% (rowEnd[k]-1))
-        }
-        turnList<-c(turnList,max(rlist))
-      }
+      
+    #   denom=turnList^lambda
+      
+    # }
+    # else if(model=="Hybrid3")
+    # {
+    #   turnList <- c() 
+    #   for(k in length(rowEnd))
+    #   {
+    #     rlist <-which(ratdata@hybridModel3[,1] %in% rowEnd[k])
+    #     if(length(rlist)==0)
+    #     {
+    #       rlist <-which(ratdata@hybridModel3[,1] %in% (rowEnd[k]-1))
+    #     }
+    #     turnList<-c(turnList,max(rlist))
+    #   }
       
       
-      denom=turnList^lambda
+    #   denom=turnList^lambda
       
-    }
-    else if(model=="Hybrid4")
-    {
-      turnList <- c() 
-      for(k in length(rowEnd))
-      {
-        rlist <-which(ratdata@hybridModel4[,1] %in% rowEnd[k])
-        if(length(rlist)==0)
-        {
-          rlist <-which(ratdata@hybridModel4[,1] %in% (rowEnd[k]-1))
-        }
-        turnList<-c(turnList,max(rlist))
-      }
+    # }
+    # else if(model=="Hybrid4")
+    # {
+    #   turnList <- c() 
+    #   for(k in length(rowEnd))
+    #   {
+    #     rlist <-which(ratdata@hybridModel4[,1] %in% rowEnd[k])
+    #     if(length(rlist)==0)
+    #     {
+    #       rlist <-which(ratdata@hybridModel4[,1] %in% (rowEnd[k]-1))
+    #     }
+    #     turnList<-c(turnList,max(rlist))
+    #   }
 
-      denom=turnList^lambda
+    #   denom=turnList^lambda
       
-    }
+    # }
 
     #alpha = alpha/denom
     #gamma1 = gamma1/denom
@@ -1591,13 +1585,13 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
      lines(xaxis,gamma1_lower_bounds, lty=2, col='red')
      abline(h=gamma1, col='red')
 
-     lines(xaxis,gamma2_upper_bounds, lty=2, col='blue')
-     lines(xaxis,gamma2_lower_bounds, lty=2, col='blue')
-     abline(h=gamma2, col='blue')
+    #  lines(xaxis,gamma2_upper_bounds, lty=2, col='blue')
+    #  lines(xaxis,gamma2_lower_bounds, lty=2, col='blue')
+    #  abline(h=gamma2, col='blue')
 
-     lines(xaxis,lambda_upper_bounds, lty=2, col='green')
-     lines(xaxis,lambda_lower_bounds, lty=2, col='green')
-     abline(h=lambda, col='green')
+    #  lines(xaxis,lambda_upper_bounds, lty=2, col='green')
+    #  lines(xaxis,lambda_lower_bounds, lty=2, col='green')
+    #  abline(h=lambda, col='green')
 
      
      #abline(v=true80,col='green')  

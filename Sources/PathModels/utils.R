@@ -1577,7 +1577,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
 
      xaxis <- maxVecs
      title <- paste(model, ", nbSim=",nbSims,collapse="")
-     plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,1),main=title,xlab="Trials",ylab="Parameters",cex.axis = 1.5, cex.lab = 1.3)
+     plot(xaxis,alpha_upper_bounds,type ='l',lty=2,col="black",ylim=c(0,0.5),main=title,xlab="Trials",ylab="Parameters",cex.axis = 1.5, cex.lab = 1.3)
      lines(xaxis,alpha_lower_bounds, lty=2, col="black")
      abline(h=alpha,col="black")
 

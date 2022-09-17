@@ -166,7 +166,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
         argList<-getArgList(modelData,ratdata)
         cat('Create new cluster\n') 
           #cl2 <- getDoMpiCluster()
-        np.val = (length(argList$lower)+2)*10
+        np.val = (length(argList$lower))*10
         myList <- DEoptim.control(NP=np.val, F=0.9, CR = 0.8,trace = FALSE, itermax = 200)
         out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=800,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
         cat('model = ',model, ', bestmem=',unname(out$optim$bestmem),'\n',sep = '')

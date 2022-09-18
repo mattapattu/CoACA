@@ -20,6 +20,7 @@ library(rlist)
 #library(doMPI);
 #library(snow);
 #library(doSNOW);
+library(bigsnpr)
 
 
 
@@ -36,6 +37,11 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=1234)
+
+  initpop <-  matrix(0,40,4)
+	initpop[,1] <- rep(0.1,40)
+	initpop[,2] <- seq_log(1e-9, 1e-3, 40)
+	initpop[,3] <- 1
     
   exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
   registerDoMPI(cl)
@@ -78,13 +84,19 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
           modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
           argList<-getArgList(modelData,ratdata)
           np.val = length(argList$lower) * 10
+          
           myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
+          
+          if(creditAssignment == "qlearningAvgRwd")
+          {
+            myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200, initialpop = initpop)
+          }
           out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
           modelData = setModelParams(modelData, unname(out$optim$bestmem))
           if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
           {
             lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-            lik <- sum(lik)*-1
+            lik <- sum(lik[-c(1:800)])*-1
             cat(sprintf('Success: alpha = %f, gamma1 = %f, gamma2 = %f\n', modelData@alpha, modelData@gamma1,modelData@gamma2))
             c(rowEnd,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik)
 

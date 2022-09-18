@@ -149,6 +149,11 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   exportDoMPI(cl, c("src.dir","model.src")) 
   #exportDoMPI(cl, c("getEndIndex", "convertTurnTimes","negLogLikFunc","src.dir"))
   registerDoMPI(cl)
+
+  initpop <-  matrix(0,40,4)
+	initpop[,1] <- rep(0.1,40)
+	initpop[,2] <- seq_log(1e-9, 1e-3, 40)
+	initpop[,3] <- 1
     
   initWorkers <-  function() {
     source(paste(src.dir, "ModelClasses.R", sep = "/"))
@@ -173,13 +178,18 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
         cat('model =',model,'\n',sep = '')
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
-
         modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=sim)
         argList<-getArgList(modelData,ratdata)
         cat('Create new cluster\n') 
           #cl2 <- getDoMpiCluster()
         np.val = (length(argList$lower))*10
         myList <- DEoptim.control(NP=np.val, F=0.9, CR = 0.8,trace = FALSE, itermax = 200)
+        
+        if(creditAssignment == "qlearningAvgRwd")
+          {
+            myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200, initialpop = initpop)
+          }
+        
         out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=800,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
         cat('model = ',model, ', bestmem=',unname(out$optim$bestmem),'\n',sep = '')
         cat('model = ',model, ', bestval=',unname(out$optim$bestval),'\n',sep = '')

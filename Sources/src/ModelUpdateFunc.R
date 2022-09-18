@@ -39,7 +39,7 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
   setRngDoMPI(cl, seed=1234)
 
   initpop <-  matrix(0,40,4)
-	initpop[,1] <- rep(0.1,40)
+	initpop[,1] <- rep(0.01,40)
 	initpop[,2] <- seq_log(1e-9, 1e-3, 40)
 	initpop[,3] <- 1
     
@@ -151,7 +151,7 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   registerDoMPI(cl)
 
   initpop <-  matrix(0,40,4)
-	initpop[,1] <- rep(0.1,40)
+	initpop[,1] <- rep(0.01,40)
 	initpop[,2] <- seq_log(1e-9, 1e-3, 40)
 	initpop[,3] <- 1
     

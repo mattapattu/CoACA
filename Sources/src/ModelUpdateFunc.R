@@ -39,9 +39,9 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
   setRngDoMPI(cl, seed=1234)
 
   initpop <-  matrix(0,40,4)
-	initpop[,1] <- rep(0.01,40)
-	initpop[,2] <- seq_log(1e-9, 1e-3, 40)
-	initpop[,3] <- 1
+  initpop[,1] <- runif(40, 1e-3, 1e-2)
+  initpop[,2] <- seq_log(1e-9, 1e-3, 40)
+  initpop[,3] <- 1
     
   exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
   registerDoMPI(cl)
@@ -151,9 +151,9 @@ getModelResults=function(ratdata, testingdata, sim, src.dir, model.src, setup.hp
   registerDoMPI(cl)
 
   initpop <-  matrix(0,40,4)
-	initpop[,1] <- rep(0.01,40)
-	initpop[,2] <- seq_log(1e-9, 1e-3, 40)
-	initpop[,3] <- 1
+  initpop[,1] <- runif(40, 1e-3, 1e-2)
+  initpop[,2] <- seq_log(1e-9, 1e-3, 40)
+  initpop[,3] <- 1
     
   initWorkers <-  function() {
     source(paste(src.dir, "ModelClasses.R", sep = "/"))

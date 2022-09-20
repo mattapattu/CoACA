@@ -23,6 +23,97 @@ library(rlist)
 library(bigsnpr)
 
 
+analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+{
+  models = testData@Models
+  #creditAssignment = testData@creditAssignment
+  
+  #paramTest = list()
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  ratName = ratdata@rat
+  model.data.dir = paste(model.data.dir,"modelParams",ratName,sep="/")
+
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=count)
+    
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
+  registerDoMPI(cl)
+    
+   initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"))
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
+   
+   
+    opts <- list(initEnvir=initWorkers) 
+  
+  alpha_seq = seq_log(1e-3, 1e-2,10)
+  gamma1_seq = seq_log(1e-8, 1e-4, 100)
+  iter=c(300,800,1100,1500,length(ratdata@allpaths[,1]))
+  
+  resMat <- foreach(i = 1:length(models), .combine='rbind', .inorder=TRUE, .options.mpi=opts) %:%
+  foreach(k = 1:length(iter),.combine='rbind', .inorder=TRUE)  %:%
+  foreach(alpha_idx = 1:length(alpha_seq),.combine='rbind', .inorder=TRUE) %:%
+  foreach(gamma1_idx = 1:length(gamma1_seq),.combine='rbind', .inorder=TRUE) %dopar%
+  {
+    alpha = alpha_seq[alpha_idx]
+    gamma1 = gamma1_seq[gamma1_idx]
+    cat(sprintf("i=%i,k=%i,alpha=%10f,gamma1=%10f", i,k,alpha,gamma1))
+    #cat(sprintf('Rat is %s, model is %s', ratName,model))
+    
+    model = models[i] 
+    modelName = strsplit(model,"\\.")[[1]][1]
+    creditAssignment = strsplit(model,"\\.")[[1]][2]
+    
+    cat(sprintf('rat=%s, iter=%i,model = %s', ratName,iter[k],model))
+    modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
+    argList<-getArgList(modelData,ratdata)
+    
+    #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
+    opt <- optim(par = c(alpha,gamma1), 
+                 fn = negLogLikFunc,ratdata=ratdata,half_index=iter[k],modelData=modelData,testModel = PathModel,sim = 2)
+    
+    modelData = setModelParams(modelData, c(opt$par,0.1,0))
+    if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
+    {
+      lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+      lik <- sum(lik[-c(1:800)])*-1
+      if (is.infinite(lik)) {
+        lik= 1000000
+      }else if (is.nan(negLogLik)) {
+        #print(sprintf("Alpha = %f", alpha))
+        lik = 1000000
+      }else if (is.na(negLogLik)) {
+        #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
+        lik = 1000000
+      }
+      cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.10f, gamma2 = %f, lik=%f\n', iter[k],modelData@alpha, modelData@gamma1,0.1,lik))
+      c(iter[k],modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik)
+      
+    }
+    else{
+      #cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
+      c(iter[k],modelData@alpha, modelData@gamma1)
+      
+    }
+  }
+  
+  print(resMat)
+  save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_",paste(modelName,creditAssignment,sep="."),"_resMat.Rdata")) 
+
+  
+}
+
 
 getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
@@ -36,7 +127,7 @@ getModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
    
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  setRngDoMPI(cl, seed=1234)
+  setRngDoMPI(cl, seed=count)
 
   initpop <-  matrix(0,40,4)
   initpop[,1] <- runif(40, 1e-3, 1e-2)

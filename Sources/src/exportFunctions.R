@@ -205,20 +205,21 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   creditAssignment <- modelData@creditAssignment
 
   gamma1 <- par[2]
-  #gamma2 <- par[3]
-  # reward = par[4]
-  # reward = 1+reward*9
-  reward <- 1
-  #
+ 
   modelData@alpha <- alpha
   modelData@gamma1 <- gamma1
-  #modelData@gamma2 <- gamma2
-  if(length(par)==4)
+
+ if(creditAssignment=="qlearningAvgRwd")
   {
-    modelData@gamma2 <- par[3]
-    modelData@lambda <- par[4]
+    modelData@gamma2 <- 0.1
+    modelData@lambda <- 0
   }
   
+  if(alpha < 0 || gamma1 < 0)
+  {
+    return(1000000)
+  }
+
   simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
   
   if(simLearns)

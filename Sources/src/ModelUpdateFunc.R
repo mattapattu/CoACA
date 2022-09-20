@@ -68,14 +68,14 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   {
     alpha = alpha_seq[alpha_idx]
     gamma1 = gamma1_seq[gamma1_idx]
-    cat(sprintf("i=%i,k=%i,alpha=%10f,gamma1=%10f", i,k,alpha,gamma1))
+    cat(sprintf("i=%i,k=%i,alpha=%.10f,gamma1=%.10f\n", i,k,alpha,gamma1))
     #cat(sprintf('Rat is %s, model is %s', ratName,model))
     
     model = models[i] 
     modelName = strsplit(model,"\\.")[[1]][1]
     creditAssignment = strsplit(model,"\\.")[[1]][2]
     
-    cat(sprintf('rat=%s, iter=%i,model = %s', ratName,iter[k],model))
+    cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter[k],model))
     modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
     argList<-getArgList(modelData,ratdata)
     
@@ -90,10 +90,10 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
       lik <- sum(lik[-c(1:800)])*-1
       if (is.infinite(lik)) {
         lik= 1000000
-      }else if (is.nan(negLogLik)) {
+      }else if (is.nan(lik)) {
         #print(sprintf("Alpha = %f", alpha))
         lik = 1000000
-      }else if (is.na(negLogLik)) {
+      }else if (is.na(lik)) {
         #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
         lik = 1000000
       }

@@ -87,7 +87,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
     if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
     {
       lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-      lik <- sum(lik[-c(1:800)])*-1
+      lik <- sum(lik[(1:800)])*-1
       if (is.infinite(lik)) {
         lik= 1000000
       }else if (is.nan(lik)) {

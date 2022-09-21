@@ -68,7 +68,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   {
     alpha = alpha_seq[alpha_idx]
     gamma1 = gamma1_seq[gamma1_idx]
-    cat(sprintf("i=%i,k=%i,alpha=%.10f,gamma1=%.10f\n", i,k,alpha,gamma1))
+    cat(sprintf("Model=%s,iter=%i,alpha init=%.10f,gamma1 init=%.10f\n", models[i],iter[k],alpha,gamma1))
     #cat(sprintf('Rat is %s, model is %s', ratName,model))
     
     model = models[i] 
@@ -97,7 +97,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
         #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
         lik = 1000000
       }
-      cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.10f, gamma2 = %f, lik=%f\n', iter[k],modelData@alpha, modelData@gamma1,0.1,lik))
+      cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik=%f\n', iter[k],modelData@alpha, modelData@gamma1,0.1,lik))
       c(iter[k],modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik)
       
     }
@@ -109,7 +109,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   }
   
   print(resMat)
-  save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_",paste(modelName,creditAssignment,sep="."),"_resMat.Rdata")) 
+  save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
 
   
 }

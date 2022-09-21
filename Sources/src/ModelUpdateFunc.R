@@ -109,6 +109,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   }
   
   print(resMat)
+  rat = ratdata@rat
   save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
 
   

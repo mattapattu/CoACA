@@ -58,7 +58,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
     opts <- list(initEnvir=initWorkers) 
   
   alpha_seq = seq_log(1e-3, 1e-2,10)
-  gamma1_seq = seq_log(1e-8, 1e-4, 200)
+  gamma1_seq = seq_log(1e-8, 1e-4, 400)
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
   resMat <- foreach(i = 1:length(models), .combine='rbind', .inorder=TRUE, .options.mpi=opts) %:%
@@ -108,6 +108,8 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
     }
   }
   
+  rat = ratdata@rat
+  save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
 
   #iter = c(300,800,1100,1500,length(ratdata@allpaths[,1]))
   df <- as.data.frame(resMat)

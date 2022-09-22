@@ -63,7 +63,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iter,models,stringsAsFactors = FALSE)
-  interval = length(gridMat[,1])/60
+  interval = length(gridMat[,1])/50
   sequences<- seq(1,length(gridMat[,1]), by=interval)
   
   
@@ -75,7 +75,7 @@ resMat <-
     start_idx=sequences[i]
     if(i != 50)
     {
-      end_idx = sequences[i+1]
+      end_idx = sequences[i+1]-1
     }
     else{
       end_idx = length(gridMat[,1])
@@ -120,7 +120,7 @@ resMat <-
           lik = 1000000
         }
         cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik))
-        c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik)
+        c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik,start_idx,end_idx)
         
       }
       else{

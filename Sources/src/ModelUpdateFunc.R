@@ -69,7 +69,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   
   
 resMat <-                 
-  foreach(i = 1:50,.combine = 'rbind') %dopar% 
+  foreach(i = 1:50,.combine = 'rbind',.options.mpi=opts) %dopar% 
   {
     
     start_idx=sequences[i]

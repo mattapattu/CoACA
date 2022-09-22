@@ -59,7 +59,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   
   
   alpha_seq = seq_log(1e-3, 1e-2,10)
-  gamma1_seq = seq_log(1e-8, 1e-4, 200)
+  gamma1_seq = seq_log(1e-8, 1e-4, 400)
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iter,models,stringsAsFactors = FALSE)
@@ -88,16 +88,16 @@ resMat <-
       iter = gridMat[idx,3]
       model = gridMat[idx,4]
       cat(sprintf("i=%i,idx= %i,alpha=%.10f,gamma1=%.10f\n", i,idx,alpha,gamma1))
-      cat(sprintf('Rat is %s, model is %s\n', ratName,model))
+      #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
       
       
       modelName = strsplit(model,"\\.")[[1]][1]
-      cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
+      #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
       creditAssignment = strsplit(model,"\\.")[[1]][2]
-      cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
+      #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
       
       
-      cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
+      #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
       modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
       argList<-getArgList(modelData,ratdata)
       
@@ -156,9 +156,9 @@ resMat <-
       modelData@gamma2 = 0.1
       modelData@lambda = 0
       argList <- getArgList(modelData, ratdata)
-      # lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-      # lik1 <- sum(lik[c(1:800)])*-1
-      # lik2 <- sum(lik[-c(1:800)])*-1
+      lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+      lik1 <- sum(lik[c(1:800)])*-1
+      lik2 <- sum(lik[-c(1:800)])*-1
       df_it[idx,7]= lik1
       
       if (is.infinite(lik1)) {

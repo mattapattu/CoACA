@@ -55,58 +55,84 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
      }
    
    
-    opts <- list(initEnvir=initWorkers) 
+  opts <- list(initEnvir=initWorkers) 
+  
   
   alpha_seq = seq_log(1e-3, 1e-2,10)
   gamma1_seq = seq_log(1e-8, 1e-4, 200)
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
-  resMat <- foreach(i = 1:length(models), .combine='rbind', .inorder=TRUE, .options.mpi=opts) %:%
-  foreach(k = 1:length(iter),.combine='rbind', .inorder=TRUE)  %:%
-  foreach(alpha_idx = 1:length(alpha_seq),.combine='rbind', .inorder=TRUE) %:%
-  foreach(gamma1_idx = 1:length(gamma1_seq),.combine='rbind', .inorder=TRUE) %dopar%
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,iter,models,stringsAsFactors = FALSE)
+  interval = length(gridMat[,1])/60
+  sequences<- seq(1,length(gridMat[,1]), by=interval)
+  
+  
+  
+resMat <-                 
+  foreach(i = 1:50,.combine = 'rbind') %dopar% 
   {
-    alpha = alpha_seq[alpha_idx]
-    gamma1 = gamma1_seq[gamma1_idx]
-    cat(sprintf("Model=%s,iter=%i,alpha init=%.10f,gamma1 init=%.10f\n", models[i],iter[k],alpha,gamma1))
-    #cat(sprintf('Rat is %s, model is %s', ratName,model))
     
-    model = models[i] 
-    modelName = strsplit(model,"\\.")[[1]][1]
-    creditAssignment = strsplit(model,"\\.")[[1]][2]
-    
-    #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter[k],model))
-    modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
-    argList<-getArgList(modelData,ratdata)
-    
-    #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
-    opt <- optim(par = c(alpha,gamma1), 
-                 fn = negLogLikFunc,ratdata=ratdata,half_index=iter[k],modelData=modelData,testModel = PathModel,sim = 2)
-    
-    modelData = setModelParams(modelData, c(opt$par,0.1,0))
-    if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
+    start_idx=sequences[i]
+    if(i != 50)
     {
-      lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-      lik <- sum(lik[(1:800)])*-1
-      if (is.infinite(lik)) {
-        lik= 1000000
-      }else if (is.nan(lik)) {
-        #print(sprintf("Alpha = %f", alpha))
-        lik = 1000000
-      }else if (is.na(lik)) {
-        #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
-        lik = 1000000
-      }
-      cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik=%f\n', iter[k],modelData@alpha, modelData@gamma1,0.1,lik))
-      c(iter[k],modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik)
-      
+      end_idx = sequences[i+1]
     }
     else{
-      #cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
-      c(iter[k],modelData@alpha, modelData@gamma1)
+      end_idx = length(gridMat[,1])
+    }
+    
+    foreach(idx = start_idx:end_idx, .combine =  'rbind') %do% 
+    {
+      alpha = gridMat[idx,1]
+      gamma1 = gridMat[idx,2]
+      iter = gridMat[idx,3]
+      model = gridMat[idx,4]
+      cat(sprintf("i=%i,idx= %i,alpha=%.10f,gamma1=%.10f\n", i,idx,alpha,gamma1))
+      cat(sprintf('Rat is %s, model is %s\n', ratName,model))
+      
+      
+      modelName = strsplit(model,"\\.")[[1]][1]
+      cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
+      creditAssignment = strsplit(model,"\\.")[[1]][2]
+      cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
+      
+      
+      cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
+      modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
+      argList<-getArgList(modelData,ratdata)
+      
+      #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
+      opt <- optim(par = c(alpha,gamma1), 
+                   fn = negLogLikFunc,ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2)
+      
+      modelData = setModelParams(modelData, c(opt$par,0.1,0))
+      if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
+      {
+        lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+        lik <- sum(lik[(1:800)])*-1
+        if (is.infinite(lik)) {
+          lik= 1000000
+        }else if (is.nan(lik)) {
+          #print(sprintf("Alpha = %f", alpha))
+          lik = 1000000
+        }else if (is.na(lik)) {
+          #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
+          lik = 1000000
+        }
+        cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik))
+        c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik)
+        
+      }
+      else{
+        #cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
+        c(iter,modelData@alpha, modelData@gamma1)
+        
+      }
       
     }
+    
   }
+
   
   rat = ratdata@rat
   save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
@@ -130,9 +156,9 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
       modelData@gamma2 = 0.1
       modelData@lambda = 0
       argList <- getArgList(modelData, ratdata)
-      lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-      lik1 <- sum(lik[c(1:800)])*-1
-      lik2 <- sum(lik[-c(1:800)])*-1
+      # lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+      # lik1 <- sum(lik[c(1:800)])*-1
+      # lik2 <- sum(lik[-c(1:800)])*-1
       df_it[idx,7]= lik1
       
       if (is.infinite(lik1)) {

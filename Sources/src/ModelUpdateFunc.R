@@ -58,7 +58,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
     opts <- list(initEnvir=initWorkers) 
   
   alpha_seq = seq_log(1e-3, 1e-2,10)
-  gamma1_seq = seq_log(1e-8, 1e-4, 400)
+  gamma1_seq = seq_log(1e-8, 1e-4, 200)
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
   resMat <- foreach(i = 1:length(models), .combine='rbind', .inorder=TRUE, .options.mpi=opts) %:%
@@ -75,7 +75,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
     modelName = strsplit(model,"\\.")[[1]][1]
     creditAssignment = strsplit(model,"\\.")[[1]][2]
     
-    cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter[k],model))
+    #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter[k],model))
     modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
     argList<-getArgList(modelData,ratdata)
     
@@ -118,7 +118,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
 
   minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
-    foreach(it = iter,.combine='rbind', .inorder=TRUE) %do%
+    foreach(it = iter,.combine='rbind', .inorder=TRUE) %dopar%
   {
     df_it <- df[which(df[,1]==it & df[,2]==model),]
     min_lik1 = 1000000
@@ -152,14 +152,9 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
         minmodel@gamma1 = df_it[idx,4]
         minmodel@gamma2 = 0.1
         minmodel@lambda = 0
-      }
-        
-      
-      
-      
-     }
+      }    
+    }
     c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
-      
   }
   
   print(minDfModels)

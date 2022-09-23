@@ -63,7 +63,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iter,models,stringsAsFactors = FALSE)
-  interval = length(gridMat[,1])/50
+  interval = length(gridMat[,1])/100
   sequences<- seq(1,length(gridMat[,1]), by=interval)
   
   

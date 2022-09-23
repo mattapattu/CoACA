@@ -87,7 +87,7 @@ resMat <-
       gamma1 = gridMat[idx,2]
       iter = gridMat[idx,3]
       model = gridMat[idx,4]
-      cat(sprintf("i=%i,idx= %i,alpha=%.10f,gamma1=%.10f\n", i,idx,alpha,gamma1))
+      #cat(sprintf("i=%i,idx= %i,alpha=%.10f,gamma1=%.10f\n", i,idx,alpha,gamma1))
       #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
       
       
@@ -97,7 +97,7 @@ resMat <-
       #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
       
       
-      #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
+      cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
       modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
       argList<-getArgList(modelData,ratdata)
       

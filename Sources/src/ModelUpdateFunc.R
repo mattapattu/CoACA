@@ -58,12 +58,12 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   opts <- list(initEnvir=initWorkers) 
   
   
-  alpha_seq = seq_log(1e-3, 1e-2,20)
-  gamma1_seq = seq_log(1e-8, 1e-4, 100)
+  alpha_seq = seq_log(1e-3, 1e-2,40)
+  gamma1_seq = seq_log(1e-8, 1e-4, 40)
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iter,models,stringsAsFactors = FALSE)
-  interval = length(gridMat[,1])/100
+  interval = length(gridMat[,1])/50
   sequences<- seq(1,length(gridMat[,1]), by=interval)
   
   

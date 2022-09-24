@@ -58,7 +58,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   opts <- list(initEnvir=initWorkers) 
   
   
-  alpha_seq = seq_log(1e-3, 1e-2,80)
+  alpha_seq = seq(1e-3, 1e-2,length.out=80)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   

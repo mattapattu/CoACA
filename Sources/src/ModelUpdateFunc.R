@@ -58,7 +58,8 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   opts <- list(initEnvir=initWorkers) 
   
   
-  alpha_seq = seq(1e-3, 1e-2,length.out=80)
+  #alpha_seq = seq(1e-3, 1e-2,length.out=80)
+  alpha_seq = seq_log(1e-3, 0.9,80)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
   iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
@@ -120,7 +121,7 @@ resMat <-
           lik = 1000000
         }
         cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik))
-        c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik,start_idx,end_idx)
+        c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik,idx,alpha,gamma1)
         
       }
       else{

@@ -66,10 +66,11 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
 
   cores <- 60
   chunkSize <- 3
-  outerLoopLen <- length(gridMat[,1])/(cores*chunkSize)
-  print(sprintf("chunkLen=%i, len(gridMat)=%i,outerLoopLen=%f",chunkLen,length(gridMat[,1]),outerLoopLen))
-  #chunkLen = length(gridMat[,1])/outerLoopLen
   interval = cores*chunkSize
+  outerLoopLen <- length(gridMat[,1])/(cores*chunkSize)
+  print(sprintf("interval=%i, len(gridMat)=%i,outerLoopLen=%f",interval,length(gridMat[,1]),outerLoopLen))
+  #chunkLen = length(gridMat[,1])/outerLoopLen
+  
   sequences<- seq(0,length(gridMat[,1]), by=interval)
   
   

@@ -69,7 +69,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   sequences<- seq(0,length(gridMat[,1]), by=chunkLen)
   
   
-  
+time1<- system.time(  
 resMat <-                 
   foreach(i = 1:outerLoopLen,.combine = 'rbind',.options.mpi=opts) %do% 
   {    
@@ -127,7 +127,8 @@ resMat <-
     }
     
   }
-
+)
+print(time1)
   
   rat = ratdata@rat
   save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 

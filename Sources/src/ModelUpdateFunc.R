@@ -61,29 +61,23 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   #alpha_seq = seq(1e-3, 1e-2,length.out=80)
   alpha_seq = seq_log(1e-3, 0.9,60)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  iter=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
+  iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,iter,models,stringsAsFactors = FALSE)
-  interval = length(gridMat[,1])/50
-  sequences<- seq(1,length(gridMat[,1]), by=interval)
+  outerLoopLen <- 50
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
+  chunkLen = length(gridMat[,1])/outerLoopLen
+  sequences<- seq(0,length(gridMat[,1]), by=chunkLen)
   
   
   
 resMat <-                 
-  foreach(i = 1:50,.combine = 'rbind',.options.mpi=opts) %dopar% 
-  {
-    
-    start_idx=sequences[i]
-    if(i != 50)
+  foreach(i = 1:outerLoopLen,.combine = 'rbind',.options.mpi=opts) %do% 
+  {    
+    foreach(j = 1:(chunkLen), .combine =  'rbind') %dopar% 
     {
-      end_idx = sequences[i+1]-1
-    }
-    else{
-      end_idx = length(gridMat[,1])
-    }
-    
-    foreach(idx = start_idx:end_idx, .combine =  'rbind') %do% 
-    {
+      
+      start_idx=sequences[i]
+      idx = start_idx+j
       alpha = gridMat[idx,1]
       gamma1 = gridMat[idx,2]
       iter = gridMat[idx,3]

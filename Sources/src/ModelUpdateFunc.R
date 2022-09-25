@@ -78,7 +78,7 @@ time1<- system.time(
 resMat <-                 
   foreach(i = 1:outerLoopLen,.combine = 'rbind',.options.mpi=opts) %do% 
   {    
-    foreach(j = 1:(cores), .combine =  'rbind',.options.mpi=opts, chunkSize=chunkSize) %dopar% 
+    foreach(j = 1:(interval), .combine =  'rbind',.options.mpi=opts, chunkSize=chunkSize) %dopar% 
     {
       
       start_idx=sequences[i]

@@ -71,8 +71,9 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   #chunkLen = length(gridMat[,1])/outerLoopLen
   
   #sequences<- seq(0,length(gridMat[,1]), by=interval)
-  chunkSize <- count
+  
   outerLoopLen <- length(gridMat[,1])
+  chunkSize <- ceiling(outerLoopLen/count)
 
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
   

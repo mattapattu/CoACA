@@ -63,9 +63,11 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
   iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   
-  outerLoopLen <- 50
+  chunkLen <- 60
+  outerLoopLen <- length(gridMat[,1])/chunkLen
+  print(sprintf("chunkLen=%i, len(gridMat)=%i,outerLoopLen=%f",chunkLen,length(gridMat[,1]),outerLoopLen))
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
-  chunkLen = length(gridMat[,1])/outerLoopLen
+  #chunkLen = length(gridMat[,1])/outerLoopLen
   sequences<- seq(0,length(gridMat[,1]), by=chunkLen)
   
   
@@ -73,7 +75,7 @@ time1<- system.time(
 resMat <-                 
   foreach(i = 1:outerLoopLen,.combine = 'rbind',.options.mpi=opts) %do% 
   {    
-    foreach(j = 1:(chunkLen), .combine =  'rbind') %dopar% 
+    foreach(j = 1:(chunkLen), .combine =  'rbind',.options.mpi=opts) %dopar% 
     {
       
       start_idx=sequences[i]

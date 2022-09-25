@@ -64,18 +64,20 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
 
-  chunkLen <- 60
-  outerLoopLen <- length(gridMat[,1])/chunkLen
+  cores <- 60
+  chunkSize <- 3
+  outerLoopLen <- length(gridMat[,1])/(cores*chunkSize)
   print(sprintf("chunkLen=%i, len(gridMat)=%i,outerLoopLen=%f",chunkLen,length(gridMat[,1]),outerLoopLen))
   #chunkLen = length(gridMat[,1])/outerLoopLen
-  sequences<- seq(0,length(gridMat[,1]), by=chunkLen)
+  interval = cores*chunkSize
+  sequences<- seq(0,length(gridMat[,1]), by=interval)
   
   
 time1<- system.time(  
 resMat <-                 
   foreach(i = 1:outerLoopLen,.combine = 'rbind',.options.mpi=opts) %do% 
   {    
-    foreach(j = 1:(chunkLen), .combine =  'rbind',.options.mpi=opts) %dopar% 
+    foreach(j = 1:(cores), .combine =  'rbind',.options.mpi=opts, chunkSize=chunkSize) %dopar% 
     {
       
       start_idx=sequences[i]

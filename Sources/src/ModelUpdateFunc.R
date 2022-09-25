@@ -55,7 +55,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
      }
    
    
-  opts <- list(initEnvir=initWorkers) 
+  
   
   
   #alpha_seq = seq(1e-3, 1e-2,length.out=80)
@@ -71,8 +71,10 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   #chunkLen = length(gridMat[,1])/outerLoopLen
   
   #sequences<- seq(0,length(gridMat[,1]), by=interval)
-  chunkSize <- cores
+  chunkSize <- count
   outerLoopLen <- length(gridMat[,1])
+
+  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
   
 time1<- system.time(  
 resMat <-                 

@@ -64,25 +64,23 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
 
-  cores <- 60
-  chunkSize <- 3
-  interval = cores*chunkSize
-  outerLoopLen <- length(gridMat[,1])/(cores*chunkSize)
-  print(sprintf("interval=%i, len(gridMat)=%i,outerLoopLen=%f",interval,length(gridMat[,1]),outerLoopLen))
+  
+  #interval = cores*chunkSize
+  #outerLoopLen <- length(gridMat[,1])/(cores*chunkSize)
+  #print(sprintf("interval=%i, len(gridMat)=%i,outerLoopLen=%f",interval,length(gridMat[,1]),outerLoopLen))
   #chunkLen = length(gridMat[,1])/outerLoopLen
   
-  sequences<- seq(0,length(gridMat[,1]), by=interval)
-  
+  #sequences<- seq(0,length(gridMat[,1]), by=interval)
+  chunkSize <- cores
+  outerLoopLen <- length(gridMat[,1])
   
 time1<- system.time(  
 resMat <-                 
-  foreach(i = 1:outerLoopLen,.combine = 'rbind',.options.mpi=opts) %do% 
-  {    
-    foreach(j = 1:(interval), .combine =  'rbind',.options.mpi=opts, chunkSize=chunkSize) %dopar% 
+    foreach(idx = 1:outerLoopLen,.combine = 'rbind',.options.mpi=opts) %dopar% 
     {
       
-      start_idx=sequences[i]
-      idx = start_idx+j
+      #start_idx=sequences[i]
+      #idx = start_idx+j
       alpha = gridMat[idx,1]
       gamma1 = gridMat[idx,2]
       iter = gridMat[idx,3]
@@ -131,7 +129,7 @@ resMat <-
       
     }
     
-  }
+  
 )
 print(time1)
   

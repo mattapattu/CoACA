@@ -54,7 +54,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   resList <- listenv()
   time2 <-system.time(
    resMat <- 
-  foreach(i = c(1:nloops),.combine = 'rbind',.export = c("negLogLikFunc"){
+  foreach(i = c(1:nloops),.combine = 'rbind',.export = c("negLogLikFunc")) %dopar%{
     
       start_idx=sequences[i]+1
       end_idx=sequences[i+1]

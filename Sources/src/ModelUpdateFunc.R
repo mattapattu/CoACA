@@ -18,8 +18,8 @@ library(rlist)
 #library(foreach)
 #library(doParallel)
 #library(doMPI);
-#library(snow);
-#library(doSNOW);
+library(snow);
+library(doSNOW);
 library(bigsnpr)
 library(parallelly)
 library(doFuture)

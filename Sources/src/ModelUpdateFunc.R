@@ -26,7 +26,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
 {
   
   registerDoFuture()
-  cl <- makeCluster(5)
+  cl <- makeCluster(count,type = "MPI")
   #plan(cluster, workers = cl)
   masterNodes <- 4
   slaves <- ((count-4)%/%4)  ## Running with 60 slaves
@@ -54,7 +54,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   resList <- listenv()
   time2 <-system.time(
    resMat <- 
-  foreach(i = c(1:nloops),.combine = 'rbind',.export = c("negLogLikFunc")){
+  foreach(i = c(1:nloops),.combine = 'rbind',.export = c("negLogLikFunc"){
     
       start_idx=sequences[i]+1
       end_idx=sequences[i+1]

@@ -144,7 +144,7 @@ for (i in c(select_rat)) {
 
   if(computeModelParams)
   {
-   analyzeParamSpaceWapper(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+   analyzeParamSpaceWrapper(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
    #analyzeParamSpace(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
    #getModelParams(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
   }

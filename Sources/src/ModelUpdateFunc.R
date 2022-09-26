@@ -22,120 +22,54 @@ library(rlist)
 #library(doSNOW);
 library(bigsnpr)
 
-
-analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
-  models = testData@Models
-  #creditAssignment = testData@creditAssignment
   
-  #paramTest = list()
-  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
-  ratName = ratdata@rat
-  model.data.dir = paste(model.data.dir,"modelParams",ratName,sep="/")
+  registerDoFuture()
+  cl <- makeCluster(5)
+  #plan(cluster, workers = cl)
+  masterNodes <- 4
+  slaves <- ((count-4)%/%4)  ## Running with 60 slaves
+  plan(list(tweak(cluster, workers = masterNodes), tweak(multisession, workers = slaves)))
+  
+  
 
-  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
-  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  setRngDoMPI(cl, seed=count)
-    
-  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
-  registerDoMPI(cl)
-    
-   initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"))
-       source(paste(model.src, "PathModel.R", sep = "/"))
-       source(paste(model.src, "TurnModel.R", sep = "/"))
-       source(paste(model.src, "HybridModel1.R", sep = "/"))
-       source(paste(model.src, "HybridModel2.R", sep = "/"))
-       source(paste(model.src, "HybridModel3.R", sep = "/"))
-       source(paste(model.src, "HybridModel4.R", sep = "/"))
-       source(paste(src.dir, "BaseClasses.R", sep = "/"))
-       source(paste(src.dir,"exportFunctions.R", sep="/"))
-   
-       #attach(myEnv, name="sourced_scripts")
-     }
-   
-   
-  
-  
-  
-  #alpha_seq = seq(1e-3, 1e-2,length.out=80)
   alpha_seq = seq_log(1e-3, 0.9,60)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
   iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
+  models = testData@Models
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
 
-  
-  #interval = cores*chunkSize
-  #outerLoopLen <- length(gridMat[,1])/(cores*chunkSize)
-  #print(sprintf("interval=%i, len(gridMat)=%i,outerLoopLen=%f",interval,length(gridMat[,1]),outerLoopLen))
-  #chunkLen = length(gridMat[,1])/outerLoopLen
-  
-  #sequences<- seq(0,length(gridMat[,1]), by=interval)
-  
-  outerLoopLen <- length(gridMat[,1])
-  chunkSize <- ceiling(outerLoopLen/count)
+  # each slave node ~ 50 futures
+  # 50*15 futures with each for loop iteration
 
-  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
-  
-time1<- system.time(  
-resMat <-                 
-    foreach(idx = 1:outerLoopLen,.combine = 'rbind',.options.mpi=opts) %dopar% 
-    {
-      
-      #start_idx=sequences[i]
-      #idx = start_idx+j
-      alpha = gridMat[idx,1]
-      gamma1 = gridMat[idx,2]
-      iter = gridMat[idx,3]
-      model = gridMat[idx,4]
-      #cat(sprintf("i=%i,idx= %i,alpha=%.10f,gamma1=%.10f\n", i,idx,alpha,gamma1))
-      #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
-      
-      
-      modelName = strsplit(model,"\\.")[[1]][1]
-      #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
-      creditAssignment = strsplit(model,"\\.")[[1]][2]
-      #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
-      
-      
-      cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
-      modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
-      argList<-getArgList(modelData,ratdata)
-      
-      #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
-      opt <- optim(par = c(alpha,gamma1), 
-                   fn = negLogLikFunc,ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2)
-      
-      modelData = setModelParams(modelData, c(opt$par,0.1,0))
-      if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
-      {
-        lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-        lik <- sum(lik[(1:800)])*-1
-        if (is.infinite(lik)) {
-          lik= 1000000
-        }else if (is.nan(lik)) {
-          #print(sprintf("Alpha = %f", alpha))
-          lik = 1000000
-        }else if (is.na(lik)) {
-          #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
-          lik = 1000000
-        }
-        cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik))
-        c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik,idx,alpha,gamma1)
-        
-      }
-      else{
-        #cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
-        c(iter,modelData@alpha, modelData@gamma1)
-        
-      }
-      
-    }
+
+  sequences = seq(0,length(gridMat[,1]), by=(50*slaves))
+  if(sequences[length(sequences)] < length(gridMat[,1]))
+  {
+    sequences = c(sequences,length(gridMat[,1]))
+  }
+  nloops = length(sequences)-1
+
+  resList <- listenv()
+  time2 <-system.time(
+   resMat <- 
+  foreach(i = c(1:nloops),.combine = 'rbind',.export = c("negLogLikFunc")){
     
+      start_idx=sequences[i]+1
+      end_idx=sequences[i+1]
+      print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
+      X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, gridMat[start_idx:end_idx,])
+      X
+  }
   
-)
-print(time1)
+  )
   
+  resMat <- Reduce(rbind,resList)
+  print(time2)
+  print(resMat)
+
+
   rat = ratdata@rat
   save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
 
@@ -187,6 +121,114 @@ print(time1)
   
   print(minDfModels)
   save(minDfModels, file = paste0(model.data.dir,"/",ratdata@rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_minDfModels.Rdata")) 
+  
+}
+
+
+analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,count,gridMat)
+{
+  models = testData@Models
+  #creditAssignment = testData@creditAssignment
+  
+  #paramTest = list()
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  ratName = ratdata@rat
+  model.data.dir = paste(model.data.dir,"modelParams",ratName,sep="/")
+
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
+  
+  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  # setRngDoMPI(cl, seed=count)
+  # exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
+  # registerDoMPI(cl)
+  
+  #  initWorkers <-  function() {
+  #      source(paste(src.dir, "ModelClasses.R", sep = "/"))
+  #      source(paste(model.src, "PathModel.R", sep = "/"))
+  #      source(paste(model.src, "TurnModel.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel1.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel2.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel3.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel4.R", sep = "/"))
+  #      source(paste(src.dir, "BaseClasses.R", sep = "/"))
+  #      source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+  #      #attach(myEnv, name="sourced_scripts")
+  #    }
+  # opts <- list(initEnvir=initWorkers) 
+   
+
+  #alpha_seq = seq(1e-3, 1e-2,length.out=80)
+  alpha_seq = seq_log(1e-3, 0.9,60)
+  gamma1_seq = seq_log(1e-8, 1e-4, 10)
+  iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
+
+   
+  
+ time1 <-system.time(
+    resMat <-
+      foreach(idx = 1:length(gridMat[,1]),.combine = 'rbind', .packages = c("TurnsNew"), .export = c("negLogLikFunc")) %dopar%
+          {
+            initWorkers()
+            #start_idx=sequences[i]
+            #idx = start_idx+j
+            alpha = gridMat[idx,1]
+            gamma1 = gridMat[idx,2]
+            iter = gridMat[idx,3]
+            model = gridMat[idx,4]
+            #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
+            #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
+
+
+            modelName = strsplit(model,"\\.")[[1]][1]
+            #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
+            creditAssignment = strsplit(model,"\\.")[[1]][2]
+            #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
+
+
+            #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
+            modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
+            argList<-getArgList(modelData,ratdata)
+
+            #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
+            #cat("Here1")
+            opt <- optim(par = c(alpha,gamma1),
+                         fn = negLogLikFunc,ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2)
+            #cat("Here2")
+            modelData = setModelParams(modelData, c(opt$par,0.1,0))
+            if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
+            {
+              #cat("Here")
+              lik1 <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+              lik1 <- sum(lik1[(1:800)])*-1
+              #reprint(lik1)
+              if (is.infinite(lik1)) {
+                lik1= 1000000
+              }else if (is.nan(lik1)) {
+                #print(sprintf("Alpha = %f", alpha))
+                lik1 = 1000000
+              }else if (is.na(lik1)) {
+                #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
+                lik1 = 1000000
+              }
+              #cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik1=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik1))
+              c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx,alpha,gamma1)
+
+            }
+            else{
+              #cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
+              c(iter,modelData@alpha, modelData@gamma1)
+
+            }
+
+          }
+
+
+  )
+    
+ print(time1)
+  
   
 
   # print(resMat)

@@ -1,19 +1,19 @@
 # library(GA)
-library(DEoptim)
+#library(DEoptim)
 # library(Rmpi)
 # library(rgenoud)
 library(rlist)
-library(foreach)
+#library(foreach)
 #library(doParallel)
 # library(doMPI);
 # library(snow);
 # library(doSNOW);
 
 #library(GA)
-library(DEoptim)
+#library(DEoptim)
 #library(Rmpi)
 #library(rgenoud)
-library(rlist)
+#library(rlist)
 #library(parallel)
 #library(foreach)
 #library(doParallel)
@@ -21,6 +21,7 @@ library(rlist)
 #library(snow);
 #library(doSNOW);
 library(bigsnpr)
+library(parallelly)
 library(doFuture)
 library(listenv)
 
@@ -28,7 +29,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
 {
   
   registerDoFuture()
-  cl <- makeCluster(count,type = "MPI")
+  cl <- parallel::makeCluster(count,type = "MPI")
   #plan(cluster, workers = cl)
   masterNodes <- 4
   slaves <- ((count-4)%/%4)  ## Running with 60 slaves

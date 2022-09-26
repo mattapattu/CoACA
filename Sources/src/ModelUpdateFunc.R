@@ -22,7 +22,7 @@ library(rlist)
 #library(doSNOW);
 library(bigsnpr)
 library(doFuture)
-library("listenv")
+library(listenv)
 
 analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {

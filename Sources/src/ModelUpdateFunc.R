@@ -19,7 +19,7 @@ library(rlist)
 #library(doParallel)
 #library(doMPI);
 library(snow)
-library(doSNOW)
+#library(doSNOW)
 library(bigsnpr)
 library(parallelly)
 library(doFuture)

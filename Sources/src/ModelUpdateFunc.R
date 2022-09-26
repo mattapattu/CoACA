@@ -4,7 +4,7 @@ library(DEoptim)
 # library(rgenoud)
 library(rlist)
 library(foreach)
-library(doParallel)
+#library(doParallel)
 # library(doMPI);
 # library(snow);
 # library(doSNOW);
@@ -21,6 +21,8 @@ library(rlist)
 #library(snow);
 #library(doSNOW);
 library(bigsnpr)
+library(doFuture)
+library("listenv")
 
 analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {

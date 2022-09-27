@@ -30,6 +30,8 @@ paramEstTest = F
 computeModelLik = F
 validateHoldout = F
 
+currentTest= "computeModelParams"
+
 if(currentTest == "computeModelParams")
 {
     computeModelParams = T
@@ -37,26 +39,20 @@ if(currentTest == "computeModelParams")
     computeModelLik = F
     validateHoldout = F
 
-}
-else if(currentTest == "paramEstTest")
+}else if (currentTest == "paramEstTest")
 {
     computeModelParams = F
     paramEstTest = T
     computeModelLik = F
     validateHoldout = F
-}else if(currentTest == "computeModelLik")
+}else
 {
     computeModelParams = F
-    paramEstTest = F
-    computeModelLik = T
-    validateHoldout = F
-}else if (currentTest == "validateHoldout")
-{
-    computeModelParams = F
-    paramEstTest = F
+    paramEstTest = T
     computeModelLik = F
-    validateHoldout = T
+    validateHoldout = F
 }
+
 
 
 ############### TEST EXECUTIONS ######################################

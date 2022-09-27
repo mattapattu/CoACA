@@ -178,15 +178,14 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   print(sprintf("gridMat len=%i",length(gridMat[,1])))
    
   resMat <- 
-      foreach(idx = c(1:length(gridMat[,1])), .combine='rbind', .options.mpi=opts, chunkSize=chunkSize) %dopar%
-      {
+      foreach(idx = 1:length(gridMat[,1]), .combine='rbind', .options.mpi=opts, chunkSize=chunkSize) %dopar% {
             #start_idx=sequences[i]
             #idx = start_idx+j
             alpha = gridMat[idx,1]
             gamma1 = gridMat[idx,2]
             iter = gridMat[idx,3]
             model = gridMat[idx,4]
-            #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
+            cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
 
 
@@ -237,7 +236,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
    print(resMat)
    rat = ratdata@rat
    save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
-    df <- as.data.frame(resMat)
+  df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
   models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")

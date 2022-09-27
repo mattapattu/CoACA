@@ -44,15 +44,13 @@ else if(currentTest == "paramEstTest")
     paramEstTest = T
     computeModelLik = F
     validateHoldout = F
-}
-else if(currentTest == "computeModelLik")
+}else if(currentTest == "computeModelLik")
 {
     computeModelParams = F
     paramEstTest = F
     computeModelLik = T
     validateHoldout = F
-}
-else if(currentTest == "validateHoldout")
+}else if (currentTest == "validateHoldout")
 {
     computeModelParams = F
     paramEstTest = F

@@ -62,12 +62,13 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   print(sprintf("Loop start time is %s",format(Sys.time(), "%H:%M:%S")))
 
   for(i in c(1:nloops)){
+    
+    start_idx=sequences[i]+1
+    end_idx=sequences[i+1]
     print(sprintf("start_idx=%i,end_idx=%i, idx start time is %s",start_idx,end_idx, format(Sys.time(), "%H:%M:%S")))
      
     resList[[i]] %<-% 
     {
-      start_idx=sequences[i]+1
-      end_idx=sequences[i+1]
       X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, gridMat[start_idx:end_idx,])
     }
   }

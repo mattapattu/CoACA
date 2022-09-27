@@ -37,29 +37,35 @@ if(currentTest == "computeModelParams")
     computeModelLik = F
     validateHoldout = F
 
-}elseif(currentTest == "paramEstTest")
+}
+else if(currentTest == "paramEstTest")
 {
     computeModelParams = F
     paramEstTest = T
     computeModelLik = F
     validateHoldout = F
 }
+else if(currentTest == "computeModelLik")
+{
+    computeModelParams = F
+    paramEstTest = F
+    computeModelLik = T
+    validateHoldout = F
+}
+else if(currentTest == "validateHoldout")
+{
+    computeModelParams = F
+    paramEstTest = F
+    computeModelLik = F
+    validateHoldout = T
+}
+
 
 ############### TEST EXECUTIONS ######################################
 
 
 
-if(unitTest1)
-{
-  source(paste(src.dir,"unitTestaca3.R", sep="/"))
-  data.path = file.path("C:/Rats-Credits/Data/testDonnes1.RData") 
-}else
-{
-  #data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/new_data_journeys.Rdata")
-  #data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/data_journeys.Rdata")
-  data.path = file.path("/home/amoongat/Projects/Rats-Credit/Data/new_data_journeys.Rdata")
-  
-}
+data.path = file.path("/home/amoongat/Projects/Rats-Credit/Data/new_data_journeys.Rdata")
 
 load(data.path)
 #load(data.path2)

@@ -42,7 +42,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   print( workers )
   cl1 <- makeCluster(masterNodes,type = "MPI")
   cl2 <- makeCluster(slaves,type = "MPI")
-  plan(list(tweak(cluster, workers = cl1), tweak(multisession, workers = cl2)))
+  plan(list(tweak(cluster, workers = cl1), tweak(cluster, workers = cl2)))
   
   
 

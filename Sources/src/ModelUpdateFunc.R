@@ -176,7 +176,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   chunkSize = length(gridMat[,1])/count
    
   resMat <- listenv()
-      foreach(idx = c(1:length(gridMat[,1])), .combine='rbind', .options.mpi=opts, chunkSize=)
+      foreach(idx = c(1:length(gridMat[,1])), .combine='rbind', .options.mpi=opts, chunkSize=chunkSize)
       {
         resMat[[idx]] %<-% 
         {

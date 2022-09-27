@@ -20,18 +20,19 @@ library(rlist)
 #library(doMPI);
 #library(snow)
 #library(doSNOW)
+library(future)
 library(bigsnpr)
 library(Rmpi)
 library(parallelly)
 library(doFuture)
 library(listenv)
-library(future)
+
 
 analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
   
   registerDoFuture()
-  cl <- parallel::makeCluster(count,type = "MPI")
+  cl <- makeCluster(count,type = "MPI")
   #plan(cluster, workers = cl)
   masterNodes <- 4
   slaves <- ((count-4)%/%4)  ## Running with 60 slaves

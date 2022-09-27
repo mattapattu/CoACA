@@ -175,11 +175,9 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   opts <- list(initEnvir=initWorkers) 
   chunkSize = length(gridMat[,1])/count
    
-  resMat <- listenv()
-      foreach(idx = c(1:length(gridMat[,1])), .combine='rbind', .options.mpi=opts, chunkSize=chunkSize)
+  resMat <- 
+      foreach(idx = c(1:length(gridMat[,1])), .combine='rbind', .options.mpi=opts, chunkSize=chunkSize) %dopar%
       {
-        resMat[[idx]] %<-% 
-        {
             initWorkers()
             #start_idx=sequences[i]
             #idx = start_idx+j
@@ -231,12 +229,10 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
               c(iter,modelData@alpha, modelData@gamma1)
 
             }
-        }
+        
 
       }
   
- resMat <- Reduce(rbind,resMat)       
-
    print(resMat)
    rat = ratdata@rat
    save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 

@@ -174,11 +174,12 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
      }
   opts <- list(initEnvir=initWorkers) 
   chunkSize = length(gridMat[,1])/count
+
+  print(sprintf("gridMat len=%i",length(gridMat[,1])))
    
   resMat <- 
       foreach(idx = c(1:length(gridMat[,1])), .combine='rbind', .options.mpi=opts, chunkSize=chunkSize) %dopar%
       {
-            initWorkers()
             #start_idx=sequences[i]
             #idx = start_idx+j
             alpha = gridMat[idx,1]

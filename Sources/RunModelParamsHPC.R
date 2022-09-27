@@ -25,6 +25,7 @@ enregres = enregCombine(rawData,rats[i])
 allpaths = enregres$allpaths
 boxTimes = enregres$boxTimes
   
+testData = new("TestModels", Name = "AvgRwd",Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
 
 alpha_seq = seq_log(1e-3, 0.9,60)
 gamma1_seq = seq_log(1e-8, 1e-4, 10)

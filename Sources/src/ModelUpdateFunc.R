@@ -5,7 +5,7 @@
 library(rlist)
 #library(foreach)
 #library(doParallel)
-library(Rmpi)
+#library(Rmpi)
 library(doMPI);
 # library(snow);
 # library(doSNOW);
@@ -179,7 +179,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resMat <- 
-      foreach(idx = 1:length(gridMat[,1]), .combine='rbind', .options.mpi=opts,chunkSize=chunkSize) %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .combine='rbind', .options.mpi=opts,chunkSize=50) %dopar% {
             #start_idx=sequences[i]
             #idx = start_idx+j
             alpha = gridMat[idx,1]

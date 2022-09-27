@@ -37,8 +37,12 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   masterNodes <- 4
   slaves <- ((count-4)%/%4)  ## Running with 60 slaves
   print(sprintf("masterNodes=%i,slaves=%i",masterNodes,slaves))
-  print(parallelly::availableWorkers())
-  plan(list(tweak(cluster, workers = masterNodes), tweak(multisession, workers = slaves)))
+  workers <- availableWorkers()
+  cat(sprintf("#workders/#availableCores/#totalCores: %d/%d/%d, workers:\n", length(workers), availableCores(), detectCores()))
+  print( workers )
+  cl1 <- makeCluster(masterNodes,type = "MPI")
+  cl2 <- makeCluster(slaves,type = "MPI")
+  plan(list(tweak(cluster, workers = cl1), tweak(multisession, workers = cl2)))
   
   
 

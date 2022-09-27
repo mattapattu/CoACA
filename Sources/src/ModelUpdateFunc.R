@@ -59,14 +59,16 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   nloops = length(sequences)-1
 
   resList <- listenv()
-    
+  print(sprintf("Loop start time is %s",format(Sys.time(), "%H:%M:%S")))
+
   for(i in c(1:nloops)){
-    
-    resList[[i]] %<-% {
-    start_idx=sequences[i]+1
-    end_idx=sequences[i+1]
-    print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
-    X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, gridMat[start_idx:end_idx,])
+    print(sprintf("start_idx=%i,end_idx=%i, idx start time is %s",start_idx,end_idx, format(Sys.time(), "%H:%M:%S")))
+     
+    resList[[i]] %<-% 
+    {
+      start_idx=sequences[i]+1
+      end_idx=sequences[i+1]
+      X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, gridMat[start_idx:end_idx,])
     }
   }
   
@@ -74,6 +76,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   resMat <- Reduce(rbind,resList)
   print(time2)
   print(resMat)
+  print(sprintf("Loop end time is %s",format(Sys.time(), "%H:%M:%S")))
 
 
   rat = ratdata@rat
@@ -163,16 +166,8 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,cou
      }
   # opts <- list(initEnvir=initWorkers) 
    
-
-  #alpha_seq = seq(1e-3, 1e-2,length.out=80)
-  alpha_seq = seq_log(1e-3, 0.9,60)
-  gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
-
    
   resMat <- listenv()
-     resMat <-
       for(idx in c(1:length(gridMat[,1])))
       {
         resMat[[idx]] %<-% 
@@ -232,10 +227,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,cou
 
       }
   
-
  resMat <- Reduce(rbind,resMat)       
-  
-  
 
   # print(resMat)
   # rat = ratdata@rat

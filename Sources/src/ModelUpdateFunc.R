@@ -32,11 +32,12 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
 {
   
   registerDoFuture()
-  cl <- makeCluster(count,type = "MPI")
+  #cl <- makeCluster(count,type = "MPI")
   #plan(cluster, workers = cl)
   masterNodes <- 4
   slaves <- ((count-4)%/%4)  ## Running with 60 slaves
-  print(sprintf("masterNodes=%i,slaves=%i,  availableWorkers=%i",masterNodes,slaves, availableWorkers()))
+  print(sprintf("masterNodes=%i,slaves=%i",masterNodes,slaves))
+  print(parallelly::availableWorkers())
   plan(list(tweak(cluster, workers = masterNodes), tweak(multisession, workers = slaves)))
   
   
@@ -72,7 +73,8 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
       #end_idx=sequences[i+1]
       X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, model.data.dir,gridMat[start_idx:end_idx,])
     }
-    print(sprintf("start_idx=%i,end_idx=%i, idx start time is %s,  availableWorkers=%i",start_idx,end_idx, format(Sys.time(), "%H:%M:%S",  availableWorkers())))
+    print(sprintf("start_idx=%i,end_idx=%i, idx start time is %s",start_idx,end_idx, format(Sys.time(), "%H:%M:%S")))
+    print(parallelly::availableWorkers())
 
   }
   

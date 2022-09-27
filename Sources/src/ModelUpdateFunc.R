@@ -69,6 +69,8 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
      
     resList[[i]] %<-% 
     {
+      start_idx=sequences[i]+1
+      end_idx=sequences[i+1]
       X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, gridMat[start_idx:end_idx,])
     }
   }

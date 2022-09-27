@@ -37,9 +37,9 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   masterNodes <- 4
   slaves <- ((count-4)%/%4)  ## Running with 60 slaves
   print(sprintf("masterNodes=%i,slaves=%i",masterNodes,slaves))
-  workers <- availableWorkers()
-  cat(sprintf("#workders/#availableCores/#totalCores: %d/%d/%d, workers:\n", length(workers), availableCores(), detectCores()))
-  print( workers )
+  #workers <- availableWorkers()
+  #cat(sprintf("#workders/#availableCores/#totalCores: %d/%d/%d, workers:\n", length(workers), availableCores(), detectCores()))
+  #print( workers )
   cl <- makeCluster(count,type = "MPI")
   plan(list(tweak(cluster, workers = cl), tweak(cluster, workers = cl)))
   
@@ -142,7 +142,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   
 }
 
-analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,gridMat)
+analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat)
 {
   models = testData@Models
   #creditAssignment = testData@creditAssignment
@@ -154,10 +154,10 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,gri
 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
   
-  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  # setRngDoMPI(cl, seed=count)
-  # exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
-  # registerDoMPI(cl)
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=count)
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
+  registerDoMPI(cl)
   
    initWorkers <-  function() {
        source(paste(src.dir, "ModelClasses.R", sep = "/"))
@@ -172,11 +172,11 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,gri
    
        #attach(myEnv, name="sourced_scripts")
      }
-  # opts <- list(initEnvir=initWorkers) 
-   
+  opts <- list(initEnvir=initWorkers) 
+  chunkSize = length(gridMat[,1])/count
    
   resMat <- listenv()
-      for(idx in c(1:length(gridMat[,1])))
+      foreach(idx = c(1:length(gridMat[,1])), .combine='rbind', .options.mpi=opts, chunkSize=)
       {
         resMat[[idx]] %<-% 
         {

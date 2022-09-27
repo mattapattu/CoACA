@@ -25,6 +25,7 @@ library(Rmpi)
 library(parallelly)
 library(doFuture)
 library(listenv)
+library(future)
 
 analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
@@ -34,6 +35,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   #plan(cluster, workers = cl)
   masterNodes <- 4
   slaves <- ((count-4)%/%4)  ## Running with 60 slaves
+  print(sprintf("masterNodes=%i,slaves=%i",masterNodes,slaves))
   plan(list(tweak(cluster, workers = masterNodes), tweak(multisession, workers = slaves)))
   
   
@@ -48,7 +50,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   # 50*15 futures with each for loop iteration
 
 
-  sequences = seq(0,length(gridMat[,1]), by=(50*slaves))
+  sequences = seq(0,length(gridMat[,1]), by=(100*slaves))
   if(sequences[length(sequences)] < length(gridMat[,1]))
   {
     sequences = c(sequences,length(gridMat[,1]))
@@ -56,18 +58,17 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   nloops = length(sequences)-1
 
   resList <- listenv()
-  time2 <-system.time(
-   resMat <- 
-  foreach(i = c(1:nloops),.combine = 'rbind',.export = c("negLogLikFunc")) %dopar%{
     
-      start_idx=sequences[i]+1
-      end_idx=sequences[i+1]
-      print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
-      X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, gridMat[start_idx:end_idx,])
-      X
+  for(i in c(1:nloops)){
+    
+    resList[[i]] %<-% {
+    start_idx=sequences[i]+1
+    end_idx=sequences[i+1]
+    print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
+    X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, gridMat[start_idx:end_idx,])
+    }
   }
   
-  )
   
   resMat <- Reduce(rbind,resList)
   print(time2)
@@ -169,11 +170,12 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,cou
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
 
    
-  
- time1 <-system.time(
-    resMat <-
-      foreach(idx = 1:length(gridMat[,1]),.combine = 'rbind', .packages = c("TurnsNew"), .export = c("negLogLikFunc")) %dopar%
-          {
+  resMat <- listenv()
+     resMat <-
+      for(idx in c(1:length(gridMat[,1])))
+      {
+        resMat[[idx]] %<-% 
+        {
             initWorkers()
             #start_idx=sequences[i]
             #idx = start_idx+j
@@ -225,20 +227,19 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,cou
               c(iter,modelData@alpha, modelData@gamma1)
 
             }
+        }
 
-          }
+      }
+  
 
-
-  )
-    
- print(time1)
+ resMat <- Reduce(rbind,resMat)       
   
   
 
   # print(resMat)
   # rat = ratdata@rat
   # save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
-
+  return(resMat)
   
 }
 

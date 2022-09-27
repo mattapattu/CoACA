@@ -1,4 +1,3 @@
-options(echo=TRUE) # if you want see commands in output file
 args <- commandArgs(trailingOnly = TRUE)
 print(args)
 
@@ -117,10 +116,14 @@ for (i in c(select_rat)) {
     iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
     models = testData@Models
     gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
+    sequences = seq(0,length(gridMat[,1]), length.out=10)
     gridMat <- gridMat[start_idx:end_idx,]
     print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
+    
+    seq_id <- which((sequences+1) %in% start_idx)
+    name = paste0("mParams",seq_id,"_",paste0("rat",select_rat))
    #analyzeParamSpaceWrapper(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, gridMat)
-   analyzeParamSpace(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat)
+   analyzeParamSpace(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name)
    #getModelParams(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
   }
 

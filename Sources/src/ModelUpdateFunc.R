@@ -77,7 +77,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
       X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, model.data.dir,gridMat[start_idx:end_idx,])
     }
     print(sprintf("start_idx=%i,end_idx=%i, idx start time is %s",start_idx,end_idx, format(Sys.time(), "%H:%M:%S")))
-    print(parallelly::availableWorkers())
+    #print(parallelly::availableWorkers())
 
   }
   

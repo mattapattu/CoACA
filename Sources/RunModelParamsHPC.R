@@ -62,7 +62,7 @@ for(i in c(1:9))
     stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
     stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
-    command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,stdout,stderr,name,rat,seed,spawnslaves,"computeModelParams", start_idx, end_idx)
+    command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,"computeModelParams", start_idx, end_idx)
     cat(command)
     cat("\n")
     system(command)

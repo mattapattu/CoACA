@@ -16,7 +16,23 @@ names=c('e','f','g','c','d','h','i','j','a','b','k')
 src.dir = file.path("/home/amoongat/Projects/Rats-Credit/Sources/src")
 #src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 
+# model = "Model2"  ## {Model1,Model2,Model3}
+# source(paste(src.dir,"ModelClasses.R", sep="/"))
+
+# ## Model files
+# model.src = paste(src.dir,model, sep="/")
+# source(paste(model.src,"PathModel.R", sep="/"))
+# source(paste(model.src,"TurnModel.R", sep="/"))
+# source(paste(model.src,"HybridModel1.R", sep="/"))
+# source(paste(model.src,"HybridModel2.R", sep="/"))
+# source(paste(model.src,"HybridModel2.R", sep="/"))
+# source(paste(model.src,"HybridModel3.R", sep="/"))
+# source(paste(model.src,"HybridModel4.R", sep="/"))
+
+
+source(paste(src.dir,"BaseClasses.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
+
 
 data.path = file.path("/home/amoongat/Projects/Rats-Credit/Data/new_data_journeys.Rdata")
 load(data.path)
@@ -51,5 +67,5 @@ for(i in c(1:9))
     system(sprintf("oarsub -t besteffort -t idempotent -l core=%i walltime=%s -n %s 
     --stdout=\'logs/test12.%%jobid%%.stdout\' 
     --stderr=\'logs/test12.%%jobid%%.stderr\' 
-    -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,rat,seed,spawnslaves"computeModelParams", start_idx, end_idx))
+    -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,rat,seed,spawnslaves,"computeModelParams", start_idx, end_idx))
 }

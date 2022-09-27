@@ -5,7 +5,8 @@
 library(rlist)
 #library(foreach)
 #library(doParallel)
-# library(doMPI);
+library(Rmpi)
+library(doMPI);
 # library(snow);
 # library(doSNOW);
 
@@ -20,12 +21,12 @@ library(rlist)
 #library(doMPI);
 #library(snow)
 #library(doSNOW)
-library(future)
+#library(future)
 library(bigsnpr)
-library(Rmpi)
-library(parallelly)
-library(doFuture)
-library(listenv)
+#library(Rmpi)
+#library(parallelly)
+#library(doFuture)
+#library(listenv)
 
 
 analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
@@ -173,12 +174,12 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
        #attach(myEnv, name="sourced_scripts")
      }
   opts <- list(initEnvir=initWorkers) 
-  chunkSize = length(gridMat[,1])/count
+  chunkSize = length(gridMat[,1])/getDoParWorkers()
 
-  print(sprintf("gridMat len=%i",length(gridMat[,1])))
+  print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resMat <- 
-      foreach(idx = 1:length(gridMat[,1]), .combine='rbind', .options.mpi=opts, chunkSize=chunkSize) %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .combine='rbind', .options.mpi=opts,chunkSize=chunkSize) %dopar% {
             #start_idx=sequences[i]
             #idx = start_idx+j
             alpha = gridMat[idx,1]

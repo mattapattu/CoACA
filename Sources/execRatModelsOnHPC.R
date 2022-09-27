@@ -118,6 +118,7 @@ for (i in c(select_rat)) {
     models = testData@Models
     gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
     gridMat <- gridMat[start_idx:end_idx,]
+    print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
    #analyzeParamSpaceWrapper(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, gridMat)
    analyzeParamSpace(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat)
    #getModelParams(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)

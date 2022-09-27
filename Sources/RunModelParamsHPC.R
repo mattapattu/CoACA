@@ -60,8 +60,6 @@ for(i in c(1:9))
     spawnslaves = cores-1
     name = paste0("modelParams_",i)
     
-    system(sprintf("oarsub -t besteffort -t idempotent -l core=%i walltime=%s -n %s 
-    --stdout=\'logs/test12.%%jobid%%.stdout\' 
-    --stderr=\'logs/test12.%%jobid%%.stderr\' 
-    -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,rat,seed,spawnslaves,"computeModelParams", start_idx, end_idx))
+    system(sprintf("oarsub -t besteffort -t idempotent -l core=%i walltime=%s -n %s --stdout=\'logs/test12.%%jobid%%.stdout\' 
+    --stderr=\'logs/test12.%%jobid%%.stderr\' -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,rat,seed,spawnslaves,"computeModelParams", start_idx, end_idx))
 }

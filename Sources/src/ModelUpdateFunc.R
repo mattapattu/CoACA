@@ -71,7 +71,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
     {
       start_idx=sequences[i]+1
       end_idx=sequences[i+1]
-      X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, gridMat[start_idx:end_idx,])
+      X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, model.data.dir,gridMat[start_idx:end_idx,])
     }
   }
   
@@ -136,8 +136,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   
 }
 
-
-analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,count,gridMat)
+analyzeParamSpace=function(ratdata,testData,src.dir,model.src,model.data.dir,gridMat)
 {
   models = testData@Models
   #creditAssignment = testData@creditAssignment

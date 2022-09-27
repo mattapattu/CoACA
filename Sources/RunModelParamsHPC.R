@@ -12,24 +12,20 @@ names=c('e','f','g','c','d','h','i','j','a','b','k')
 
 ### Options Linux/Windows ####
 
-#src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 src.dir = file.path("/home/amoongat/Projects/Rats-Credit/Sources/src")
-#src.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Sources/src")
 
-# model = "Model2"  ## {Model1,Model2,Model3}
-# source(paste(src.dir,"ModelClasses.R", sep="/"))
+model = "Model2"  ## {Model1,Model2,Model3}
+source(paste(src.dir,"ModelClasses.R", sep="/"))
 
-# ## Model files
-# model.src = paste(src.dir,model, sep="/")
-# source(paste(model.src,"PathModel.R", sep="/"))
-# source(paste(model.src,"TurnModel.R", sep="/"))
-# source(paste(model.src,"HybridModel1.R", sep="/"))
-# source(paste(model.src,"HybridModel2.R", sep="/"))
-# source(paste(model.src,"HybridModel2.R", sep="/"))
-# source(paste(model.src,"HybridModel3.R", sep="/"))
-# source(paste(model.src,"HybridModel4.R", sep="/"))
-
-
+## Model files
+model.src = paste(src.dir,model, sep="/")
+source(paste(model.src,"PathModel.R", sep="/"))
+source(paste(model.src,"TurnModel.R", sep="/"))
+source(paste(model.src,"HybridModel1.R", sep="/"))
+source(paste(model.src,"HybridModel2.R", sep="/"))
+source(paste(model.src,"HybridModel2.R", sep="/"))
+source(paste(model.src,"HybridModel3.R", sep="/"))
+source(paste(model.src,"HybridModel4.R", sep="/"))
 source(paste(src.dir,"BaseClasses.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 

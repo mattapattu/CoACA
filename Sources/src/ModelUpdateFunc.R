@@ -36,7 +36,7 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
   #plan(cluster, workers = cl)
   masterNodes <- 4
   slaves <- ((count-4)%/%4)  ## Running with 60 slaves
-  print(sprintf("masterNodes=%i,slaves=%i",masterNodes,slaves))
+  print(sprintf("masterNodes=%i,slaves=%i,  availableWorkers=%i",masterNodes,slaves, availableWorkers()))
   plan(list(tweak(cluster, workers = masterNodes), tweak(multisession, workers = slaves)))
   
   
@@ -65,14 +65,15 @@ analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc
     
     start_idx=sequences[i]+1
     end_idx=sequences[i+1]
-    print(sprintf("start_idx=%i,end_idx=%i, idx start time is %s",start_idx,end_idx, format(Sys.time(), "%H:%M:%S")))
      
     resList[[i]] %<-% 
     {
-      start_idx=sequences[i]+1
-      end_idx=sequences[i+1]
+      #start_idx=sequences[i]+1
+      #end_idx=sequences[i+1]
       X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, model.data.dir,gridMat[start_idx:end_idx,])
     }
+    print(sprintf("start_idx=%i,end_idx=%i, idx start time is %s,  availableWorkers=%i",start_idx,end_idx, format(Sys.time(), "%H:%M:%S",  availableWorkers())))
+
   }
   
   

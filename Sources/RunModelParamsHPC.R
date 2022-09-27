@@ -1,9 +1,8 @@
+library(bigsnpr)
 args <- commandArgs(trailingOnly = TRUE)
 print(args)
 
 rat <- as.integer(args[1])
-seed <- as.numeric(args[2])
-count <- as.integer(args[3])
 #options(error=recover)
 options(error=function()traceback(2))
 
@@ -22,7 +21,7 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 data.path = file.path("/home/amoongat/Projects/Rats-Credit/Data/new_data_journeys.Rdata")
 load(data.path)
 rawData <- donnees_ash[[rat]]
-enregres = enregCombine(rawData,rat)
+enregres = enregCombine(rawData,rats[i])
 allpaths = enregres$allpaths
 boxTimes = enregres$boxTimes
   

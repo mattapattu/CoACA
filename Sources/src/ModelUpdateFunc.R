@@ -294,7 +294,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
   maxVecs <- c()
   for(grp in c(1:n))
   {
-   print(grp)
+   #print(grp)
    begin_ses <- min(session_grps[[grp]])
    end_ses <- max(session_grps[[grp]])
    indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
@@ -320,14 +320,15 @@ generateParamResMat=function(ratdata,model.data.dir,count)
       lik1 <- sum(lik[c(1:800)])*-1
       lik2 <- sum(lik[-c(1:800)])*-1
       df_it[idx,7]= lik1
-      
+
       if (is.infinite(lik1)) {
+        print(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1)
         lik1= 1000000
       }else if (is.nan(lik1)) {
-        #print(sprintf("Alpha = %f", alpha))
+        print(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1)
         lik1 = 1000000
       }else if (is.na(lik1)) {
-        #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
+        print(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1)
         lik1 = 1000000
       }
       if(lik1 < min_lik1)
@@ -340,7 +341,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
         minmodel@lambda = 0
       }    
     }
-    print(sprintf("it=%i,model=%s, min_lik1=%i",it,model,min_lik1))
+    cat(sprintf("it=%i,model=%s, min_lik1=%i",it,model,min_lik1))
     c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
 
   }

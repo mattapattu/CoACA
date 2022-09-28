@@ -32,66 +32,9 @@ library(bigsnpr)
 analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
   
-  registerDoFuture()
-  #cl <- makeCluster(count,type = "MPI")
-  #plan(cluster, workers = cl)
-  masterNodes <- 4
-  slaves <- ((count-4)%/%4)  ## Running with 60 slaves
-  print(sprintf("masterNodes=%i,slaves=%i",masterNodes,slaves))
-  #workers <- availableWorkers()
-  #cat(sprintf("#workders/#availableCores/#totalCores: %d/%d/%d, workers:\n", length(workers), availableCores(), detectCores()))
-  #print( workers )
-  cl <- makeCluster(count,type = "MPI")
-  plan(list(tweak(cluster, workers = cl), tweak(cluster, workers = cl)))
-  
-  
+  X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, model.data.dir,gridMat[start_idx:end_idx,])
 
-  alpha_seq = seq_log(1e-3, 0.9,60)
-  gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))
-  models = testData@Models
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
-
-  # each slave node ~ 50 futures
-  # 50*15 futures with each for loop iteration
-
-
-  sequences = seq(0,length(gridMat[,1]), by=(100*slaves))
-  if(sequences[length(sequences)] < length(gridMat[,1]))
-  {
-    sequences = c(sequences,length(gridMat[,1]))
-  }
-  nloops = length(sequences)-1
-
-  resList <- listenv()
-  print(sprintf("Loop start time is %s",format(Sys.time(), "%H:%M:%S")))
-
-  for(i in c(1:nloops)){
-    
-    start_idx=sequences[i]+1
-    end_idx=sequences[i+1]
-     
-    resList[[i]] %<-% 
-    {
-      #start_idx=sequences[i]+1
-      #end_idx=sequences[i+1]
-      X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, model.data.dir,gridMat[start_idx:end_idx,])
-    }
-    print(sprintf("start_idx=%i,end_idx=%i, idx start time is %s",start_idx,end_idx, format(Sys.time(), "%H:%M:%S")))
-    #print(parallelly::availableWorkers())
-
-  }
-  
-  
-  resMat <- Reduce(rbind,resList)
-  print(time2)
-  print(resMat)
-  print(sprintf("Loop end time is %s",format(Sys.time(), "%H:%M:%S")))
-
-
-  rat = ratdata@rat
-  save(resMat, file = paste0(model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
-
+   
   #iter = c(300,800,1100,1500,length(ratdata@allpaths[,1]))
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7)
@@ -238,6 +181,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
    print(resMat)
    rat = ratdata@rat
    save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
+  
   # df <- as.data.frame(resMat)
   # cols.num <- c(1,3,4,5,6,7)
   # df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
@@ -287,6 +231,83 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   # save(minDfModels, file = paste0(model.data.dir,"/",ratdata@rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_minDfModels.Rdata")) 
 
   
+}
+
+
+generateParamResMat=function(ratdata,model.data.dir)
+{
+  
+  #models = testData@Models
+  #creditAssignment = testData@creditAssignment
+  
+  #paramTest = list()
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  ratName = ratdata@rat
+  model.data.dir = paste(model.data.dir,"modelParams",ratName,sep="/")
+
+  df <- as.data.frame(resMat)
+  cols.num <- c(1,3,4,5,6,7)
+  df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  
+  resMatList <- listenv()
+
+  for(i in c(1:9))
+  {
+    setwd(model.data.dir)
+    pattern=paste0(ratName,"_mParams",i,"_.*Rdata")
+    resMat=list.files(".", pattern=pattern, full.names=FALSE)
+    load(resMat)
+    resMatList[[i]] <- resMat
+  }
+  resMat <- Reduce(rbind,resMatList)
+  df <- as.data.frame(resMat)
+  cols.num <- c(1,3,4,5,6,7)
+  df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+
+  minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
+    foreach(it = iter,.combine='rbind', .inorder=TRUE) %dopar%
+  {
+    df_it <- df[which(df[,1]==it & df[,2]==model),]
+    min_lik1 = 1000000
+    minmodel = modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
+    for(idx in 1:length(df_it[,1]))
+    {
+      modelData@alpha = df_it[idx,3]
+      modelData@gamma1 = df_it[idx,4]
+      modelData@gamma2 = 0.1
+      modelData@lambda = 0
+      argList <- getArgList(modelData, ratdata)
+      lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+      lik1 <- sum(lik[c(1:800)])*-1
+      lik2 <- sum(lik[-c(1:800)])*-1
+      df_it[idx,7]= lik1
+      
+      if (is.infinite(lik1)) {
+        lik1= 1000000
+      }else if (is.nan(lik1)) {
+        #print(sprintf("Alpha = %f", alpha))
+        lik1 = 1000000
+      }else if (is.na(lik1)) {
+        #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
+        lik1 = 1000000
+      }
+      if(lik1 < min_lik1)
+      {
+        min_lik1=lik1
+        min_lik2=lik2
+        minmodel@alpha = df_it[idx,3]
+        minmodel@gamma1 = df_it[idx,4]
+        minmodel@gamma2 = 0.1
+        minmodel@lambda = 0
+      }    
+    }
+    c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
+    print(minDfModels)
+    save(minDfModels, file = paste0(model.data.dir,"/",ratdata@rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_minDfModels.Rdata")) 
+
+
 }
 
 

@@ -5,6 +5,13 @@ library(rlist)
 
 HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
 {
+  
+  ## Test settings ###############
+  
+  DataGenerated = FALSE
+  
+  ##################################
+
   testDataName = testData@Name
   models = testData@Models
   ratName = ratdata@rat
@@ -47,8 +54,9 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
     
     opts <- list(initEnvir=initWorkers)
     
-  
-   generatedDataList <-  
+  if(!DataGenerated)
+  {
+    generatedDataList <-  
      foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
      foreach(generation=1:20) %dopar%
      {
@@ -85,26 +93,58 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
        }
        
      }    
+
+  }else{
+    ## load generatedDataList
+  }
  
   allData<-unlist(generatedDataList)
   modelNum =  length(allData)
   
+
+  alpha_seq = seq_log(1e-3, 0.9,60)
+  gamma1_seq = seq_log(1e-8, 1e-4, 10)
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,models,c(1:modelNum),stringsAsFactors = FALSE)
+    
+
+  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
+
   
   time2<- system.time(  
     resList<-
-      foreach(i = 1:modelNum, .options.mpi=opts) %:%
-      foreach(model = models) %dopar% {
+      foreach(i = 1:length(gridMat[,1]), .combine='rbind', .options.mpi=opts) %dopar%
+      { 
         generated_data = allData[[i]]
+
+        alpha = gridMat[idx,1]
+        gamma1 = gridMat[idx,2]
+        model = gridMat[idx,3]
+        modelNum = gridMat[idx,4]
+        generatedData = allData[[modelNum]]
+
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
-        argList<-getArgList(modelData,generated_data)
-        np.val = length(argList$lower) * 10
-        myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
-        out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=800,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
-        modelData = setModelParams(modelData, unname(out$optim$bestmem))
-        modelData = setModelResults(modelData,generated_data,allModels)
-        list(data=generated_data,res=modelData)
+        argList<-getArgList(modelData,generatedData)
+
+
+        cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
+            #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
+
+        cat(sprintf('rat=%s, iter=%i,model = %s, creditAssignment=%s\n', ratName,iter,modelName,creditAssignment))
+            #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
+
+
+        #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
+            #cat("Here1")
+        opt <- optim(par = c(alpha,gamma1),
+                         fn = negLogLikFunc,ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1)
+            modelData = setModelParams(modelData, c(opt$par,0.1,0))
+
+        
+        modelData = setModelResults(modelData,generatedData,allModels)
+        list(data=generatedData,res=modelData)
       }
   )
   
@@ -175,10 +215,12 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
 
 testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
 {
+  ## Test settings ###############
+  
   StabilityTest = FALSE 
   DataGenerated = FALSE
   
-  
+  ##################################
   models = testData@Models
   #creditAssignment = testData@creditAssignment
   
@@ -224,7 +266,6 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
    # trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
    # trueModelData = modifyModelData(trueModelData) 
    #} 
-
    if(!DataGenerated)
    {
       generatedDataList <-  
@@ -278,12 +319,6 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
    allData<-unlist(generatedDataList)
    modelNum =  length(allData)
-   #iter=as.integer(floor(length(ratdata@allpaths[,1])/100))
-   
-   #n = 10
-   #x<-c(1:length(ratdata@allpaths[,1]))
-   #splits<-split(x, sort(x%%n))
-   #maxVecs<-sapply(splits, function(x) max(x))
    n = 8
    sessions<-unique(ratdata@allpaths[,5])
    session_grps<-split(sessions, sort(sessions%%8))
@@ -297,92 +332,74 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
     maxVecs <- c(maxVecs,max(indices_of_ses))
    }
 
-   
-   
-   resList<-
-     foreach(i=maxVecs, .combine='rbind', .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"), .inorder=TRUE) %:%
-      foreach(j = c(1:modelNum)) %dopar% {
-       generated_data = allData[[j]]
-       #if(j==iter)
-       #{
-       #  rowEnd = length(generated_data@allpaths[,1])
-       #}else{
-       #  rowEnd = i*100
-       #}
-       rowEnd = i
-       model = generated_data@simModel
-       creditAssignment = generated_data@simMethod
+  alpha_seq = seq_log(1e-3, 0.9,60)
+  gamma1_seq = seq_log(1e-8, 1e-4, 10)
+  iters=maxVecs
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,c(1:modelNum),stringsAsFactors = FALSE)
+    
 
-       cat(sprintf('model = %s, creditAssignment=%s, rowEnd = %i\n', model,creditAssignment,rowEnd))
-       modelData =  new("ModelData", Model=model, creditAssignment = creditAssignment, sim=1)
-       argList<-getArgList(modelData,generated_data)
-       np.val = length(argList$lower) * 10
-       myList <- DEoptim.control(NP=np.val, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
-       out <-DEoptim(negLogLikFunc,argList$lower,argList$upper,ratdata=argList[[3]],half_index=rowEnd,modelData=argList[[5]],testModel = argList[[6]],sim = argList[[7]],myList)
-       modelData <- setModelParams(modelData, unname(out$optim$bestmem))
-       #modelData <- setModelResults(modelData, ratdata, allModels)
-       probMat <- TurnsNew::getProbMatrix(argList[[3]], modelData, argList[[6]], sim=1)
-       trueModelData <- generated_data@simModelData
-       trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
-       
-       row1 <- round((trueProbMat[rowEnd,] - probMat[rowEnd,]),2)/round(trueProbMat[rowEnd,],2) 
-       if(trueProbMat[rowEnd,1] == -1)
-       {
-         index <- max(which(probMat[1:rowEnd,1] != -1))
-       }else{
-         index <- max(which(probMat[1:rowEnd,7] != -1))
-       }
-       #print(sprintf("index=%i",index))
-      
-       row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
-       row1[is.nan(row1)] <- 0
-       row2[is.nan(row2)] <- 0
-       probRow <- row1 + row2  
-       probRow[is.infinite(probRow)] <- 0
-       
-       #diff1 <-  (trueProbMat[rowEnd,] - probMat[rowEnd,])
-       #diff2 <-  (trueProbMat[index,] - probMat[index,])
-       #diff <- diff1 + diff2
-        
-      #alphahat = modelData@alpha
-      #gammahat = modelData@gamma1
-      #alpha = trueModelData@alpha
-      #gamma = trueModelData@gamma1
+  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
-       #cat(sprintf("model=%s, iter=%i, alphahat=%f, alpha=%f, gammahat=%f, gamma=%f\n",model,rowEnd,alphahat,alpha,gammahat,gamma)) 
-       #cat(sprintf("trueProbMat: %s\n",toString(round(trueProbMat[rowEnd,],2))))
-       #cat(sprintf("probMat: %s\n",toString(round(probMat[rowEnd,],2))))
-       #cat(sprintf("trueProbMat: %s\n",toString(round(trueProbMat[index,],2)))) 
-       #cat(sprintf("probMat: %s\n",toString(round(probMat[index,],2))))
-       #cat(sprintf("%s, %s\n",toString(round(probRow[1:13]),2),model))
-       #cat(sprintf("%s", paste(round(probRow[1:13]),2, collapse=" ")))
-       #cat(sprintf("%s\n", paste(round(diff[1:12],2), collapse=" ")))
-       #cat(sprintf("%s\n", paste(round(probRow[1:12],2), collapse=" ")))
-
-      # cat(sprintf("Params= (%s)\n", toString(unname(out$optim$bestmem))))
-      # cat(sprintf("BestLik= %s, testModel=%s,\n", out$optim$bestval,argList[[6]]@Name))
-      # lik <- TurnsNew::getTurnsLikelihood(argList[[3]], modelData, argList[[6]], sim=1)
-      #likSum <- (-1) *sum(lik[1:rowEnd])
-      #cat(sprintf("likSum=%f\n", likSum)) 
-      #cat(sprintf('Success: rowEnd = %i, alpha = %f, gamma = %f\n',rowEnd, modelData@alpha, modelData@gamma1))
-       list(iter = rowEnd, genDataIndex = j,data=generated_data,res=modelData,probRow=probRow,trueModelData=trueModelData)
-     }
+  print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
+  resList <- 
+      foreach(idx = 1:length(gridMat[,1]), .combine='rbind', .options.mpi=opts) %dopar% {
+        #start_idx=sequences[i]
+        #idx = start_idx+j
+        alpha = gridMat[idx,1]
+        gamma1 = gridMat[idx,2]
+        iter = gridMat[idx,3]
+        modelNum = gridMat[idx,4]
+        generatedData = allData[[modelNum]]
+
+        cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
+            #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
+
+        modelName = generatedData@simModel
+        creditAssignment = generatedData@simMethod              
+        cat(sprintf('rat=%s, iter=%i,model = %s, creditAssignment=%s\n', ratName,iter,modelName,creditAssignment))
+            #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
+
+
+            #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
+        modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
+        argList<-getArgList(modelData,generatedData)
+
+            #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
+            #cat("Here1")
+        opt <- optim(par = c(alpha,gamma1),
+                  fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
+        modelData = setModelParams(modelData, c(opt$par,0.1,0))
+
+        probMat <- TurnsNew::getProbMatrix(argList[[3]], modelData, argList[[6]], sim=1)
+        trueModelData <- generated_data@simModelData
+        trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
+            
+        row1 <- round((trueProbMat[rowEnd,] - probMat[rowEnd,]),2)/round(trueProbMat[rowEnd,],2) 
+        if(trueProbMat[rowEnd,1] == -1)
+          {
+            index <- max(which(probMat[1:rowEnd,1] != -1))
+          }else{
+            index <- max(which(probMat[1:rowEnd,7] != -1))
+          }
+            #print(sprintf("index=%i",index))
+            
+        row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
+        row1[is.nan(row1)] <- 0
+        row2[is.nan(row2)] <- 0
+        probRow <- row1 + row2  
+        probRow[is.infinite(probRow)] <- 0
+        list(iter = iter, genDataIndex = j,data=generated_data,res=modelData,probRow=probRow,trueModelData=trueModelData)
+      }
+
    
     rat = ratdata@rat
-   save(resList,  file = paste0(res.model.data.dir,"/",rat, timestamp,"_ParamEstResList.Rdata"))
+    save(resList,  file = paste0(res.model.data.dir,"/",rat, timestamp,"_ParamEstResList.Rdata"))
    
-  #   print(getwd())
-  #   print(paste0(res.model.data.dir))
-  #   setwd(paste0(res.model.data.dir))
-  #   #print(paste0(res.model.data.dir,"/",rat, ".*_ParamEstResList.Rdata"))
-   
-  #  paramTestData=list.files(".",pattern="rat.*ParamEstResList.Rdata")
-  #  print(paramTestData)
-  #  load(paramTestData)
 
-   if(any(grepl("qlearningAvgRwd",models)))
-   {
+    if(any(grepl("qlearningAvgRwd",models)))
+    {
       df <- data.frame(model=character(),
                     iter=integer(),
                     genIndex=integer(),

@@ -39,10 +39,14 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 data.path = file.path("/home/amoongat/Projects/Rats-Credit/Data/new_data_journeys.Rdata")
 load(data.path)
+plot.dir = file.path("/home/amoongat/Projects/Rats-Credit/Plots")
+model.data.dir = file.path("/home/amoongat/Projects/Rats-Credit/Data/Rat_Model_Data")
+
 rawData <- donnees_ash[[rat]]
 enregres = enregCombine(rawData,rats[i])
 allpaths = enregres$allpaths
 boxTimes = enregres$boxTimes
+ratdata = populateRatModel(allpaths=allpaths,rat=rats[i],donnees_ash[[i]],TurnModel)
   
 ############## END INIT ##############################################  
 

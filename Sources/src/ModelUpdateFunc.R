@@ -264,32 +264,46 @@ generateParamResMat=function(ratdata,model.data.dir,count)
 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
   
-  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  #setRngDoMPI(cl, seed=count)
-  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
-  registerDoMPI(cl)
+  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  # #setRngDoMPI(cl, seed=count)
+  # exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
+  # registerDoMPI(cl)
   
-   initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"))
-       source(paste(model.src, "PathModel.R", sep = "/"))
-       source(paste(model.src, "TurnModel.R", sep = "/"))
-       source(paste(model.src, "HybridModel1.R", sep = "/"))
-       source(paste(model.src, "HybridModel2.R", sep = "/"))
-       source(paste(model.src, "HybridModel3.R", sep = "/"))
-       source(paste(model.src, "HybridModel4.R", sep = "/"))
-       source(paste(src.dir, "BaseClasses.R", sep = "/"))
-       source(paste(src.dir,"exportFunctions.R", sep="/"))
+  #  initWorkers <-  function() {
+  #      source(paste(src.dir, "ModelClasses.R", sep = "/"))
+  #      source(paste(model.src, "PathModel.R", sep = "/"))
+  #      source(paste(model.src, "TurnModel.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel1.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel2.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel3.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel4.R", sep = "/"))
+  #      source(paste(src.dir, "BaseClasses.R", sep = "/"))
+  #      source(paste(src.dir,"exportFunctions.R", sep="/"))
    
-       #attach(myEnv, name="sourced_scripts")
-     }
+  #      #attach(myEnv, name="sourced_scripts")
+  #    }
   
-  #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  opts <- list(initEnvir=initWorkers) 
+  # #chunkSize = length(gridMat[,1])/getDoParWorkers()
+  # opts <- list(initEnvir=initWorkers) 
 
   #print(sprintf("getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
+
+  n = 8
+  sessions<-unique(ratdata@allpaths[,5])
+  session_grps<-split(sessions, sort(sessions%%8))
+  maxVecs <- c()
+  for(grp in c(1:n))
+  {
+   print(grp)
+   begin_ses <- min(session_grps[[grp]])
+   end_ses <- max(session_grps[[grp]])
+   indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
+   maxVecs <- c(maxVecs,max(indices_of_ses))
+  }
+  iter = maxVecs
    
   minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
-    foreach(it = iter,.combine='rbind', .inorder=TRUE) %dopar%
+  foreach(it = iter,.combine='rbind', .inorder=TRUE) %do%
   {
     df_it <- df[which(df[,1]==it & df[,2]==model),]
     min_lik1 = 1000000

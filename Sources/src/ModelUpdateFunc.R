@@ -286,7 +286,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
   opts <- list(initEnvir=initWorkers) 
 
-  print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
+  #print(sprintf("getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
     foreach(it = iter,.combine='rbind', .inorder=TRUE) %dopar%

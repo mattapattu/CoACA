@@ -304,6 +304,8 @@ generateParamResMat=function(ratdata,model.data.dir)
       }    
     }
     c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
+
+  }
     print(minDfModels)
     save(minDfModels, file = paste0(model.data.dir,"/",ratdata@rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_minDfModels.Rdata")) 
 

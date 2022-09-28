@@ -30,7 +30,11 @@ source(paste(model.src,"HybridModel2.R", sep="/"))
 source(paste(model.src,"HybridModel3.R", sep="/"))
 source(paste(model.src,"HybridModel4.R", sep="/"))
 source(paste(src.dir,"BaseClasses.R", sep="/"))
+source(paste(src.dir,"ModelUpdateFunc.R", sep="/"))
+source(paste(src.dir,"ValidationFunc.R", sep="/"))
+source(paste(src.dir,"ValidationFunc2.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
+
 
 
 data.path = file.path("/home/amoongat/Projects/Rats-Credit/Data/new_data_journeys.Rdata")

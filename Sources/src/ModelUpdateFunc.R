@@ -26,7 +26,7 @@ library(bigsnpr)
 #library(Rmpi)
 #library(parallelly)
 #library(doFuture)
-#library(listenv)
+library(listenv)
 
 
 analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)

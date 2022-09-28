@@ -244,12 +244,7 @@ generateParamResMat=function(ratdata,model.data.dir)
   #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   ratName = ratdata@rat
   model.data.dir = paste(model.data.dir,"modelParams",ratName,sep="/")
-
-  df <- as.data.frame(resMat)
-  cols.num <- c(1,3,4,5,6,7)
-  df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
-  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
-  
+ 
   resMatList <- listenv()
 
   for(i in c(1:9))

@@ -257,6 +257,10 @@ generateParamResMat=function(ratdata,model.data.dir,count)
     resMatList[[i]] <- resMat
   }
   resMat <- Reduce(rbind,resMatList)
+  save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
+
+
+
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))

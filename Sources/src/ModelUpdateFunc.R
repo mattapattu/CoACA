@@ -311,15 +311,15 @@ generateParamResMat=function(ratdata,model.data.dir,count)
       df_it[idx,7]= lik1
 
       if (is.infinite(lik1)) {
-        cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+        #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
         lik1= 1000000
         next
       }else if (is.nan(lik1)) {
-        cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+        #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
         lik1 = 1000000
         next
       }else if (is.na(lik1)) {
-        cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+        #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
         lik1 = 1000000
         next
       }
@@ -333,7 +333,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
         minmodel@lambda = 0
       }    
     }
-    cat(sprintf("it=%i,model=%s, min_lik1=%i",it,model,min_lik1))
+    #cat(sprintf("it=%i,model=%s, min_lik1=%i",it,model,min_lik1))
     c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
 
   }

@@ -322,13 +322,13 @@ generateParamResMat=function(ratdata,model.data.dir,count)
       df_it[idx,7]= lik1
 
       if (is.infinite(lik1)) {
-        print(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1)
+        cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1))
         lik1= 1000000
       }else if (is.nan(lik1)) {
-        print(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1)
+        cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1))
         lik1 = 1000000
       }else if (is.na(lik1)) {
-        print(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1)
+        cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", alpha,gamma1, lik1))
         lik1 = 1000000
       }
       if(lik1 < min_lik1)

@@ -75,15 +75,15 @@ if(computeModelParams){
   {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
-      
       seed = start_idx
       spawnslaves = cores-1
       #name = paste0("modelParams_",i,"_",rats[[rat]])
       name = paste0("mParams",i,"_",paste0("rat",rat))
       stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
       stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+      currentTest = "computeModelParams"
 
-      command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,"computeModelParams", start_idx, end_idx)
+      command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
       cat(command)
       cat("\n")
       system(command)
@@ -94,7 +94,19 @@ if(computeModelParams){
 
 
 if(generateModelParamMat){
-  generateParamResMat(ratdata,model.data.dir)
+  cores = 5
+  walltime = "1:00"
+  spawnslaves = cores-1
+  start_idx = 0
+  end_idx = 0
+  seed = 0
+  name = paste0("genPMat_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+  currentTest = "generateModelParamMat"
+
+  command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+
 }
 
 ################## Test 3: ################

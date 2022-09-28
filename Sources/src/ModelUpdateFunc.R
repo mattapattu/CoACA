@@ -117,7 +117,8 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
        #attach(myEnv, name="sourced_scripts")
      }
   
-  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  #chunkSize = length(gridMat[,1])/getDoParWorkers()
+  chunkSize = 75
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -234,7 +235,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
 }
 
 
-generateParamResMat=function(ratdata,model.data.dir)
+generateParamResMat=function(ratdata,model.data.dir,count)
 {
   
   #models = testData@Models
@@ -261,6 +262,32 @@ generateParamResMat=function(ratdata,model.data.dir)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
   models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
 
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
+  
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  #setRngDoMPI(cl, seed=count)
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
+  registerDoMPI(cl)
+  
+   initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"))
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
+  
+  #chunkSize = length(gridMat[,1])/getDoParWorkers()
+  opts <- list(initEnvir=initWorkers) 
+
+  print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
+   
   minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
     foreach(it = iter,.combine='rbind', .inorder=TRUE) %dopar%
   {
@@ -301,8 +328,8 @@ generateParamResMat=function(ratdata,model.data.dir)
     c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
 
   }
-    print(minDfModels)
-    save(minDfModels, file = paste0(model.data.dir,"/",ratdata@rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_minDfModels.Rdata")) 
+  print(minDfModels)
+  save(minDfModels, file = paste0(model.data.dir,"/",ratdata@rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_minDfModels.Rdata")) 
 
 
 }

@@ -259,8 +259,6 @@ generateParamResMat=function(ratdata,model.data.dir,count)
   resMat <- Reduce(rbind,resMatList)
   save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
 
-
-
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
@@ -290,21 +288,8 @@ generateParamResMat=function(ratdata,model.data.dir,count)
   # #chunkSize = length(gridMat[,1])/getDoParWorkers()
   # opts <- list(initEnvir=initWorkers) 
 
-  #print(sprintf("getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
-
-  n = 8
-  sessions<-unique(ratdata@allpaths[,5])
-  session_grps<-split(sessions, sort(sessions%%8))
-  maxVecs <- c()
-  for(grp in c(1:n))
-  {
-   #print(grp)
-   begin_ses <- min(session_grps[[grp]])
-   end_ses <- max(session_grps[[grp]])
-   indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
-   maxVecs <- c(maxVecs,max(indices_of_ses))
-  }
-  iter = maxVecs
+  #print(sprintf("getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))  
+  iter = unique(as.numeric(resMat[,1]))
    
   minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
   foreach(it = iter,.combine='rbind', .inorder=TRUE) %do%

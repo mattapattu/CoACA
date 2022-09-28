@@ -46,7 +46,7 @@ rawData <- donnees_ash[[rat]]
 enregres = enregCombine(rawData,rats[i])
 allpaths = enregres$allpaths
 boxTimes = enregres$boxTimes
-ratdata = populateRatModel(allpaths=allpaths,rat=rats[i],donnees_ash[[i]],TurnModel)
+ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
   
 ############## END INIT ##############################################  
 

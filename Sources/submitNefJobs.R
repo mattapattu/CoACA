@@ -106,7 +106,9 @@ if(generateModelParamMat){
   currentTest = "generateModelParamMat"
 
   command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
-
+  cat(command)
+  cat("\n")
+  system(command)
 }
 
 ################## Test 3: ################

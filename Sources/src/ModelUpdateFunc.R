@@ -305,6 +305,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
   minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
   foreach(it = iter,.combine='rbind', .inorder=TRUE) %do%
   {
+    print(sprintf("it=%i,model=%s",it,model))
     df_it <- df[which(df[,1]==it & df[,2]==model),]
     min_lik1 = 1000000
     minmodel = modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
@@ -339,6 +340,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
         minmodel@lambda = 0
       }    
     }
+    print(sprintf("it=%i,model=%s, min_lik1=%i",it,model,min_lik1))
     c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
 
   }

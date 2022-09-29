@@ -138,7 +138,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
             modelName = strsplit(model,"\\.")[[1]][1]
             #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
             creditAssignment = strsplit(model,"\\.")[[1]][2]
-            #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
+            cat(sprintf('rat=%s, iter=%i,modelName=%s,creditAssignment = %s\n', ratName,iter,modelName,creditAssignment))
 
 
             #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))

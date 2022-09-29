@@ -54,7 +54,8 @@ testData = new("TestModels", Name = "AvgRwd",Models=c("Paths.qlearningAvgRwd","H
 
 #### Tests ##############
 computeModelParams = F
-generateModelParamMat = T
+generateModelParamMat = F
+paramEstTest = T
 
 ########################## Test 1: computeModelParams 
 
@@ -83,7 +84,7 @@ if(computeModelParams){
       stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
       currentTest = "computeModelParams"
 
-      command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+      command <- sprintf("oarsub -t besteffort -t idempotent -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
       cat(command)
       cat("\n")
       system(command)
@@ -112,4 +113,95 @@ if(generateModelParamMat){
   generateParamResMat(ratdata,model.data.dir,count)
 }
 
-################## Test 3: ################
+################## Test 3: Estimate params on artificial data ################
+
+if(paramEstTest)
+{
+    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    
+   n = 8
+   sessions<-unique(ratdata@allpaths[,5])
+   session_grps<-split(sessions, sort(sessions%%8))
+   maxVecs <- c()
+   for(grp in c(1:n))
+   {
+    print(grp)
+    begin_ses <- min(session_grps[[grp]])
+    end_ses <- max(session_grps[[grp]])
+    indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
+    maxVecs <- c(maxVecs,max(indices_of_ses))
+   }
+
+
+    alpha_seq = seq_log(1e-3, 0.9,60)
+    gamma1_seq = seq_log(1e-8, 1e-4, 10)
+    gridMat<- expand.grid(alpha_seq,gamma1_seq,maxVecs,c(1:40),stringsAsFactors = FALSE)
+    
+    sequences = seq(0,length(gridMat[,1]), length.out=21)
+    cores = 10
+    walltime = "10:00"
+
+   for(i in c(1:20))
+   {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+      #name = paste0("modelParams_",i,"_",rats[[rat]])
+      name = paste0("pEstTest",i,"_",paste0("rat",rat))
+      stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+      stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+      currentTest = "paramEstTest"
+
+      command <- sprintf("oarsub -t besteffort -t idempotent -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+      cat(command)
+      cat("\n")
+      system(command)
+   }
+
+    
+    
+
+}  
+
+
+################## Test 4: Holdout test on artificial data ################
+
+if(validateHoldout)
+  {
+    #debug(HoldoutTest)
+    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #HoldoutTest(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    
+    
+    alpha_seq = seq_log(1e-3, 0.9,60)
+    gamma1_seq = seq_log(1e-8, 1e-4, 10)
+    models = testData@Models
+    gridMat<- expand.grid(alpha_seq,gamma1_seq,models,c(1:100),stringsAsFactors = FALSE)
+    
+    sequences = seq(0,length(gridMat[,1]), length.out=21)
+    cores = 10
+    walltime = "10:00"
+
+   for(i in c(1:20))
+   {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+      #name = paste0("modelParams_",i,"_",rats[[rat]])
+      name = paste0("hValid",i,"_",paste0("rat",rat))
+      stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+      stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+      currentTest = "paramEstTest"
+
+      command <- sprintf("oarsub -t besteffort -t idempotent -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+      cat(command)
+      cat("\n")
+      system(command)
+   }
+
+
+  }
+

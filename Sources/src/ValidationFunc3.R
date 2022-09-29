@@ -3,7 +3,7 @@ library(rlist)
 
 
 
-HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
+HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
 {
   
   ## Test settings ###############
@@ -30,35 +30,35 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   
     #worker.nodes = mpi.universe.size()-1
     #print(sprintf("worker.nodes=%i",worker.nodes))
-    dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
-    cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-    setRngDoMPI(cl, seed=seed) 
-    exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
-    registerDoMPI(cl)
-    
-    cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
-    
-    initWorkers <-  function() {
-      source(paste(src.dir,"../ModelClasses.R", sep="/"))
-      source(paste(src.dir,"PathModel.R", sep="/"))
-      source(paste(src.dir,"TurnModel.R", sep="/"))
-      source(paste(src.dir,"HybridModel1.R", sep="/"))
-      source(paste(src.dir,"HybridModel2.R", sep="/"))
-      source(paste(src.dir,"HybridModel3.R", sep="/"))
-      source(paste(src.dir,"HybridModel4.R", sep="/"))
-      source(paste(src.dir,"../BaseClasses.R", sep="/"))
-      source(paste(src.dir,"../exportFunctions.R", sep="/"))
-      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=seed) 
+  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  registerDoMPI(cl)
+   
+  cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
+   
+  initWorkers <-  function() {
+    source(paste(src.dir,"../ModelClasses.R", sep="/"))
+    source(paste(src.dir,"PathModel.R", sep="/"))
+    source(paste(src.dir,"TurnModel.R", sep="/"))
+    source(paste(src.dir,"HybridModel1.R", sep="/"))
+    source(paste(src.dir,"HybridModel2.R", sep="/"))
+    source(paste(src.dir,"HybridModel3.R", sep="/"))
+    source(paste(src.dir,"HybridModel4.R", sep="/"))
+    source(paste(src.dir,"../BaseClasses.R", sep="/"))
+    source(paste(src.dir,"../exportFunctions.R", sep="/"))
+    source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
       #attach(myEnv, name="sourced_scripts")
-    }
+  }
     
-    opts <- list(initEnvir=initWorkers)
+  opts <- list(initEnvir=initWorkers)
     
   if(!DataGenerated)
   {
     generatedDataList <-  
      foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
-     foreach(generation=1:20) %dopar%
+     foreach(generation=1:10) %dopar%
      {
        model = models[i] 
        modelName = strsplit(models[i],"\\.")[[1]][1]
@@ -92,7 +92,12 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
          generated_data
        }
        
-     }    
+     }   
+
+    rat=ratdata@rat
+    print(sprintf("Generated DataList"))   
+    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_generatedDataList.Rdata"))
+   
 
   }else{
     ## load generatedDataList
@@ -101,13 +106,8 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   allData<-unlist(generatedDataList)
   modelNum =  length(allData)
   
-
-  alpha_seq = seq_log(1e-3, 0.9,60)
-  gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,models,c(1:modelNum),stringsAsFactors = FALSE)
-    
-
-  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  chunkSize = 75
+  #chunkSize = length(gridMat[,1])/getDoParWorkers()
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   
@@ -120,8 +120,8 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         model = gridMat[idx,3]
-        modelNum = gridMat[idx,4]
-        generatedData = allData[[modelNum]]
+        modelNb = gridMat[idx,4]
+        generatedData = allData[[modelNb]]
 
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
@@ -150,7 +150,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   
   print(time2)
   rat = ratdata@rat
-  save(resList,  file = paste0(res.model.data.dir,"/",rat, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_resList.Rdata"))
+  save(resList,  file = paste0(res.model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_resList.Rdata"))
 # setwd(res.model.data.dir)
 # print(res.model.data.dir)
 # rat=ratdata@rat
@@ -187,7 +187,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   }
   
   rat = ratdata@rat
-  save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_mat_res.Rdata"))
+  save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_mat_res.Rdata"))
   
   
   if(setup.hpc)
@@ -213,11 +213,11 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
 
 
 
-testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
+testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,gridMat,name)
 {
   ## Test settings ###############
   
-  StabilityTest = FALSE 
+  StabilityTest = TRUE 
   DataGenerated = FALSE
   
   ##################################
@@ -272,6 +272,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
       foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
       foreach(generation=1:10) %dopar%
       {
+        
         model = models[i] 
         modelName = strsplit(models[i],"\\.")[[1]][1]
         creditAssignment = strsplit(models[i],"\\.")[[1]][2]
@@ -311,7 +312,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
     
     rat=ratdata@rat
     print(sprintf("Generated DataList"))   
-    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat, timestamp,"_generatedDataList.Rdata"))
+    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_generatedDataList.Rdata"))
 
    }else{
     ### Load generatedDataList.Rdata
@@ -319,26 +320,9 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
    allData<-unlist(generatedDataList)
    modelNum =  length(allData)
-   n = 8
-   sessions<-unique(ratdata@allpaths[,5])
-   session_grps<-split(sessions, sort(sessions%%8))
-   maxVecs <- c()
-   for(grp in c(1:n))
-   {
-    print(grp)
-    begin_ses <- min(session_grps[[grp]])
-    end_ses <- max(session_grps[[grp]])
-    indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
-    maxVecs <- c(maxVecs,max(indices_of_ses))
-   }
 
-  alpha_seq = seq_log(1e-3, 0.9,60)
-  gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  iters=maxVecs
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,c(1:modelNum),stringsAsFactors = FALSE)
-    
-
-  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  #chunkSize = length(gridMat[,1])/getDoParWorkers()
+  chunkSize = 75
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -395,7 +379,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
    
     rat = ratdata@rat
-    save(resList,  file = paste0(res.model.data.dir,"/",rat, timestamp,"_ParamEstResList.Rdata"))
+    save(resList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_ParamEstResList.Rdata"))
    
 
     if(any(grepl("qlearningAvgRwd",models)))
@@ -437,11 +421,11 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
       rat = ratdata@rat
       if(StabilityTest)
       {
-        save(df, file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Stability_df.Rdata"))
       }
       else
       {
-        save(df,  file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
+        save(df,  file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Conv_df.Rdata"))
       }
 
    }
@@ -477,16 +461,15 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
       if(StabilityTest)
       {
-        save(df, file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Stability_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Stability_df.Rdata"))
       }
       else
       {
-        save(df, file = paste0(res.model.data.dir, "/" , rat, timestamp,"_ParamEs_Conv_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Conv_df.Rdata"))
       }
    
    }
-   
-    
+      
    
   if(setup.hpc)
   {

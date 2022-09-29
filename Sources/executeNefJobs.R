@@ -69,7 +69,7 @@ testData = new("TestModels", Name = "AvgRwd",Models=c("Paths.qlearningAvgRwd","H
 
 if(currentTest == "computeModelParams")
 {
-  alpha_seq = seq_log(1e-3, 0.9,60)
+  alpha_seq = seq_log(1e-3, 0.9,100)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
   models = testData@Models
@@ -89,10 +89,69 @@ if(currentTest == "computeModelParams")
 
 
 if(currentTest == "generateModelParamMat"){
+
   generateParamResMat(ratdata,model.data.dir,count)
+
 } 
+
+################# Test 3: Param estimation test ######################
+
+  if(currentTest == "paramEstTest"){
+
+   
+   n = 8
+   sessions<-unique(ratdata@allpaths[,5])
+   session_grps<-split(sessions, sort(sessions%%8))
+   maxVecs <- c()
+   for(grp in c(1:n))
+   {
+    print(grp)
+    begin_ses <- min(session_grps[[grp]])
+    end_ses <- max(session_grps[[grp]])
+    indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
+    maxVecs <- c(maxVecs,max(indices_of_ses))
+   }
+   
+    alpha_seq = seq_log(1e-3, 0.9,60)
+    gamma1_seq = seq_log(1e-8, 1e-4, 10)
+    gridMat<- expand.grid(alpha_seq,gamma1_seq,maxVecs,c(1:40),stringsAsFactors = FALSE)
+    
+    sequences = seq(0,length(gridMat[,1]), length.out=21)
+    gridMat <- gridMat[start_idx:end_idx,]
+    print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
+      
+    seq_id <- which((sequences+1) %in% start_idx)
+    name = paste0("mParams",seq_id,"_",paste0("rat",select_rat))
+
+    testParamEstimationNew(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name)
+
+
+  } 
   
+    #plotSimParamEstimation(ratdata,testData,model.data.dir,plot.dir)
+    #plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
+
   
+  ################## Test 4: Holdout test on artificial data ################
+
+  if(validateHoldout)
+  {
+    alpha_seq = seq_log(1e-3, 0.9,60)
+    gamma1_seq = seq_log(1e-8, 1e-4, 10)
+    models = testData@Models
+    gridMat<- expand.grid(alpha_seq,gamma1_seq,models,c(1:100),stringsAsFactors = FALSE)
+    
+    sequences = seq(0,length(gridMat[,1]), length.out=21)
+    gridMat <- gridMat[start_idx:end_idx,]
+    print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
+      
+    seq_id <- which((sequences+1) %in% start_idx)
+    name = paste0("mParams",seq_id,"_",paste0("rat",select_rat))
+    
+    HoldoutTestNew(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count,gridMat, name)
+    #model.data.dir = paste(model.data.dir,"holdoutTest",ratdata@rat,sep="/")
+    #printMatRes(ratdata,testData,model.data.dir)
+  }
 
 
 

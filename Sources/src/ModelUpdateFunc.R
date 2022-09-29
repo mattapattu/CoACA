@@ -118,7 +118,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
      }
   
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  chunkSize = 75
+  chunkSize = 20
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -181,57 +181,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
   
    print(resMat)
    rat = ratdata@rat
-   save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
-  
-  # df <- as.data.frame(resMat)
-  # cols.num <- c(1,3,4,5,6,7)
-  # df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
-  # models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
-
-  # minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
-  #   foreach(it = iter,.combine='rbind', .inorder=TRUE) %dopar%
-  # {
-  #   df_it <- df[which(df[,1]==it & df[,2]==model),]
-  #   min_lik1 = 1000000
-  #   minmodel = modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
-  #   for(idx in 1:length(df_it[,1]))
-  #   {
-  #     modelData@alpha = df_it[idx,3]
-  #     modelData@gamma1 = df_it[idx,4]
-  #     modelData@gamma2 = 0.1
-  #     modelData@lambda = 0
-  #     argList <- getArgList(modelData, ratdata)
-  #     lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-  #     lik1 <- sum(lik[c(1:800)])*-1
-  #     lik2 <- sum(lik[-c(1:800)])*-1
-  #     df_it[idx,7]= lik1
-      
-  #     if (is.infinite(lik1)) {
-  #       lik1= 1000000
-  #     }else if (is.nan(lik1)) {
-  #       #print(sprintf("Alpha = %f", alpha))
-  #       lik1 = 1000000
-  #     }else if (is.na(lik1)) {
-  #       #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
-  #       lik1 = 1000000
-  #     }
-  #     if(lik1 < min_lik1)
-  #     {
-  #       min_lik1=lik1
-  #       min_lik2=lik2
-  #       minmodel@alpha = df_it[idx,3]
-  #       minmodel@gamma1 = df_it[idx,4]
-  #       minmodel@gamma2 = 0.1
-  #       minmodel@lambda = 0
-  #     }    
-  #   }
-  #   c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
-  # }
-  
-  # print(minDfModels)
-  # save(minDfModels, file = paste0(model.data.dir,"/",ratdata@rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_minDfModels.Rdata")) 
-
-  
+   save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata"))   
 }
 
 
@@ -266,29 +216,6 @@ generateParamResMat=function(ratdata,model.data.dir,count)
 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
   
-  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  # #setRngDoMPI(cl, seed=count)
-  # exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
-  # registerDoMPI(cl)
-  
-  #  initWorkers <-  function() {
-  #      source(paste(src.dir, "ModelClasses.R", sep = "/"))
-  #      source(paste(model.src, "PathModel.R", sep = "/"))
-  #      source(paste(model.src, "TurnModel.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel1.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel2.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel3.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel4.R", sep = "/"))
-  #      source(paste(src.dir, "BaseClasses.R", sep = "/"))
-  #      source(paste(src.dir,"exportFunctions.R", sep="/"))
-   
-  #      #attach(myEnv, name="sourced_scripts")
-  #    }
-  
-  # #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  # opts <- list(initEnvir=initWorkers) 
-
-  #print(sprintf("getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))  
   iter = unique(as.numeric(resMat[,1]))
    
   minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
@@ -306,7 +233,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
       modelData@lambda = 0
       argList <- getArgList(modelData, ratdata)
       lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-      lik1 <- sum(lik[c(1:800)])*-1
+      lik1 <- sum(lik[c(1:it)])*-1
       lik2 <- sum(lik[-c(1:800)])*-1
       df_it[idx,7]= lik1
 
@@ -670,12 +597,15 @@ readModelParams <- function(ratdata,res.dir,testingdata, sim){
   
 }
 
-readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
+readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
   
   print(sprintf("Inside readModelParams"))
   models <- testingdata@Models
   
-
+  setwd(param.model.data.dir)
+  load(list.files(".", pattern=paste0(ratName,".*minDfModels.Rdata"), full.names=FALSE))
+  allModelRes <- minDfModels
+  modelParamsList <- minDfModels[which(as.numeric(minDfModels[,2])==  length(ratdata@allpaths[,1])),]
 
   allmodelRes <- new("AllModelRes")
   setwd(res.dir)
@@ -692,16 +622,13 @@ readModelParamsNew <- function(ratdata,res.dir,testingdata, sim){
     creditAssignment = strsplit(models[i],"\\.")[[1]][2]
     modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = sim)
     print(sprintf("modelName=%s,creditAssignment=%s",modelName,creditAssignment))
-    paramTestData=list.files(".", pattern=paste0(rat,".*",modelName,".",creditAssignment,"_ParamRes.Rdata"), full.names=FALSE)
-    print(paramTestData)
-    load(paramTestData)
-    rowlen <- length(modelRes[[1]][,1])
-    modelData@alpha <- modelRes[[1]][rowlen, 2]
-    modelData@gamma1 <- modelRes[[1]][rowlen, 3]
+
+    modelData@alpha <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),3])
+    modelData@gamma1 <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),4])
     if(ncol(modelRes[[1]]) >= 5)
     {
-      modelData@gamma2 <- modelRes[[1]][rowlen, 4]
-      modelData@lambda <- modelRes[[1]][rowlen, 5]
+      modelData@gamma2 <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),5])
+      modelData@lambda <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),6])
     }
     modelData <- setModelResults(modelData, ratdata, allModels)
     allmodelRes <- addModelData(allmodelRes, modelData)

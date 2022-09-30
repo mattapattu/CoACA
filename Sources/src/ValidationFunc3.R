@@ -1,5 +1,6 @@
 library(doMPI)
 library(rlist)
+library(nloptr)
 
 
 
@@ -106,7 +107,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   allData<-unlist(generatedDataList)
   modelNum =  length(allData)
   
-  chunkSize = 75
+  chunkSize = 150
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
@@ -138,9 +139,9 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
 
         #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
             #cat("Here1")
-        opt <- optim(par = c(alpha,gamma1),
+         res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                          fn = negLogLikFunc,ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1)
-            modelData = setModelParams(modelData, c(opt$par,0.1,0))
+            modelData = setModelParams(modelData, c(res$par,0.1,0))
 
         
         modelData = setModelResults(modelData,generatedData,allModels)
@@ -322,7 +323,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
    modelNum =  length(allData)
 
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  chunkSize = 75
+  chunkSize = 150
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -352,9 +353,9 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
 
             #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
             #cat("Here1")
-        opt <- optim(par = c(alpha,gamma1),
+        res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                   fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
-        modelData = setModelParams(modelData, c(opt$par,0.1,0))
+        modelData = setModelParams(modelData, c(res$par,0.1,0))
 
         probMat <- TurnsNew::getProbMatrix(argList[[3]], modelData, argList[[6]], sim=1)
         trueModelData <- generated_data@simModelData

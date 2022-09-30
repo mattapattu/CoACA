@@ -27,6 +27,7 @@ library(bigsnpr)
 #library(parallelly)
 #library(doFuture)
 library(listenv)
+library(nloptr)
 
 
 analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
@@ -118,7 +119,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
      }
   
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  chunkSize = 20
+  chunkSize = 150
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -147,10 +148,10 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
 
             #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
             #cat("Here1")
-            opt <- optim(par = c(alpha,gamma1),
+            res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                          fn = negLogLikFunc,ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2)
             #cat("Here2")
-            modelData = setModelParams(modelData, c(opt$par,0.1,0))
+            modelData = setModelParams(modelData, c(res$par,0.1,0))
             if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
             {
               #cat("Here")

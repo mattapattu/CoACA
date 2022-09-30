@@ -22,9 +22,9 @@ if(computeModelParams){
   source("testConfig.R")
 
   cores = 10
-  walltime = "7:00"
+  walltime = "10:00"
 
-  for(i in c(1:9))
+  for(i in c(1:10))
   {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]

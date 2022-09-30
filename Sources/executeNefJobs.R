@@ -1,7 +1,7 @@
 args <- commandArgs(trailingOnly = TRUE)
 print(args)
 
-select_rat <- as.integer(args[1])
+rat <- as.integer(args[1])
 seed <- as.numeric(args[2])
 count <- as.integer(args[3])
 currentTest <- as.character(args[4])

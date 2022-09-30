@@ -179,7 +179,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
         
 
       }
-   resMat <- rbindlist(resMat)
+   resMat <- Reduce(rbind,resMat)
    print(resMat)
    rat = ratdata@rat
    save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata"))   
@@ -604,12 +604,13 @@ readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
   models <- testingdata@Models
   
   setwd(param.model.data.dir)
+  ratName = ratdata@rat
   load(list.files(".", pattern=paste0(ratName,".*minDfModels.Rdata"), full.names=FALSE))
   allModelRes <- minDfModels
   modelParamsList <- minDfModels[which(as.numeric(minDfModels[,2])==  length(ratdata@allpaths[,1])),]
 
   allmodelRes <- new("AllModelRes")
-  setwd(res.dir)
+  #setwd(res.dir)
   #print(res.dir)
   rat=ratdata@rat
   #paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
@@ -626,7 +627,7 @@ readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
 
     modelData@alpha <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),3])
     modelData@gamma1 <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),4])
-    if(ncol(modelRes[[1]]) >= 5)
+    if(creditAssignment == "qlearningAvgRwd")
     {
       modelData@gamma2 <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),5])
       modelData@lambda <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),6])

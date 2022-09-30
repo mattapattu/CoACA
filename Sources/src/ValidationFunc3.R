@@ -114,7 +114,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   
   time2<- system.time(  
     resList<-
-      foreach(i = 1:length(gridMat[,1]), .combine='rbind', .packages="nloptr",.options.mpi=opts) %dopar%
+      foreach(i = 1:length(gridMat[,1]), .packages="nloptr",.options.mpi=opts) %dopar%
       { 
         generated_data = allData[[i]]
 
@@ -150,6 +150,8 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   )
   
   print(time2)
+
+  resList
   rat = ratdata@rat
   save(resList,  file = paste0(res.model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_resList.Rdata"))
 # setwd(res.model.data.dir)
@@ -329,7 +331,7 @@ testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.di
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resList <- 
-      foreach(idx = 1:length(gridMat[,1]), .combine='rbind',.packages="nloptr", .options.mpi=opts) %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .packages="nloptr", .options.mpi=opts) %dopar% {
         #start_idx=sequences[i]
         #idx = start_idx+j
         alpha = gridMat[idx,1]

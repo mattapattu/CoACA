@@ -53,7 +53,9 @@ if(currentTest == "computeModelParams")
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
   models = testData@Models
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=11)    
+  sequences = seq(0,length(gridMat[,1]), length.out=11)  
+  print(sprintf("gridMat len=%i",length(gridMat[,1])))
+  
 }
 
 ################# Test : Param estimation test ######################

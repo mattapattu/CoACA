@@ -32,12 +32,12 @@ source(paste(src.dir,"ValidationFunc.R", sep="/"))
 source(paste(src.dir,"ValidationFunc2.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
-rawData <- donnees_ash[[select_rat]] 
-enregres = enregCombine(rawData,rats[select_rat])
+rawData <- donnees_ash[[rat]] 
+enregres = enregCombine(rawData,rats[rat])
 allpaths = enregres$allpaths
 boxTimes = enregres$boxTimes
     
-ratdata = populateRatModel(allpaths=allpaths,rat=rats[select_rat],donnees_ash[[select_rat]],TurnModel)
+ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
 
 ############### Tests #############################################
 

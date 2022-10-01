@@ -62,11 +62,11 @@ if(generateModelParamMat){
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
   currentTest = "generateModelParamMat"
 
-  #command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
-  #cat(command)
-  #cat("\n")
-  #system(command)
-  generateParamResMat(ratdata,model.data.dir,count)
+  command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+  cat(command)
+  cat("\n")
+  system(command)
+  #generateParamResMat(ratdata,model.data.dir,count)
 }
 
 ################## Test 3: Estimate params on artificial data ################

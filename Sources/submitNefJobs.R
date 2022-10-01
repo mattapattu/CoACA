@@ -12,7 +12,7 @@ options(error=function()traceback(2))
 computeModelParams = F
 generateModelParamMat = F
 paramEstTest = T
-validateHoldout = T
+validateHoldout = F
 
 ########################## Test 1: computeModelParams 
 
@@ -79,10 +79,10 @@ if(paramEstTest)
   currentTest = "paramEstTest"
   source("testConfig.R")
   cores = 10
-  walltime = "10:00"
+  walltime = "12:00"
 
 
-   for(i in c(1:20))
+   for(i in c(1:10))
    {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]

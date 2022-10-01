@@ -30,6 +30,7 @@ source(paste(src.dir,"BaseClasses.R", sep="/"))
 source(paste(src.dir,"ModelUpdateFunc.R", sep="/"))
 source(paste(src.dir,"ValidationFunc.R", sep="/"))
 source(paste(src.dir,"ValidationFunc2.R", sep="/"))
+source(paste(src.dir,"ValidationFunc3.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 testData = new("TestModels", Name = "AvgRwd",Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))

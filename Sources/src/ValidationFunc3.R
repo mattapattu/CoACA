@@ -391,7 +391,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         row2[is.nan(row2)] <- 0
         probRow <- row1 + row2  
         probRow[is.infinite(probRow)] <- 0
-        list(iter = iter, genDataIndex = j,data=generatedData,res=modelData,probRow=probRow,trueModelData=trueModelData)
+        list(iter = iter, genDataIndex = modelNum,data=generatedData,res=modelData,probRow=probRow,trueModelData=trueModelData)
       }
 
    

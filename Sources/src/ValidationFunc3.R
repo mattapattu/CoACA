@@ -377,12 +377,12 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         trueModelData <- generatedData@simModelData
         trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
             
-        row1 <- round((trueProbMat[rowEnd,] - probMat[rowEnd,]),2)/round(trueProbMat[rowEnd,],2) 
-        if(trueProbMat[rowEnd,1] == -1)
+        row1 <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
+        if(trueProbMat[iter,1] == -1)
           {
-            index <- max(which(probMat[1:rowEnd,1] != -1))
+            index <- max(which(probMat[1:iter,1] != -1))
           }else{
-            index <- max(which(probMat[1:rowEnd,7] != -1))
+            index <- max(which(probMat[1:iter,7] != -1))
           }
             #print(sprintf("index=%i",index))
             

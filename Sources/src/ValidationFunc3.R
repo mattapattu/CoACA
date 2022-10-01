@@ -288,28 +288,44 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         while(!simLearns){
           if(StabilityTest)
           {
-           trueModelData = modifyModelData(trueModelData)
+           trueModelData_mod = modifyModelData(trueModelData)
+           generated_data = simulateData(trueModelData_mod,ratdata,allModels)
+          }else{
+            generated_data = simulateData(trueModelData,ratdata,allModels)
           }
-          generated_data = simulateData(trueModelData,ratdata,allModels)
+          
           #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
           simLearns = checkSimLearns(generated_data@allpaths,sim=1,limit=0.8) 
           missedOptimalIter=missedOptimalIter+1
           
           if(missedOptimalIter>500)
           {
-              cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
-        break
+              cat(sprintf('model = %s, missedOptimalIter = %i, trueAlpha = %f, trueGamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
+              break
           }
-          cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
+          #cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
         }
+
         
         if(simLearns)
         {
-          generated_data = populateSimRatModel(ratdata,generated_data,modelName)
-          generated_data@simModel = trueModelData@Model
-          generated_data@simMethod = trueModelData@creditAssignment
-          generated_data@simModelData = trueModelData
+          if(StabilityTest)
+          {
+            cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData_mod@alpha, trueModelData_mod@gamma1)) 
+            generated_data = populateSimRatModel(ratdata,generated_data,modelName)
+            generated_data@simModel = trueModelData_mod@Model
+            generated_data@simMethod = trueModelData_mod@creditAssignment
+            generated_data@simModelData = trueModelData_mod
+          }else{
+
+            cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
+            generated_data = populateSimRatModel(ratdata,generated_data,modelName)
+            generated_data@simModel = trueModelData@Model
+            generated_data@simMethod = trueModelData@creditAssignment
+            generated_data@simModelData = trueModelData
+          }
           generated_data
+
         }
         
       } 

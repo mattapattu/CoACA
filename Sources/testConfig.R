@@ -69,7 +69,7 @@ if(currentTest == "paramEstTest")
   maxVecs <- c()
   for(grp in c(1:n))
   {
-   print(grp)
+   #print(grp)
    begin_ses <- min(session_grps[[grp]])
    end_ses <- max(session_grps[[grp]])
    indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)

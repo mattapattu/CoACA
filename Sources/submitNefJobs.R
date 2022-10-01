@@ -89,7 +89,7 @@ if(paramEstTest)
       seed = start_idx
       spawnslaves = cores-1
       #name = paste0("modelParams_",i,"_",rats[[rat]])
-      name = paste0("pEstTest",i,"_",paste0("rat",rat))
+      name = paste0("paramEst",i,"_",paste0("rat",rat))
       stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
       stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
@@ -119,7 +119,7 @@ if(validateHoldout)
       seed = start_idx
       spawnslaves = cores-1
       #name = paste0("modelParams_",i,"_",rats[[rat]])
-      name = paste0("hValid",i,"_",paste0("rat",rat))
+      name = paste0("holdVal",i,"_",paste0("rat",rat))
       stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
       stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 

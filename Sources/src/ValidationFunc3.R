@@ -4,7 +4,7 @@ library(nloptr)
 
 
 
-HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
+HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
 {
   
   ## Test settings ###############
@@ -216,7 +216,7 @@ HoldoutTestNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
 
 
 
-testParamEstimationNew=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,gridMat,name)
+testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,gridMat,name)
 {
   ## Test settings ###############
   

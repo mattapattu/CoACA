@@ -317,7 +317,6 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
             generated_data@simMethod = trueModelData_mod@creditAssignment
             generated_data@simModelData = trueModelData_mod
           }else{
-
             cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
             generated_data = populateSimRatModel(ratdata,generated_data,modelName)
             generated_data@simModel = trueModelData@Model

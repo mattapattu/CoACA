@@ -71,9 +71,9 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
        missedOptimalIter = 0
        
        while(!simLearns){
-         generated_data = simulateData(trueModelData,ratdata,allModels)
+         generatedData = simulateData(trueModelData,ratdata,allModels)
          #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
-         simLearns = checkSimLearns(generated_data@allpaths,sim=1,limit=0.8) 
+         simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
          missedOptimalIter=missedOptimalIter+1
          
          if(missedOptimalIter>500)
@@ -86,11 +86,11 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
        
        if(simLearns)
        {
-         generated_data = populateSimRatModel(ratdata,generated_data,modelName)
-         generated_data@simModel = trueModelData@Model
-         generated_data@simMethod = trueModelData@creditAssignment
-         generated_data@simModelData = trueModelData
-         generated_data
+         generatedData = populateSimRatModel(ratdata,generatedData,modelName)
+         generatedData@simModel = trueModelData@Model
+         generatedData@simMethod = trueModelData@creditAssignment
+         generatedData@simModelData = trueModelData
+         generatedData
        }
        
      }   
@@ -116,8 +116,6 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
     resList<-
       foreach(i = 1:length(gridMat[,1]), .packages="nloptr",.options.mpi=opts) %dopar%
       { 
-        generated_data = allData[[i]]
-
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         model = gridMat[idx,3]
@@ -289,13 +287,13 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
           if(StabilityTest)
           {
            trueModelData_mod = modifyModelData(trueModelData)
-           generated_data = simulateData(trueModelData_mod,ratdata,allModels)
+           generatedData = simulateData(trueModelData_mod,ratdata,allModels)
           }else{
-            generated_data = simulateData(trueModelData,ratdata,allModels)
+            generatedData = simulateData(trueModelData,ratdata,allModels)
           }
           
           #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
-          simLearns = checkSimLearns(generated_data@allpaths,sim=1,limit=0.8) 
+          simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
           missedOptimalIter=missedOptimalIter+1
           
           if(missedOptimalIter>500)
@@ -312,18 +310,18 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
           if(StabilityTest)
           {
             cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData_mod@alpha, trueModelData_mod@gamma1)) 
-            generated_data = populateSimRatModel(ratdata,generated_data,modelName)
-            generated_data@simModel = trueModelData_mod@Model
-            generated_data@simMethod = trueModelData_mod@creditAssignment
-            generated_data@simModelData = trueModelData_mod
+            generatedData = populateSimRatModel(ratdata,generatedData,modelName)
+            generatedData@simModel = trueModelData_mod@Model
+            generatedData@simMethod = trueModelData_mod@creditAssignment
+            generatedData@simModelData = trueModelData_mod
           }else{
             cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
-            generated_data = populateSimRatModel(ratdata,generated_data,modelName)
-            generated_data@simModel = trueModelData@Model
-            generated_data@simMethod = trueModelData@creditAssignment
-            generated_data@simModelData = trueModelData
+            generatedData = populateSimRatModel(ratdata,generatedData,modelName)
+            generatedData@simModel = trueModelData@Model
+            generatedData@simMethod = trueModelData@creditAssignment
+            generatedData@simModelData = trueModelData
           }
-          generated_data
+          generatedData
 
         }
         
@@ -376,7 +374,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         modelData = setModelParams(modelData, c(res$par,0.1,0))
 
         probMat <- TurnsNew::getProbMatrix(argList[[3]], modelData, argList[[6]], sim=1)
-        trueModelData <- generated_data@simModelData
+        trueModelData <- generatedData@simModelData
         trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
             
         row1 <- round((trueProbMat[rowEnd,] - probMat[rowEnd,]),2)/round(trueProbMat[rowEnd,],2) 
@@ -393,7 +391,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         row2[is.nan(row2)] <- 0
         probRow <- row1 + row2  
         probRow[is.infinite(probRow)] <- 0
-        list(iter = iter, genDataIndex = j,data=generated_data,res=modelData,probRow=probRow,trueModelData=trueModelData)
+        list(iter = iter, genDataIndex = j,data=generatedData,res=modelData,probRow=probRow,trueModelData=trueModelData)
       }
 
    
@@ -420,7 +418,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       {
         iter = resList[[k]]$iter
         genIndex = resList[[k]]$genDataIndex
-        generated_data = resList[[k]]$data
+        generatedData = resList[[k]]$data
         modelDataRes = resList[[k]]$res
         trueModelData = resList[[k]]$trueModelData
         
@@ -463,7 +461,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       {
         iter = resList[[k]]$iter
         genIndex = resList[[k]]$genDataIndex
-        generated_data = resList[[k]]$data
+        generatedData = resList[[k]]$data
         modelDataRes = resList[[k]]$res
         trueModelData = resList[[k]]$trueModelData
         

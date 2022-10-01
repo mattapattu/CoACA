@@ -240,13 +240,14 @@ generateParamResMat=function(ratdata,model.data.dir,count)
    
        #attach(myEnv, name="sourced_scripts")
      }
-  
 
+
+  chunkSize = length(models)*length(iter)/getDoParWorkers()
+  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
    
-  minDfModels <- foreach(model = models, .inorder=TRUE) %:% 
+  minDfModels <- foreach(model = models, .inorder=TRUE, .options.mpi=opts) %:% 
     foreach(it = iter, .inorder=TRUE) %dopar%
     {
-      initWorkers()
       print(sprintf("it=%i,model=%s",it,model))
       df_it <- df[which(df[,1]==it & df[,2]==model),]
       min_lik1 = 1000000

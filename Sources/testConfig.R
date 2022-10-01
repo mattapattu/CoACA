@@ -85,7 +85,7 @@ if(currentTest == "paramEstTest")
 
 ################# Test : validate holdout ######################
 
-if(currentTest == "paramEstTest")
+if(currentTest == "validateHoldout")
 {
   alpha_seq = seq_log(1e-3, 0.9,60)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)

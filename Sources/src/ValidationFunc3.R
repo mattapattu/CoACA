@@ -280,15 +280,16 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         modelName = strsplit(models[i],"\\.")[[1]][1]
         creditAssignment = strsplit(models[i],"\\.")[[1]][2]
         trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-        if(StabilityTest)
-        {
-          trueModelData = modifyModelData(trueModelData)
-        }
+        
         #trueModelData = modifyModelData(trueModelData) 
         simLearns = FALSE 
         missedOptimalIter = 0
         
         while(!simLearns){
+          if(StabilityTest)
+          {
+           trueModelData = modifyModelData(trueModelData)
+          }
           generated_data = simulateData(trueModelData,ratdata,allModels)
           #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
           simLearns = checkSimLearns(generated_data@allpaths,sim=1,limit=0.8) 

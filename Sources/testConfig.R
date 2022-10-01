@@ -79,7 +79,7 @@ if(currentTest == "paramEstTest")
 
   alpha_seq = seq_log(1e-3, 0.9,60)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,maxVecs,c(1:10),stringsAsFactors = FALSE)
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,maxVecs,c(1:4),stringsAsFactors = FALSE)
   sequences = seq(0,length(gridMat[,1]), length.out=11)
 }
 

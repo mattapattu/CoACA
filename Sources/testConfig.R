@@ -59,6 +59,17 @@ if(currentTest == "computeModelParams")
   
 }
 
+############## Generate Datasets ##########################
+
+if(currentTest == "generateDataset")
+{
+  gridMat<- expand.grid(models,c(1:100),stringsAsFactors = FALSE)
+  sequences = seq(0,length(gridMat[,1]), length.out=11)
+}
+
+
+
+
 ################# Test : Param estimation test ######################
 
 

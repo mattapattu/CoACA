@@ -36,12 +36,27 @@ if(currentTest == "generateModelParamMat"){
 
 } 
 
+################# Generate Dataset ######################
+
+  if(currentTest == "generateDataset"){
+
+    
+    gridMat <- gridMat[start_idx:end_idx,]
+    seq_id <- which((sequences+1) %in% start_idx)
+    name = paste0("GenData",seq_id,"_",paste0("rat",rat))
+
+    GenerateData(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name)
+
+
+  } 
+
+
 ################# Test 3: Param estimation test ######################
 
   if(currentTest == "paramEstTest"){
 
     seq_id <- which((sequences+1) %in% start_idx)
-    name = paste0("paramEst",seq_id,"_",paste0("rat",rat))
+    name = paste0("paramEs",seq_id,"_",paste0("rat",rat))
 
     testParamEstimationV2(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name)
 

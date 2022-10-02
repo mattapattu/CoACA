@@ -69,6 +69,39 @@ if(generateModelParamMat){
   #generateParamResMat(ratdata,model.data.dir,count)
 }
 
+############## Generate Datasets ##########################
+
+if(generateDataset)
+{
+  currentTest = "generateDataset"
+  source("testConfig.R")
+  cores = 10
+  walltime = "12:00"
+
+ 
+
+   for(i in c(1:10))
+   {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+      #name = paste0("modelParams_",i,"_",rats[[rat]])
+      name = paste0("GenData",i,"_",paste0("rat",rat))
+      stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+      stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+      command <- sprintf("oarsub -t besteffort -t idempotent -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+      cat(command)
+      cat("\n")
+      system(command)
+   }
+
+}
+
+
+
+
 ################## Test 3: Estimate params on artificial data ################
 
 if(paramEstTest)

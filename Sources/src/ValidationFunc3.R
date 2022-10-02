@@ -3,6 +3,124 @@ library(rlist)
 library(nloptr)
 
 
+GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
+{
+  ## Test settings ###############
+  
+  StabilityTest = TRUE 
+  DataGenerated = FALSE
+  
+  ##################################
+  models = testData@Models
+  #creditAssignment = testData@creditAssignment
+  
+  #paramTest = list()
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  ratName = ratdata@rat
+  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
+
+  res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
+   
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
+  timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+ 
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=seed)
+    
+  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  registerDoMPI(cl)
+    
+   initWorkers <-  function() {
+      source(paste(src.dir,"../ModelClasses.R", sep="/"))
+      source(paste(src.dir,"PathModel.R", sep="/"))
+      source(paste(src.dir,"TurnModel.R", sep="/"))
+      source(paste(src.dir,"HybridModel1.R", sep="/"))
+      source(paste(src.dir,"HybridModel2.R", sep="/"))
+      source(paste(src.dir,"HybridModel3.R", sep="/"))
+      source(paste(src.dir,"HybridModel4.R", sep="/"))
+      source(paste(src.dir,"../BaseClasses.R", sep="/"))
+      source(paste(src.dir,"../exportFunctions.R", sep="/"))
+      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
+      #attach(myEnv, name="sourced_scripts")
+    }
+   
+   chunkSize = 2
+   #chunkSize = 150
+   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
+ 
+   source(paste(src.dir,"../exportFunctions.R", sep="/")) 
+   
+   generatedDataList <-  
+   foreach(i=1:length(gridMat[,1]), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
+     %dopar%
+    {
+        
+      model = gridMat[i,1] 
+      index = gridMat[i,1]
+      cat(sprintf('model = %s, index = %i, \n', model,index))
+
+      modelName = strsplit(models[i],"\\.")[[1]][1]
+      creditAssignment = strsplit(models[i],"\\.")[[1]][2]
+      trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
+       
+        #trueModelData = modifyModelData(trueModelData) 
+      simLearns = FALSE 
+      missedOptimalIter = 0
+        
+      while(!simLearns)
+      {
+        if(StabilityTest)
+        {
+         trueModelData_mod = modifyModelData(trueModelData)
+         generatedData = simulateData(trueModelData_mod,ratdata,allModels)
+        }else{
+         generatedData = simulateData(trueModelData,ratdata,allModels)
+        }
+          
+          #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
+        simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
+        missedOptimalIter=missedOptimalIter+1
+          
+        if(missedOptimalIter>500)
+        {
+          cat(sprintf('model = %s, missedOptimalIter = %i, trueAlpha = %f, trueGamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
+          break
+        }
+          #cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
+      }
+
+        
+      if(simLearns)
+      {
+        if(StabilityTest)
+        {
+          cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData_mod@alpha, trueModelData_mod@gamma1)) 
+          generatedData = populateSimRatModel(ratdata,generatedData,modelName)
+          generatedData@simModel = trueModelData_mod@Model
+          generatedData@simMethod = trueModelData_mod@creditAssignment
+          generatedData@simModelData = trueModelData_mod
+        }else{
+          cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
+          generatedData = populateSimRatModel(ratdata,generatedData,modelName)
+          generatedData@simModel = trueModelData@Model
+          generatedData@simMethod = trueModelData@creditAssignment
+          generatedData@simModelData = trueModelData
+       }
+       generatedData
+
+      }
+        
+    } 
+  allData<-unlist(generatedDataList)  
+  rat=ratdata@rat
+  print(sprintf("Generated DataList"))   
+  save(allData,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_genDataset.Rdata"))
+
+  
+}
+
+
 HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
 {
   

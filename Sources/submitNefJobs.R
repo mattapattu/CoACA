@@ -11,6 +11,7 @@ options(error=function()traceback(2))
 #### Tests ##############
 computeModelParams = F
 generateModelParamMat = F
+generateDataset = F
 paramEstTest = T
 validateHoldout = F
 

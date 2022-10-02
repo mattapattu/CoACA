@@ -63,6 +63,7 @@ if(currentTest == "computeModelParams")
 
 if(currentTest == "generateDataset")
 {
+  models = testData@Models
   gridMat<- expand.grid(models,c(1:100),stringsAsFactors = FALSE)
   sequences = seq(0,length(gridMat[,1]), length.out=11)
 }

@@ -53,9 +53,7 @@ if(currentTest == "generateModelParamMat"){
 
   if(currentTest == "validateHoldout")
   {
-    gridMat <- gridMat[start_idx:end_idx,]
-    print(sprintf("start_idx=%i,end_idx=%i",start_idx,end_idx))
-      
+     
     seq_id <- which((sequences+1) %in% start_idx)
     name = paste0("holdVal",seq_id,"_",paste0("rat",rat))
     

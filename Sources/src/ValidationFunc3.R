@@ -3,7 +3,6 @@ library(rlist)
 library(nloptr)
 
 
-
 HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
 {
   
@@ -53,13 +52,16 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
       #attach(myEnv, name="sourced_scripts")
   }
     
-  opts <- list(initEnvir=initWorkers)
+   chunkSize = length(gridMat[,1])/getDoParWorkers()
+   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
+ 
+
     
    if(!DataGenerated)
    {
       generatedDataList <-  
       foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
-      foreach(generation=1:4) %dopar%
+      foreach(generation=1:10) %dopar%
       {
         
         model = models[i] 
@@ -123,7 +125,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
       ### Load generatedDataList.Rdata
     }
   
-    allData<-unlist(generatedDataList)
+  allData<-unlist(generatedDataList)
   modelNum =  length(allData)
   
   #chunkSize = 150
@@ -131,15 +133,14 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   
-  time2<- system.time(  
-    resList<-
-      foreach(i = 1:length(gridMat[,1]), .packages="nloptr",.options.mpi=opts) %dopar%
+  resList<-
+    foreach(j = 1:modelNum, .packages="nloptr", .options.mpi=opts) %:% 
+      foreach(idx = 1:length(gridMat[,1]), .inorder=TRUE) %dopar%
       { 
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         model = gridMat[idx,3]
-        modelNb = gridMat[idx,4]
-        generatedData = allData[[modelNb]]
+        generatedData = allData[[j]]
 
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
@@ -164,7 +165,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
         modelData = setModelResults(modelData,generatedData,allModels)
         list(data=generatedData,res=modelData)
       }
-  )
+  
   
   print(time2)
 
@@ -275,7 +276,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       #attach(myEnv, name="sourced_scripts")
     }
    
-   chunkSize = length(gridMat[,1])/getDoParWorkers()
+   chunkSize =ceiling(length(models)*4/getDoParWorkers())
    #chunkSize = 150
    opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
  
@@ -397,28 +398,6 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         modelData = setModelParams(modelData, c(res$par,0.1,0))
         model = paste0(modelName,".",creditAssignment)
         c(iter = iter,genDataIndex = modelNum,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,gridMatIdx = idx)
-
-
-        # probMat <- TurnsNew::getProbMatrix(argList[[3]], modelData, argList[[6]], sim=1)
-        # trueModelData <- generatedData@simModelData
-        # trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
-            
-        # row1 <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
-        # if(trueProbMat[iter,1] == -1)
-        #   {
-        #     index <- max(which(probMat[1:iter,1] != -1))
-        #   }else{
-        #     index <- max(which(probMat[1:iter,7] != -1))
-        #   }
-        #     #print(sprintf("index=%i",index))
-            
-        # row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
-        # row1[is.nan(row1)] <- 0
-        # row2[is.nan(row2)] <- 0
-        # probRow <- row1 + row2  
-        # probRow[is.infinite(probRow)] <- 0
-        # list(iter = iter, genDataIndex = modelNum,data=generatedData,res=modelData,probRow=probRow,trueModelData=trueModelData)
-
       }
 
   resList1 <- unlist(resList1, recursive = FALSE)
@@ -427,7 +406,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   save(resList1,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_ParamEstResList1.Rdata"))
 
    
-  chunkSize = ceiling(length(resList1[,1])/getDoParWorkers())
+  chunkSize = ceiling(length(models)*iters/getDoParWorkers())
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   df <- as.data.frame(resList1)

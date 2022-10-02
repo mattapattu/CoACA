@@ -112,12 +112,18 @@ GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
       }
         
     } 
+
+
   allData<-unlist(generatedDataList)  
   rat=ratdata@rat
-  print(sprintf("Generated DataList"))   
-  save(allData,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_genDataset.Rdata"))
-
-  
+  print(sprintf("Generated DataList")) 
+  if(StabilityTest)
+  {
+    save(allData,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_Stability_genDataset.Rdata"))
+  }else{
+    save(allData,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_Conv_genDataset.Rdata"))
+  }  
+    
 }
 
 

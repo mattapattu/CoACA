@@ -56,7 +56,7 @@ GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
    {
         
       model = gridMat[i,1] 
-      index = gridMat[i,1]
+      index = as.numeric(gridMat[i,1])
       cat(sprintf('model = %s, index = %i, \n', model,index))
 
       modelName = strsplit(models[i],"\\.")[[1]][1]

@@ -59,8 +59,8 @@ GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
       index = as.integer(gridMat[i,2])
       cat(sprintf('model = %s, index = %i, \n', model,index))
 
-      modelName = strsplit(models[i],"\\.")[[1]][1]
-      creditAssignment = strsplit(models[i],"\\.")[[1]][2]
+      modelName = strsplit(model,"\\.")[[1]][1]
+      creditAssignment = strsplit(model,"\\.")[[1]][2]
       trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
        
         #trueModelData = modifyModelData(trueModelData) 

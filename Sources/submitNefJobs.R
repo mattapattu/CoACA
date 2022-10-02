@@ -51,7 +51,7 @@ if(generateModelParamMat){
   currentTest = "generateModelParamMat"
   source("testConfig.R")
 
-  cores = 5
+  cores = 10
   walltime = "1:00"
   spawnslaves = cores-1
   start_idx = 0

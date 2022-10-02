@@ -89,7 +89,7 @@ if(paramEstTest)
       seed = start_idx
       spawnslaves = cores-1
       #name = paste0("modelParams_",i,"_",rats[[rat]])
-      name = paste0("paramEst",i,"_",paste0("rat",rat))
+      name = paste0("paramEs",i,"_",paste0("rat",rat))
       stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
       stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
@@ -112,7 +112,7 @@ if(validateHoldout)
     cores = 10
     walltime = "10:00"
 
-   for(i in c(1:20))
+   for(i in c(1:10))
    {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]

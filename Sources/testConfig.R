@@ -64,22 +64,11 @@ if(currentTest == "computeModelParams")
 
 if(currentTest == "paramEstTest")
 {
-  n = 8
-  sessions<-unique(ratdata@allpaths[,5])
-  session_grps<-split(sessions, sort(sessions%%8))
-  maxVecs <- c()
-  for(grp in c(1:n))
-  {
-   #print(grp)
-   begin_ses <- min(session_grps[[grp]])
-   end_ses <- max(session_grps[[grp]])
-   indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
-   maxVecs <- c(maxVecs,max(indices_of_ses))
-  }
+  iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
 
   alpha_seq = seq_log(1e-3, 0.9,60)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,maxVecs,c(1:4),stringsAsFactors = FALSE)
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,stringsAsFactors = FALSE)
   sequences = seq(0,length(gridMat[,1]), length.out=11)
 }
 
@@ -91,7 +80,7 @@ if(currentTest == "validateHoldout")
   alpha_seq = seq_log(1e-3, 0.9,60)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
   models = testData@Models
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,models,c(1:100),stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=21)
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,models,stringsAsFactors = FALSE)
+  sequences = seq(0,length(gridMat[,1]), length.out=11)
 
 }

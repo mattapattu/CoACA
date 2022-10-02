@@ -1,7 +1,7 @@
 library(doMPI)
 library(rlist)
 library(nloptr)
-
+library(stringr)
 
 GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
 {
@@ -343,7 +343,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resList1 <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages="nloptr", .options.mpi=opts) %dopar%
+      foreach(idx = 1:length(gridMat[,1]), .packages=c("nloptr","stringr"), .options.mpi=opts) %dopar%
       {
         #start_idx=sequences[i]
         #idx = start_idx+j
@@ -396,7 +396,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
   iters = unique(as.numeric(resList1[,1]))
  
-  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts) %:% 
+  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"),) %:% 
     foreach(iter = iters, .inorder=TRUE) %dopar%
     {
       print(sprintf("it=%i,model=%s",it,model))

@@ -52,8 +52,8 @@ GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
    source(paste(src.dir,"../exportFunctions.R", sep="/")) 
    
    generatedDataList <-  
-   foreach(i=1:length(gridMat[,1]), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData"))
-     %dopar%{
+   foreach(i=1:length(gridMat[,1]), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
+   {
         
       model = gridMat[i,1] 
       index = gridMat[i,1]

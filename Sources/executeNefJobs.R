@@ -55,6 +55,7 @@ if(currentTest == "generateModelParamMat"){
 
   if(currentTest == "paramEstTest"){
 
+    gridMat <- gridMat[start_idx:end_idx,]
     seq_id <- which((sequences+1) %in% start_idx)
     name = paste0("paramEs",seq_id,"_",paste0("rat",rat))
 

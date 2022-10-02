@@ -79,8 +79,10 @@ if(currentTest == "paramEstTest")
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
   alpha_seq = seq_log(1e-3, 0.9,60)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=11)
+  genDataList = c(1:4)
+  genData = c(1:60)
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,genDataList, genData,stringsAsFactors = FALSE)
+  sequences = seq(0,length(gridMat[,1]), length.out=21)
 }
 
 

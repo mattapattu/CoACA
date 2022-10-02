@@ -131,7 +131,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   
   ## Test settings ###############
   StabilityTest = TRUE 
-  DataGenerated = FALSE
+  DataGenerated = TRUE
   
   ##################################
 
@@ -180,75 +180,12 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
  
 
     
-   if(!DataGenerated)
-   {
-      generatedDataList <-  
-      foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
-      foreach(generation=1:10) %dopar%
-      {
-        
-        model = models[i] 
-        modelName = strsplit(models[i],"\\.")[[1]][1]
-        creditAssignment = strsplit(models[i],"\\.")[[1]][2]
-        trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-        
-        #trueModelData = modifyModelData(trueModelData) 
-        simLearns = FALSE 
-        missedOptimalIter = 0
-        
-        while(!simLearns){
-          if(StabilityTest)
-          {
-           trueModelData_mod = modifyModelData(trueModelData)
-           generatedData = simulateData(trueModelData_mod,ratdata,allModels)
-          }else{
-            generatedData = simulateData(trueModelData,ratdata,allModels)
-          }
-          
-          #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
-          simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
-          missedOptimalIter=missedOptimalIter+1
-          
-          if(missedOptimalIter>500)
-          {
-              cat(sprintf('model = %s, missedOptimalIter = %i, trueAlpha = %f, trueGamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
-              break
-          }
-          #cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
-        }
+  nefTaskIndex = as.numeric(gsub("GenData(\\d+).*",'\\1',name))
+  setwd(res.model.data.dir)
+  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  dfData <- dfData[which(str_detect(dfData,paste0("GenData",nefTaskIndex,"_")))]
+  load(dfData)
 
-        
-        if(simLearns)
-        {
-          if(StabilityTest)
-          {
-            cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData_mod@alpha, trueModelData_mod@gamma1)) 
-            generatedData = populateSimRatModel(ratdata,generatedData,modelName)
-            generatedData@simModel = trueModelData_mod@Model
-            generatedData@simMethod = trueModelData_mod@creditAssignment
-            generatedData@simModelData = trueModelData_mod
-          }else{
-            cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
-            generatedData = populateSimRatModel(ratdata,generatedData,modelName)
-            generatedData@simModel = trueModelData@Model
-            generatedData@simMethod = trueModelData@creditAssignment
-            generatedData@simModelData = trueModelData
-          }
-          generatedData
-
-        }
-        
-      } 
-    
-      rat=ratdata@rat
-      print(sprintf("Generated DataList"))   
-      save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_generatedDataList.Rdata"))
-
-    }else{
-      ### Load generatedDataList.Rdata
-    }
-  
-  allData<-unlist(generatedDataList)
   modelNum =  length(allData)
   
   #chunkSize = 150
@@ -362,7 +299,6 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   ## Test settings ###############
   
   StabilityTest = TRUE 
-  DataGenerated = FALSE
   
   ##################################
   models = testData@Models
@@ -398,90 +334,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
       #attach(myEnv, name="sourced_scripts")
     }
-   
-   chunkSize =ceiling(length(models)*4/getDoParWorkers())
-   #chunkSize = 150
-   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
- 
-   source(paste(src.dir,"../exportFunctions.R", sep="/")) 
-   #for(i in c(1:length(modelNames)))
-   #{
-   # model = modelNames[i]
-   # modelName = strsplit(model,"\\.")[[1]][1]
-   # creditAssignment = strsplit(model,"\\.")[[1]][2]
-   # trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-   # trueModelData = modifyModelData(trueModelData) 
-   #} 
-   if(!DataGenerated)
-   {
-      generatedDataList <-  
-      foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %:%
-      foreach(generation=1:4) %dopar%
-      {
-        
-        model = models[i] 
-        modelName = strsplit(models[i],"\\.")[[1]][1]
-        creditAssignment = strsplit(models[i],"\\.")[[1]][2]
-        trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-        
-        #trueModelData = modifyModelData(trueModelData) 
-        simLearns = FALSE 
-        missedOptimalIter = 0
-        
-        while(!simLearns){
-          if(StabilityTest)
-          {
-           trueModelData_mod = modifyModelData(trueModelData)
-           generatedData = simulateData(trueModelData_mod,ratdata,allModels)
-          }else{
-            generatedData = simulateData(trueModelData,ratdata,allModels)
-          }
-          
-          #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
-          simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
-          missedOptimalIter=missedOptimalIter+1
-          
-          if(missedOptimalIter>500)
-          {
-              cat(sprintf('model = %s, missedOptimalIter = %i, trueAlpha = %f, trueGamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
-              break
-          }
-          #cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
-        }
-
-        
-        if(simLearns)
-        {
-          if(StabilityTest)
-          {
-            cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData_mod@alpha, trueModelData_mod@gamma1)) 
-            generatedData = populateSimRatModel(ratdata,generatedData,modelName)
-            generatedData@simModel = trueModelData_mod@Model
-            generatedData@simMethod = trueModelData_mod@creditAssignment
-            generatedData@simModelData = trueModelData_mod
-          }else{
-            cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
-            generatedData = populateSimRatModel(ratdata,generatedData,modelName)
-            generatedData@simModel = trueModelData@Model
-            generatedData@simMethod = trueModelData@creditAssignment
-            generatedData@simModelData = trueModelData
-          }
-          generatedData
-
-        }
-        
-      } 
-    
-    rat=ratdata@rat
-    print(sprintf("Generated DataList"))   
-    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_generatedDataList.Rdata"))
-
-   }else{
-    ### Load generatedDataList.Rdata
-   }
-
-   allData<-unlist(generatedDataList)
-   modelNum =  length(allData)
+  
 
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
   chunkSize = 150
@@ -490,16 +343,22 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resList1 <- 
-    foreach(j = 1:modelNum, .packages="nloptr", .options.mpi=opts) %:% 
-      foreach(idx = 1:length(gridMat[,1]), .inorder=TRUE) %dopar%
+      foreach(idx = 1:length(gridMat[,1]), .packages="nloptr", .options.mpi=opts) %dopar%
       {
         #start_idx=sequences[i]
         #idx = start_idx+j
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         iter = gridMat[idx,3]
-        #modelNum = gridMat[idx,4]
-        generatedData = allData[[j]]
+        genDataList = as.numeric(gridMat[idx,4])
+        genDataNum = as.numeric(gridMat[idx,5])
+
+        setwd(res.model.data.dir)
+        dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+        dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+        load(dfData)
+        generatedData = allData[[genDataNum]]
+
 
         cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
@@ -520,7 +379,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
                   fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
         modelData = setModelParams(modelData, c(res$par,0.1,0))
         model = paste0(modelName,".",creditAssignment)
-        c(iter = iter,genDataIndex = modelNum,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,gridMatIdx = idx)
+        c(iter = iter,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, genDataList=genDataList,genDataNum=genDataNum)
       }
 
   resList1 <- unlist(resList1, recursive = FALSE)
@@ -533,7 +392,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   df <- as.data.frame(resList1)
-  cols.num <- c(1,2,4,5,6,7,8)
+  cols.num <- c(1,3,4,5,6,7,8)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
   iters = unique(as.numeric(resList1[,1]))
  
@@ -541,15 +400,16 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
     foreach(iter = iters, .inorder=TRUE) %dopar%
     {
       print(sprintf("it=%i,model=%s",it,model))
-      df_it <- df[which(df[,1]==it & df[,3]==model),]
+      df_it <- df[which(df[,1]==it & df[,2]==model),]
       min_lik1 = 1000000
       minmodel = modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
-      minmodel_modelnum = 0
+      minmodel_genDataList = 0
+      minmodel_genDataNum = 0
       
       for(idx in 1:length(df_it[,1]))
       {
-        modelData@alpha = df_it[idx,5]
-        modelData@gamma1 = df_it[idx,6]
+        modelData@alpha = df_it[idx,3]
+        modelData@gamma1 = df_it[idx,4]
         modelData@gamma2 = 0.1
         modelData@lambda = 0
         argList <- getArgList(modelData, ratdata)
@@ -578,13 +438,19 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
           minmodel@gamma1 = df_it[idx,4]
           minmodel@gamma2 = 0.1
           minmodel@lambda = 0
-          minmodel_modelnum = df_it[idx,2]
+          minmodel_genDataList = df_it[idx,7]
+          minmodel_genDataNum = df_it[idx,8]
 
         }    
       }
       ### Compute probrow using modelData=minmodel  ####################
       probMat <- TurnsNew::getProbMatrix(argList[[3]], minmodel, argList[[6]], sim=1)
-      trueModelData <- allData[[minmodel_modelnum]]@simModelData
+
+      setwd(res.model.data.dir)
+      dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+      dfData <- dfData[which(str_detect(dfData,paste0("GenData",minmodel_genDataList,"_")))]
+      load(dfData)
+      trueModelData <- allData[[minmodel_genDataNum]]@simModelData
       trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
             
       row1 <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
@@ -601,7 +467,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       row2[is.nan(row2)] <- 0
       probRow <- row1 + row2  
       probRow[is.infinite(probRow)] <- 0
-      list(iter = iter, genDataIndex = minmodel_modelnum,res=minmodel,probRow=probRow)
+      list(iter = iter, genDataList=minmodel_genDataList,genDataNum=minmodel_genDataNum,res=minmodel,probRow=probRow)
 
 
 
@@ -618,7 +484,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
     {
       df <- data.frame(model=character(),
                     iter=integer(),
-                    genIndex=integer(),
+                    genDataList=integer(),
+                    genDataNum = integer(),
                     alpha=double(),
                     gamma1=double(),
                     gamma2=double(),
@@ -632,22 +499,24 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       for(k in c(1:length(minDflist)))
       {
         iter = minDflist[[k]]$iter
-        genIndex = minDflist[[k]]$genDataIndex
+        genDataList = minDflist[[k]]$genDataList
+        genDataNum = minDflist[[k]]$genDataNum
         generatedData = allData[[genIndex]]
         modelDataRes = minDflist[[k]]$res
         trueModelData = minDflist[[k]]$trueModelData
         
         df[k,1] <- modelDataRes@Model
         df[k,2] <- iter
-        df[k,3] <- genIndex
-        df[k,4] <- modelDataRes@alpha
-        df[k,5] <- modelDataRes@gamma1
-        df[k,6] <- modelDataRes@gamma2
-        df[k,7] <- modelDataRes@lambda
-        df[k,8] <- trueModelData@alpha
-        df[k,9] <- trueModelData@gamma1
-        df[k,10] <- trueModelData@gamma2
-        df[k,11] <- trueModelData@lambda
+        df[k,3] <- genDataList
+        df[k,4] <- genDataNum
+        df[k,5] <- modelDataRes@alpha
+        df[k,6] <- modelDataRes@gamma1
+        df[k,7] <- modelDataRes@gamma2
+        df[k,8] <- modelDataRes@lambda
+        df[k,9] <- trueModelData@alpha
+        df[k,10] <- trueModelData@gamma1
+        df[k,11] <- trueModelData@gamma2
+        df[k,12] <- trueModelData@lambda
 
       }
       rat = ratdata@rat

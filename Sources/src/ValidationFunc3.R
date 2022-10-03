@@ -344,8 +344,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
     genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
-  #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  chunkSize = 150
+  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  #chunkSize = 500
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -403,6 +403,49 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   save(resList1,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_ParamEstResList1.Rdata"))
 
    
+      
+   
+  if(setup.hpc)
+  {
+    closeCluster(cl)
+  }
+  
+}
+
+
+
+combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,name)
+{
+  
+  ratName = ratdata@rat
+  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
+
+  res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
+   
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
+  timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+ 
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=seed)
+    
+  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  registerDoMPI(cl)
+    
+   initWorkers <-  function() {
+      source(paste(src.dir,"../ModelClasses.R", sep="/"))
+      source(paste(src.dir,"PathModel.R", sep="/"))
+      source(paste(src.dir,"TurnModel.R", sep="/"))
+      source(paste(src.dir,"HybridModel1.R", sep="/"))
+      source(paste(src.dir,"HybridModel2.R", sep="/"))
+      source(paste(src.dir,"HybridModel3.R", sep="/"))
+      source(paste(src.dir,"HybridModel4.R", sep="/"))
+      source(paste(src.dir,"../BaseClasses.R", sep="/"))
+      source(paste(src.dir,"../exportFunctions.R", sep="/"))
+      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
+      #attach(myEnv, name="sourced_scripts")
+    }
+    
   chunkSize = ceiling(length(models)*iters/getDoParWorkers())
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
@@ -585,12 +628,5 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       }
    
    }
-      
-   
-  if(setup.hpc)
-  {
-    closeCluster(cl)
-  }
-  
-}
 
+}

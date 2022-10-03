@@ -80,7 +80,7 @@ GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
         simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
         missedOptimalIter=missedOptimalIter+1
           
-        if(missedOptimalIter>500)
+        if(missedOptimalIter==500)
         {
           cat(sprintf('model = %s, missedOptimalIter = %i, trueAlpha = %f, trueGamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
           break
@@ -364,9 +364,9 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         iter = gridMat[idx,3]
         genDataFileNum = as.numeric(gridMat[idx,4])
         genDataNum = as.numeric(gridMat[idx,5])
-        cat(sprintf("genDataFileNum= %i,genDataNum=%i\n", genDataFileNum,genDataNum))
+        #cat(sprintf("genDataFileNum= %i,genDataNum=%i\n", genDataFileNum,genDataNum))
         genDataList <- genDataFiles[[genDataFileNum]]
-        cat(sprintf("length(genDataList)= %i,genDataNum=%i\n", length(genDataList),genDataNum))
+        #cat(sprintf("length(genDataList)= %i,genDataNum=%i\n", length(genDataList),genDataNum))
 
         if(length(genDataList) < genDataNum)
         {
@@ -380,7 +380,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 
         modelName = generatedData@simModel
         creditAssignment = generatedData@simMethod              
-        cat(sprintf('rat=%s, iter=%i,model = %s, creditAssignment=%s\n', ratName,iter,modelName,creditAssignment))
+        #cat(sprintf('rat=%s, iter=%i,model = %s, creditAssignment=%s\n', ratName,iter,modelName,creditAssignment))
             #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
 
 

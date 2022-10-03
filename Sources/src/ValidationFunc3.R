@@ -355,6 +355,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       {
         #start_idx=sequences[i]
         #idx = start_idx+j
+        #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
+        cat(sprintf("idx= %i,name=%s\n", idx,name))
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         iter = gridMat[idx,3]
@@ -370,7 +372,6 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
           generatedData = genDataList[[genDataNum]]
         }
         
-        cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
 
         modelName = generatedData@simModel

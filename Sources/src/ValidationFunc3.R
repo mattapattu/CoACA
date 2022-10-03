@@ -335,8 +335,17 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
     }
   
 
+  setwd(res.model.data.dir)
+  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
+  {
+    genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
+
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  chunkSize = 500
+  chunkSize = 1000
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -349,19 +358,16 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         iter = gridMat[idx,3]
-        genDataList = as.numeric(gridMat[idx,4])
+        genDataFileNum = as.numeric(gridMat[idx,4])
         genDataNum = as.numeric(gridMat[idx,5])
 
-        setwd(res.model.data.dir)
-        dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-        dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
-        load(dfData)
-        if(length(allData) < genDataNum)
+        genDataList <- genDataFiles[[genDataFileNum]]
+        if(length(genDataList) < genDataNum)
         {
           return(NULL)
         }else
         {
-          generatedData = allData[[genDataNum]]
+          generatedData = genDataList[[genDataNum]]
         }
         
         cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))

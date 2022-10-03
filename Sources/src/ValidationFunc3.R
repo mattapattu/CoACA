@@ -337,7 +337,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 
   setwd(res.model.data.dir)
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-  dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+  #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
   genDataFiles <- list()
   for(i in 1:length(dfData))
   {
@@ -356,14 +356,18 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         #start_idx=sequences[i]
         #idx = start_idx+j
         #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
+        cat(gridMat[idx,])
+        cat("\n")
         cat(sprintf("idx= %i,name=%s\n", idx,name))
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         iter = gridMat[idx,3]
         genDataFileNum = as.numeric(gridMat[idx,4])
         genDataNum = as.numeric(gridMat[idx,5])
-
+        cat(sprintf("genDataFileNum= %i,genDataNum=%i\n", genDataFileNum,genDataNum))
         genDataList <- genDataFiles[[genDataFileNum]]
+        cat(sprintf("length(genDataList)= %i,genDataNum=%i\n", length(genDataList),genDataNum))
+
         if(length(genDataList) < genDataNum)
         {
           return(NULL)

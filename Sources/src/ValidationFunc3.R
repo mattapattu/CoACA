@@ -8,7 +8,6 @@ GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
   ## Test settings ###############
   
   StabilityTest = TRUE 
-  DataGenerated = FALSE
   
   ##################################
   models = testData@Models
@@ -337,7 +336,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   
 
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  chunkSize = 150
+  chunkSize = 500
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -357,9 +356,14 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
         dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
         load(dfData)
-        generatedData = allData[[genDataNum]]
-
-
+        if(length(allData) < genDataNum)
+        {
+          return(NULL)
+        }else
+        {
+          generatedData = allData[[genDataNum]]
+        }
+        
         cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
 

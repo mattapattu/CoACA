@@ -15,7 +15,7 @@ generateDataset = F
 paramEstTest = T
 validateHoldout = F
 
-########################## Test 1: computeModelParams 
+########################## Test 1: computeModelParams  ########################
 
 if(computeModelParams){
 
@@ -76,12 +76,12 @@ if(generateDataset)
 {
   currentTest = "generateDataset"
   source("testConfig.R")
-  cores = 10
+  cores = 15
   walltime = "12:00"
 
  
 
-   for(i in c(1:20))
+   for(i in c(5:10))
    {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -116,7 +116,7 @@ if(paramEstTest)
   walltime = "12:00"
 
 
-   for(i in c(1:10))
+   for(i in c(1:20))
    {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]

@@ -345,7 +345,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   }
 
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  chunkSize = 1000
+  chunkSize = 150
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))

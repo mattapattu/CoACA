@@ -356,9 +356,9 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         #start_idx=sequences[i]
         #idx = start_idx+j
         #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
-        cat(toString(gridMat[idx,]))
-        cat("\n")
-        cat(sprintf("idx= %i,name=%s\n", idx,name))
+        #cat(toString(gridMat[idx,]))
+        #cat("\n")
+        #cat(sprintf("idx= %i,name=%s\n", idx,name))
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         iter = gridMat[idx,3]
@@ -394,7 +394,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
                   fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
         modelData = setModelParams(modelData, c(res$par,0.1,0))
         model = paste0(modelName,".",creditAssignment)
-        c(iter = iter,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, genDataList=genDataList,genDataNum=genDataNum)
+        c(iter = iter,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, genDataFileNum=genDataFileNum,genDataNum=genDataNum)
       }
 
   resList1 <- unlist(resList1, recursive = FALSE)
@@ -418,7 +418,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       df_it <- df[which(df[,1]==it & df[,2]==model),]
       min_lik1 = 1000000
       minmodel = modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
-      minmodel_genDataList = 0
+      minmodel_genDataFileNum = 0
       minmodel_genDataNum = 0
       
       for(idx in 1:length(df_it[,1]))
@@ -453,7 +453,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
           minmodel@gamma1 = df_it[idx,4]
           minmodel@gamma2 = 0.1
           minmodel@lambda = 0
-          minmodel_genDataList = df_it[idx,7]
+          minmodel_genDataFileNum = df_it[idx,7]
           minmodel_genDataNum = df_it[idx,8]
 
         }    
@@ -463,7 +463,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 
       setwd(res.model.data.dir)
       dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-      dfData <- dfData[which(str_detect(dfData,paste0("GenData",minmodel_genDataList,"_")))]
+      dfData <- dfData[which(str_detect(dfData,paste0("GenData",minmodel_genDataFileNum,"_")))]
       load(dfData)
       trueModelData <- allData[[minmodel_genDataNum]]@simModelData
       trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
@@ -482,7 +482,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       row2[is.nan(row2)] <- 0
       probRow <- row1 + row2  
       probRow[is.infinite(probRow)] <- 0
-      list(iter = iter, genDataList=minmodel_genDataList,genDataNum=minmodel_genDataNum,res=minmodel,probRow=probRow)
+      list(iter = iter, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res=minmodel,probRow=probRow)
 
 
 
@@ -499,7 +499,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
     {
       df <- data.frame(model=character(),
                     iter=integer(),
-                    genDataList=integer(),
+                    genDataFileNum=integer(),
                     genDataNum = integer(),
                     alpha=double(),
                     gamma1=double(),
@@ -514,7 +514,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       for(k in c(1:length(minDflist)))
       {
         iter = minDflist[[k]]$iter
-        genDataList = minDflist[[k]]$genDataList
+        genDataFileNum = minDflist[[k]]$genDataFileNum
         genDataNum = minDflist[[k]]$genDataNum
         generatedData = allData[[genIndex]]
         modelDataRes = minDflist[[k]]$res
@@ -522,7 +522,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         
         df[k,1] <- modelDataRes@Model
         df[k,2] <- iter
-        df[k,3] <- genDataList
+        df[k,3] <- genDataFileNum
         df[k,4] <- genDataNum
         df[k,5] <- modelDataRes@alpha
         df[k,6] <- modelDataRes@gamma1

@@ -49,7 +49,7 @@ ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],Tu
 
 if(currentTest == "computeModelParams")
 {
-  alpha_seq = seq_log(1e-3, 0.9,60)
+  alpha_seq = seq_log(1e-3, 0.9,30)
   gamma1_seq = seq_log(1e-8, 1e-4, 10)
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
   models = testData@Models

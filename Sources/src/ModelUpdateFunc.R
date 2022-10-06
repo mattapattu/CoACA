@@ -118,8 +118,8 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
        #attach(myEnv, name="sourced_scripts")
      }
   
-  #chunkSize = length(gridMat[,1])/getDoParWorkers()
-  chunkSize = 150
+  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  #chunkSize = 150
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -151,32 +151,42 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
             res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                          fn = negLogLikFunc,ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2)
             #cat("Here2")
-            modelData = setModelParams(modelData, c(res$par,0.1,0))
-            if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
+            if(res$convergence < 0)
             {
-              #cat("Here")
-              lik1 <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-              lik1 <- sum(lik1[(1:800)])*-1
-              #reprint(lik1)
-              if (is.infinite(lik1)) {
-                lik1= 1000000
-              }else if (is.nan(lik1)) {
-                #print(sprintf("Alpha = %f", alpha))
-                lik1 = 1000000
-              }else if (is.na(lik1)) {
-                #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
-                lik1 = 1000000
+              modelData = setModelParams(modelData, c(NA,NA,0.1,0))
+              c(iter,modelName,NA, NA,modelData@gamma2,modelData@lambda,NA,idx,alpha,gamma1)
+
+            }else
+            {
+              modelData = setModelParams(modelData, c(res$par,0.1,0))
+              if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
+              {
+                #cat("Here")
+                lik1 <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+                lik1 <- sum(lik1[(1:800)])*-1
+                #reprint(lik1)
+                if (is.infinite(lik1)) {
+                  lik1= 1000000
+                }else if (is.nan(lik1)) {
+                  #print(sprintf("Alpha = %f", alpha))
+                  lik1 = 1000000
+                }else if (is.na(lik1)) {
+                  #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
+                  lik1 = 1000000
+                }
+                #cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik1=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik1))
+                c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx,alpha,gamma1)
+
               }
-              #cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik1=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik1))
-              c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx,alpha,gamma1)
+              else{
+                #cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
+                c(iter,modelData@alpha, modelData@gamma1)
 
-            }
-            else{
-              #cat(sprintf('Success: alpha = %f, gamma = %f\n', modelData@alpha, modelData@gamma1))
-              c(iter,modelData@alpha, modelData@gamma1)
-
-            }
+              }
         
+
+            }
+            
 
       }
    resMat <- Reduce(rbind,resMat)
@@ -258,6 +268,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
         modelData@gamma1 = df_it[idx,4]
         modelData@gamma2 = 0.1
         modelData@lambda = 0
+        
         argList <- getArgList(modelData, ratdata)
         lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
         lik1 <- sum(lik[c(1:it)])*-1

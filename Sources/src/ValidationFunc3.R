@@ -426,6 +426,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
 
   res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   print(res.model.data.dir) 
+  print(model.src)
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 
@@ -474,7 +475,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
 
  
-  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr")) %:% 
+  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src")) %:% 
     foreach(iter = iters, .inorder=TRUE) %dopar%
     {
       print(sprintf("it=%i,model=%s",it,model))

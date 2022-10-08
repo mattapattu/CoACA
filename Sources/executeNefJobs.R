@@ -32,7 +32,7 @@ if(currentTest == "computeModelParams")
 
 if(currentTest == "generateModelParamMat"){
 
-  generateParamResMat(ratdata,model.data.dir,count)
+  generateParamResMat(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 
 } 
 

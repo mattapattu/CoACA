@@ -196,7 +196,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
 }
 
 
-generateParamResMat=function(ratdata,model.data.dir,count)
+generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
   
   #models = testData@Models

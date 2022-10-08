@@ -149,7 +149,7 @@ if(combineParamEstResLists)
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("CombineParamEstResLists_",paste0("rat",rat))
+  name = paste0("combineParamEstResLists_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 

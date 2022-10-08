@@ -472,7 +472,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
 
  
-  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"),) %:% 
+  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr")) %:% 
     foreach(iter = iters, .inorder=TRUE) %dopar%
     {
       print(sprintf("it=%i,model=%s",it,model))

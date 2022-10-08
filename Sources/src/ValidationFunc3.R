@@ -450,21 +450,24 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
   registerDoMPI(cl)
     
    initWorkers <-  function() {
-      source(paste(src.dir,"../ModelClasses.R", sep="/"))
-      source(paste(src.dir,"PathModel.R", sep="/"))
-      source(paste(src.dir,"TurnModel.R", sep="/"))
-      source(paste(src.dir,"HybridModel1.R", sep="/"))
-      source(paste(src.dir,"HybridModel2.R", sep="/"))
-      source(paste(src.dir,"HybridModel3.R", sep="/"))
-      source(paste(src.dir,"HybridModel4.R", sep="/"))
-      source(paste(src.dir,"../BaseClasses.R", sep="/"))
-      source(paste(src.dir,"../exportFunctions.R", sep="/"))
-      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
-      #attach(myEnv, name="sourced_scripts")
-    }
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"))
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
+
     
   iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))  
   chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
+  print(sprintf("chunkSize=%i",chunkSize))
+
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   df <- as.data.frame(resMat)
@@ -558,7 +561,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
     }
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
-
+ 
+    print("Generating Df")
    
 
     if(any(grepl("qlearningAvgRwd",models)))

@@ -437,6 +437,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
     setwd(res.model.data.dir)
     pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
     resList1=list.files(".", pattern=pattern, full.names=FALSE)
+    print(resList1)
     load(resList1)
     resMatList[[i]] <- resList1
   }
@@ -462,13 +463,14 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
       #attach(myEnv, name="sourced_scripts")
     }
     
+  iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))  
   chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7,8)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
-  iters = unique(as.numeric(resList1[,1]))
+
  
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"),) %:% 
     foreach(iter = iters, .inorder=TRUE) %dopar%

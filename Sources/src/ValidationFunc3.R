@@ -435,7 +435,6 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
   for(i in c(1:20))
   {
     setwd(res.model.data.dir)
-    rat_114_paramEs4_rat6_20221008_172944_ParamEstResList1.Rdata
     pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
     resList1=list.files(".", pattern=pattern, full.names=FALSE)
     load(resList1)

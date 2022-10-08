@@ -419,8 +419,9 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,name)
 {
   
+  print(sprintf("Inside combineParamEstResLists"))
   ratName = ratdata@rat
-  param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
+  #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
   res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
@@ -451,7 +452,21 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
   chunkSize = ceiling(length(models)*iters/getDoParWorkers())
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
-  df <- as.data.frame(resList1)
+
+  resMatList <- listenv()
+
+  for(i in c(1:20))
+  {
+    setwd(res.model.data.dir)
+    rat_114_paramEs4_rat6_20221008_172944_ParamEstResList1.Rdata
+    pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
+    resList1=list.files(".", pattern=pattern, full.names=FALSE)
+    load(resList1)
+    resMatList[[i]] <- resList1
+  }
+  resMat <- Reduce(rbind,resMatList)
+
+  df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7,8)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
   iters = unique(as.numeric(resList1[,1]))
@@ -462,7 +477,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
       print(sprintf("it=%i,model=%s",it,model))
       df_it <- df[which(df[,1]==it & df[,2]==model),]
       min_lik1 = 1000000
-      minmodel = modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
+      minmodel <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
       minmodel_genDataFileNum = 0
       minmodel_genDataNum = 0
       
@@ -498,19 +513,24 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
           minmodel@gamma1 = df_it[idx,4]
           minmodel@gamma2 = 0.1
           minmodel@lambda = 0
-          minmodel_genDataFileNum = df_it[idx,7]
-          minmodel_genDataNum = df_it[idx,8]
+          minmodel_genDataFileNum = df_it[idx,11]
+          minmodel_genDataNum = df_it[idx,12]
 
         }    
       }
       ### Compute probrow using modelData=minmodel  ####################
       probMat <- TurnsNew::getProbMatrix(argList[[3]], minmodel, argList[[6]], sim=1)
 
-      setwd(res.model.data.dir)
-      dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-      dfData <- dfData[which(str_detect(dfData,paste0("GenData",minmodel_genDataFileNum,"_")))]
-      load(dfData)
-      trueModelData <- allData[[minmodel_genDataNum]]@simModelData
+      # setwd(res.model.data.dir)
+      # dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+      # dfData <- dfData[which(str_detect(dfData,paste0("GenData",minmodel_genDataFileNum,"_")))]
+      # load(dfData)
+      trueModelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
+      trueModelData@alpha = df_it[idx,7]
+      trueModelData@gamma1 = df_it[idx,8]
+      trueModelData@gamma2 = df_it[idx,9]
+      trueModelData@lambda = df_it[idx,10]
+      #trueModelData <- allData[[minmodel_genDataNum]]@simModelData
       trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
             
       row1 <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 

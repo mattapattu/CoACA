@@ -64,9 +64,9 @@ if(currentTest == "generateModelParamMat"){
 
   } 
 
-  ################# Test 4: generateModelParamMat ######################
+  ################# Test 4: combineParamEstResLists ######################
 
-  if(currentTest == "generateModelParamMat"){
+  if(currentTest == "combineParamEstResLists"){
 
     combineParamEstResLists(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,name)
 

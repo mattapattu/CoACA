@@ -252,7 +252,7 @@ generateParamResMat=function(ratdata,model.data.dir,count)
      }
 
 
-  chunkSize = ceiling(length(models)*length(iter)/getDoParWorkers())
+  chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
    
   minDfModels <- foreach(model = models, .inorder=TRUE, .options.mpi=opts) %:% 

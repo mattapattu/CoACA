@@ -429,6 +429,19 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
    
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+
+  resMatList <- listenv()
+
+  for(i in c(1:20))
+  {
+    setwd(res.model.data.dir)
+    rat_114_paramEs4_rat6_20221008_172944_ParamEstResList1.Rdata
+    pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
+    resList1=list.files(".", pattern=pattern, full.names=FALSE)
+    load(resList1)
+    resMatList[[i]] <- resList1
+  }
+  resMat <- Reduce(rbind,resMatList)
  
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
@@ -450,22 +463,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
       #attach(myEnv, name="sourced_scripts")
     }
     
-  chunkSize = ceiling(length(models)*iters/getDoParWorkers())
+  chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
-
-
-  resMatList <- listenv()
-
-  for(i in c(1:20))
-  {
-    setwd(res.model.data.dir)
-    rat_114_paramEs4_rat6_20221008_172944_ParamEstResList1.Rdata
-    pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
-    resList1=list.files(".", pattern=pattern, full.names=FALSE)
-    load(resList1)
-    resMatList[[i]] <- resList1
-  }
-  resMat <- Reduce(rbind,resMatList)
 
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7,8)

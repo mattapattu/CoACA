@@ -426,7 +426,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
   res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
-   
+  print(res.model.data.dir) 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 

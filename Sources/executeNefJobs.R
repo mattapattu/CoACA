@@ -63,9 +63,17 @@ if(currentTest == "generateModelParamMat"){
 
 
   } 
+
+  ################# Test 4: generateModelParamMat ######################
+
+  if(currentTest == "generateModelParamMat"){
+
+    combineParamEstResLists(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,name)
+
+  } 
   
   
-  ################## Test 4: Holdout test on artificial data ################
+  ################## Test 5: Holdout test on artificial data ################
 
   if(currentTest == "validateHoldout")
   {

@@ -375,6 +375,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         {
           generatedData = genDataList[[genDataNum]]
         }
+
+        trueModelData = generatedData@simModelData
         
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
 
@@ -394,11 +396,11 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
                   fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
         modelData = setModelParams(modelData, c(res$par,0.1,0))
         model = paste0(modelName,".",creditAssignment)
-        c(iter = iter,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, genDataFileNum=genDataFileNum,genDataNum=genDataNum)
+        c(iter = iter,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
       }
 
   resList1 <- unlist(resList1, recursive = FALSE)
-  resList1 <- Reduce(rbind,resList1)
+  #resList1 <- Reduce(rbind,resList1)
   rat = ratdata@rat
   save(resList1,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_ParamEstResList1.Rdata"))
 
@@ -418,8 +420,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
 {
   
   ratName = ratdata@rat
-  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
-  allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
+  param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
+  #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
   res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
    

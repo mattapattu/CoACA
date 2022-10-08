@@ -12,7 +12,8 @@ options(error=function()traceback(2))
 computeModelParams = F
 generateModelParamMat = F
 generateDataset = F
-paramEstTest = T
+paramEstTest = F
+combineParamEstResLists = T
 validateHoldout = F
 
 ########################## Test 1: computeModelParams  ########################
@@ -61,7 +62,6 @@ if(generateModelParamMat){
   name = paste0("genPMat_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
-  currentTest = "generateModelParamMat"
 
   command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
   cat(command)
@@ -135,6 +135,29 @@ if(paramEstTest)
 
 }  
 
+################# paramEstTest: combineParamEstResLists #########################
+
+if(combineParamEstResLists)
+{
+  currentTest = "combineParamEstResLists"
+  source("testConfig.R")
+
+  cores = 10
+  walltime = "1:00"
+  spawnslaves = cores-1
+  start_idx = 0
+  end_idx = 0
+  seed = 0
+  name = paste0("ParamResList_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+  command <- sprintf("oarsub -t besteffort -t idempotent -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+  cat(command)
+  cat("\n")
+  system(command)
+
+}  
 
 ################## Test 4: Holdout test on artificial data ################
 

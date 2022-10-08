@@ -643,6 +643,7 @@ readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
   models <- testingdata@Models
   
   setwd(param.model.data.dir)
+  print(sprintf("param.model.data.dir=%s",param.model.data.dir))
   ratName = ratdata@rat
   load(list.files(".", pattern=paste0(ratName,".*minDfModels.Rdata"), full.names=FALSE))
   allModelRes <- minDfModels

@@ -479,10 +479,14 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     foreach(iter = iters, .inorder=TRUE) %dopar%
     {
       print(sprintf("it=%i,model=%s",iter,model))
+      modelName = strsplit(model,"\\.")[[1]][1]
+      #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
+      creditAssignment = strsplit(model,"\\.")[[1]][2]
+
       df_it <- df[which(df[,1]==iter & df[,2]==model),]
       min_lik1 = 1000000
-      modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
-      minmodel <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
+      modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
+      minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
       minmodel_genDataFileNum = 0
       minmodel_genDataNum = 0
       

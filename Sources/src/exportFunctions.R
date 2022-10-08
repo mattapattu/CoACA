@@ -294,11 +294,11 @@ modifyModelData=function(modelData)
   modelData@gamma1 = modifyParam(modelData@gamma1)
   #modelData@gamma2 = modifyParam(modelData@gamma2)
 
-  if(modelData@creditAssignment == "qlearningAvgRwd")
-  {
-    modelData@gamma2 = modifyParam(modelData@gamma2)
-    modelData@lambda = modifyParam(modelData@lambda)
-  }
+  # if(modelData@creditAssignment == "qlearningAvgRwd")
+  # {
+  #   modelData@gamma2 = modifyParam(modelData@gamma2)
+  #   modelData@lambda = modifyParam(modelData@lambda)
+  # }
 
   return(modelData)
 }

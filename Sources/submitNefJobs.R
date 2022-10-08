@@ -163,7 +163,7 @@ if(combineParamEstResLists)
 ################## Test 4: Holdout test on artificial data ################
 
 if(validateHoldout)
-  {
+{
    
     currentTest = "validateHoldout"
     source("testConfig.R")  

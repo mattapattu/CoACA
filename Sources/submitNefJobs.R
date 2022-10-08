@@ -12,8 +12,8 @@ options(error=function()traceback(2))
 computeModelParams = F
 generateModelParamMat = F
 generateDataset = F
-paramEstTest = F
-combineParamEstResLists = T
+paramEstTest = T
+combineParamEstResLists = F
 validateHoldout = F
 
 ########################## Test 1: computeModelParams  ########################
@@ -136,7 +136,8 @@ if(paramEstTest)
 }  
 
 ################# paramEstTest: combineParamEstResLists #########################
-
+print(sprintf("combineParamEstResLists=%s, is",toString(combineParamEstResLists)))
+print(is.logical(combineParamEstResLists))
 if(combineParamEstResLists)
 {
   currentTest = "combineParamEstResLists"
@@ -148,7 +149,7 @@ if(combineParamEstResLists)
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("ParamResList_",paste0("rat",rat))
+  name = paste0("CombineParamEstResLists_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 

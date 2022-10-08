@@ -478,7 +478,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src")) %:% 
     foreach(iter = iters, .inorder=TRUE) %dopar%
     {
-      print(sprintf("it=%i,model=%s",it,model))
+      print(sprintf("it=%i,model=%s",iter,model))
       df_it <- df[which(df[,1]==iter & df[,2]==model),]
       min_lik1 = 1000000
       minmodel <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)

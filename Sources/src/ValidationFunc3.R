@@ -479,7 +479,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     foreach(iter = iters, .inorder=TRUE) %dopar%
     {
       print(sprintf("it=%i,model=%s",it,model))
-      df_it <- df[which(df[,1]==it & df[,2]==model),]
+      df_it <- df[which(df[,1]==iter & df[,2]==model),]
       min_lik1 = 1000000
       minmodel <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
       minmodel_genDataFileNum = 0
@@ -493,7 +493,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
         modelData@lambda = 0
         argList <- getArgList(modelData, ratdata)
         lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=1)
-        lik1 <- sum(lik[c(1:it)])*-1
+        lik1 <- sum(lik[c(1:iter)])*-1
         lik2 <- sum(lik[-c(1:800)])*-1
         
         if (is.infinite(lik1)) {

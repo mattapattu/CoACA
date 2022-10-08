@@ -421,6 +421,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,setup.hpc,model.data.d
   
   print(sprintf("Inside combineParamEstResLists"))
   ratName = ratdata@rat
+  models = testData@Models
   #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 

@@ -370,7 +370,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 
         if(length(genDataList) < genDataNum)
         {
-          return(NULL)
+          return(c(iter = iter,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum))
         }else
         {
           generatedData = genDataList[[genDataNum]]
@@ -438,6 +438,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
     resList1=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList1)
+    print(any(!complete.cases(resList1)))
     load(resList1)
     resMatList[[i]] <- resList1
   }
@@ -473,7 +474,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7,8,9,10,11,12)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
-
+  anyNA <- any(!complete.cases(df))
+  print(sprintf("anyNA=%s",anyNA))
  
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
     foreach(iter = iters, .inorder=TRUE, .combine='rbind') %dopar%
@@ -517,9 +519,10 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
                 
                 argList <- getArgList(modelData, generatedData)
                 lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
-                print(df_genData[idx,])
                 lik1 <- sum(lik[c(1:iter)])*-1
                 #lik2 <- sum(lik[-c(1:800)])*-1
+                print(sprintf("alpha=%f, gamma1=%f",modelData@alpha,modelData@gamma1))
+
                 
                 if (is.infinite(lik1)) {
                   #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))

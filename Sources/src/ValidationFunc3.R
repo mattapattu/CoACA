@@ -495,7 +495,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
         foreach(fileNb = genDataFileNumbers, .combine='rbind')%do%
         {
           df_it_fileNb = df_it[which(df_it[,11]==fileNb),]
-          genDataNb =  unique(df_if_fileNb[,12])
+          genDataNb =  unique(df_it_fileNb[,12])
           res1 <- 
             foreach(i = genDataNb, .combine='rbind') %do%
             {

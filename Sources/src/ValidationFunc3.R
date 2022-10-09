@@ -566,7 +566,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               print(minmodel)
               idx = length(df_genData[,1])
               print(sprintf("idx=%i",idx))
-              trueModelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 1)
+              trueModelData <- new("ModelData", Model = modelName, creditAssignment = "qlearningAvgRwd", sim = 1)
               trueModelData@alpha = df_genData[idx,7]
               trueModelData@gamma1 = df_genData[idx,8]
               trueModelData@gamma2 = df_genData[idx,9]

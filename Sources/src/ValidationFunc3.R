@@ -421,7 +421,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 }
 
 
-combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,name)
+combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
   
   print(sprintf("Inside combineParamEstResLists"))
@@ -483,7 +483,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   anyNA <- any(!complete.cases(df))
   print(sprintf("anyNA=%s",anyNA))
 
-  save(df, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Stability_df.Rdata"))
+  save(df, file = paste0(res.model.data.dir, "/" , rat,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
 
  
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 

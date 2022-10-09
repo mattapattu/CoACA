@@ -514,7 +514,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               load(dfData)
               generatedData <- allData[[i]]
               print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
-              df_genData = df_it_fileNb[which(df_it[,12]==i),]
+              df_genData = df_it_fileNb[which(df_it_fileNb[,12]==i),]
               min_lik1 = 1000000
               minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
 

@@ -516,6 +516,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
 
                 argList <- getArgList(modelData, generatedData)
                 lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
+                print(sprintf("alpha=%f,gamma1=%f",alpha,gamma1))
                 lik1 <- sum(lik[c(1:iter)])*-1
                 #lik2 <- sum(lik[-c(1:800)])*-1
                 
@@ -546,8 +547,10 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               }
 
               ### Compute probrow using modelData=minmodel  ####################
-              probMat <- TurnsNew::getProbMatrix(generatedData, minmodel, argList[[6]], sim=1)
 
+              
+              probMat <- TurnsNew::getProbMatrix(generatedData, minmodel, argList[[6]], sim=1)
+              print(minmodel)
               trueModelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 1)
               trueModelData@alpha = df_genData[idx,7]
               trueModelData@gamma1 = df_genData[idx,8]
@@ -563,13 +566,14 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               }else{
                 index <- max(which(probMat[1:iter,7] != -1))
               }
-                    #print(sprintf("index=%i",index))
+              print(sprintf("index=%i",index))
                     
               row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
               row1[is.nan(row1)] <- 0
               row2[is.nan(row2)] <- 0
               probRow <- row1 + row2  
               probRow[is.infinite(probRow)] <- 0
+              print(probRow)
               list(iter = iter, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res=minmodel,probRow=probRow)
             }
             res1

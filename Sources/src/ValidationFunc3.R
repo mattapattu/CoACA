@@ -394,9 +394,15 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
             #cat("Here1")
         res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                   fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
-        modelData = setModelParams(modelData, c(res$par,0.1,0))
+        #modelData = setModelParams(modelData, c(res$par,0.1,0))
+        modelData@alpha = res$par[1]
+        modelData@gamma1 = res$par[2]
+        modelData@gamma2 = 0.1
+        modelData@lambda = 0
+
+
         model = paste0(modelName,".",creditAssignment)
-        c(iter = iter,model=model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
+        c(iter = iter,model=model,res$par[0], res$par[1],modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
       }
 
   #resList1 <- unlist(resList1, recursive = FALSE)
@@ -476,6 +482,9 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
   anyNA <- any(!complete.cases(df))
   print(sprintf("anyNA=%s",anyNA))
+
+  save(df, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Stability_df.Rdata"))
+
  
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
     foreach(iter = iters, .inorder=TRUE, .combine='rbind') %dopar%

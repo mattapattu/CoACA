@@ -590,7 +590,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               probRow <- row1 + row2  
               probRow[is.infinite(probRow)] <- 0
               print(probRow)
-              list(iter = iter, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res=minmodel,probRow=probRow)
+              list(iter = iter, model = modelName, creditAssignment=creditAssignment, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res_alpha=minmodel@alpha, res_gamma1=minmodel@gamma1, res_gamma2=minmodel@gamma2,res_lambda=minmodel@lambda,probRow=probRow,trueAlpha = trueModelData@alpha,trueGamma1 = trueModelData@gamma1,trueGamma2 = trueModelData@gamma2,trueLambda = trueModelData@lambda)
             }
             res1
         }
@@ -598,7 +598,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     }
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
- 
+   save(minDflist, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_minDflist.Rdata"))
+
     print("Generating Df")
    
 
@@ -624,21 +625,32 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
         genDataFileNum = minDflist[[k]]$genDataFileNum
         genDataNum = minDflist[[k]]$genDataNum
         generatedData = allData[[genIndex]]
-        modelDataRes = minDflist[[k]]$res
-        trueModelData = minDflist[[k]]$trueModelData
+        model = minDflist[[k]]$model
+        #modelDataRes = minDflist[[k]]$res
+        #trueModelData = minDflist[[k]]$trueModelData
+
+        res_alpha = minDflist[[k]]$res_alpha
+        res_gamma1 = minDflist[[k]]$res_gamma1
+        res_gamma2 = minDflist[[k]]$res_gamma2
+        res_lambda = minDflist[[k]]$res_lambda
+
+        trueAlpha = minDflist[[k]]$trueAlpha
+        trueGamma1 = minDflist[[k]]$trueGamma1
+        trueGamma2 = minDflist[[k]]$trueGamma2
+        trueLambda= minDflist[[k]]$trueLambda
         
-        df[k,1] <- modelDataRes@Model
+        df[k,1] <- model
         df[k,2] <- iter
         df[k,3] <- genDataFileNum
         df[k,4] <- genDataNum
-        df[k,5] <- modelDataRes@alpha
-        df[k,6] <- modelDataRes@gamma1
-        df[k,7] <- modelDataRes@gamma2
-        df[k,8] <- modelDataRes@lambda
-        df[k,9] <- trueModelData@alpha
-        df[k,10] <- trueModelData@gamma1
-        df[k,11] <- trueModelData@gamma2
-        df[k,12] <- trueModelData@lambda
+        df[k,5] <- res_alpha
+        df[k,6] <- res_gamma1
+        df[k,7] <- res_gamma2
+        df[k,8] <- res_lambda
+        df[k,9] <- trueAlpha
+        df[k,10] <- trueGamma1
+        df[k,11] <- trueGamma2
+        df[k,12] <- trueLambda
 
       }
       rat = ratdata@rat

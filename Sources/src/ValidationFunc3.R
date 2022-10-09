@@ -504,7 +504,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               dfData <- dfData[which(str_detect(dfData,paste0("GenData",fileNb,"_")))]
               load(dfData)
               generatedData <- allData[[i]]
-
+              print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
               df_genData = df_it_fileNb[which(df_it[,12]==i),]
               min_lik1 = 1000000
               for(idx in 1:length(df_genData[,1]))

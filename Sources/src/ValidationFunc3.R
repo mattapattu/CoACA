@@ -484,8 +484,6 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
       creditAssignment = strsplit(model,"\\.")[[1]][2]
 
       df_it <- df[which(df[,1]==iter & df[,2]==model),]
-      modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
-      minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
       #minmodel_genDataFileNum = 0
       #minmodel_genDataNum = 0
 
@@ -507,16 +505,19 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
               df_genData = df_it_fileNb[which(df_it[,12]==i),]
               min_lik1 = 1000000
+              minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
+
               for(idx in 1:length(df_genData[,1]))
               {
+                modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
                 modelData@alpha = df_genData[idx,3]
                 modelData@gamma1 = df_genData[idx,4]
                 modelData@gamma2 = 0.1
                 modelData@lambda = 0
-
+                
                 argList <- getArgList(modelData, generatedData)
                 lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
-                print(sprintf("alpha=%f,gamma1=%f",modelData@alpha,modelData@gamma1))
+                print(df_genData[idx,])
                 lik1 <- sum(lik[c(1:iter)])*-1
                 #lik2 <- sum(lik[-c(1:800)])*-1
                 

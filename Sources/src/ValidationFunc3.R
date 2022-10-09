@@ -564,12 +564,15 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               
               probMat <- TurnsNew::getProbMatrix(generatedData, minmodel, argList[[6]], sim=1)
               print(minmodel)
+              idx = length(df_genData[,1])
+              print(sprintf("idx=%i",idx))
               trueModelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 1)
               trueModelData@alpha = df_genData[idx,7]
               trueModelData@gamma1 = df_genData[idx,8]
               trueModelData@gamma2 = df_genData[idx,9]
               trueModelData@lambda = df_genData[idx,10]
               #trueModelData <- allData[[minmodel_genDataNum]]@simModelData
+              print(trueModelData)
               trueProbMat <- TurnsNew::getProbMatrix(generatedData, trueModelData, argList[[6]], sim=1)
                     
               row1 <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 

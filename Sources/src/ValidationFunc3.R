@@ -516,7 +516,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
 
                 argList <- getArgList(modelData, generatedData)
                 lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
-                print(sprintf("alpha=%f,gamma1=%f",alpha,gamma1))
+                print(sprintf("alpha=%f,gamma1=%f",modelData@alpha,modelData@gamma1))
                 lik1 <- sum(lik[c(1:iter)])*-1
                 #lik2 <- sum(lik[-c(1:800)])*-1
                 

@@ -475,8 +475,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
 
  
-  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src")) %:% 
-    foreach(iter = iters, .inorder=TRUE) %dopar%
+  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
+    foreach(iter = iters, .inorder=TRUE, .combine='rbind') %dopar%
     {
       print(sprintf("it=%i,model=%s",iter,model))
       modelName = strsplit(model,"\\.")[[1]][1]
@@ -484,85 +484,97 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
       creditAssignment = strsplit(model,"\\.")[[1]][2]
 
       df_it <- df[which(df[,1]==iter & df[,2]==model),]
-      min_lik1 = 1000000
       modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
       minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
-      minmodel_genDataFileNum = 0
-      minmodel_genDataNum = 0
+      #minmodel_genDataFileNum = 0
+      #minmodel_genDataNum = 0
+
+      genDataFileNumbers = unique(df_it[,11])
       
-      for(idx in 1:length(df_it[,1]))
-      {
-        modelData@alpha = df_it[idx,3]
-        modelData@gamma1 = df_it[idx,4]
-        modelData@gamma2 = 0.1
-        modelData@lambda = 0
-        argList <- getArgList(modelData, ratdata)
-        lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=1)
-        lik1 <- sum(lik[c(1:iter)])*-1
-        lik2 <- sum(lik[-c(1:800)])*-1
-        
-        if (is.infinite(lik1)) {
-          #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
-          lik1= 1000000
-          next
-        }else if (is.nan(lik1)) {
-          #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
-          lik1 = 1000000
-          next
-        }else if (is.na(lik1)) {
-          #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
-          lik1 = 1000000
-          next
-        }
-        if(lik1 < min_lik1)
+      res2 <- 
+        foreach(fileNb = genDataFileNumbers, .combine='rbind')%do%
         {
-          min_lik1=lik1
-          min_lik2=lik2
-          minmodel@alpha = df_it[idx,3]
-          minmodel@gamma1 = df_it[idx,4]
-          minmodel@gamma2 = 0.1
-          minmodel@lambda = 0
-          minmodel_genDataFileNum = df_it[idx,11]
-          minmodel_genDataNum = df_it[idx,12]
+          df_it_fileNb = df_it[which(df_it[,11]==fileNb),]
+          genDataNb =  unique(df_if_fileNb[,12])
+          res1 <- 
+            foreach(i = genDataNb, .combine='rbind') %do%
+            {
+              setwd(res.model.data.dir)
+              dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+              dfData <- dfData[which(str_detect(dfData,paste0("GenData",fileNb,"_")))]
+              load(dfData)
+              generatedData <- allData[[i]]
 
-        }    
-      }
-      ### Compute probrow using modelData=minmodel  ####################
-      probMat <- TurnsNew::getProbMatrix(argList[[3]], minmodel, argList[[6]], sim=1)
+              df_genData = df_it_fileNb[which(df_it[,12]==i),]
+              min_lik1 = 1000000
+              for(idx in 1:length(df_genData[,1]))
+              {
+                modelData@alpha = df_genData[idx,3]
+                modelData@gamma1 = df_genData[idx,4]
+                modelData@gamma2 = 0.1
+                modelData@lambda = 0
 
-      # setwd(res.model.data.dir)
-      # dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-      # dfData <- dfData[which(str_detect(dfData,paste0("GenData",minmodel_genDataFileNum,"_")))]
-      # load(dfData)
-      trueModelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
-      trueModelData@alpha = df_it[idx,7]
-      trueModelData@gamma1 = df_it[idx,8]
-      trueModelData@gamma2 = df_it[idx,9]
-      trueModelData@lambda = df_it[idx,10]
-      #trueModelData <- allData[[minmodel_genDataNum]]@simModelData
-      trueProbMat <- TurnsNew::getProbMatrix(argList[[3]], trueModelData, argList[[6]], sim=1)
-            
-      row1 <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
-      if(trueProbMat[iter,1] == -1)
-      {
-        index <- max(which(probMat[1:iter,1] != -1))
-      }else{
-        index <- max(which(probMat[1:iter,7] != -1))
-      }
-            #print(sprintf("index=%i",index))
-            
-      row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
-      row1[is.nan(row1)] <- 0
-      row2[is.nan(row2)] <- 0
-      probRow <- row1 + row2  
-      probRow[is.infinite(probRow)] <- 0
-      list(iter = iter, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res=minmodel,probRow=probRow)
+                argList <- getArgList(modelData, generatedData)
+                lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
+                lik1 <- sum(lik[c(1:iter)])*-1
+                #lik2 <- sum(lik[-c(1:800)])*-1
+                
+                if (is.infinite(lik1)) {
+                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+                  lik1= 1000000
+                  next
+                }else if (is.nan(lik1)) {
+                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+                  lik1 = 1000000
+                  next
+                }else if (is.na(lik1)) {
+                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+                  lik1 = 1000000
+                  next
+                }
+                if(lik1 < min_lik1)
+                {
+                  min_lik1=lik1
+                  minmodel@alpha = df_genData[idx,3]
+                  minmodel@gamma1 = df_genData[idx,4]
+                  minmodel@gamma2 = 0.1
+                  minmodel@lambda = 0
+                  minmodel_genDataFileNum = df_genData[idx,11]
+                  minmodel_genDataNum = df_genData[idx,12]
 
+                }    
+              }
 
+              ### Compute probrow using modelData=minmodel  ####################
+              probMat <- TurnsNew::getProbMatrix(generatedData, minmodel, argList[[6]], sim=1)
 
-      #cat(sprintf("it=%i,model=%s, min_lik1=%i",it,model,min_lik1))
-    #c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
-      
+              trueModelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 1)
+              trueModelData@alpha = df_genData[idx,7]
+              trueModelData@gamma1 = df_genData[idx,8]
+              trueModelData@gamma2 = df_genData[idx,9]
+              trueModelData@lambda = df_genData[idx,10]
+              #trueModelData <- allData[[minmodel_genDataNum]]@simModelData
+              trueProbMat <- TurnsNew::getProbMatrix(generatedData, trueModelData, argList[[6]], sim=1)
+                    
+              row1 <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
+              if(trueProbMat[iter,1] == -1)
+              {
+                index <- max(which(probMat[1:iter,1] != -1))
+              }else{
+                index <- max(which(probMat[1:iter,7] != -1))
+              }
+                    #print(sprintf("index=%i",index))
+                    
+              row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
+              row1[is.nan(row1)] <- 0
+              row2[is.nan(row2)] <- 0
+              probRow <- row1 + row2  
+              probRow[is.infinite(probRow)] <- 0
+              list(iter = iter, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res=minmodel,probRow=probRow)
+            }
+            res1
+        }
+        res2
     }
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)

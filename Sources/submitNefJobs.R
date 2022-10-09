@@ -136,7 +136,7 @@ if(paramEstTest)
 }  
 
 ################# paramEstTest: combineParamEstResLists #########################
-print(sprintf("combineParamEstResLists=%s, is",toString(combineParamEstResLists)))
+#print(sprintf("combineParamEstResLists=%s, is",toString(combineParamEstResLists)))
 print(is.logical(combineParamEstResLists))
 if(combineParamEstResLists)
 {

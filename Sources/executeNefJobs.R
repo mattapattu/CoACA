@@ -68,7 +68,7 @@ if(currentTest == "generateModelParamMat"){
 
   if(currentTest == "combineParamEstResLists"){
 
-    combineParamEstResLists(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,name)
+    combineParamEstResLists(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 
   } 
   

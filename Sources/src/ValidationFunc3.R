@@ -621,23 +621,22 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
 
       for(k in c(1:length(minDflist)))
       {
-        iter = minDflist[[k]]$iter
-        genDataFileNum = minDflist[[k]]$genDataFileNum
-        genDataNum = minDflist[[k]]$genDataNum
-        generatedData = allData[[genIndex]]
-        model = minDflist[[k]]$model
+        iter = minDflist[k,]$iter
+        genDataFileNum = minDflist[k,]$genDataFileNum
+        genDataNum = minDflist[k,]$genDataNum
+        model = minDflist[k,]$model
         #modelDataRes = minDflist[[k]]$res
         #trueModelData = minDflist[[k]]$trueModelData
 
-        res_alpha = minDflist[[k]]$res_alpha
-        res_gamma1 = minDflist[[k]]$res_gamma1
-        res_gamma2 = minDflist[[k]]$res_gamma2
-        res_lambda = minDflist[[k]]$res_lambda
+        res_alpha = minDflist[k,]$res_alpha
+        res_gamma1 = minDflist[k,]$res_gamma1
+        res_gamma2 = minDflist[k,]$res_gamma2
+        res_lambda = minDflist[k,]$res_lambda
 
-        trueAlpha = minDflist[[k]]$trueAlpha
-        trueGamma1 = minDflist[[k]]$trueGamma1
-        trueGamma2 = minDflist[[k]]$trueGamma2
-        trueLambda= minDflist[[k]]$trueLambda
+        trueAlpha = minDflist[k,]$trueAlpha
+        trueGamma1 = minDflist[k,]$trueGamma1
+        trueGamma2 = minDflist[k,]$trueGamma2
+        trueLambda= minDflist[k,]$trueLambda
         
         df[k,1] <- model
         df[k,2] <- iter

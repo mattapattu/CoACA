@@ -456,6 +456,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   }
   resMat <- Reduce(rbind,resMatList)
 
+  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
   genDataFiles <- list()
   for(i in 1:length(dfData))
   {

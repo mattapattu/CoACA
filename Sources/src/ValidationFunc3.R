@@ -598,7 +598,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     }
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
-   save(minDflist, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_minDflist.Rdata"))
+   save(minDflist, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_minDflist.Rdata"))
 
     print("Generating Df")
    
@@ -656,11 +656,11 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
       rat = ratdata@rat
       if(StabilityTest)
       {
-        save(df, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Stability_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Stability_df.Rdata"))
       }
       else
       {
-        save(df,  file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Conv_df.Rdata"))
+        save(df,  file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Conv_df.Rdata"))
       }
 
    }
@@ -696,11 +696,11 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
 
       if(StabilityTest)
       {
-        save(df, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Stability_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Stability_df.Rdata"))
       }
       else
       {
-        save(df, file = paste0(res.model.data.dir, "/" , rat,"_",name, timestamp,"_ParamEs_Conv_df.Rdata"))
+        save(df, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Conv_df.Rdata"))
       }
    
    }

@@ -598,7 +598,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     }
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
-   save(minDflist, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_minDflist.Rdata"))
+  save(minDflist, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_minDflist.Rdata"))
 
     print("Generating Df")
    
@@ -619,7 +619,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
                     trueLambda=double(),
                     stringsAsFactors=FALSE)
 
-      for(k in c(1:length(minDflist)))
+      for(k in c(1:length(minDflist[,1])))
       {
         iter = minDflist[k,]$iter
         genDataFileNum = minDflist[k,]$genDataFileNum

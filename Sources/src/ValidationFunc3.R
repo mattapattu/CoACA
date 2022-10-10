@@ -510,12 +510,14 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
       res2 <- 
         foreach(fileNb = genDataFileNumbers, .combine='rbind')%do%
         {
+          print(sprintf("fileNb=%i",fileNb))
           df_it_fileNb = df_it[which(df_it[,11]==fileNb),]
           genDataNb =  unique(df_it_fileNb[,12])
           print(genDataNb)
           res1 <- 
             foreach(i = genDataNb, .combine='rbind') %do%
             {
+              print(sprintf("i=%i",i))
               setwd(res.model.data.dir)
               dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
               dfData <- dfData[which(str_detect(dfData,paste0("GenData",fileNb,"_")))]
@@ -528,6 +530,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
 
               for(idx in 1:length(df_genData[,1]))
               {
+                print(sprintf("idx=%i",idx))
                 modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
                 modelData@alpha = df_genData[idx,3]
                 modelData@gamma1 = df_genData[idx,4]
@@ -573,7 +576,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               probMat <- TurnsNew::getProbMatrix(generatedData, minmodel, argList[[6]], sim=1)
               print(minmodel)
               idx = length(df_genData[,1])
-              print(sprintf("idx=%i",idx))
+              
               trueModelData <- new("ModelData", Model = modelName, creditAssignment = "qlearningAvgRwd", sim = 1)
               trueModelData@alpha = df_genData[idx,7]
               trueModelData@gamma1 = df_genData[idx,8]

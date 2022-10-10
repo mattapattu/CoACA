@@ -489,7 +489,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   anyNA <- any(!complete.cases(df))
   print(sprintf("anyNA=%s",anyNA))
 
-  #save(df, file = paste0(res.model.data.dir, "/" , rat,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
+  save(df, file = paste0(res.model.data.dir, "/" , rat,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
 
  
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
@@ -505,12 +505,14 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
       #minmodel_genDataNum = 0
 
       genDataFileNumbers = unique(df_it[,11])
+      print(genDataFileNumbers)
       
       res2 <- 
         foreach(fileNb = genDataFileNumbers, .combine='rbind')%do%
         {
           df_it_fileNb = df_it[which(df_it[,11]==fileNb),]
           genDataNb =  unique(df_it_fileNb[,12])
+          print(genDataNb)
           res1 <- 
             foreach(i = genDataNb, .combine='rbind') %do%
             {

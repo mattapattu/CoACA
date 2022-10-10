@@ -455,6 +455,13 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     resMatList[[i]] <- resList1
   }
   resMat <- Reduce(rbind,resMatList)
+
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
+  {
+    genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
+
  
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
@@ -518,11 +525,9 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
             foreach(i = genDataNb, .combine='rbind') %do%
             {
               print(sprintf("it=%i,fileNb=%i, i=%i",iter,fileNb,i))
-              setwd(res.model.data.dir)
-              dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-              dfData <- dfData[which(str_detect(dfData,paste0("GenData",fileNb,"_")))]
-              load(dfData)
-              generatedData <- allData[[i]]
+              genDataList <- genDataFiles[[fileNb]]
+              generatedData = genDataList[[i]]
+
               print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
               df_genData = df_it_fileNb[which(df_it_fileNb[,12]==i),]
               print(sprintf("len df_genData=%i",length(df_genData[,1])))

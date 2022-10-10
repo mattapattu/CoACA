@@ -510,14 +510,14 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
       res2 <- 
         foreach(fileNb = genDataFileNumbers, .combine='rbind')%do%
         {
-          print(sprintf("fileNb=%i",fileNb))
+          print(sprintf("it=%i,fileNb=%i",iter,fileNb))
           df_it_fileNb = df_it[which(df_it[,11]==fileNb),]
           genDataNb =  unique(df_it_fileNb[,12])
-          print(genDataNb)
+          print(sprintf("len genDataNb=%i",length(genDataNb)))
           res1 <- 
             foreach(i = genDataNb, .combine='rbind') %do%
             {
-              print(sprintf("i=%i",i))
+              print(sprintf("it=%i,fileNb=%i, i=%i",iter,fileNb,i))
               setwd(res.model.data.dir)
               dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
               dfData <- dfData[which(str_detect(dfData,paste0("GenData",fileNb,"_")))]
@@ -525,6 +525,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               generatedData <- allData[[i]]
               print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
               df_genData = df_it_fileNb[which(df_it_fileNb[,12]==i),]
+              print(sprintf("len df_genData=%i",length(df_genData[,1])))
               min_lik1 = 1000000
               minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
 

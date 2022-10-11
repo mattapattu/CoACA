@@ -371,7 +371,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         if(length(genDataList) < genDataNum)
         {
           print(sprintf("idx=%i,genDataFileNum=%i,genDataNum=%i does not exist ",idx,genDataFileNum,genDataNum))
-          return(c(iter = iter,model=model,NA, NA,NA,NA, NA, NA,NA,NA,genDataFileNum=genDataFileNum,genDataNum=genDataNum))
+          #return(c(iter = iter,model=model,NA, NA,NA,NA, NA, NA,NA,NA,genDataFileNum=genDataFileNum,genDataNum=genDataNum))
+          return(NULL)
         }else
         {
           generatedData = genDataList[[genDataNum]]

@@ -166,7 +166,7 @@ for (i in c(select_rat)) {
     #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
     #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
     
-    testParamEstimationNew(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count)
+    #testParamEstimationNew(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count)
     plotSimParamEstimation(ratdata,testData,model.data.dir,plot.dir)
     #plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
 

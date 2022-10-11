@@ -1330,7 +1330,7 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
   res.dir = paste(model.data.dir,"paramEstTest",ratdata@rat,sep="/")
   print(res.dir)
   setwd(res.dir)
-  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Conv_df.Rdata"), full.names=FALSE)
+  dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Stability_df.Rdata"), full.names=FALSE)
   #print(dfData)
   #eightyCI <- getSimLearningEndIndices(rat,dfData,res.dir)
   listDfData <- list()
@@ -1351,20 +1351,8 @@ plotSimParamEstimation=function(ratdata,testData,model.data.dir,plot.dir)
   layout( matrix(c(1,3,0,2,4,0),ncol=2,nrow=3), heights=c(2,2,0.2) )
  #layout( matrix(c(1,0,1,0),ncol=2,nrow=2), heights=c(1,0.2) )
 
-  iterations=as.integer(floor(length(ratdata@allpaths[,1])/100))
-  n = 8
-  sessions<-unique(ratdata@allpaths[,5])
-  session_grps<-split(sessions, sort(sessions%%8))
-  maxVecs <- c()
-  for(grp in c(1:n))
-  {
-   print(grp)
-   begin_ses <- min(session_grps[[grp]])
-   end_ses <- max(session_grps[[grp]])
-   indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
-   maxVecs <- c(maxVecs,max(indices_of_ses))
-  }
-
+  iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
+  maxVecs=iters
   for(m in models)
   {
     model = strsplit(m,"\\.")[[1]][1]

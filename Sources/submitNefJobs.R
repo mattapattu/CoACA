@@ -113,7 +113,7 @@ if(paramEstTest)
   currentTest = "paramEstTest"
   source("testConfig.R")
   cores = 20
-  walltime = "8:00"
+  walltime = "12:00"
 
 
    for(i in c(1:20))
@@ -138,7 +138,7 @@ if(paramEstTest)
 ################# paramEstTest: combineParamEstResLists #########################
 #print(sprintf("combineParamEstResLists=%s, is",toString(combineParamEstResLists)))
 print(is.logical(combineParamEstResLists))
-if(combineParamEstResLists)
+if(isTRUE(combineParamEstResLists))
 {
   currentTest = "combineParamEstResLists"
   source("testConfig.R")

@@ -344,7 +344,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
     genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
-  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  chunkSize = ceiling(length(gridMat[,1])/(getDoParWorkers()*5))
   #chunkSize = 500
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 

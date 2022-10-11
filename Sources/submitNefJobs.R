@@ -112,8 +112,8 @@ if(paramEstTest)
     
   currentTest = "paramEstTest"
   source("testConfig.R")
-  cores = 10
-  walltime = "12:00"
+  cores = 20
+  walltime = "8:00"
 
 
    for(i in c(1:20))

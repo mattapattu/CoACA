@@ -356,7 +356,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         prev.time <- curr.time
         curr.time <- Sys.time() 
         time.diff <- curr.time-prev.time
-        print(time.diff)
+        cat(time.diff)
         #start_idx=sequences[i]
         #idx = start_idx+j
         #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
@@ -461,6 +461,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     resMatList[[i]] <- resList1
   }
   resMat <- Reduce(rbind,resMatList)
+  save(resMat, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resMat.Rdata"))
+
 
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
   genDataFiles <- list()
@@ -503,7 +505,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   anyNA <- any(!complete.cases(df))
   print(sprintf("anyNA=%s",anyNA))
 
-  save(df, file = paste0(res.model.data.dir, "/" , rat,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
+  save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
 
  
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 

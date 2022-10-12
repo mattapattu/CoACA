@@ -344,15 +344,19 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
     genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
-  chunkSize = ceiling(length(gridMat[,1])/(getDoParWorkers()*5))
+  chunkSize = ceiling(length(gridMat[,1])/(getDoParWorkers()))
   #chunkSize = 500
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
-   
+  curr.time <- Sys.time() 
   resList1 <- 
       foreach(idx = 1:length(gridMat[,1]), .packages=c("nloptr","stringr"), .options.mpi=opts) %dopar%
       {
+        prev.time <- curr.time
+        curr.time <- Sys.time() 
+        time.diff <- curr.time-prev.time
+        print(time.diff)
         #start_idx=sequences[i]
         #idx = start_idx+j
         #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))

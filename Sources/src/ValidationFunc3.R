@@ -346,12 +346,12 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 
   chunkSize = ceiling(length(gridMat[,1])/(getDoParWorkers()))
   #chunkSize = 500
-  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
+  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize, profile=TRUE) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
   curr.time <- Sys.time() 
   resList1 <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages=c("nloptr","stringr"), .options.mpi=opts) %dopar%
+      foreach(idx = 1:length(gridMat[,1]), .packages=c("nloptr","stringr","tictoc"), .options.mpi=opts) %dopar%
       {
         prev.time <- curr.time
         curr.time <- Sys.time() 
@@ -399,8 +399,11 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 
             #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
             #cat("Here1")
+        tic    
         res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                   fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
+        s <- toc
+        cat(s)
         #modelData = setModelParams(modelData, c(res$par,0.1,0))
         modelData@alpha = res$par[1]
         modelData@gamma1 = res$par[2]

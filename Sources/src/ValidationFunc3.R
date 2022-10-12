@@ -356,7 +356,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         prev.time <- curr.time
         curr.time <- Sys.time() 
         #time.diff <- curr.time-prev.time
-        cat(sprintf("idx=%i,time=%s",idx,difftime(curr.time, prev.time, units="sec")))
+        cat(sprintf("idx=%i,time=%s, alpha=%.10f,gamma1=%.10f,genDataFileNum= %i,genDataNum=%i",idx,difftime(curr.time, prev.time, units="sec"),alpha,gamma1,genDataFileNum,genDataNum))
         cat("\n")
         #start_idx=sequences[i]
         #idx = start_idx+j
@@ -403,7 +403,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                   fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
         s <- toc()
-        cat(s$callback_msg)
+        #cat(s$callback_msg)
+        cat("\n")
         #modelData = setModelParams(modelData, c(res$par,0.1,0))
         modelData@alpha = res$par[1]
         modelData@gamma1 = res$par[2]

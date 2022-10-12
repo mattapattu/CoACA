@@ -355,8 +355,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
       {
         prev.time <- curr.time
         curr.time <- Sys.time() 
-        time.diff <- curr.time-prev.time
-        cat(difftime(end.time, start.time, units="sec"))
+        #time.diff <- curr.time-prev.time
+        cat(difftime(curr.time, prev.time, units="sec"))
         cat("\n")
         #start_idx=sequences[i]
         #idx = start_idx+j

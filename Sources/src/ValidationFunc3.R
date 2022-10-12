@@ -356,7 +356,13 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         prev.time <- curr.time
         curr.time <- Sys.time() 
         #time.diff <- curr.time-prev.time
-        cat(sprintf("idx=%i,time=%s, alpha=%.10f,gamma1=%.10f,genDataFileNum= %i,genDataNum=%i",idx,difftime(curr.time, prev.time, units="sec"),alpha,gamma1,genDataFileNum,genDataNum))
+        alpha = gridMat[idx,1]
+        gamma1 = gridMat[idx,2]
+        iter = gridMat[idx,3]
+        genDataFileNum = as.numeric(gridMat[idx,4])
+        genDataNum = as.numeric(gridMat[idx,5])
+
+        cat(sprintf("idx=%i,time=%s, alpha=%.10f,gamma1=%.10f,iter=%i, genDataFileNum= %i,genDataNum=%i",idx,difftime(curr.time, prev.time, units="sec"),alpha,gamma1,iter,genDataFileNum,genDataNum))
         cat("\n")
         #start_idx=sequences[i]
         #idx = start_idx+j
@@ -364,11 +370,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         #cat(toString(gridMat[idx,]))
         #cat("\n")
         #cat(sprintf("idx= %i,name=%s\n", idx,name))
-        alpha = gridMat[idx,1]
-        gamma1 = gridMat[idx,2]
-        iter = gridMat[idx,3]
-        genDataFileNum = as.numeric(gridMat[idx,4])
-        genDataNum = as.numeric(gridMat[idx,5])
+        
         #cat(sprintf("genDataFileNum= %i,genDataNum=%i\n", genDataFileNum,genDataNum))
         genDataList <- genDataFiles[[genDataFileNum]]
         #cat(sprintf("length(genDataList)= %i,genDataNum=%i\n", length(genDataList),genDataNum))

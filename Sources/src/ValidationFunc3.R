@@ -399,11 +399,11 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 
             #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
             #cat("Here1")
-        tic    
+        tic()    
         res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                   fn = negLogLikFunc,ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
-        s <- toc
-        cat(s)
+        s <- toc()
+        cat(s$callback_msg)
         #modelData = setModelParams(modelData, c(res$par,0.1,0))
         modelData@alpha = res$par[1]
         modelData@gamma1 = res$par[2]

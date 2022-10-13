@@ -12,8 +12,8 @@ options(error=function()traceback(2))
 computeModelParams = F
 generateModelParamMat = F
 generateDataset = F
-paramEstTest = T
-combineParamEstResLists = F
+paramEstTest = F
+combineParamEstResLists = T
 validateHoldout = F
 
 ########################## Test 1: computeModelParams  ########################
@@ -112,7 +112,7 @@ if(paramEstTest)
     
   currentTest = "paramEstTest"
   source("testConfig.R")
-  cores = 20
+  cores = 10
   walltime = "12:00"
 
 

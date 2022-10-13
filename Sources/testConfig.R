@@ -77,7 +77,7 @@ if(currentTest == "generateDataset")
 if(currentTest == "paramEstTest")
 {
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
-  alpha_seq = seq_log(1e-3, 0.9,15)
+  alpha_seq = seq_log(1e-3, 0.1,15)
   gamma1_seq = seq_log(1e-8, 1e-4, 8)
   genDataList = c(1:4)
   genData = c(1:60)

@@ -346,7 +346,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 
   chunkSize = ceiling(length(gridMat[,1])/(getDoParWorkers()))
   #chunkSize = 500
-  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize, profile=TRUE) 
+  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize, profile=FALSE) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
   curr.time <- Sys.time() 
@@ -512,7 +512,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   anyNA <- any(!complete.cases(df))
   print(sprintf("anyNA=%s",anyNA))
 
-  save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
+  #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
 
  
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 

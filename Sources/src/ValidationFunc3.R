@@ -503,7 +503,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))  
   #chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
   print(sprintf("chunkSize=%i",chunkSize))
-  chunkSize=10
+  chunkSize=20
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   df <- as.data.frame(resMat)

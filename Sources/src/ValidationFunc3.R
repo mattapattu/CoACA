@@ -101,13 +101,13 @@ unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed
           print(which(y!=0,arr.ind = T))
           print(y[which(y!=0)])
         }else{
-          cat(sprint("Pass: Both prob matrices are same"))
+          cat(sprintf("Pass: Both prob matrices are same"))
         }
       }
       generatedData  
     } 
 
-    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_testGenDataset.Rdata"))
+    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_unitTestGenDataset.Rdata"))
 
 }
 

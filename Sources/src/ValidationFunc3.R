@@ -48,7 +48,7 @@ unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed
    opts <- list(initEnvir=initWorkers) 
  
    source(paste(src.dir,"../exportFunctions.R", sep="/")) 
-   
+   generatedDataList <-  
     foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
     {
       print(sprintf("model is %s",models[i]))  
@@ -99,14 +99,16 @@ unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed
         {
           cat(sprintf("Fail! Non-zero element found."))
           print(which(y!=0,arr.ind = T))
-          print(y[which(y!=0,arr.ind = T)])
+          print(y[which(y!=0)])
         }else{
           cat(sprint("Pass: Both prob matrices are same"))
         }
       }
-        
+      generatedData  
     } 
-    
+
+    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_testGenDataset.Rdata"))
+
 }
 
 

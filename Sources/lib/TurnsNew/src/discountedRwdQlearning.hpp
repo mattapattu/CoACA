@@ -10,7 +10,7 @@
 
 
 //namespace aca3 {
-Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, Rcpp::S4 turnModel, arma::vec turnStages, bool debug)
+Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, Rcpp::S4 turnModel, arma::vec turnStages, bool debug)
 {
   //Rcpp::Rcout << "Inside simulateAca2TurnsModels" << std::endl;
   arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));

@@ -259,9 +259,8 @@ setMethod("testSimulateData",  signature=c("ModelData","RatData","AllModels"),
             generated_data = TurnsNew::simulateTurnsModels(ratdata,x,testModel,TurnModel,turnstages, debug=TRUE)
             
             simData = new("RatData", rat = "simulation",allpaths = generated_data$PathData, turnTimes = generated_data$TurnData)
-            simData = new("RatData", rat = "simulation",allpaths = generated_data$PathData, turnTimes = generated_data$TurnData)
-
-            return(list("genData"=simData,"probMat"=probMat_true))
+              
+            return(list("genData"=simData,"probMat"=generated_data$probMat))
           }
 )
 

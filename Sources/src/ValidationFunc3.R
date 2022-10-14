@@ -94,7 +94,7 @@ unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed
         probMat_true = res$probMat
         argList <- getArgList(trueModelData, generatedData)
         probMat <-  TurnsNew::getProbMatrix(generatedData, trueModelData, argList[[6]], sim=1)
-        y <- probMat-probMat_true
+        y <- probMat[,c(1:12)]-probMat_true[,c(1:12)]
         if(any(y!=0))
         {
           cat(sprintf("Fail! Non-zero element found."))

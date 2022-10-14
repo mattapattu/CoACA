@@ -65,7 +65,7 @@ unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed
       while(!simLearns)
       {
       
-         res = testSimulateData(trueModelData,ratdata,allModels,debug=TRUE)
+         res = testSimulateData(trueModelData,ratdata,allModels)
          generatedData = res$genData
                   
           #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)

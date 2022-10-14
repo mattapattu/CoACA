@@ -3,6 +3,113 @@ library(rlist)
 library(nloptr)
 library(stringr)
 
+unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
+{
+  ## Test settings ###############
+  
+  StabilityTest = TRUE 
+  models = testData@Models
+  ##################################
+  
+  #creditAssignment = testData@creditAssignment
+  
+  #paramTest = list()
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  ratName = ratdata@rat
+  param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
+
+  res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
+   
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
+  timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+ 
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=seed)
+    
+  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  registerDoMPI(cl)
+    
+   initWorkers <-  function() {
+      source(paste(src.dir,"../ModelClasses.R", sep="/"))
+      source(paste(src.dir,"PathModel.R", sep="/"))
+      source(paste(src.dir,"TurnModel.R", sep="/"))
+      source(paste(src.dir,"HybridModel1.R", sep="/"))
+      source(paste(src.dir,"HybridModel2.R", sep="/"))
+      source(paste(src.dir,"HybridModel3.R", sep="/"))
+      source(paste(src.dir,"HybridModel4.R", sep="/"))
+      source(paste(src.dir,"../BaseClasses.R", sep="/"))
+      source(paste(src.dir,"../exportFunctions.R", sep="/"))
+      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
+      #attach(myEnv, name="sourced_scripts")
+    }
+   
+   #chunkSize = 150
+   opts <- list(initEnvir=initWorkers) 
+ 
+   source(paste(src.dir,"../exportFunctions.R", sep="/")) 
+   
+   foreach(i=1:length(models, .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
+   {
+        
+      model = models[i,1] 
+
+      modelName = strsplit(model,"\\.")[[1]][1]
+      creditAssignment = strsplit(model,"\\.")[[1]][2]
+      trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
+       
+        #trueModelData = modifyModelData(trueModelData) 
+      simLearns = FALSE 
+      missedOptimalIter = 0
+        
+      while(!simLearns)
+      {
+      
+         res = testSimulateData(trueModelData,ratdata,allModels,debug=TRUE)
+         generatedData = res$genData
+                  
+          #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
+        simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
+        missedOptimalIter=missedOptimalIter+1
+          
+        if(missedOptimalIter==500)
+        {
+          cat(sprintf('model = %s, missedOptimalIter = %i, trueAlpha = %f, trueGamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
+          break
+        }
+          #cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
+      }
+
+        
+      if(simLearns)
+      {
+        
+        cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
+        generatedData = populateSimRatModel(ratdata,generatedData,modelName)
+        generatedData@simModel = trueModelData@Model
+        generatedData@simMethod = trueModelData@creditAssignment
+        generatedData@simModelData = trueModelData
+
+
+        probMat_true = res$probMat
+        argList <- getArgList(trueModelData, generatedData)
+        probMat <-  TurnsNew::getProbMatrix(generatedData, trueModelData, argList[[6]], sim=1)
+        y <- probMat-probMat_true
+        if(any(y!=0))
+        {
+          cat(sprintf("Fail! Non-zero element found."))
+          print(which(y!=0,arr.ind = T))
+          print(y[which(y!=0,arr.ind = T)])
+        }else{
+          cat(sprint("Pass: Both prob matrices are same"))
+        }
+      }
+        
+    } 
+    
+}
+
+
 GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
 {
   ## Test settings ###############
@@ -344,8 +451,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
     genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
-  chunkSize = ceiling(length(gridMat[,1])/(getDoParWorkers()))
-  #chunkSize = 500
+  #chunkSize = ceiling(length(gridMat[,1])/(getDoParWorkers()))
+  chunkSize = 300
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize, profile=FALSE) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
@@ -517,7 +624,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
     foreach(iter = iters, .inorder=TRUE, .combine='rbind') %dopar%
     {
-      print(sprintf("it=%i,model=%s",iter,model))
+      #print(sprintf("it=%i,model=%s",iter,model))
       modelName = strsplit(model,"\\.")[[1]][1]
       #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
       creditAssignment = strsplit(model,"\\.")[[1]][2]
@@ -527,15 +634,15 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
       #minmodel_genDataNum = 0
 
       genDataFileNumbers = unique(df_it[,11])
-      print(genDataFileNumbers)
+      #print(genDataFileNumbers)
       
       res2 <- 
         foreach(fileNb = genDataFileNumbers, .combine='rbind')%do%
         {
-          print(sprintf("it=%i,fileNb=%i",iter,fileNb))
+          #print(sprintf("it=%i,fileNb=%i",iter,fileNb))
           df_it_fileNb = df_it[which(df_it[,11]==fileNb),]
           genDataNb =  unique(df_it_fileNb[,12])
-          print(sprintf("len genDataNb=%i",length(genDataNb)))
+          #print(sprintf("len genDataNb=%i",length(genDataNb)))
           res1 <- 
             foreach(i = genDataNb, .combine='rbind') %do%
             {
@@ -543,15 +650,15 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               genDataList <- genDataFiles[[fileNb]]
               generatedData = genDataList[[i]]
 
-              print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
+              #print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
               df_genData = df_it_fileNb[which(df_it_fileNb[,12]==i),]
-              print(sprintf("len df_genData=%i",length(df_genData[,1])))
+              #print(sprintf("len df_genData=%i",length(df_genData[,1])))
               min_lik1 = 1000000
               minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
 
               for(idx in 1:length(df_genData[,1]))
               {
-                print(sprintf("idx=%i",idx))
+                #print(sprintf("idx=%i",idx))
                 modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
                 modelData@alpha = df_genData[idx,3]
                 modelData@gamma1 = df_genData[idx,4]
@@ -562,7 +669,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
                 lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
                 lik1 <- sum(lik[c(1:iter)])*-1
                 #lik2 <- sum(lik[-c(1:800)])*-1
-                print(sprintf("alpha=%.10f, gamma1=%.10f",modelData@alpha,modelData@gamma1))
+                #print(sprintf("alpha=%.10f, gamma1=%.10f",modelData@alpha,modelData@gamma1))
 
                 
                 if (is.infinite(lik1)) {
@@ -595,7 +702,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
 
               
               probMat <- TurnsNew::getProbMatrix(generatedData, minmodel, argList[[6]], sim=1)
-              print(minmodel)
+              #print(minmodel)
               idx = length(df_genData[,1])
               
               trueModelData <- new("ModelData", Model = modelName, creditAssignment = "qlearningAvgRwd", sim = 1)
@@ -604,24 +711,24 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               trueModelData@gamma2 = df_genData[idx,9]
               trueModelData@lambda = df_genData[idx,10]
               #trueModelData <- allData[[minmodel_genDataNum]]@simModelData
-              print(trueModelData)
+              #print(trueModelData)
               trueProbMat <- TurnsNew::getProbMatrix(generatedData, trueModelData, argList[[6]], sim=1)
                     
-              row1 <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
-              if(trueProbMat[iter,1] == -1)
-              {
-                index <- max(which(probMat[1:iter,1] != -1))
-              }else{
-                index <- max(which(probMat[1:iter,7] != -1))
-              }
-              print(sprintf("index=%i",index))
+              probRow <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
+              # if(trueProbMat[iter,1] == -1)
+              # {
+              #   index <- max(which(probMat[1:iter,1] != -1))
+              # }else{
+              #   index <- max(which(probMat[1:iter,7] != -1))
+              # }
+              # print(sprintf("index=%i",index))
                     
-              row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
-              row1[is.nan(row1)] <- 0
-              row2[is.nan(row2)] <- 0
-              probRow <- row1 + row2  
+              # row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
+              # row1[is.nan(row1)] <- 0
+              # row2[is.nan(row2)] <- 0
+              # probRow <- row1 + row2  
               probRow[is.infinite(probRow)] <- 0
-              print(probRow)
+              #print(probRow)
               list(iter = iter, model = modelName, creditAssignment=creditAssignment, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res_alpha=minmodel@alpha, res_gamma1=minmodel@gamma1, res_gamma2=minmodel@gamma2,res_lambda=minmodel@lambda,probRow=probRow,trueAlpha = trueModelData@alpha,trueGamma1 = trueModelData@gamma1,trueGamma2 = trueModelData@gamma2,trueLambda = trueModelData@lambda)
             }
             res1

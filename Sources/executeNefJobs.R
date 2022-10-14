@@ -34,7 +34,17 @@ if(currentTest == "generateModelParamMat"){
 
   generateParamResMat(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 
-} 
+
+}
+
+
+################# Unit Test ###################
+
+if(currentTest == "unitTestProbDiff"){
+
+  unitTestProbDiff(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
+}
+
 
 ################# Generate Dataset ######################
 

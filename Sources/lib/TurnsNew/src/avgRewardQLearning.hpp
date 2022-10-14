@@ -396,47 +396,51 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
         
         for (int path = 0; path < 6; path++)
         {
-          //Rcpp::Rcout << "path=" << path << ", state=" << S << std::endl;
-          
-          Rcpp::StringVector turnVec;
-          if (S == 0)
+        //Rcpp::Rcout << "path=" << path << ", state=" << S << std::endl;
+        
+          for (int box = 0; box < 2; box++)
           {
-            turnVec = S0.getTurnsFromPaths(path);
-            turnVec.push_front("E");
-          }
-          else
-          {
-            turnVec = S1.getTurnsFromPaths(path);
-            turnVec.push_front("I");
-          }
-          //Rcpp::Rcout << "turnVec=" << turnVec << std::endl;
-          // msg.str("");
-          // msg << "turnVec=";
-          // logger.PrintRcppVec(msg.str(),turnVec); 
-          double pathProb = 1;
-          for (int k = 0; k < (turnVec.length() - 1); k++)
-          {
-            std::string turn1 = Rcpp::as<std::string>(turnVec[k]);
-            std::string turn2 = Rcpp::as<std::string>(turnVec[k + 1]);
-            //Rcpp::Rcout << "turn1=" << turn1 << ", turn2=" << turn2 << std::endl;
-            
-            Edge e;
-            if (S == 0)
+            Rcpp::StringVector turnVec;
+            if (box == 0)
             {
-              e = S0.getEdge(turn1, turn2);
+              turnVec = S0.getTurnsFromPaths(path);
+              turnVec.push_front("E");
             }
             else
             {
-              e = S1.getEdge(turn1, turn2);
+              turnVec = S1.getTurnsFromPaths(path);
+              turnVec.push_front("I");
             }
             
-            //Rcpp::Rcout << "Edge prob=" << e.probability << std::endl;
-            pathProb = e.probability * pathProb;
+            double pathProb = 1;
+            
+            for (int k = 0; k < (turnVec.length() - 1); k++)
+            {
+              std::string turn1 = Rcpp::as<std::string>(turnVec[k]);
+              std::string turn2 = Rcpp::as<std::string>(turnVec[k + 1]);
+              //Rcpp::Rcout << "turn1=" << turn1 << ", turn2=" << turn2 << std::endl;
+              
+              Edge e;
+              if (box == 0)
+              {
+                e = S0.getEdge(turn1, turn2);
+              }
+              else
+              {
+                e = S1.getEdge(turn1, turn2);
+              }
+              
+              //Rcpp::Rcout << "Edge prob=" << e.probability << std::endl;
+              pathProb = e.probability * pathProb;
+            }
+            
+            int index = path + (6 * box);
+            probRow[index] = pathProb;
+            
           }
-          int index = path + (6 * S);
-          //Rcpp::Rcout << "index=" << index << ", pathProb=" << pathProb << std::endl;
-          probRow[index] = pathProb;
-        }
+       
+       }
+
         //Rcpp::Rcout << "probRow=" << probRow << std::endl;
         mseMatrix = arma::join_vert(mseMatrix, probRow);
         
@@ -1113,45 +1117,49 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
       for (int path = 0; path < 6; path++)
       {
         //Rcpp::Rcout << "path=" << path << ", state=" << S << std::endl;
-        Rcpp::StringVector turnVec;
-        if (S == 0)
+        
+        for (int box = 0; box < 2; box++)
         {
-          turnVec = S0.getTurnsFromPaths(path);
-          turnVec.push_front("E");
-        }
-        else
-        {
-          turnVec = S1.getTurnsFromPaths(path);
-          turnVec.push_front("I");
-        }
-        //Rcpp::Rcout << "turnVec=" << turnVec << std::endl;
-        // msg.str("");
-        // msg << "turnVec=";
-        // logger.PrintRcppVec(msg.str(),turnVec); 
-        double pathProb = 1;
-        for (int k = 0; k < (turnVec.length() - 1); k++)
-        {
-          std::string turn1 = Rcpp::as<std::string>(turnVec[k]);
-          std::string turn2 = Rcpp::as<std::string>(turnVec[k + 1]);
-          //Rcpp::Rcout << "turn1=" << turn1 << ", turn2=" << turn2 << std::endl;
-          
-          Edge e;
-          if (S == 0)
+          Rcpp::StringVector turnVec;
+          if (box == 0)
           {
-            e = S0.getEdge(turn1, turn2);
+            turnVec = S0.getTurnsFromPaths(path);
+            turnVec.push_front("E");
           }
           else
           {
-            e = S1.getEdge(turn1, turn2);
+            turnVec = S1.getTurnsFromPaths(path);
+            turnVec.push_front("I");
           }
           
-          //Rcpp::Rcout << "Edge prob=" << e.probability << std::endl;
-          pathProb = e.probability * pathProb;
-        }
-        int index = path + (6 * S);
-        //Rcpp::Rcout << "index=" << index << ", pathProb=" << pathProb << std::endl;
-        probRow[index] = pathProb;
-      }
+          double pathProb = 1;
+          
+          for (int k = 0; k < (turnVec.length() - 1); k++)
+          {
+            std::string turn1 = Rcpp::as<std::string>(turnVec[k]);
+            std::string turn2 = Rcpp::as<std::string>(turnVec[k + 1]);
+            //Rcpp::Rcout << "turn1=" << turn1 << ", turn2=" << turn2 << std::endl;
+            
+            Edge e;
+            if (box == 0)
+            {
+              e = S0.getEdge(turn1, turn2);
+            }
+            else
+            {
+              e = S1.getEdge(turn1, turn2);
+            }
+            
+            //Rcpp::Rcout << "Edge prob=" << e.probability << std::endl;
+            pathProb = e.probability * pathProb;
+          }
+          
+          int index = path + (6 * box);
+          probRow[index] = pathProb;
+          
+         }
+       
+       }
       //Rcpp::Rcout << "probRow=" << probRow << std::endl;
       mseMatrix = arma::join_vert(mseMatrix, probRow);
       i++;

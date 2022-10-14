@@ -11,9 +11,10 @@ options(error=function()traceback(2))
 #### Tests ##############
 computeModelParams = F
 generateModelParamMat = F
+unitTestProbDiff = T
 generateDataset = F
 paramEstTest = F
-combineParamEstResLists = T
+combineParamEstResLists = F
 validateHoldout = F
 
 ########################## Test 1: computeModelParams  ########################
@@ -69,6 +70,27 @@ if(generateModelParamMat){
   system(command)
   #generateParamResMat(ratdata,model.data.dir,count)
 }
+
+############## Unit Test ###############################
+  currentTest = "unitTestProbDiff"
+  source("testConfig.R")
+
+  cores = 7
+  walltime = "1:00"
+  spawnslaves = cores-1
+  start_idx = 0
+  end_idx = 0
+  seed = 0
+  name = paste0("unitTest_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+  command <- sprintf("oarsub -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+  cat(command)
+  cat("\n")
+  system(command)
+
+
 
 ############## Generate Datasets ##########################
 

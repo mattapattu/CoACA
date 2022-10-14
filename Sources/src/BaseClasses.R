@@ -83,6 +83,7 @@ setGeneric("setModelParams", function(x,modelParams) standardGeneric("setModelPa
 setGeneric("getArgList", function(x,ratdata)  standardGeneric("getArgList"))
 setGeneric("setModelResults", function(x,ratdata, allModels)  standardGeneric("setModelResults"))
 setGeneric("simulateData", function(x,ratdata,allModels) standardGeneric("simulateData"))
+setGeneric("testSimulateData", function(x,ratdata,allModels) standardGeneric("testSimulateData"))
 setGeneric("addModelData", function(x,modelData) standardGeneric("addModelData"))
 setGeneric("getModelData", function(x,modelName,creditAssignment) standardGeneric("getModelData"))
 
@@ -238,6 +239,31 @@ setMethod("simulateData",  signature=c("ModelData","RatData","AllModels"),
           }
 )
 
+
+setMethod("testSimulateData",  signature=c("ModelData","RatData","AllModels"),
+          definition=function(x,ratdata,allModels)
+          {
+            ratName = ratdata@rat
+            endStage1 = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.5)
+            endStage2 = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.85)
+            endStage3 = length(ratdata@allpaths[,1])
+            #pathstages=c(1,endStage1,endStage2,endStage3)
+                       
+            model = x@Model
+            testModel = slot(allModels,model)
+
+            turnIdxStage1 = last(which(ratdata@turnTimes[,1]<=endStage1))
+            turnIdxStage2 = last(which(ratdata@turnTimes[,1]<=endStage2))
+            turnIdxStage3 = length(ratdata@turnTimes[,1])
+            turnstages = c(1,turnIdxStage1,turnIdxStage2,turnIdxStage3)
+            generated_data = TurnsNew::simulateTurnsModels(ratdata,x,testModel,TurnModel,turnstages, debug=TRUE)
+            
+            simData = new("RatData", rat = "simulation",allpaths = generated_data$PathData, turnTimes = generated_data$TurnData)
+            simData = new("RatData", rat = "simulation",allpaths = generated_data$PathData, turnTimes = generated_data$TurnData)
+
+            return(list("genData"=simData,"probMat"=probMat_true)
+          }
+)
 
 setMethod("addModelData",  signature=c("AllModelRes","ModelData"),
           function(x,modelData)

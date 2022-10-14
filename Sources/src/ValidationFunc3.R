@@ -49,8 +49,8 @@ unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed
  
    source(paste(src.dir,"../exportFunctions.R", sep="/")) 
    
-   foreach(i=1:length(models, .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
-   {
+    foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
+    {
         
       model = models[i,1] 
 

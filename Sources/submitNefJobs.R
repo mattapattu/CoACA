@@ -72,6 +72,8 @@ if(generateModelParamMat){
 }
 
 ############## Unit Test ###############################
+if(unitTestProbDiff)
+{
   currentTest = "unitTestProbDiff"
   source("testConfig.R")
 
@@ -89,6 +91,8 @@ if(generateModelParamMat){
   cat(command)
   cat("\n")
   system(command)
+}
+  
 
 
 

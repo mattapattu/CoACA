@@ -16,8 +16,9 @@ unitTestHoldOut=function(ratdata,allModelRes,testData,src.dir)
   
   print(sprintf("models: %s",toString(modelNames)))
   
-  for(i in c(1:length(modelNames)))
+  for(i in c(1:length(models)))
   {
+      print(sprintf("model is %s",models[i]))
       model = modelNames[i] 
       modelName = strsplit(model,"\\.")[[1]][1]
       creditAssignment = strsplit(model,"\\.")[[1]][2]

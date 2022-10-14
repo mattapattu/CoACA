@@ -51,8 +51,8 @@ unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed
    
     foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
     {
-        
-      model = models[i,1] 
+      print(sprintf("model is %s",models[i]))  
+      model = models[i] 
 
       modelName = strsplit(model,"\\.")[[1]][1]
       creditAssignment = strsplit(model,"\\.")[[1]][2]

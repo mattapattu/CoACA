@@ -170,6 +170,7 @@ generateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
       modelName = strsplit(model,"\\.")[[1]][1]
       creditAssignment = strsplit(model,"\\.")[[1]][2]
       trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
+      trueModelData_mod = modifyModelData(trueModelData)
        
         #trueModelData = modifyModelData(trueModelData) 
       simLearns = FALSE 
@@ -179,7 +180,7 @@ generateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
       {
         if(StabilityTest)
         {
-         trueModelData_mod = modifyModelData(trueModelData)
+         #trueModelData_mod = modifyModelData(trueModelData)
          generatedData = simulateData(trueModelData_mod,ratdata,allModels)
         }else{
          generatedData = simulateData(trueModelData,ratdata,allModels)
@@ -194,7 +195,7 @@ generateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
           cat(sprintf('model = %s, missedOptimalIter = %i, trueAlpha = %f, trueGamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
           break
         }
-        cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData_mod@alpha, trueModelData_mod@gamma1)) 
+        #cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData_mod@alpha, trueModelData_mod@gamma1)) 
       }
 
         

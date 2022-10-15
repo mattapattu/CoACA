@@ -75,7 +75,7 @@ checkSimLearns=function(allpaths,sim,limit)
       counter=counter+1
     }
   }
-  if(counter>=3)
+  if(counter>=2)
   {
     simLearns = TRUE
   }

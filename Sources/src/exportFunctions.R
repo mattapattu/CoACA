@@ -62,6 +62,7 @@ checkSimLearns=function(allpaths,sim,limit)
   simLearns = FALSE
   sessions <- allpaths[,5]
   uniqueSessIds <- unique(sessions)
+  counter = 0
   
   for(sess in uniqueSessIds)
   {
@@ -71,9 +72,12 @@ checkSimLearns=function(allpaths,sim,limit)
     if(successRate >= limit)
     {
       end_index = sessIdx[length(sessIdx)]
-      simLearns = TRUE
-      break
+      counter=counter+1
     }
+  }
+  if(counter>=5)
+  {
+    simLearns = TRUE
   }
   
   return(simLearns)

@@ -112,7 +112,7 @@ unitTestProbDiff=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed
 }
 
 
-GenerateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
+generateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
 {
   ## Test settings ###############
   
@@ -717,20 +717,9 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
               trueProbMat <- TurnsNew::getProbMatrix(generatedData, trueModelData, argList[[6]], sim=1)
                     
               probRow <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
-              # if(trueProbMat[iter,1] == -1)
-              # {
-              #   index <- max(which(probMat[1:iter,1] != -1))
-              # }else{
-              #   index <- max(which(probMat[1:iter,7] != -1))
-              # }
-              # print(sprintf("index=%i",index))
-                    
-              # row2 <- round((trueProbMat[index,] - probMat[index,]),2)/round(trueProbMat[index,],2)
-              # row1[is.nan(row1)] <- 0
-              # row2[is.nan(row2)] <- 0
-              # probRow <- row1 + row2  
+              probRow[is.nan(probRow)] <- 0
               probRow[is.infinite(probRow)] <- 0
-              #print(probRow)
+              print(probRow)
               list(iter = iter, model = modelName, creditAssignment=creditAssignment, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res_alpha=minmodel@alpha, res_gamma1=minmodel@gamma1, res_gamma2=minmodel@gamma2,res_lambda=minmodel@lambda,probRow=probRow,trueAlpha = trueModelData@alpha,trueGamma1 = trueModelData@gamma1,trueGamma2 = trueModelData@gamma2,trueLambda = trueModelData@lambda)
             }
             res1
@@ -739,7 +728,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     }
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
-  save(minDflist, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_minDflist.Rdata"))
+  save(minDflist, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_minDflist.Rdata"))
 
     print("Generating Df")
    

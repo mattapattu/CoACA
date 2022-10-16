@@ -49,8 +49,10 @@ ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],Tu
 
 if(currentTest == "computeModelParams")
 {
-  alpha_seq = seq_log(1e-3, 0.9,10)
-  gamma1_seq = seq_log(1e-8, 1e-4, 5)
+  #alpha_seq = seq_log(1e-3, 0.9,10)
+  #gamma1_seq = seq_log(1e-8, 1e-4, 5)
+  alpha_seq = seq_log(1e-3, 0.1,15)
+  gamma1_seq = seq_log(1e-8, 1e-4, 8)
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
   models = testData@Models
   gridMat<- expand.grid(alpha_seq,gamma1_seq,iters,models,stringsAsFactors = FALSE)

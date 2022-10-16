@@ -215,7 +215,7 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
 
  if(creditAssignment=="qlearningAvgRwd")
   {
-    modelData@gamma2 <- 0.1
+    modelData@gamma2 <- 0.2
     modelData@lambda <- 0
   }
   

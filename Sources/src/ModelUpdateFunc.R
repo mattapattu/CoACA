@@ -262,6 +262,7 @@ generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
       df_it <- df[which(df[,1]==it & df[,2]==model),]
       min_lik1 = 1000000
       minmodel <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
+      modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
       for(idx in 1:length(df_it[,1]))
       {
         modelData@alpha = df_it[idx,3]

@@ -34,7 +34,7 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
 {
   models = testData@Models
   #########################
-  gamma2 = 0.5
+  gamma2 = 0.3
   lambda = 0
   #########################
 
@@ -149,7 +149,7 @@ generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   #################################
 
-  gamma2 = 0.5
+  gamma2 = 0.3
   lambda = 0
 
   ########################### 

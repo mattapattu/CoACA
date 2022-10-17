@@ -117,7 +117,8 @@ generateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
   ## Test settings ###############
   
   StabilityTest = TRUE 
-  
+  gamma2 = 0.2
+  lambda = 0
   ##################################
   models = testData@Models
   #creditAssignment = testData@creditAssignment
@@ -242,6 +243,8 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   StabilityTest = TRUE 
   DataGenerated = TRUE
   
+  gamma2=0.2
+  lambda=0
   ##################################
 
   testDataName = testData@Name
@@ -328,7 +331,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
             #cat("Here1")
          res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
                          fn = negLogLikFunc,ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1)
-            modelData = setModelParams(modelData, c(res$par,0.1,0))
+            modelData = setModelParams(modelData, c(res$par,gamma2,lambda))
 
         
         modelData = setModelResults(modelData,generatedData,allModels)
@@ -407,7 +410,9 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 {
   ## Test settings ###############
   
-  StabilityTest = TRUE 
+  StabilityTest = TRUE
+  gamma2 = 0.2
+  lambda = 0 
   
   ##################################
   models = testData@Models
@@ -520,8 +525,8 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
         #modelData = setModelParams(modelData, c(res$par,0.1,0))
         modelData@alpha = res$par[1]
         modelData@gamma1 = res$par[2]
-        modelData@gamma2 = 0.1
-        modelData@lambda = 0
+        modelData@gamma2 = gamma2
+        modelData@lambda = lambda
 
 
         model = paste0(modelName,".",creditAssignment)
@@ -550,6 +555,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     ## Test settings ###############
   
   StabilityTest = TRUE 
+  gamma2=0.2
+  lambda=0
   
   ####################################
 
@@ -665,8 +672,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
                 modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
                 modelData@alpha = df_genData[idx,3]
                 modelData@gamma1 = df_genData[idx,4]
-                modelData@gamma2 = 0.1
-                modelData@lambda = 0
+                modelData@gamma2 = gamma2
+                modelData@lambda = lambda
                 
                 argList <- getArgList(modelData, generatedData)
                 lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
@@ -693,8 +700,8 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
                   min_lik1=lik1
                   minmodel@alpha = df_genData[idx,3]
                   minmodel@gamma1 = df_genData[idx,4]
-                  minmodel@gamma2 = 0.1
-                  minmodel@lambda = 0
+                  minmodel@gamma2 = gamma2
+                  minmodel@lambda = lambda
                   minmodel_genDataFileNum = df_genData[idx,11]
                   minmodel_genDataNum = df_genData[idx,12]
 

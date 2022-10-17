@@ -117,7 +117,7 @@ generateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
   ## Test settings ###############
   
   StabilityTest = TRUE 
-  gamma2 = 0.3
+  gamma2 = 0.23
   lambda = 0
   ##################################
   models = testData@Models
@@ -243,7 +243,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   StabilityTest = TRUE 
   DataGenerated = TRUE
   
-  gamma2=0.3
+  gamma2 = 0.23
   lambda=0
   ##################################
 
@@ -411,7 +411,7 @@ testParamEstimationV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   ## Test settings ###############
   
   StabilityTest = TRUE
-  gamma2 = 0.3
+  gamma2 = 0.23
   lambda = 0 
   
   ##################################
@@ -555,7 +555,7 @@ combineParamEstResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mo
     ## Test settings ###############
   
   StabilityTest = TRUE 
-  gamma2=0.3
+  gamma2 = 0.23
   lambda=0
   
   ####################################

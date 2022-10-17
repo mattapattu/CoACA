@@ -30,66 +30,14 @@ library(listenv)
 library(nloptr)
 
 
-analyzeParamSpaceWrapper = function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
-{
-  
-  X <- analyzeParamSpace(ratdata,testData,src.dir, model.src, model.data.dir,gridMat[start_idx:end_idx,])
-
-   
-  #iter = c(300,800,1100,1500,length(ratdata@allpaths[,1]))
-  df <- as.data.frame(resMat)
-  cols.num <- c(1,3,4,5,6,7)
-  df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
-  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
-
-  minDfModels <- foreach(model = models,.combine='rbind', .inorder=TRUE) %:% 
-    foreach(it = iter,.combine='rbind', .inorder=TRUE) %dopar%
-  {
-    df_it <- df[which(df[,1]==it & df[,2]==model),]
-    min_lik1 = 1000000
-    minmodel = modelData <- new("ModelData", Model = model, creditAssignment = "qlearningAvgRwd", sim = 2)
-    for(idx in 1:length(df_it[,1]))
-    {
-      modelData@alpha = df_it[idx,3]
-      modelData@gamma1 = df_it[idx,4]
-      modelData@gamma2 = 0.1
-      modelData@lambda = 0
-      argList <- getArgList(modelData, ratdata)
-      lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-      lik1 <- sum(lik[c(1:800)])*-1
-      lik2 <- sum(lik[-c(1:800)])*-1
-      df_it[idx,7]= lik1
-      
-      if (is.infinite(lik1)) {
-        lik1= 1000000
-      }else if (is.nan(lik1)) {
-        #print(sprintf("Alpha = %f", alpha))
-        lik1 = 1000000
-      }else if (is.na(lik1)) {
-        #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
-        lik1 = 1000000
-      }
-      if(lik1 < min_lik1)
-      {
-        min_lik1=lik1
-        min_lik2=lik2
-        minmodel@alpha = df_it[idx,3]
-        minmodel@gamma1 = df_it[idx,4]
-        minmodel@gamma2 = 0.1
-        minmodel@lambda = 0
-      }    
-    }
-    c(model,it,minmodel@alpha,minmodel@gamma1,minmodel@gamma2,minmodel@lambda,min_lik1,min_lik2)
-  }
-  
-  print(minDfModels)
-  save(minDfModels, file = paste0(model.data.dir,"/",ratdata@rat, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_minDfModels.Rdata")) 
-  
-}
-
 analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name)
 {
   models = testData@Models
+  #########################
+  gamma2 = 0.2
+  lambda = 0
+  #########################
+
   #creditAssignment = testData@creditAssignment
   
   #paramTest = list()
@@ -153,12 +101,12 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
             #cat("Here2")
             if(res$convergence < 0)
             {
-              modelData = setModelParams(modelData, c(NA,NA,0.1,0))
+              modelData = setModelParams(modelData, c(NA,NA,gamma2,lambda))
               c(iter,modelName,NA, NA,modelData@gamma2,modelData@lambda,NA,idx,alpha,gamma1)
 
             }else
             {
-              modelData = setModelParams(modelData, c(res$par,0.1,0))
+              modelData = setModelParams(modelData, c(res$par,gamma2,lambda))
               if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
               {
                 #cat("Here")
@@ -199,6 +147,13 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
 generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
   
+  #################################
+
+  gamma2 = 0.2
+  lambda = 0
+
+  ########################### 
+
   #models = testData@Models
   #creditAssignment = testData@creditAssignment
   
@@ -267,8 +222,8 @@ generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
       {
         modelData@alpha = df_it[idx,3]
         modelData@gamma1 = df_it[idx,4]
-        modelData@gamma2 = 0.1
-        modelData@lambda = 0
+        modelData@gamma2 = gamma2
+        modelData@lambda = lambda
         
         argList <- getArgList(modelData, ratdata)
         lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
@@ -295,8 +250,8 @@ generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
           min_lik2=lik2
           minmodel@alpha = df_it[idx,3]
           minmodel@gamma1 = df_it[idx,4]
-          minmodel@gamma2 = 0.1
-          minmodel@lambda = 0
+          minmodel@gamma2 = gamma2
+          minmodel@lambda = lambda
         }    
       }
       #cat(sprintf("it=%i,model=%s, min_lik1=%i",it,model,min_lik1))

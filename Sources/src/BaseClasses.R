@@ -89,7 +89,7 @@ setClass("RatData",
 
 setMethod("initialize", "ModelData", function(.Object, ...) {
   .Object <- callNextMethod()
-  if(!is.null(.Object@creditAssignment)){
+  if(length(.Object@creditAssignment) > 0) {
     if(.Object@creditAssignment == "qlearningAvgRwd")
     {
       .Object@gamma2 = avgRwd_gamma2

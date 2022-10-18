@@ -5,7 +5,7 @@ allModels = new("AllModels",Paths = PathModel, Turns = TurnModel,Hybrid1 = Hybri
 
 ############### Default parameters #######################
 
-avgRwd_gamma2 = 0.3
+avgRwd_gamma2 = 0.5
 avgRwd_lambda = 0
 
 #######################################################

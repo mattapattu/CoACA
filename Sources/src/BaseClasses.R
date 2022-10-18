@@ -77,6 +77,20 @@ setClass("RatData",
 
 )
 
+########## Init ModelData #######################
+
+setMethod("initialize", "ModelData", function(.Object, ...) {
+  .Object <- callNextMethod()
+  if(.Object@creditAssignment == "qlearningAvgRwd")
+  {
+    .Object@gamma2 = avgRwd_gamma2
+    .Object@lambda = avgRwd_lambda
+  }
+  .Object
+  
+})
+
+
 
 #### func setModelParams ###
 setGeneric("setModelParams", function(x,modelParams) standardGeneric("setModelParams"))

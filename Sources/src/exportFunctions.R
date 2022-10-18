@@ -56,9 +56,10 @@ getEndIndex = function(ratName, generated_data, sim, limit){
 }
 
 
-checkSimLearns=function(allpaths,sim,limit)
+checkSimLearns=function(ratdata, modelData, testModel,sim,limit)
 {
   #end_index = -1
+  allpaths <- ratdata@allpaths
   simLearns = FALSE
   sessions <- allpaths[,5]
   uniqueSessIds <- unique(sessions)
@@ -79,7 +80,19 @@ checkSimLearns=function(allpaths,sim,limit)
   {
     simLearns = TRUE
   }
-  
+
+  if(simLearns)
+  {
+    probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
+    if((length(which(probMat[,4] > 0.8)) > 10 && length(which(probMat[,10] > 0.8)) > 10))
+    {
+      simLearns = TRUE
+    }else{
+      simLearns = FALSE
+    }
+
+  }
+    
   return(simLearns)
 }
 
@@ -213,12 +226,6 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
   modelData@alpha <- alpha
   modelData@gamma1 <- gamma1
 
- if(creditAssignment=="qlearningAvgRwd")
-  {
-    modelData@gamma2 <- 0.2
-    modelData@lambda <- 0
-  }
-  
   if(alpha < 0 || gamma1 < 0)
   {
     return(1000000)
@@ -245,7 +252,6 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
    negLogLik = 1000000
   }
   
-
   # print(sprintf("negLogLik = %f",negLogLik))
   if (is.infinite(negLogLik)) {
     return(1000000)

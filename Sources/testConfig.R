@@ -43,6 +43,10 @@ boxTimes = enregres$boxTimes
     
 ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
 
+############### Default parameters #######################
+
+avgRwd_gamma2 = 0.3
+
 ############### Tests #############################################
 
 

@@ -34,9 +34,6 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
 {
   models = testData@Models
   #########################
-  gamma2 = 0.23
-  lambda = 0
-  #########################
 
   #creditAssignment = testData@creditAssignment
   
@@ -101,12 +98,12 @@ analyzeParamSpace=function(ratdata,testData,src.dir,model.src,setup.hpc,model.da
             #cat("Here2")
             if(res$convergence < 0)
             {
-              modelData = setModelParams(modelData, c(NA,NA,gamma2,lambda))
+              modelData = setModelParams(modelData, c(NA,NA,modelData@gamma2,modelData@lambda))
               c(iter,modelName,NA, NA,modelData@gamma2,modelData@lambda,NA,idx,alpha,gamma1)
 
             }else
             {
-              modelData = setModelParams(modelData, c(res$par,gamma2,lambda))
+              modelData = setModelParams(modelData, c(res$par,modelData@gamma2,modelData@lambda))
               if(creditAssignment == "qlearningAvgRwd"||creditAssignment == "aca4")
               {
                 #cat("Here")
@@ -148,11 +145,6 @@ generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
 {
   
   #################################
-
-  gamma2 = 0.23
-  lambda = 0
-
-  ########################### 
 
   #models = testData@Models
   #creditAssignment = testData@creditAssignment
@@ -222,8 +214,6 @@ generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
       {
         modelData@alpha = df_it[idx,3]
         modelData@gamma1 = df_it[idx,4]
-        modelData@gamma2 = gamma2
-        modelData@lambda = lambda
         
         argList <- getArgList(modelData, ratdata)
         lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
@@ -250,8 +240,6 @@ generateParamResMat=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
           min_lik2=lik2
           minmodel@alpha = df_it[idx,3]
           minmodel@gamma1 = df_it[idx,4]
-          minmodel@gamma2 = gamma2
-          minmodel@lambda = lambda
         }    
       }
       #cat(sprintf("it=%i,model=%s, min_lik1=%i",it,model,min_lik1))

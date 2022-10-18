@@ -231,19 +231,11 @@ negLogLikFunc <- function(par, ratdata, half_index, modelData, testModel, sim) {
     return(1000000)
   }
 
-  simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
+  #simLearns = checkSimLearns(ratdata@allpaths,sim=sim,limit=0.8)
   
-  if(simLearns)
-  {
-   lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
-   lik <- lik[1:half_index]
-   negLogLik <- (-1) * sum(lik)
-  }
-  else
-  {
-   negLogLik = 1000000
-  }
-
+  lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, testModel, sim)
+  lik <- lik[1:half_index]
+  negLogLik <- (-1) * sum(lik)
   
   probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
 

@@ -186,7 +186,12 @@ generateData=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,cou
         }
           
           #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
-        simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
+        generatedData = populateSimRatModel(ratdata,generatedData,modelName)
+        
+        modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)  
+        argList<-getArgList(modelData,generatedData)
+
+        simLearns = checkSimLearns(generatedData, modelData = trueModelData_mod, testModel = argList[[6]],sim=1,limit=0.8) 
         missedOptimalIter=missedOptimalIter+1
           
         if(missedOptimalIter==500)

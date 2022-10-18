@@ -272,8 +272,8 @@ populateSimRatModel=function(ratdata,generated_data,testModelName)
 
 modifyParam=function(param)
 {
-  lower = param - (param/40)
-  upper = param + (param/40)
+  lower = param - (param/5)
+  upper = param + (param/5)
 
   if(lower <=0 )
   {

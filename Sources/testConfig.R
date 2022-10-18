@@ -16,11 +16,6 @@ source(paste(src.dir,"ModelClasses.R", sep="/"))
 setup.hpc = TRUE
 
 
-############### Default parameters #######################
-
-avgRwd_gamma2 = 0.3
-avgRwd_lambda = 0
-
 ## Model files
 model.src = paste(src.dir,model, sep="/")
 source(paste(model.src,"PathModel.R", sep="/"))

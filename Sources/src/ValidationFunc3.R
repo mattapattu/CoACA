@@ -290,7 +290,9 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
     
     
   setwd(param.model.data.dir)
+  print(param.model.data.dir)
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  print(dfData)
   #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
   genDataFiles <- list()
   for(i in 1:length(dfData))

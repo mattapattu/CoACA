@@ -196,7 +196,7 @@ if(validateHoldout)
     cores = 10
     walltime = "10:00"
 
-   for(i in c(1:10))
+   for(i in c(1:20))
    {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]

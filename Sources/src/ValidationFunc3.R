@@ -288,38 +288,54 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
       #attach(myEnv, name="sourced_scripts")
   }
     
-   chunkSize = length(gridMat[,1])/getDoParWorkers()
-   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
- 
-
     
-  nefTaskIndex = as.numeric(gsub("GenData(\\d+).*",'\\1',name))
-  setwd(res.model.data.dir)
+  setwd(param.model.data.dir)
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-  dfData <- dfData[which(str_detect(dfData,paste0("GenData",nefTaskIndex,"_")))]
-  load(dfData)
+  #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
+  {
+    genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
 
-  modelNum =  length(allData)
+  #modelNum =  length(allData)
   
-  #chunkSize = 150
-  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  chunkSize = 300
+  #chunkSize = length(gridMat[,1])/getDoParWorkers()
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   
   resList<-
-    foreach(j = 1:modelNum, .packages="nloptr", .options.mpi=opts) %:% 
-      foreach(idx = 1:length(gridMat[,1]), .inorder=TRUE) %dopar%
+      foreach(idx = 1:length(gridMat[,1]), .packages=c("nloptr","stringr","tictoc"), .options.mpi=opts) %dopar%
       { 
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
         model = gridMat[idx,3]
-        generatedData = allData[[j]]
+        genDataFileNum = as.numeric(gridMat[idx,4])
+        genDataNum = as.numeric(gridMat[idx,5])
+
+        genDataList <- genDataFiles[[genDataFileNum]]
+        #cat(sprintf("length(genDataList)= %i,genDataNum=%i\n", length(genDataList),genDataNum))
+
+        if(length(genDataList) < genDataNum)
+        {
+          print(sprintf("idx=%i,genDataFileNum=%i,genDataNum=%i does not exist ",idx,genDataFileNum,genDataNum))
+          #return(c(iter = iter,model=model,NA, NA,NA,NA, NA, NA,NA,NA,genDataFileNum=genDataFileNum,genDataNum=genDataNum))
+          return(NULL)
+        }else
+        {
+          generatedData = genDataList[[genDataNum]]
+        }
+
+        trueModel = generatedData@simModel
+
+         
 
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
         argList<-getArgList(modelData,generatedData)
-
+        
 
         cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
@@ -336,15 +352,14 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
 
         
         modelData = setModelResults(modelData,generatedData,allModels)
-        list(data=generatedData,res=modelData)
+        list(model=model,trueModel=trueModel,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
       }
   
   
   print(time2)
-
-  resList
+  resList <- Reduce(rbind,resList)
   rat = ratdata@rat
-  save(resList,  file = paste0(res.model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_resList.Rdata"))
+  save(resList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_HoldoutResList.Rdata"))
 # setwd(res.model.data.dir)
 # print(res.model.data.dir)
 # rat=ratdata@rat
@@ -353,35 +368,35 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
 #  load(resData)
 #  modelNum=length(resList)
   
-  for(i in 1:modelNum)
-  {
-    min_method = ""
-    min_score = 100000
-    gen_model = resList[[i]][[1]]$data@simModel
-    gen_method = resList[[i]][[1]]$data@simMethod
-    gen_modelname = paste(gen_model, gen_method, sep=".")
-    for(m in 1:length(models))
-    {
-      res_model = resList[[i]][[m]]$res@Model
-      res_method = resList[[i]][[m]]$res@creditAssignment
-      likelihood = resList[[i]][[m]]$res@likelihood
-      res_modelname = paste(res_model, res_method, sep=".")
-      model_score = sum(likelihood[-(1:800)]) * -1
-      print(sprintf("i=%i,m=%s,res_modelname=%s,model_score=%f,gen_modelname=%s",i,m,res_modelname,model_score,gen_modelname))
+  # for(i in 1:modelNum)
+  # {
+  #   min_method = ""
+  #   min_score = 100000
+  #   gen_model = resList[[i]][[1]]$data@simModel
+  #   gen_method = resList[[i]][[1]]$data@simMethod
+  #   gen_modelname = paste(gen_model, gen_method, sep=".")
+  #   for(m in 1:length(models))
+  #   {
+  #     res_model = resList[[i]][[m]]$res@Model
+  #     res_method = resList[[i]][[m]]$res@creditAssignment
+  #     likelihood = resList[[i]][[m]]$res@likelihood
+  #     res_modelname = paste(res_model, res_method, sep=".")
+  #     model_score = sum(likelihood[-(1:800)]) * -1
+  #     print(sprintf("i=%i,m=%s,res_modelname=%s,model_score=%f,gen_modelname=%s",i,m,res_modelname,model_score,gen_modelname))
   
-      if(model_score < min_score)
-      {
-        min_method = res_modelname
-        min_score = model_score 
-      }
+  #     if(model_score < min_score)
+  #     {
+  #       min_method = res_modelname
+  #       min_score = model_score 
+  #     }
       
-    }
-    print(sprintf("gen_modelname=%s, min_method=%s, min_score=%f",gen_modelname,min_method, min_score))
-    mat_res[gen_modelname,min_method] = mat_res[gen_modelname,min_method]+1
-  }
+  #   }
+  #   print(sprintf("gen_modelname=%s, min_method=%s, min_score=%f",gen_modelname,min_method, min_score))
+  #   mat_res[gen_modelname,min_method] = mat_res[gen_modelname,min_method]+1
+  # }
   
-  rat = ratdata@rat
-  save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_mat_res.Rdata"))
+  # rat = ratdata@rat
+  # save(mat_res, generatedDataList,resList,  file = paste0(res.model.data.dir, "/" , rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S_'),testDataName,"_mat_res.Rdata"))
   
   
   if(setup.hpc)
@@ -404,6 +419,192 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   # }
   
 }
+
+combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+{
+      ## Test settings ###############
+  
+  StabilityTest = TRUE 
+  
+  ####################################
+
+  print(sprintf("Inside combineParamEstResLists"))
+  ratName = ratdata@rat
+  models = testData@Models
+  #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
+  #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
+
+  res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
+  print(res.model.data.dir) 
+  print(model.src)
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
+  timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+
+  resMatList <- listenv()
+
+  for(i in c(1:20))
+  {
+    setwd(res.model.data.dir)
+    pattern=paste0(ratName,"_holdVal",i,"_.*_HoldoutResList.Rdata")
+    resList=list.files(".", pattern=pattern, full.names=FALSE)
+    print(resList)
+    print(any(!complete.cases(resList)))
+    load(resList)
+    resMatList[[i]] <- resList
+  }
+  resMat <- Reduce(rbind,resMatList)
+  save(resMat, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resMat.Rdata"))
+
+
+  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
+  {
+    genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
+
+ 
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=seed)
+    
+  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  registerDoMPI(cl)
+    
+   initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"))
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
+
+    
+  iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))  
+  #chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
+  #print(sprintf("chunkSize=%i",chunkSize))
+  opts <- list(initEnvir=initWorkers, profile=TRUE) 
+
+  df <- as.data.frame(resMat)
+  cols.num <- c(1,3,4,5,6,7,8,9,10,11,12)
+  df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
+  anyNA <- any(!complete.cases(df))
+  print(sprintf("anyNA=%s",anyNA))
+
+  #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
+
+ 
+  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
+    foreach(iter = iters, .inorder=TRUE, .combine='rbind') %dopar%
+    {
+      #print(sprintf("it=%i,model=%s",iter,model))
+      modelName = strsplit(model,"\\.")[[1]][1]
+      #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
+      creditAssignment = strsplit(model,"\\.")[[1]][2]
+
+      df_it <- df[which(df[,1]==iter & df[,2]==model),]
+      #minmodel_genDataFileNum = 0
+      #minmodel_genDataNum = 0
+
+      genDataFileNumbers = unique(df_it[,11])
+      #print(genDataFileNumbers)
+      
+      res2 <- 
+        foreach(fileNb = genDataFileNumbers, .combine='rbind')%do%
+        {
+          #print(sprintf("it=%i,fileNb=%i",iter,fileNb))
+          df_it_fileNb = df_it[which(df_it[,11]==fileNb),]
+          genDataNb =  unique(df_it_fileNb[,12])
+          #print(sprintf("len genDataNb=%i",length(genDataNb)))
+          res1 <- 
+            foreach(i = genDataNb, .combine='rbind') %do%
+            {
+              print(sprintf("it=%i,fileNb=%i, i=%i",iter,fileNb,i))
+              genDataList <- genDataFiles[[fileNb]]
+              generatedData = genDataList[[i]]
+
+              #print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
+              df_genData = df_it_fileNb[which(df_it_fileNb[,12]==i),]
+              #print(sprintf("len df_genData=%i",length(df_genData[,1])))
+              min_lik1 = 1000000
+              minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
+
+              for(idx in 1:length(df_genData[,1]))
+              {
+                #print(sprintf("idx=%i",idx))
+                modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
+                modelData@alpha = df_genData[idx,3]
+                modelData@gamma1 = df_genData[idx,4]
+                
+                argList <- getArgList(modelData, generatedData)
+                lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
+                lik1 <- sum(lik[c(1:iter)])*-1
+                #lik2 <- sum(lik[-c(1:800)])*-1
+                #print(sprintf("alpha=%.10f, gamma1=%.10f",modelData@alpha,modelData@gamma1))
+
+                
+                if (is.infinite(lik1)) {
+                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+                  lik1= 1000000
+                  next
+                }else if (is.nan(lik1)) {
+                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+                  lik1 = 1000000
+                  next
+                }else if (is.na(lik1)) {
+                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+                  lik1 = 1000000
+                  next
+                }
+                if(lik1 < min_lik1)
+                {
+                  min_lik1=lik1
+                  minmodel@alpha = df_genData[idx,3]
+                  minmodel@gamma1 = df_genData[idx,4]
+                  minmodel_genDataFileNum = df_genData[idx,11]
+                  minmodel_genDataNum = df_genData[idx,12]
+
+                }    
+              }
+
+              ### Compute probrow using modelData=minmodel  ####################
+
+              
+              probMat <- TurnsNew::getProbMatrix(generatedData, minmodel, argList[[6]], sim=1)
+              #print(minmodel)
+              idx = length(df_genData[,1])
+              
+              trueModelData <- new("ModelData", Model = modelName, creditAssignment = "qlearningAvgRwd", sim = 1)
+              trueModelData@alpha = df_genData[idx,7]
+              trueModelData@gamma1 = df_genData[idx,8]
+              #trueModelData@gamma2 = df_genData[idx,9]
+              #trueModelData@lambda = df_genData[idx,10]
+              #trueModelData <- allData[[minmodel_genDataNum]]@simModelData
+              #print(trueModelData)
+              trueProbMat <- TurnsNew::getProbMatrix(generatedData, trueModelData, argList[[6]], sim=1)
+                    
+              probRow <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
+              probRow[is.nan(probRow)] <- 0
+              probRow[is.infinite(probRow)] <- 0
+              print(probRow)
+              list(iter = iter, model = modelName, creditAssignment=creditAssignment, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res_alpha=minmodel@alpha, res_gamma1=minmodel@gamma1, res_gamma2=minmodel@gamma2,res_lambda=minmodel@lambda,probRow=probRow,trueAlpha = trueModelData@alpha,trueGamma1 = trueModelData@gamma1,trueGamma2 = trueModelData@gamma2,trueLambda = trueModelData@lambda)
+            }
+            res1
+        }
+        res2
+    }
+  #minDflist <- unlist(minDfModels, recursive = FALSE)
+  #minDfModels <- Reduce(rbind,minDflist)
+  save(minDflist, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_minDflist.Rdata"))
+
+
+}
+
 
 
 

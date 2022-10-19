@@ -94,10 +94,13 @@ if(currentTest == "paramEstTest")
 
 if(currentTest == "validateHoldout")
 {
-  alpha_seq = seq_log(1e-3, 0.9,60)
-  gamma1_seq = seq_log(1e-8, 1e-4, 10)
-  #models = testData@Models
-  gridMat<- expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=11)
+  models = testData@Models
+  alpha_seq = seq_log(1e-3, 0.1,15)
+  gamma1_seq = seq_log(1e-8, 1e-4, 8)
+  genDataList = c(1:10)
+  genData = c(1:60)
+  gridMat<- expand.grid(alpha_seq,gamma1_seq,models,genDataList, genData,stringsAsFactors = FALSE)
+  sequences = seq(0,length(gridMat[,1]), length.out=21)
+
 
 }

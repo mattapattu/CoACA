@@ -330,7 +330,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
           generatedData = genDataList[[genDataNum]]
         }
 
-        trueModel = generatedData@simModel
+        trueModelData = generatedData@simModelData
 
          
 
@@ -355,7 +355,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
 
         
         modelData = setModelResults(modelData,generatedData,allModels)
-        list(model=model,trueModel=trueModel,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
+        list(model=model,trueModel=trueModelData@Model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
       }
   
   

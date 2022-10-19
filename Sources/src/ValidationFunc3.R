@@ -343,7 +343,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
         cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
 
-        cat(sprintf('rat=%s, iter=%i,model = %s, creditAssignment=%s\n', ratName,iter,modelName,creditAssignment))
+        cat(sprintf('rat=%s, model = %s, creditAssignment=%s\n', ratName,modelName,creditAssignment))
             #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
 
 

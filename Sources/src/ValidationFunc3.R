@@ -300,8 +300,8 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
 
   #modelNum =  length(allData)
   
-  chunkSize = 300
-  #chunkSize = length(gridMat[,1])/getDoParWorkers()
+  #chunkSize = 300
+  chunkSize = length(gridMat[,1])/getDoParWorkers()
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   

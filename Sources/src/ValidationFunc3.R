@@ -252,6 +252,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   models = testData@Models
   ratName = ratdata@rat
   param.model.data.dir=paste(model.data.dir,"modelParams",ratName,sep="/")
+  gen.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
   
   res.model.data.dir=paste(model.data.dir,"holdoutTest",ratName,sep="/")
@@ -289,7 +290,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   }
     
     
-  setwd(param.model.data.dir)
+  setwd(gen.data.dir)
   print(param.model.data.dir)
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
   print(dfData)

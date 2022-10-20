@@ -2,6 +2,7 @@ library(foreach)
 library(doParallel)
 #library(doMPI)
 library(rlist)
+library(bigsnpr)
 
 
 modifyParam=function(param)
@@ -92,7 +93,7 @@ unitTestHoldOut=function(ratdata,allModelRes,testData,src.dir)
     }
 }
 
-HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.dir)
+HoldoutTest=function(ratdata,testData,src.dir,setup.hpc,model.data.dir)
 {
   models = testData@Models
   creditAssignment = testData@creditAssignment
@@ -276,94 +277,70 @@ HoldoutTest=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.d
 
 
 
-testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,model.data.dir)
+testParamEstimation=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,allmodelRes)
 {
   models = testData@Models
-  creditAssignment = testData@creditAssignment
+  #creditAssignment = testData@creditAssignment
   
-  paramTest = list()
-  modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  #paramTest = list()
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   
   ratName = ratdata@rat
   
-  if(setup.hpc)
-  {
-    #worker.nodes = mpi.universe.size()-1
-    #print(sprintf("worker.nodes=%i",worker.nodes))
-    cl <- startMPIcluster(50)
-    setRngDoMPI(cl, seed=1234)
+  initWorkers <-  function() {
+    source(paste(src.dir, "ModelClasses.R", sep = "/"))
+    source(paste(model.src, "PathModel.R", sep = "/"))
+    source(paste(model.src, "TurnModel.R", sep = "/"))
+    source(paste(model.src, "HybridModel1.R", sep = "/"))
+    source(paste(model.src, "HybridModel2.R", sep = "/"))
+    source(paste(model.src, "HybridModel3.R", sep = "/"))
+    source(paste(model.src, "HybridModel4.R", sep = "/"))
+    source(paste(src.dir, "BaseClasses.R", sep = "/"))
+    source(paste(src.dir,"exportFunctions.R", sep="/"))
     
-    exportDoMPI(cl, c("src.dir"),envir=environment())
-    registerDoMPI(cl)
-    
-    initWorkers <-  function() {
-      source(paste(src.dir,"ModelClasses.R", sep="/"))
-      source(paste(src.dir,"TurnModel.R", sep="/"))
-      source(paste(src.dir,"HybridModel1.R", sep="/"))
-      source(paste(src.dir,"HybridModel2.R", sep="/"))
-      source(paste(src.dir,"HybridModel3.R", sep="/"))
-      source(paste(src.dir,"HybridModel4.R", sep="/"))
-      source(paste(src.dir,"BaseClasses.R", sep="/"))
-      source(paste(src.dir,"exportFunctions.R", sep="/"))
-      source(paste(src.dir,"ModelUpdateFunc.R", sep="/"))
-      #attach(myEnv, name="sourced_scripts")
-    }
-    
-    opts <- list(initEnvir=initWorkers) 
-  }
-  else
-  {
-    cl <- makeCluster(3, outfile = "")
-    #registerDoParallel(cl)
-    clusterExport(cl, varlist = c("getEndIndex", "convertTurnTimes","simulateData","src.dir","populateSimRatModel","getMinimumLikelihood","getModelResults","negLogLikFunc","getAllModelResults","getTurnTimesMat","getModelResultsSeq"))
-    clusterEvalQ(cl, source(paste(src.dir,"ModelClasses.R", sep="/")))
-    clusterEvalQ(cl, source(paste(src.dir,"TurnModel.R", sep="/")))
-    clusterEvalQ(cl, source(paste(src.dir,"HybridModel1.R", sep="/")))
-    clusterEvalQ(cl, source(paste(src.dir,"HybridModel2.R", sep="/")))
-    clusterEvalQ(cl, source(paste(src.dir,"HybridModel3.R", sep="/")))
-    clusterEvalQ(cl, source(paste(src.dir,"HybridModel4.R", sep="/")))
-    clusterEvalQ(cl, source(paste(src.dir,"BaseClasses.R", sep="/")))
-    clusterExport(cl, varlist = c("ratdata","allModelRes","testData","creditAssignment"),envir=environment())
-    clusterEvalQ(cl, library("TTR"))
-    clusterEvalQ(cl, library("dplyr"))
-    clusterEvalQ(cl, library("DEoptim"))
-    
-    clusterCall(cl, function() {
-      library(doParallel)
-      NULL 
-    })
-    
-    registerDoParallel(cl)
-    
+    #attach(myEnv, name="sourced_scripts")
   }
   
-  for(i in 1:length(modelNames))
-  {
-    model = modelNames[i] 
-    #cat(sprintf('Model is %s\n', model))
-    modelName = strsplit(model,"\\.")[[1]][1]
-    creditAssignment = strsplit(model,"\\.")[[1]][2]
-    trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
-    end_index = -1
-    missedOptimalIter = 0
-    
-    while(end_index == -1){
-      generated_data = simulateData(trueModelData,ratdata,allModels)
-      generated_data = populateSimRatModel(ratdata,generated_data,modelName)
-      #generated_data@simModel = trueModelData@Model
-      #generated_data@simMethod = trueModelData@creditAssignment
-      end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
-      #cat('i=',i, ', j=',j,' end_index=', end_index, '.\n', sep = '') 
-      missedOptimalIter=missedOptimalIter+1
+  
+  generatedDataList <-  
+    foreach(i=1:length(models),.export=c("testData")) %:%
+    foreach(generation=1:1) %dopar%
+    {
+      initWorkers()
+      model = models[i] 
+      modelName = strsplit(models[i],"\\.")[[1]][1]
+      creditAssignment = strsplit(models[i],"\\.")[[1]][2]
+      trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
       
-      if(missedOptimalIter>500)
-      {
-        break
+      #trueModelData = modifyModelData(trueModelData) 
+      simLearns = FALSE 
+      missedOptimalIter = 0
+      
+      while(!simLearns){
+        generated_data = simulateData(trueModelData,ratdata,allModels)
+        #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
+        simLearns = T
+        missedOptimalIter=missedOptimalIter+1
+        
+        if(missedOptimalIter>500)
+        {
+          cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1))
+          break
+        }
+        cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
       }
-      cat(sprintf('model = %s, missedOptimalIter=%i\n', model, missedOptimalIter))
-      set.seed(missedOptimalIter)
-    }
-    
+      
+      if(simLearns)
+      {
+        generated_data = populateSimRatModel(ratdata,generated_data,modelName)
+        generated_data@simModel = trueModelData@Model
+        generated_data@simMethod = trueModelData@creditAssignment
+        generated_data@simModelData = trueModelData
+        generated_data
+      }
+      
+    }   
+  
     rat = ratdata@rat
     save(generated_data, file = paste0(model.data.dir, "/", rat, "_", modelName,"_genData.Rdata")) 
     
@@ -386,7 +363,7 @@ testParamEstimation=function(ratdata,allModelRes,testData,src.dir,setup.hpc,mode
         }   
     }
     paramTest = list.append(paramTest,list(model=trueModelData,resMat=resMat))
-  }
+  
   
   
   rat = ratdata@rat

@@ -21,6 +21,8 @@ unitTest1 = FALSE
 unitTest2 = FALSE
 unitTest3 = F
 
+computeModelParams = F
+
 computeModelLik = F
 loadAllModelRes = F
 modelSelection = F
@@ -32,6 +34,7 @@ validateHoldout = FALSE
 
 printHoldoutRes = F
 paramEstTest = T
+analyzeParams = F
 thetaHatTest = F
 pcaPlot = F
 dumpModelParams = F
@@ -107,10 +110,21 @@ dfPCA<- data.frame(PC1=double(),
                    Rat=character(),
                    stringsAsFactors=FALSE)
 
-for (i in c(6)) {
+dfProbBoxPlot <- data.frame(Path1.S1=double(),
+                            Path1.S1=double(),
+                            Model=character(),
+                            PathNb =character(),
+                            TextVec=integer(),
+                            Rat=character(),
+                            stringsAsFactors=FALSE)
+avgRwd_gamma2= 0.3
+
+for (i in c(4)) {
   
   #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
-  testData = new("TestModels", Models=c("Paths"), creditAssignment=c("qlearning"))
+  testData = new("TestModels", Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
+  #testData = new("TestModels", Models=c("Paths.aca4","Hybrid1.aca4","Hybrid2.aca4","Hybrid3.aca4","Hybrid4.aca4","Turns.aca4"))
+  
   #model = "Model2"
   
   
@@ -169,6 +183,21 @@ for (i in c(6)) {
     printMatRes(ratdata,testData,"C:/Users/matta/Downloads")
   }
  
+  if(computeModelParams)
+  {
+    getModelParams(ratdata,testData)
+  }
+  
+  if(analyzeParams)
+  {
+    debug(analyzeParamSpace)
+    #resMat = analyzeParamSpaceWrapper(ratdata,testData,src.dir,model.src)
+    resMat = analyzeParamSpace(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir)
+    #print(resMat)
+    model.data.dir="C:/Users/matta/Downloads"
+    debug(generateParamResMat)
+    generateParamResMat(ratdata,model.data.dir)
+  }
   
   if(computeModelLik)
   {
@@ -239,10 +268,22 @@ for (i in c(6)) {
   
   if(paramEstTest)
   {
-    debug(readModelParams)
-    allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
-    debug(testParamEstimation)
-    testParamEstimation(ratdata,allmodelRes,testData,src.dir,setup.hpc,model.data.dir)
+    model.data.dir="C:/Users/matta/Downloads"
+    
+    debug(plotSimProbBoxPlots)
+    plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
+    
+    #debug(plotSimParamEstimation2)
+    #plotSimParamEstimation2(ratdata,testData,model.data.dir,plot.dir)
+    
+    #debug(readModelParams)
+    #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
+    #debug(readModelParamsNew)
+    #allModelRes = readModelParamsNew(ratdata,"C:/Users/matta/Downloads",testData, sim=2)
+    
+    #debug(testParamEstimation)
+    #testParamEstimation(ratdata,testData,src.dir,setup.hpc,model.data.dir,allModelRes)
+    
     
     
     rat=ratdata@rat
@@ -256,19 +297,10 @@ for (i in c(6)) {
       listDfData[[i]] <- df
     }
     dfcombined <- bind_rows(listDfData)
-    iterations=as.integer(floor(length(ratdata@allpaths[,1])/100))
-    n = 8
-    sessions<-unique(ratdata@allpaths[,5])
-    session_grps<-split(sessions, sort(sessions%%8))
-    maxVecs <- c()
-    for(grp in c(1:n))
-    {
-      print(grp)
-      begin_ses <- min(session_grps[[grp]])
-      end_ses <- max(session_grps[[grp]])
-      indices_of_ses <- which(ratdata@allpaths[,5]>=begin_ses & ratdata@allpaths[,5] <=end_ses)
-      maxVecs <- c(maxVecs,max(indices_of_ses))
-    }
+    
+    iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
+    maxVecs=iters
+    
     models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
     for(model in models)
     {
@@ -280,11 +312,11 @@ for (i in c(6)) {
         for(iter in maxVecs)
         {
           rowEnd = iter
-          simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),4]
-          simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),5]
+          simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),5]
+          simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),6]
           
-          true_random_alphas <- dfModel[which(dfModel[,2]==rowEnd),6]
-          true_random_gammas <- dfModel[which(dfModel[,2]==rowEnd),7]
+          true_random_alphas <- dfModel[which(dfModel[,2]==rowEnd),9]
+          true_random_gammas <- dfModel[which(dfModel[,2]==rowEnd),10]
           
           dfParamEstTest <- rbind(dfParamEstTest,cbind(simulation_alphas-true_random_alphas, simulation_gammas-true_random_gammas,rep(iter,length(simulation_alphas)),rep(model,length(simulation_alphas)),rep(rat,length(simulation_alphas)) ))
           
@@ -294,28 +326,46 @@ for (i in c(6)) {
     
   }
   
+
   if(thetaHatTest)
   {
     #res.dir = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/Rat_Model_Data")
     #debug(plotThetaHat)
     #plotThetaHat(ratdata,model.data.dir,plot.dir)
+    #debug(plotThetaHat2)
+    #plotThetaHat2(ratdata,testData,model.data.dir,plot.dir)
     
+    
+    # rat=ratdata@rat
+    # setwd(model.data.dir)
+    # paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+    # load(paramTestData)
+    # models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+    # 
+    # for(i in c(1:6))
+    # {
+    #   rowEnd = paramTest[[i]][[1]][,1]
+    #   alpha = paramTest[[i]][[1]][,2]
+    #   gamma1 = paramTest[[i]][[1]][,3]
+    #   #gamma2 = paramTest[[i]]$model@gamma2
+    #   model = models[i]
+    #   dfThetahat<-rbind(dfThetahat,cbind(rowEnd,alpha,gamma1,model,rep(rat,length(model))))
+    # }
     
     rat=ratdata@rat
-    setwd(model.data.dir)
-    paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
-    load(paramTestData)
-    models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+    #setwd(model.data.dir)
+    setwd("C:/Users/matta/Downloads")
+    #paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
+    #load(paramTestData)
+    iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
     
-    for(i in c(1:6))
-    {
-      rowEnd = paramTest[[i]][[1]][,1]
-      alpha = paramTest[[i]][[1]][,2]
-      gamma1 = paramTest[[i]][[1]][,3]
-      #gamma2 = paramTest[[i]]$model@gamma2
-      model = models[i]
-      dfThetahat<-rbind(dfThetahat,cbind(rowEnd,alpha,gamma1,model,rep(rat,length(model))))
-    }
+    minDf <- list.files(".", pattern=paste0(ratdata@rat,".*minDfModels.Rdata"), full.names=FALSE)[1]
+    minDfrat<-get(load(minDf))
+    minDfrat.df <- as.data.frame(minDfrat)
+    cols.num <- c(2,3,4,5,6,7,8)
+    minDfrat.df[,cols.num] <- lapply(cols.num,function(x) as.numeric(minDfrat.df[[x]]))
+    
+    dfThetahat<-rbind(dfThetahat,cbind(minDfrat.df[,c(2,3,4,1)],rep(rat,length(iters))))
     
   }
   

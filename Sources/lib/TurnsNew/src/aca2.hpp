@@ -615,7 +615,7 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
         std::stringstream stateString;
         std::copy(episodeActions.begin(), episodeActions.end(), std::ostream_iterator<int>(actionString, " "));
         std::copy(episodeStates.begin(), episodeStates.end(), std::ostream_iterator<int>(stateString, " "));
-        Rcpp::Rcout << "episodeNb=" << episode <<  "Paths:" << actionString.str() <<  "States:" << stateString.str() << std::endl;
+        //Rcpp::Rcout << "episodeNb=" << episode <<  "Paths:" << actionString.str() <<  "States:" << stateString.str() << std::endl;
         
         
         //double alpha_prime = getAlphaPrime(alpha,episodeNb);
@@ -1175,7 +1175,7 @@ arma::mat getAca2ProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
       }
       
       
-      Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A << ", ses=" << sessId<<std::endl;
+      //Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A << ", ses=" << sessId<<std::endl;
       std::ostringstream msg; 
       msg << "i="<< i << ", S=" << S <<", A=" << A <<", pathNb=" << allpaths_pathNb_sess(i);;
       //logger.Print(msg.str()); 
@@ -1297,7 +1297,7 @@ arma::mat getAca2ProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
       //Check if episode ended
       if (returnToInitState || (i==nrow-1))
       {
-        Rcpp::Rcout << "Inside end episode, episodeNb=" << episodeNb << std::endl;
+        //Rcpp::Rcout << "Inside end episode, episodeNb=" << episodeNb << std::endl;
         msg.str("");
         msg <<"Inside end episode";
         //logger.Print(msg.str()); 
@@ -1309,7 +1309,7 @@ arma::mat getAca2ProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 test
         
         for(unsigned int m=0; m<episodeTurns.size(); m++)
         {
-           Rcpp::Rcout << episodeTurns[m] << "," <<episodeTurnStates[m] << "," <<episodeTurnTimes[m] << std::endl;
+           //Rcpp::Rcout << episodeTurns[m] << "," <<episodeTurnStates[m] << "," <<episodeTurnTimes[m] << std::endl;
         }
         
         Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);

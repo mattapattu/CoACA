@@ -173,20 +173,24 @@ public:
         }
     }
     
-    void printProbabilities()
+    void printProbabilities(bool debug)
     {
-      int N = nodes.size();
-      Rcpp::Rcout <<"N=" << N<<std::endl;
-      for (int i = 0; i < N; i++)
+      if(debug)
       {
-
-        // print all neighboring vertices of a vertex `i`
-        for (auto v : adjList[i])
+        int N = nodes.size();
+        Rcpp::Rcout <<"N=" << N<<std::endl;
+        for (int i = 0; i < N; i++)
         {
-          Rcpp::Rcout <<"v.src=" << v.src->node << ", v.dest=" << v.dest->node << ", v.probability=" << v.probability <<std::endl;
-          std::cout << "i=" << i << ", " << nodes[i].node << " ——> " << v.dest->node << ":" <<v.probability << std::endl;
+          
+          // print all neighboring vertices of a vertex `i`
+          for (auto v : adjList[i])
+          {
+            Rcpp::Rcout <<"v.src=" << v.src->node << ", v.dest=" << v.dest->node << ", v.probability=" << v.probability <<std::endl;
+            std::cout << "i=" << i << ", " << nodes[i].node << " ——> " << v.dest->node << ":" <<v.probability << std::endl;
+          }
         }
       }
+      
     }
 
     void decayCredits(double gamma)
@@ -255,15 +259,48 @@ public:
                 }
                 arma::vec v(edgeCredits);
                 
-                double m = arma::max(v);
-                // if(debug)
-                // {
-                //    Rcpp::Rcout << "v-m=" << v-m<< std::endl; 
-                // }
-                //v = exp(v - m);
-                // //Rcpp::Rcout << "m=" << m<< std::endl;
-                double exp_sum = arma::accu(exp(v));
-                arma::vec probVec = exp(v) / exp_sum;
+                double max = v.max();
+                //Rcpp::Rcout << "v" << v<< std::endl;
+                
+                
+                arma::vec exp_v= exp(v);
+                double exp_v_sum = arma::accu(exp_v);
+                
+                arma::vec v_new=v-max;
+                //Rcpp::Rcout << "v-max=" << v_new<< std::endl; 
+                arma::vec exp_v_new= exp(v_new);
+                //Rcpp::Rcout << "exp_v_new=" << exp_v_new<< std::endl; 
+                
+                double exp_v_new_sum = arma::accu(exp_v_new);
+                //Rcpp::Rcout << "exp_v_new_sum=" << exp_v_new_sum<< std::endl; 
+                
+                //arma::vec test1_exp_v= arma::exp(v_new);
+                //Rcpp::Rcout << "test1_exp_v=" << test1_exp_v<< std::endl; 
+                //arma::vec test1_probVec = test1_exp_v / arma::accu(test1_exp_v);
+                //Rcpp::Rcout << "test1_probVec=" << test1_probVec<< std::endl; 
+                
+                //arma::vec test2_exp_v= arma::exp(v);
+                //Rcpp::Rcout << "test2_exp_v=" << test2_exp_v<< std::endl; 
+                //double test2_exp_sum = arma::accu(test2_exp_v);
+                //arma::vec test2_probVec = test2_exp_v / arma::accu(test2_exp_v);
+                //Rcpp::Rcout << "test2_probVec=" << test2_probVec<< std::endl; 
+                
+                
+                //arma::vec probVec = exp_v_new / exp_v_new_sum;
+                arma::vec probVec = exp_v / exp_v_sum;
+                
+                //Rcpp::Rcout << "probVec=" << probVec << std::endl;
+                
+                //if(arma::accu(test1_probVec-probVec) !=0)
+                //{
+                  //Rcpp::Rcout<< "Diff between exp_v_new and test1_exp_v="<< arma::accu(test1_probVec-probVec) << std::endl;
+                //}
+                
+                //if(arma::accu(test2_probVec-probVec) !=0)
+                //{
+                  //Rcpp::Rcout<< "Diff between exp_v_new and test2_exp_v=" << arma::accu(test2_probVec-probVec) << std::endl;
+                //}
+                
                 if(debug)
                 {
                     Rcpp::Rcout << "nodeNames=" << nodeNames << std::endl;

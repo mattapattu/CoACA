@@ -11,11 +11,11 @@ options(error=function()traceback(2))
 #### Tests ##############
 computeModelParams = F
 generateModelParamMat = F
-unitTestProbDiff = T
+unitTestProbDiff = F
 generateDataset = F
 paramEstTest = F
 combineParamEstResLists = F
-validateHoldout = F
+validateHoldout = T
 
 ########################## Test 1: computeModelParams  ########################
 
@@ -139,7 +139,7 @@ if(paramEstTest)
   currentTest = "paramEstTest"
   source("testConfig.R")
   cores = 10
-  walltime = "12:00"
+  walltime = "14:00"
 
 
    for(i in c(1:20))
@@ -194,7 +194,7 @@ if(validateHoldout)
     currentTest = "validateHoldout"
     source("testConfig.R")  
     cores = 10
-    walltime = "12:00"
+    walltime = "14:00"
 
    for(i in c(1:20))
    {

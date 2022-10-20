@@ -194,7 +194,7 @@ if(validateHoldout)
     currentTest = "validateHoldout"
     source("testConfig.R")  
     cores = 10
-    walltime = "10:00"
+    walltime = "12:00"
 
    for(i in c(1:20))
    {

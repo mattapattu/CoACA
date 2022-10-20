@@ -359,7 +359,6 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
       }
   
   
-  print(time2)
   resList <- Reduce(rbind,resList)
   rat = ratdata@rat
   save(resList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_HoldoutResList.Rdata"))

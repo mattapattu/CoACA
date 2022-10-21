@@ -256,6 +256,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
   
   res.model.data.dir=paste(model.data.dir,"holdoutTest",ratName,sep="/")
+  timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 
   mat_res = matrix(0, length(models), length(models))
   colnames(mat_res) <- models

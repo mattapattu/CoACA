@@ -509,8 +509,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   colnames(confusionMatrix) <- c(testData@Models)
   rownames(confusionMatrix) <- c(testData@Models)
   
-  for(genDataFile = c(1:10)){
-    for(genDataNum = c(1:60)) 
+  for(genDataFile in c(1:10)){
+    for(genDataNum in c(1:60)) 
     {
       df_genData = df[which(resList[,11]== genDataFile & resList[,12]==genDataNum),]
       genData_minlik = 1000000

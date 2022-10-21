@@ -509,8 +509,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   colnames(confusionMatrix) <- c(testData@Models)
   rownames(confusionMatrix) <- c(testData@Models)
   
-  foreach(genDataFile = c(1:10), .inorder=TRUE) %:% 
-    foreach(genDataNum = c(1:60), .inorder=TRUE) %do%
+  for(genDataFile = c(1:10)){
+    for(genDataNum = c(1:60)) 
     {
       df_genData = df[which(resList[,11]== genDataFile & resList[,12]==genDataNum),]
       genData_minlik = 1000000
@@ -563,6 +563,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
 
       confusionMatrix[trueModel,minModel@modelName] = confusionMatrix[trueModel,minModel@modelName]+1  
     }
+  }
+    
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
   save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))

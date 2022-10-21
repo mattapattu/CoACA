@@ -504,14 +504,14 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   colnames(confusionMatrix) <- c(testData@Models)
   rownames(confusionMatrix) <- c(testData@Models)
   
-  foreach(genDataFile = c(1:10), .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
-    foreach(genDataNum = c(1:60), .inorder=TRUE, .combine='rbind') %do%
+  foreach(genDataFile = c(1:10), .inorder=TRUE) %:% 
+    foreach(genDataNum = c(1:60), .inorder=TRUE) %do%
     {
       df_genData = df[which(resList[,11]== genDataFile & resList[,12]==genDataNum),]
       genData_minlik = 1000000
       minModel <- new("ModelData", sim = 1)
       trueModel = paste0(df_genData[1,2],"qlearningAvgRwd")
-      foreach(model = models) %do%
+      for(model in models)
       {
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]

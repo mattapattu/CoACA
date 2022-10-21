@@ -221,7 +221,7 @@ if(validateHoldout)
 
 if(isTRUE(combineHoldoutResLists))
 {
-  currentTest = "combineParamEstResLists"
+  currentTest = "combineHoldoutResLists"
   source("testConfig.R")
 
   cores = 0
@@ -234,7 +234,7 @@ if(isTRUE(combineHoldoutResLists))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
-  command <- sprintf("Rscript executeNefJobs.R %i %i %i %s %i %i\" ", rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+  command <- sprintf("Rscript executeNefJobs.R %i %i %i %s %i %i", rat,seed,spawnslaves,currentTest, start_idx, end_idx)
   cat(command)
   cat("\n")
   system(command)

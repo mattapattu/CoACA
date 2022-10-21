@@ -493,10 +493,10 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   # opts <- list(initEnvir=initWorkers, profile=TRUE) 
 
   df <- as.data.frame(resMat)
-  cols.num <- c(1,3,4,5,6,7,8,9,10,11,12)
+  cols.num <- c(3,4,5,6,7,8,9,10,11,12)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
-  anyNA <- any(!complete.cases(df))
-  print(sprintf("anyNA=%s",anyNA))
+  #anyNA <- any(!complete.cases(df))
+  #print(sprintf("anyNA=%s",anyNA))
 
   #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
 

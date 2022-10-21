@@ -438,10 +438,19 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
   res.model.data.dir=paste(model.data.dir,"holdoutTest",ratName,sep="/")
+  gen.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   #print(res.model.data.dir) 
   #print(model.src)
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+
+  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  genDataFiles <- list()
+  setwd(gen.data.dir)
+  for(i in 1:length(dfData))
+  {
+    genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
 
   resMatList <- listenv()
 
@@ -459,12 +468,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   save(resMat, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resMat.Rdata"))
 
 
-  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-  genDataFiles <- list()
-  for(i in 1:length(dfData))
-  {
-    genDataFiles[[i]] <- get(load(dfData[[i]]))
-  }
+  
 
  
   # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)

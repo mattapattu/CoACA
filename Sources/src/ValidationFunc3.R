@@ -459,12 +459,12 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   save(resMat, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resMat.Rdata"))
 
 
-  # dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-  # genDataFiles <- list()
-  # for(i in 1:length(dfData))
-  # {
-  #   genDataFiles[[i]] <- get(load(dfData[[i]]))
-  # }
+  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
+  {
+    genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
 
  
   # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
@@ -511,6 +511,9 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
       genData_minlik = 1000000
       minModel <- new("ModelData", sim = 1)
       trueModel = paste0(df_genData[1,2],"qlearningAvgRwd")
+      genDataList <- genDataFiles[[genDataFile]]
+      generatedData = genDataList[[genDataNum]]
+
       for(model in models)
       {
         df_genData_model = df_genData[which(df_genData[,1]==model),]

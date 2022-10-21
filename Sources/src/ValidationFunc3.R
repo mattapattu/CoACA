@@ -444,9 +444,10 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 
+  setwd(gen.data.dir)
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
   genDataFiles <- list()
-  setwd(gen.data.dir)
+
   for(i in 1:length(dfData))
   {
     genDataFiles[[i]] <- get(load(dfData[[i]]))

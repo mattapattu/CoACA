@@ -98,7 +98,13 @@ if(currentTest == "unitTestProbDiff"){
     #printMatRes(ratdata,testData,model.data.dir)
   }
 
+################# Test 6: combineHoldoutResLists ######################
 
+  if(currentTest == "combineHoldoutResLists"){
+
+    combineHoldoutResLists(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir)
+
+  } 
 
 
 print(sprintf("End of script"))

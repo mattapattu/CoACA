@@ -15,7 +15,8 @@ unitTestProbDiff = F
 generateDataset = F
 paramEstTest = F
 combineParamEstResLists = F
-validateHoldout = T
+validateHoldout = F
+combineHoldoutResLists = T
 
 ########################## Test 1: computeModelParams  ########################
 
@@ -215,4 +216,27 @@ if(validateHoldout)
 
 
   }
+####################
 
+
+if(isTRUE(combineHoldoutResLists))
+{
+  currentTest = "combineParamEstResLists"
+  source("testConfig.R")
+
+  cores = 0
+  walltime = "0:00"
+  spawnslaves = cores-1
+  start_idx = 0
+  end_idx = 0
+  seed = 0
+  name = paste0("combineParamEstResLists_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+  command <- sprintf("Rscript executeNefJobs.R %i %i %i %s %i %i\" ", rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+  cat(command)
+  cat("\n")
+  system(command)
+
+}

@@ -423,7 +423,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   
 }
 
-combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir)
 {
       ## Test settings ###############
   
@@ -437,9 +437,9 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
-  res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
-  print(res.model.data.dir) 
-  print(model.src)
+  res.model.data.dir=paste(model.data.dir,"holdoutTest",ratName,sep="/")
+  #print(res.model.data.dir) 
+  #print(model.src)
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 
@@ -459,39 +459,38 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   save(resMat, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resMat.Rdata"))
 
 
-  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-  genDataFiles <- list()
-  for(i in 1:length(dfData))
-  {
-    genDataFiles[[i]] <- get(load(dfData[[i]]))
-  }
+  # dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  # genDataFiles <- list()
+  # for(i in 1:length(dfData))
+  # {
+  #   genDataFiles[[i]] <- get(load(dfData[[i]]))
+  # }
 
  
-  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  setRngDoMPI(cl, seed=seed)
+  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  # setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
-  registerDoMPI(cl)
+  # exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  # registerDoMPI(cl)
     
-   initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"))
-       source(paste(model.src, "PathModel.R", sep = "/"))
-       source(paste(model.src, "TurnModel.R", sep = "/"))
-       source(paste(model.src, "HybridModel1.R", sep = "/"))
-       source(paste(model.src, "HybridModel2.R", sep = "/"))
-       source(paste(model.src, "HybridModel3.R", sep = "/"))
-       source(paste(model.src, "HybridModel4.R", sep = "/"))
-       source(paste(src.dir, "BaseClasses.R", sep = "/"))
-       source(paste(src.dir,"exportFunctions.R", sep="/"))
+  #  initWorkers <-  function() {
+  #      source(paste(src.dir, "ModelClasses.R", sep = "/"))
+  #      source(paste(model.src, "PathModel.R", sep = "/"))
+  #      source(paste(model.src, "TurnModel.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel1.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel2.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel3.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel4.R", sep = "/"))
+  #      source(paste(src.dir, "BaseClasses.R", sep = "/"))
+  #      source(paste(src.dir,"exportFunctions.R", sep="/"))
    
-       #attach(myEnv, name="sourced_scripts")
-     }
+  #      #attach(myEnv, name="sourced_scripts")
+  #    }
 
     
-  iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))  
   #chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
   #print(sprintf("chunkSize=%i",chunkSize))
-  opts <- list(initEnvir=initWorkers, profile=TRUE) 
+  # opts <- list(initEnvir=initWorkers, profile=TRUE) 
 
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7,8,9,10,11,12)
@@ -501,109 +500,64 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
 
   #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
 
- 
-  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
-    foreach(iter = iters, .inorder=TRUE, .combine='rbind') %dopar%
+  confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
+  colnames(confusionMatrix) <- c(testData@Models)
+  rownames(confusionMatrix) <- c(testData@Models)
+  
+  foreach(genDataFile = c(1:10), .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
+    foreach(genDataNum = c(1:60), .inorder=TRUE, .combine='rbind') %do%
     {
-      #print(sprintf("it=%i,model=%s",iter,model))
-      modelName = strsplit(model,"\\.")[[1]][1]
-      #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
-      creditAssignment = strsplit(model,"\\.")[[1]][2]
+      df_genData = df[which(resList[,11]== genDataFile & resList[,12]==genDataNum),]
+      genData_minlik = 1000000
+      minModel <- new("ModelData", sim = 1)
+      trueModel = paste0(df_genData[1,2],"qlearningAvgRwd")
+      foreach(model = models) %do%
+      {
+        df_genData_model = df_genData[which(df_genData[,1]==model),]
+        modelName = strsplit(model,"\\.")[[1]][1]
+        #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
+        creditAssignment = strsplit(model,"\\.")[[1]][2]
 
-      df_it <- df[which(df[,1]==iter & df[,2]==model),]
-      #minmodel_genDataFileNum = 0
-      #minmodel_genDataNum = 0
-
-      genDataFileNumbers = unique(df_it[,11])
-      #print(genDataFileNumbers)
-      
-      res2 <- 
-        foreach(fileNb = genDataFileNumbers, .combine='rbind')%do%
+        for(idx in 1:length(df_genData_model[,1]))
         {
-          #print(sprintf("it=%i,fileNb=%i",iter,fileNb))
-          df_it_fileNb = df_it[which(df_it[,11]==fileNb),]
-          genDataNb =  unique(df_it_fileNb[,12])
-          #print(sprintf("len genDataNb=%i",length(genDataNb)))
-          res1 <- 
-            foreach(i = genDataNb, .combine='rbind') %do%
-            {
-              print(sprintf("it=%i,fileNb=%i, i=%i",iter,fileNb,i))
-              genDataList <- genDataFiles[[fileNb]]
-              generatedData = genDataList[[i]]
-
-              #print(sprintf("model=%s, interval=%i, fileNb=%i, datasetNb=%i, genDataSimModel=%s",modelName,iter,fileNb,i,generatedData@simModel))
-              df_genData = df_it_fileNb[which(df_it_fileNb[,12]==i),]
-              #print(sprintf("len df_genData=%i",length(df_genData[,1])))
-              min_lik1 = 1000000
-              minmodel <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
-
-              for(idx in 1:length(df_genData[,1]))
-              {
-                #print(sprintf("idx=%i",idx))
-                modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
-                modelData@alpha = df_genData[idx,3]
-                modelData@gamma1 = df_genData[idx,4]
+          #print(sprintf("idx=%i",idx))
+          modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
+          modelData@alpha = df_genData_model[idx,3]
+          modelData@gamma1 = df_genData_model[idx,4]
+          modelData@gamma2 = df_genData_model[idx,5]
+          modelData@lambda = df_genData_model[idx,6]    
+          argList <- getArgList(modelData, generatedData)
+          lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
+          lik1 <- sum(lik[c(1:800)])*-1
                 
-                argList <- getArgList(modelData, generatedData)
-                lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
-                lik1 <- sum(lik[c(1:iter)])*-1
-                #lik2 <- sum(lik[-c(1:800)])*-1
-                #print(sprintf("alpha=%.10f, gamma1=%.10f",modelData@alpha,modelData@gamma1))
-
-                
-                if (is.infinite(lik1)) {
-                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
-                  lik1= 1000000
-                  next
-                }else if (is.nan(lik1)) {
-                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
-                  lik1 = 1000000
-                  next
-                }else if (is.na(lik1)) {
-                  #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
-                  lik1 = 1000000
-                  next
-                }
-                if(lik1 < min_lik1)
-                {
-                  min_lik1=lik1
-                  minmodel@alpha = df_genData[idx,3]
-                  minmodel@gamma1 = df_genData[idx,4]
-                  minmodel_genDataFileNum = df_genData[idx,11]
-                  minmodel_genDataNum = df_genData[idx,12]
-
-                }    
-              }
-
-              ### Compute probrow using modelData=minmodel  ####################
-
-              
-              probMat <- TurnsNew::getProbMatrix(generatedData, minmodel, argList[[6]], sim=1)
-              #print(minmodel)
-              idx = length(df_genData[,1])
-              
-              trueModelData <- new("ModelData", Model = modelName, creditAssignment = "qlearningAvgRwd", sim = 1)
-              trueModelData@alpha = df_genData[idx,7]
-              trueModelData@gamma1 = df_genData[idx,8]
-              #trueModelData@gamma2 = df_genData[idx,9]
-              #trueModelData@lambda = df_genData[idx,10]
-              #trueModelData <- allData[[minmodel_genDataNum]]@simModelData
-              #print(trueModelData)
-              trueProbMat <- TurnsNew::getProbMatrix(generatedData, trueModelData, argList[[6]], sim=1)
-                    
-              probRow <- round((trueProbMat[iter,] - probMat[iter,]),2)/round(trueProbMat[iter,],2) 
-              probRow[is.nan(probRow)] <- 0
-              probRow[is.infinite(probRow)] <- 0
-              print(probRow)
-              list(iter = iter, model = modelName, creditAssignment=creditAssignment, genDataFileNum=minmodel_genDataFileNum,genDataNum=minmodel_genDataNum,res_alpha=minmodel@alpha, res_gamma1=minmodel@gamma1, res_gamma2=minmodel@gamma2,res_lambda=minmodel@lambda,probRow=probRow,trueAlpha = trueModelData@alpha,trueGamma1 = trueModelData@gamma1,trueGamma2 = trueModelData@gamma2,trueLambda = trueModelData@lambda)
-            }
-            res1
+          if (is.infinite(lik1)) {
+            #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+            lik1= 1000000
+          }else if (is.nan(lik1)) {
+            #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+            lik1 = 1000000
+          }else if (is.na(lik1)) {
+            #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
+            lik1 = 1000000
+          }
+       
+          if(lik1 < genData_minlik)
+          {
+            genData_minlik=lik1
+            minModel@modelName = model
+            minmodel@alpha = df_genData_model[idx,3]
+            minmodel@gamma1 = df_genData_model[idx,4]
+            minmodel@gamma2 = df_genData_model[idx,5]
+            minmodel@lambda = df_genData_model[idx,6]
+          }    
         }
-        res2
+      }
+
+      confusionMatrix[trueModel,minModel@modelName] = confusionMatrix[trueModel,minModel@modelName]+1  
     }
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
-  save(minDflist, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_minDflist.Rdata"))
+  save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
 
 
 }

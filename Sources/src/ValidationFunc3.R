@@ -524,6 +524,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
+        cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s, modelName = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel,modelName))
 
         for(idx in 1:length(df_genData_model[,1]))
         {
@@ -561,7 +562,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           }    
         }
       }
-
+      print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
     }
   }

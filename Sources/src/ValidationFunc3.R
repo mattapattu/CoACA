@@ -520,8 +520,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
-        #cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s, modelName = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel,modelName))
-
+        cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s, modelName = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel,modelName))
+        model_minlik = 1000000
         for(idx in 1:length(df_genData_model[,1]))
         {
           #print(sprintf("idx=%i",idx))
@@ -551,13 +551,18 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           {
             genData_minlik=lik1
             minModel = paste0(modelName, ".qlearningAvgRwd")
+            model_minlik = lik1
             # minmodel@alpha = df_genData_model[idx,3]
             # minmodel@gamma1 = df_genData_model[idx,4]
             # minmodel@gamma2 = df_genData_model[idx,5]
             # minmodel@lambda = df_genData_model[idx,6]
-          }    
+          }   
+
         }
+
+        cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minModel, genData_minlik))
       }
+      cat(sprintf('modelName = %s, minlik=%f\n', modelName, minlik))
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
       c(trueModel=trueModel,minModel=minModel,genDataFile=genDataFile,genDataNum=genDataNum)

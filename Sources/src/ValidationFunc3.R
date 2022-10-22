@@ -440,7 +440,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   res.model.data.dir=paste(model.data.dir,"holdoutTest",ratName,sep="/")
   gen.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   #print(res.model.data.dir) 
-  #print(model.src)
+  print(src.dir)
+  print(model.src)
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 

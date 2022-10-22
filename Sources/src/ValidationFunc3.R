@@ -553,7 +553,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           if(lik1 < genData_minlik)
           {
             genData_minlik=lik1
-            minModel@modelName = model
+            minModel = paste0(modelName, ".qlearningAvgRwd")
+            minModel@Model = modelName
             minmodel@alpha = df_genData_model[idx,3]
             minmodel@gamma1 = df_genData_model[idx,4]
             minmodel@gamma2 = df_genData_model[idx,5]
@@ -562,7 +563,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
         }
       }
 
-      confusionMatrix[trueModel,minModel@modelName] = confusionMatrix[trueModel,minModel@modelName]+1  
+      confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
     }
   }
     

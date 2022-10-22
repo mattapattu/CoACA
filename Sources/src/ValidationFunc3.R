@@ -548,7 +548,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
             lik1 = 1000000
           }
        
-          if(model_minlik < lik1)
+          if(lik1 < model_minlik)
           {
             model_minlik = lik1
             minmodel@alpha = df_genData_model[idx,3]

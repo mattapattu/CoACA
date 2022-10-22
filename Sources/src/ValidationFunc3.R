@@ -515,7 +515,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
       genData_minlik = 1000000
       minModel <- new("ModelData", sim = 1)
-      trueModel = paste0(df_genData[1,2],"qlearningAvgRwd")
+      trueModel = paste0(df_genData[1,2],".qlearningAvgRwd")
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]
 
@@ -528,7 +528,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
 
         for(idx in 1:length(df_genData_model[,1]))
         {
-          print(sprintf("idx=%i",idx))
+          #print(sprintf("idx=%i",idx))
           modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
           modelData@alpha = df_genData_model[idx,3]
           modelData@gamma1 = df_genData_model[idx,4]
@@ -562,7 +562,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           }    
         }
       }
-      print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
+      #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
     }
   }

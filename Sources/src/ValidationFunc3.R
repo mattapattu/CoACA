@@ -468,10 +468,6 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   resMat <- Reduce(rbind,resMatList)
   save(resMat, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resMat.Rdata"))
 
-
-  
-
- 
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
@@ -508,7 +504,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   
   
   resList<-
-  foreach(genDataFile = c(1:10), .combine='rbind', .options.mpi=opts,) %:%
+  foreach(genDataFile = c(1:10), .combine='rbind', .options.mpi=opts) %:%
     foreach(genDataNum = c(1:60), .combine='rbind')  %dopar%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
@@ -518,8 +514,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]
 
-    res <- 
-      foreach(model = models, .combine='rbind') %do%
+      for(model in models)
       {
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
@@ -566,8 +561,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
       c(trueModel=trueModel,minModel=minModel,genDataFile=genDataFile,genDataNum=genDataNum)
     }
-    res
-  }
+    
+  
     
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)

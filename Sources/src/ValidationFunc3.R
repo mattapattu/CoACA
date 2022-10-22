@@ -489,7 +489,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
      }
 
     
-  chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
+  chunkSize = ceiling(600/getDoParWorkers())
   #print(sprintf("chunkSize=%i",chunkSize))
   opts <- list(initEnvir=initWorkers) 
 

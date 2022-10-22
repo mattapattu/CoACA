@@ -423,7 +423,7 @@ HoldoutTestV2=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   
 }
 
-combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir)
+combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
       ## Test settings ###############
   

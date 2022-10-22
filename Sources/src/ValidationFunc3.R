@@ -523,7 +523,6 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
       {
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
-        cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s, modelName = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel,modelName))
         creditAssignment = strsplit(model,"\\.")[[1]][2]
 
         for(idx in 1:length(df_genData_model[,1]))
@@ -535,6 +534,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           modelData@gamma2 = df_genData_model[idx,5]
           modelData@lambda = df_genData_model[idx,6]    
           argList <- getArgList(modelData, generatedData)
+          cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s, modelName = %s, alpha = %.10f, gamma1 = %.10f, gamma2 = %f, lambda = %f\n', ratName,genDataFile,genDataNum, generatedData@simModel,modelName, modelData@alpha, modelData@gamma1, modelData@gamma2, modelData@lambda))
+
           lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
           lik1 <- sum(lik[c(1:800)])*-1
                 

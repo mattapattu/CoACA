@@ -492,7 +492,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
     
   chunkSize = ceiling(600/getDoParWorkers())
   #print(sprintf("chunkSize=%i",chunkSize))
-  opts <- list(initEnvir=initWorkers) 
+  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   df <- as.data.frame(resMat)
   cols.num <- c(3,4,5,6,7,8,9,10,11,12)
@@ -505,7 +505,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   
   
   resList<-
-  foreach(genDataFile = c(1:10), .combine='rbind', .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"),) %:%
+  foreach(genDataFile = c(1:10), .combine='rbind', .options.mpi=opts, .packages=c("stringr"), .export=c("model.src")) %:%
     foreach(genDataNum = c(1:60), .combine='rbind')  %dopar%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]

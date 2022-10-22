@@ -510,17 +510,18 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
       genData_minlik = 1000000
-      minModel <- new("ModelData", sim = 1)
+      
       trueModel = paste0(df_genData[1,2],".qlearningAvgRwd")
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]
+      cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))
 
       for(model in models)
       {
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
-        cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s, modelName = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel,modelName))
+        minModel <- new("ModelData", modelName=modelName, creditAssignment=creditAssignment, sim = 1)
         model_minlik = 1000000
         for(idx in 1:length(df_genData_model[,1]))
         {
@@ -547,7 +548,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
             lik1 = 1000000
           }
        
-          if(model_minlik < lik)
+          if(model_minlik < lik1)
           {
             model_minlik = lik1
           }
@@ -564,7 +565,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           }   
 
         }
-        cat(sprintf('modelName = %s, model_minlik=%f\n', modelName, model_minlik))
+        cat(sprintf('modelName = %s, model_minlik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, model_minlik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
       }
       cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minModel, genData_minlik))
 

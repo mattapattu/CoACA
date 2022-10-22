@@ -472,30 +472,30 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   
 
  
-  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  # setRngDoMPI(cl, seed=seed)
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=seed)
     
-  # exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
-  # registerDoMPI(cl)
+  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  registerDoMPI(cl)
     
-  #  initWorkers <-  function() {
-  #      source(paste(src.dir, "ModelClasses.R", sep = "/"))
-  #      source(paste(model.src, "PathModel.R", sep = "/"))
-  #      source(paste(model.src, "TurnModel.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel1.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel2.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel3.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel4.R", sep = "/"))
-  #      source(paste(src.dir, "BaseClasses.R", sep = "/"))
-  #      source(paste(src.dir,"exportFunctions.R", sep="/"))
+   initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"))
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
    
-  #      #attach(myEnv, name="sourced_scripts")
-  #    }
+       #attach(myEnv, name="sourced_scripts")
+     }
 
     
-  #chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
+  chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
   #print(sprintf("chunkSize=%i",chunkSize))
-  # opts <- list(initEnvir=initWorkers, profile=TRUE) 
+  opts <- list(initEnvir=initWorkers) 
 
   df <- as.data.frame(resMat)
   cols.num <- c(3,4,5,6,7,8,9,10,11,12)
@@ -505,12 +505,11 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
 
   #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
 
-  confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
-  colnames(confusionMatrix) <- c(testData@Models)
-  rownames(confusionMatrix) <- c(testData@Models)
   
-  for(genDataFile in c(1:10)){
-    for(genDataNum in c(1:60)) 
+  
+  resList<-
+  foreach(genDataFile = c(1:10), .combine='rbind', .options.mpi=opts,) %:%
+    foreach(genDataNum = c(1:60), .combine='rbind')  %dopar%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
       genData_minlik = 1000000
@@ -519,7 +518,8 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]
 
-      for(model in models)
+    res <- 
+      foreach(model = models, .combine='rbind') %do%
       {
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
@@ -563,15 +563,32 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
         }
       }
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
-      confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
+      #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
+      c(trueModel=trueModel,minModel=minModel,genDataFile=genDataFile,genDataNum=genDataNum)
     }
+    res
   }
     
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
+  #print(resList)
+  save(resList, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_HoldoutRes.Rdata"))
+
+
+  df <- as.data.frame(resList)
+  confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
+  colnames(confusionMatrix) <- c(testData@Models)
+  rownames(confusionMatrix) <- c(testData@Models)
+  
+  for(i in length(df[,1]))
+  {
+    trueModel = df[i,1]
+    minModel = df[i,2]
+    confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
+  }
+
   print(confusionMatrix)
   save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
-
 
 }
 

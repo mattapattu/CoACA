@@ -521,7 +521,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
-        minModel <- new("ModelData", Model=modelName, creditAssignment=creditAssignment, sim = 1)
+        minmodel <- new("ModelData", Model=modelName, creditAssignment=creditAssignment, sim = 1)
         model_minlik = 1000000
         for(idx in 1:length(df_genData_model[,1]))
         {
@@ -551,6 +551,10 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           if(model_minlik < lik1)
           {
             model_minlik = lik1
+            minmodel@alpha = df_genData_model[idx,3]
+            minmodel@gamma1 = df_genData_model[idx,4]
+            minmodel@gamma2 = df_genData_model[idx,5]
+            minmodel@lambda = df_genData_model[idx,6]
           }
 
           if(lik1 < genData_minlik)
@@ -558,10 +562,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
             genData_minlik=lik1
             minModel = paste0(modelName, ".qlearningAvgRwd")
             
-            # minmodel@alpha = df_genData_model[idx,3]
-            # minmodel@gamma1 = df_genData_model[idx,4]
-            # minmodel@gamma2 = df_genData_model[idx,5]
-            # minmodel@lambda = df_genData_model[idx,6]
+            
           }   
 
         }

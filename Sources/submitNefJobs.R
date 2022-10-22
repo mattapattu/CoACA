@@ -224,17 +224,17 @@ if(isTRUE(combineHoldoutResLists))
   currentTest = "combineHoldoutResLists"
   source("testConfig.R")
 
-  cores = 0
-  walltime = "0:00"
+  cores = 10
+  walltime = "1:00"
   spawnslaves = cores-1
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("combineParamEstResLists_",paste0("rat",rat))
+  name = paste0("combineHoldoutResLists_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
-  command <- sprintf("Rscript executeNefJobs.R %i %i %i %s %i %i", rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+  command <- sprintf("oarsub -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
   cat(command)
   cat("\n")
   system(command)

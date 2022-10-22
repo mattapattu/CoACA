@@ -559,10 +559,10 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           }   
 
         }
-
-        cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minModel, genData_minlik))
+        cat(sprintf('modelName = %s, model_minlik=%f\n', modelName, model_minlik))
       }
-      cat(sprintf('modelName = %s, minlik=%f\n', modelName, minlik))
+      cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minModel, genData_minlik))
+
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
       c(trueModel=trueModel,minModel=minModel,genDataFile=genDataFile,genDataNum=genDataNum)

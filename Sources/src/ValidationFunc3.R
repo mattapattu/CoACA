@@ -431,7 +431,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   
   ####################################
 
-  print(sprintf("Inside combineParamEstResLists"))
+  print(sprintf("Inside combineHoldoutResLists"))
   ratName = ratdata@rat
   models = testData@Models
   #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")

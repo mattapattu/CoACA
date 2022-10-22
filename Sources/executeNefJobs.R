@@ -102,7 +102,7 @@ if(currentTest == "unitTestProbDiff"){
 
   if(currentTest == "combineHoldoutResLists"){
 
-    combineHoldoutResLists(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir)
+    combineHoldoutResLists(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 
   } 
 

@@ -512,7 +512,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   for(genDataFile in c(1:10)){
     for(genDataNum in c(1:60)) 
     {
-      df_genData = df[which(resList[,11]== genDataFile & resList[,12]==genDataNum),]
+      df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
       genData_minlik = 1000000
       minModel <- new("ModelData", sim = 1)
       trueModel = paste0(df_genData[1,2],"qlearningAvgRwd")
@@ -527,7 +527,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
 
         for(idx in 1:length(df_genData_model[,1]))
         {
-          #print(sprintf("idx=%i",idx))
+          print(sprintf("idx=%i",idx))
           modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
           modelData@alpha = df_genData_model[idx,3]
           modelData@gamma1 = df_genData_model[idx,4]

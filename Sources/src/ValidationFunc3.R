@@ -531,10 +531,10 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
           modelData@gamma2 = df_genData_model[idx,5]
           modelData@lambda = df_genData_model[idx,6]    
           argList <- getArgList(modelData, generatedData)
-          #cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s, modelName = %s, alpha = %.10f, gamma1 = %.10f, gamma2 = %f, lambda = %f\n', ratName,genDataFile,genDataNum, generatedData@simModel,modelName, modelData@alpha, modelData@gamma1, modelData@gamma2, modelData@lambda))
+          #cat(sprintf('alpha = %.10f, gamma1 = %.10f, gamma2 = %f, lambda = %f\n', ratName,genDataFile,genDataNum, generatedData@simModel,modelName, modelData@alpha, modelData@gamma1, modelData@gamma2, modelData@lambda))
 
           lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
-          lik1 <- sum(lik[c(1:800)])*-1
+          lik1 <- sum(lik[-c(1:800)])*-1
                 
           if (is.infinite(lik1)) {
             #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
@@ -547,11 +547,16 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
             lik1 = 1000000
           }
        
+          if(model_minlik < lik)
+          {
+            model_minlik = lik1
+          }
+
           if(lik1 < genData_minlik)
           {
             genData_minlik=lik1
             minModel = paste0(modelName, ".qlearningAvgRwd")
-            model_minlik = lik1
+            
             # minmodel@alpha = df_genData_model[idx,3]
             # minmodel@gamma1 = df_genData_model[idx,4]
             # minmodel@gamma2 = df_genData_model[idx,5]
@@ -581,7 +586,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
   colnames(confusionMatrix) <- c(testData@Models)
   rownames(confusionMatrix) <- c(testData@Models)
   
-  for(i in length(df[,1]))
+  for(i in c(1:length(df[,1])))
   {
     trueModel = df[i,1]
     minModel = df[i,2]

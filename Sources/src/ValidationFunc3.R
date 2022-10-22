@@ -521,7 +521,7 @@ combineHoldoutResLists=function(ratdata,testData,src.dir,model.src,setup.hpc,mod
         df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
-        minModel <- new("ModelData", modelName=modelName, creditAssignment=creditAssignment, sim = 1)
+        minModel <- new("ModelData", Model=modelName, creditAssignment=creditAssignment, sim = 1)
         model_minlik = 1000000
         for(idx in 1:length(df_genData_model[,1]))
         {

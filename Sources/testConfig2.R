@@ -7,7 +7,14 @@ data.path = file.path("/home/amoongat/Projects/Rats-Credit/Data/new_data_journey
 load(data.path)
 
 plot.dir = file.path("/home/amoongat/Projects/Rats-Credit/Plots")
+
 model.data.dir = file.path("/home/amoongat/Projects/Rats-Credit/Data/Rat_Model_Data")
+dir.create(file.path(model.data.dir, testSuite), showWarnings = FALSE)
+model.data.dir= file.path(model.data.dir, testSuite)
+dir.create(file.path(model.data.dir, "rat_106"), showWarnings = FALSE)
+dir.create(file.path(model.data.dir, "rat_112"), showWarnings = FALSE)
+dir.create(file.path(model.data.dir, "rat_113"), showWarnings = FALSE)
+dir.create(file.path(model.data.dir, "rat_114"), showWarnings = FALSE)
 #model.data.dir = file.path("/home/amoongat/Projects/Rats-Credit/Data/Rat_Model_Data/qlearning")
 
 model = "Model2"  ## {Model1,Model2,Model3}

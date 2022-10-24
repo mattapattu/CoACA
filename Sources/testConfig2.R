@@ -50,7 +50,7 @@ initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
 
 ############### Tests #############################################
 
-
+print(sprintf("currentTest=%s",currentTest))
 
 if(currentTest == "computeModelParams")
 {

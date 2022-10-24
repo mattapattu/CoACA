@@ -310,7 +310,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
 
   
   resList<-
-      foreach(idx = 1:length(gridMat[,1]), .packages=c("nloptr","stringr","tictoc"), .options.mpi=opts) %dopar%
+      foreach(idx = 1:length(gridMat[,1]), .packages=c("DEoptim","stringr","tictoc"), .options.mpi=opts) %dopar%
       { 
         alpha = gridMat[idx,1]
         gamma1 = gridMat[idx,2]
@@ -354,7 +354,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
         #                  fn = negLogLikFunc,ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1)
 
         myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
-        out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1)
+        out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1,myList)
         modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
 
         
@@ -627,7 +627,7 @@ testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
   curr.time <- Sys.time() 
   resList1 <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages=c("nloptr","stringr","tictoc"), .options.mpi=opts) %dopar%
+      foreach(idx = 1:length(gridMat[,1]), .packages=c("DEoptim","stringr","tictoc"), .options.mpi=opts) %dopar%
       {
         prev.time <- curr.time
         curr.time <- Sys.time() 
@@ -679,7 +679,7 @@ testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
             #cat("Here1")
         tic()         
         myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
-        out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1)
+        out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1,myList)
         s <- toc()
         #cat(s$callback_msg)
         cat("\n")

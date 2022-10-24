@@ -48,7 +48,7 @@ if(isTRUE(computeModelParams)){
   print(paramMat)  
   write.table(paramMat, file="ARL_paramMat_T1.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarctl sub --array-param-file param_file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T1.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T1.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -79,7 +79,7 @@ if(isTRUE(generateModelParamMat)){
     }
   write.table(paramMat, file="ARL_paramMat_T2.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarctl sub --array-param-file param_file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T2.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T2.txt",cores, walltime,name,stdout,stderr)
 
   #command <- sprintf("oarsub -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
   cat(command)
@@ -138,7 +138,7 @@ if(isTRUE(generateDataset))
     }
   write.table(paramMat, file="ARL_paramMat_T3.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarctl sub --array-param-file param_file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T3.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T3.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -175,7 +175,7 @@ if(isTRUE(paramEstTest))
     }
   write.table(paramMat, file="ARL_paramMat_T4.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarctl sub --array-param-file param_file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T4.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T4.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -211,7 +211,7 @@ if(isTRUE(combineParamEstResLists))
     }
   write.table(paramMat, file="ARL_paramMat_T5.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarctl sub --array-param-file param_file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T5.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T5.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -242,7 +242,7 @@ if(isTRUE(validateHoldout))
     }
     write.table(paramMat, file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-    command <- sprintf("oarctl sub --array-param-file param_file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
+    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
     cat(command)
     cat("\n")
     system(command)
@@ -277,7 +277,7 @@ if(isTRUE(combineHoldoutResLists))
     }
   write.table(paramMat, file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarctl sub --array-param-file param_file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)

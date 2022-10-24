@@ -33,7 +33,7 @@ if(isTRUE(computeModelParams)){
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1:10), .combine='rbind') %do%
+    foreach(i = c(1:1), .combine='rbind') %do%
     {
       
       start_idx = sequences[i]+1

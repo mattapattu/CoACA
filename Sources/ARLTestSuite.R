@@ -21,7 +21,7 @@ validateHoldout = F
 
 ########################## Test 1: computeModelParams  ########################
 
-if(computeModelParams){
+if(isTRUE(computeModelParams)){
 
   currentTest = "computeModelParams"
   source("testConfig2.R")
@@ -56,7 +56,7 @@ name = paste0("genPMat_",paste0("rat",rat))
 stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
 stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
-if(generateModelParamMat){
+if(isTRUE(generateModelParamMat)){
 
   currentTest = "generateModelParamMat"
   source("testConfig2.R")
@@ -85,7 +85,7 @@ if(generateModelParamMat){
 }
 
 ############## Unit Test ###############################
-if(unitTestProbDiff)
+if(isTRUE(unitTestProbDiff))
 {
   currentTest = "unitTestProbDiff"
   source("testConfig2.R")
@@ -111,7 +111,7 @@ if(unitTestProbDiff)
 
 ############## Generate Datasets ##########################
 
-if(generateDataset)
+if(isTRUE(generateDataset))
 {
   currentTest = "generateDataset"
   source("testConfig2.R")
@@ -146,7 +146,7 @@ if(generateDataset)
 
 ################## Test 3: Estimate params on artificial data ################
 
-if(paramEstTest)
+if(isTRUE(paramEstTest))
 {
     #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
     #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
@@ -215,7 +215,7 @@ if(isTRUE(combineParamEstResLists))
 
 ################## Test 4: Holdout test on artificial data ################
 
-if(validateHoldout)
+if(isTRUE(validateHoldout))
 {
    
     currentTest = "validateHoldout"
@@ -247,7 +247,7 @@ if(validateHoldout)
 
 ############# Test ####################################################
 
-if(combineHoldoutResLists)
+if(isTRUE(combineHoldoutResLists))
 {
   currentTest = "combineHoldoutResLists"
   source("testConfig2.R")

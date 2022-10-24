@@ -102,7 +102,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
             if(out$optim$bestval >= 1000000)
             {
               modelData = setModelParams(modelData, c(NA,NA,modelData@gamma2,modelData@lambda))
-              c(iter,modelName,NA, NA,modelData@gamma2,modelData@lambda,NA,idx,alpha,gamma1)
+              c(iter,modelName,NA, NA,modelData@gamma2,modelData@lambda,NA,idx)
 
             }else
             {
@@ -120,7 +120,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
                   lik1 = 1000000
                 }
                 #cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik1=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik1))
-                c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx,alpha,gamma1)
+                c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx)
             }
             
 

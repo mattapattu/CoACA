@@ -33,7 +33,7 @@ if(isTRUE(computeModelParams)){
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1:10), .combine='rbind')
+    foreach(i = c(1:10), .combine='rbind') %do%
     {
       
       start_idx = sequences[i]+1
@@ -66,7 +66,7 @@ if(isTRUE(generateModelParamMat)){
   source("testConfig2.R")
 
   paramMat <-
-    foreach(i = c(1), .combine='rbind')
+    foreach(i = c(1), .combine='rbind')%do%
     {
       cores = 10
       walltime = "1:00"
@@ -127,7 +127,7 @@ if(isTRUE(generateDataset))
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")  
 
    paramMat <-
-    foreach(i = c(1:10), .combine='rbind')
+    foreach(i = c(1:10), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -164,7 +164,7 @@ if(isTRUE(paramEstTest))
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:10), .combine='rbind')
+    foreach(i = c(1:10), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -200,7 +200,7 @@ if(isTRUE(combineParamEstResLists))
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1), .combine='rbind')
+    foreach(i = c(1), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -231,7 +231,7 @@ if(isTRUE(validateHoldout))
     stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:20), .combine='rbind')
+    foreach(i = c(1:20), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -266,7 +266,7 @@ if(isTRUE(combineHoldoutResLists))
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1), .combine='rbind')
+    foreach(i = c(1), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]

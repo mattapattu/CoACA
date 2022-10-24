@@ -70,7 +70,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resMat <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages="nloptr", .options.mpi=opts) %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim", .options.mpi=opts) %dopar% {
             #start_idx=sequences[i]
             #idx = start_idx+j
             #alpha = gridMat[idx,1]

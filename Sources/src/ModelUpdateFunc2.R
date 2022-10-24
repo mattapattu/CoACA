@@ -40,7 +40,10 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   #paramTest = list()
   #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
   ratName = ratdata@rat
-  model.data.dir = paste(model.data.dir,"modelParams",ratName,sep="/")
+  model.data.dir=file.path(model.data.dir, ratName)
+  dir.create(file.path(model.data.dir,"modelParams"), showWarnings = FALSE)
+  model.data.dir=file.path(model.data.dir, "modelParams")
+  print(model.data.dir)
 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
   

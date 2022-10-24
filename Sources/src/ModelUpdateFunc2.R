@@ -73,11 +73,11 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
       foreach(idx = 1:length(gridMat[,1]), .packages="nloptr", .options.mpi=opts) %dopar% {
             #start_idx=sequences[i]
             #idx = start_idx+j
-            alpha = gridMat[idx,1]
-            gamma1 = gridMat[idx,2]
-            iter = gridMat[idx,3]
-            model = gridMat[idx,4]
-            cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
+            #alpha = gridMat[idx,1]
+            #gamma1 = gridMat[idx,2]
+            iter = gridMat[idx,1]
+            model = gridMat[idx,2]
+            #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
 
 

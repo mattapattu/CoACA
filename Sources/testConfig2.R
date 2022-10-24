@@ -59,7 +59,8 @@ if(currentTest == "computeModelParams")
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
   models = testData@Models
   gridMat<- expand.grid(iters,models,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=11)  
+  sequences = seq(0,length(gridMat[,1]), length.out=2)
+  print(sequences)  
   print(sprintf("gridMat len=%i",length(gridMat[,1])))
   
 }

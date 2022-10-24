@@ -45,9 +45,8 @@ if(isTRUE(computeModelParams)){
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
     }
-  paramMat <- as.matrix(paramMat)  
-  print(as.matrix(paramMat))
-  write.table(paramMat, file="ARL_paramMat_T1.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
+  print(t(paramMat))
+  write.table(t(paramMat), file="ARL_paramMat_T1.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T1.txt",cores, walltime,name,stdout,stderr)
   cat(command)

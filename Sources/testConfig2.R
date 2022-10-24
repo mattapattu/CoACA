@@ -92,8 +92,8 @@ if(currentTest == "paramEstTest")
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
   genDataList = c(1:4)
   genData = c(1:60)
-  gridMat<- expand.grid(iters,genDataList, genData,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=21)
+  gridMat<- expand.grid(genDataList, genData,iters,stringsAsFactors = FALSE)
+  sequences = seq(0,length(gridMat[,1]), length.out=11)
 }
 
 
@@ -104,7 +104,7 @@ if(currentTest == "validateHoldout")
   models = testData@Models
   genDataList = c(1:10)
   genData = c(1:60)
-  gridMat<- expand.grid(models,genDataList, genData,stringsAsFactors = FALSE)
+  gridMat<- expand.grid(genDataList, genData,models,stringsAsFactors = FALSE)
   sequences = seq(0,length(gridMat[,1]), length.out=11)
 
 }

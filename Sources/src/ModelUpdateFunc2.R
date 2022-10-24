@@ -258,9 +258,8 @@ readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
   setwd(param.model.data.dir)
   print(sprintf("param.model.data.dir=%s",param.model.data.dir))
   ratName = ratdata@rat
-  load(list.files(".", pattern=paste0(ratName,".*minDfModels.Rdata"), full.names=FALSE))
-  allModelRes <- minDfModels
-  modelParamsList <- minDfModels[which(as.numeric(minDfModels[,2])==  length(ratdata@allpaths[,1])),]
+  load(list.files(".", pattern=paste0(ratName,".*resMat.Rdata"), full.names=FALSE))
+  modelParamsList <- resMat[which(as.numeric(resMat[,1])==  length(ratdata@allpaths[,1])),]
 
   allmodelRes <- new("AllModelRes")
   #setwd(res.dir)
@@ -278,13 +277,11 @@ readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
     modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = sim)
     print(sprintf("modelName=%s,creditAssignment=%s",modelName,creditAssignment))
 
-    modelData@alpha <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),3])
-    modelData@gamma1 <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),4])
-    if(creditAssignment == "qlearningAvgRwd")
-    {
-      modelData@gamma2 <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),5])
-      modelData@lambda <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),6])
-    }
+    modelData@alpha <- as.numeric(modelParamsList[which(modelParamsList[,2]==modelName),3])
+    modelData@gamma1 <- as.numeric(modelParamsList[which(modelParamsList[,2]==modelName),4])
+    modelData@gamma2 <- as.numeric(modelParamsList[which(modelParamsList[,2]==modelName),5])
+    modelData@lambda <- as.numeric(modelParamsList[which(modelParamsList[,2]==modelName),6])
+
     modelData <- setModelResults(modelData, ratdata, allModels)
     allmodelRes <- addModelData(allmodelRes, modelData)
 

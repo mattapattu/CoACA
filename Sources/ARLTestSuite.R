@@ -22,10 +22,10 @@ validateHoldout = F
 ########################## Test 1: computeModelParams  ########################
 
 if(isTRUE(computeModelParams)){
-
+  
   currentTest = "computeModelParams"
   source("testConfig2.R")
-
+  print(sprintf("currentTest=%s", currentTest)) 
   cores = 10
   walltime = "10:00"
   name = paste0("mParams","_",paste0("rat",rat))

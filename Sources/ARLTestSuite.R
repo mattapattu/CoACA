@@ -38,7 +38,7 @@ if(isTRUE(computeModelParams)){
       
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
-      print(sprintf("start_idx=%i, end_idx=%i", start_idx, end_idx))
+      print(sprintf("start_idx=%d, end_idx=%d", start_idx, end_idx))
       seed = start_idx
       spawnslaves = cores-1
       

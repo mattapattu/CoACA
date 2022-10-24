@@ -11,6 +11,8 @@ testSuite <- as.character(args[7])
 #options(error=recover)
 options(error=function()traceback(2))
 
+print(sprintf("Executing testSuite %s", testSuite))
+
 ################ INIT ####################################################################
 
 source("testConfig2.R")

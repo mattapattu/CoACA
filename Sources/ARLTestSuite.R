@@ -45,7 +45,7 @@ if(isTRUE(computeModelParams)){
       spawnslaves = cores-1
       
         #name = paste0("modelParams_",i,"_",rats[[rat]])
-      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
   print(t(paramMat))
   write.table(t(paramMat), file="ARL_paramMat_T1.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)

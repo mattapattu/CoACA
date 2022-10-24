@@ -7,6 +7,7 @@ count <- as.integer(args[3])
 currentTest <- as.character(args[4])
 start_idx <- as.integer(args[5])
 end_idx <- as.integer(args[6])
+testSuite <- as.character(args[7])
 #options(error=recover)
 options(error=function()traceback(2))
 

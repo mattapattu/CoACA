@@ -45,6 +45,7 @@ if(isTRUE(computeModelParams)){
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
     }
+  paramMat <- as.matrix(paramMat)  
   print(as.matrix(paramMat))
   write.table(paramMat, file="ARL_paramMat_T1.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 

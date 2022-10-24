@@ -30,7 +30,7 @@ library(listenv)
 library(nloptr)
 
 
-analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name)
+analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop)
 {
   models = testData@Models
   #########################

@@ -24,7 +24,7 @@ if(currentTest == "computeModelParams")
   
   seq_id <- which((sequences+1) %in% start_idx)
   name = paste0("mParams",seq_id,"_",paste0("rat",rat))
-  analyzeParamSpaceV2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name)
+  analyzeParamSpaceV2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop)
 }
 
 ################### Test 2: generateModelParamMat #################333

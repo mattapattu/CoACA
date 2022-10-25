@@ -28,7 +28,7 @@ if(isTRUE(computeModelParams)){
   currentTest = "computeModelParams"
   source("testConfig2.R")
   #print(sprintf("currentTest=%s", currentTest)) 
-  cores = 7
+  cores = 10
   walltime = "10:00"
   name = paste0("mParams","_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
@@ -177,7 +177,7 @@ if(isTRUE(paramEstTest))
     }
   write.table(paramMat, file="ARL_paramMat_T4.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T4.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T4.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -228,12 +228,12 @@ if(isTRUE(validateHoldout))
     source("testConfig2.R")
     cores = 10
     walltime = "14:00"
-    name = paste0("holdVal",i,"_",paste0("rat",rat))
+    name = paste0("holdVal","_",paste0("rat",rat))
     stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
     stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:20), .combine='rbind')%do%
+    foreach(i = c(1:10), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -244,7 +244,7 @@ if(isTRUE(validateHoldout))
     }
     write.table(paramMat, file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
+    command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
     cat(command)
     cat("\n")
     system(command)

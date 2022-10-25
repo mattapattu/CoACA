@@ -51,8 +51,8 @@ boxTimes = enregres$boxTimes
     
 ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
 
-alpha_seq = seq_log(1e-3, 0.1,9)
-gamma1_seq = seq_log(1e-8, 1e-5, 6)
+alpha_seq = seq_log(1e-3, 0.1,20)
+gamma1_seq = seq_log(1e-8, 1e-4,20)
 initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
 
 ############### Tests #############################################

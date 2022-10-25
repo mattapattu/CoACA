@@ -66,13 +66,13 @@ if(isTRUE(generateModelParamMat)){
 
   currentTest = "generateModelParamMat"
   source("testConfig2.R")
-
+  cores = 2
+  walltime = "1:00"
+  spawnslaves = cores-1
   paramMat <-
     foreach(i = c(1), .combine='rbind')%do%
     {
-      cores = 10
-      walltime = "1:00"
-      spawnslaves = cores-1
+      
       start_idx = 0
       end_idx = 0
       seed = 0
@@ -211,7 +211,7 @@ if(isTRUE(combineParamEstResLists))
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
     }
-  write.table(paramMat, file="ARL_paramMat_T5.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
+  write.table(t(paramMat), file="ARL_paramMat_T5.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T5.txt",cores, walltime,name,stdout,stderr)
   cat(command)
@@ -277,7 +277,7 @@ if(isTRUE(combineHoldoutResLists))
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
     }
-  write.table(paramMat, file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
+  write.table(t(paramMat), file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
   cat(command)

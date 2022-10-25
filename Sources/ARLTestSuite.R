@@ -15,10 +15,10 @@ unitTestProbDiff = F
 
 computeModelParams = T
 generateModelParamMat = T
-generateDataset = F
-paramEstTest = F
+generateDataset = T
+paramEstTest = T
 combineParamEstResLists = F
-validateHoldout = F
+validateHoldout = T
 combineHoldoutResLists = F
 
 ########################## Test 1: computeModelParams  ########################

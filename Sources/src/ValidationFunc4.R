@@ -361,7 +361,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
         #  res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
         #                  fn = negLogLikFunc,ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1)
 
-        myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
+        myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 30)
         out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1,myList)
         modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
         cat(sprintf('rat=%s, model = %s, creditAssignment=%s\n', ratName,modelName,creditAssignment))
@@ -686,7 +686,7 @@ testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
             #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
             #cat("Here1")
         tic()         
-        myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 200)
+        myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 30)
         out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=generatedData,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 1,myList)
         s <- toc()
         #cat(s$callback_msg)

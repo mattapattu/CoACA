@@ -244,7 +244,7 @@ generateDataV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
 }
 
 
-HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name, )
+HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name,initpop)
 {
   
   ## Test settings ###############

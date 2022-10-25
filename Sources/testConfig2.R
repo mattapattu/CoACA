@@ -51,8 +51,8 @@ boxTimes = enregres$boxTimes
     
 ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
 
-alpha_seq = seq_log(1e-3, 0.1,6)
-gamma1_seq = seq_log(1e-8, 1e-4, 6)
+alpha_seq = seq_log(1e-3, 0.1,9)
+gamma1_seq = seq_log(1e-8, 1e-5, 6)
 initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
 
 ############### Tests #############################################
@@ -66,7 +66,7 @@ if(currentTest == "computeModelParams")
   iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
   models = testData@Models
   gridMat<- expand.grid(iters,models,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=2)
+  sequences = seq(0,length(gridMat[,1]), length.out=6)
   print(sequences)  
   print(sprintf("gridMat len=%i",length(gridMat[,1])))
   

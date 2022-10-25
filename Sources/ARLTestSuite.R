@@ -14,7 +14,7 @@ unitTestProbDiff = F
 
 
 computeModelParams = T
-generateModelParamMat = F
+generateModelParamMat = T
 generateDataset = F
 paramEstTest = F
 combineParamEstResLists = F

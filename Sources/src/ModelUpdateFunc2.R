@@ -111,7 +111,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
             {
               modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
                 lik1 <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-                lik1 <- sum(lik1[(1:800)])*-1
+                lik1 <- sum(lik1[(1:iter)])*-1
                 #reprint(lik1)
                 if (is.infinite(lik1)) {
                   lik1= 1000000
@@ -159,7 +159,7 @@ generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
     resMatList[[i]] <- resMat
   }
   resMat <- Reduce(rbind,resMatList)
-  #save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata")) 
+  save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMatList.Rdata")) 
 
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7)
@@ -258,7 +258,7 @@ readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
   setwd(param.model.data.dir)
   print(sprintf("param.model.data.dir=%s",param.model.data.dir))
   ratName = ratdata@rat
-  load(list.files(".", pattern=paste0(ratName,".*resMat.Rdata"), full.names=FALSE))
+  load(list.files(".", pattern=paste0(ratName,".*resMatList.Rdata"), full.names=FALSE))
   modelParamsList <- resMat[which(as.numeric(resMat[,1])==  length(ratdata@allpaths[,1])),]
 
   allmodelRes <- new("AllModelRes")

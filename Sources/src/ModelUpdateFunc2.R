@@ -49,7 +49,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=count)
-  exportDoMPI(cl, c("src.dir","model.data.dir","model.src", "testSuite"),envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"),envir=environment())
   registerDoMPI(cl)
   
    initWorkers <-  function() {

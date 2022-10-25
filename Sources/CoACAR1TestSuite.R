@@ -8,8 +8,6 @@ rat <- as.integer(args[1])
 options(error=function()traceback(2))
 
 testSuite = "CoACAR1"
-testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
-
 
 #### Tests ##############
 unitTestProbDiff = F

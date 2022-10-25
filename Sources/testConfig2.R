@@ -41,6 +41,16 @@ source(paste(src.dir,"ModelUpdateFunc2.R", sep="/"))
 source(paste(src.dir,"ValidationFunc4.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
+
+if(testSuite=="ARLTestSuite")
+{
+  testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+
+}else if(testSuite=="CoACAR1"){
+
+  testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+
+}
 testData = new("TestModels", Name = testSuite,Models=testModels)
 
 

@@ -8,7 +8,6 @@ rat <- as.integer(args[1])
 options(error=function()traceback(2))
 
 testSuite = "ARLTestSuite"
-testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
 
 #### Tests ##############

@@ -41,7 +41,7 @@ source(paste(src.dir,"ModelUpdateFunc2.R", sep="/"))
 source(paste(src.dir,"ValidationFunc4.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
-testData = new("TestModels", Name = "AvgRwd",Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
+testData = new("TestModels", Name = testSuite,Models=testModels)
 
 
 rawData <- donnees_ash[[rat]] 

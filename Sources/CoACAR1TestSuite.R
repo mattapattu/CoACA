@@ -7,8 +7,8 @@ rat <- as.integer(args[1])
 #options(error=recover)
 options(error=function()traceback(2))
 
-testSuite = "ARLTestSuite"
-testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+testSuite = "CoACAR1"
+testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 
 
 #### Tests ##############

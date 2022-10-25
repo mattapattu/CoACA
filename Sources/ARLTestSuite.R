@@ -77,7 +77,7 @@ if(isTRUE(generateModelParamMat)){
       end_idx = 0
       seed = 0
         #name = paste0("modelParams_",i,"_",rats[[rat]])
-      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
   write.table(t(paramMat), file="ARL_paramMat_T2.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
@@ -136,7 +136,7 @@ if(isTRUE(generateDataset))
       seed = start_idx
       spawnslaves = cores-1
         #name = paste0("modelParams_",i,"_",rats[[rat]])
-      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
   write.table(paramMat, file="ARL_paramMat_T3.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
@@ -173,7 +173,7 @@ if(isTRUE(paramEstTest))
       seed = start_idx
       spawnslaves = cores-1
         #name = paste0("modelParams_",i,"_",rats[[rat]])
-      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
   write.table(paramMat, file="ARL_paramMat_T4.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
@@ -209,7 +209,7 @@ if(isTRUE(combineParamEstResLists))
       seed = start_idx
       spawnslaves = cores-1
         #name = paste0("modelParams_",i,"_",rats[[rat]])
-      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
   write.table(t(paramMat), file="ARL_paramMat_T5.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
@@ -240,7 +240,7 @@ if(isTRUE(validateHoldout))
       seed = start_idx
       spawnslaves = cores-1
         #name = paste0("modelParams_",i,"_",rats[[rat]])
-      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
     write.table(paramMat, file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
@@ -275,7 +275,7 @@ if(isTRUE(combineHoldoutResLists))
       seed = start_idx
       spawnslaves = cores-1
         #name = paste0("modelParams_",i,"_",rats[[rat]])
-      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx)  
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
   write.table(t(paramMat), file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 

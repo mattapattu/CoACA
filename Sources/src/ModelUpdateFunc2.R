@@ -149,7 +149,7 @@ generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
   #model.data.dir = paste(model.data.dir,"modelParams",ratName,sep="/")
   model.data.dir=file.path(model.data.dir, ratName)
   model.data.dir=file.path(model.data.dir, "modelParams")
-
+  print(model.data.dir)
   setwd(model.data.dir)
   resMatList <- listenv()
 

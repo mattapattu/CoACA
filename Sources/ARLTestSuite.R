@@ -28,7 +28,7 @@ if(isTRUE(computeModelParams)){
   currentTest = "computeModelParams"
   source("testConfig2.R")
   #print(sprintf("currentTest=%s", currentTest)) 
-  cores = 10
+  cores = 7
   walltime = "10:00"
   name = paste0("mParams","_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")

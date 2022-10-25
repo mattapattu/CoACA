@@ -153,10 +153,11 @@ generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
   setwd(model.data.dir)
   resMatList <- listenv()
 
-  for(i in c(1:10))
+  for(i in c(1:6))
   {
     
     pattern=paste0(ratName,"_mParams",i,"_.*Rdata")
+    #print(pattern)
     resMat=list.files(".", pattern=pattern, full.names=FALSE)
     load(resMat)
     resMatList[[i]] <- resMat

@@ -72,7 +72,7 @@ if(currentTest == "unitTestProbDiff"){
     seq_id <- which((sequences+1) %in% start_idx)
     name = paste0("paramEs",seq_id,"_",paste0("rat",rat))
     print(sprintf("Test = paramEstTest, start_idx=%i, end_idx=%i",start_idx,end_idx))
-    testParamEstimationV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name)
+    testParamEstimationV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name, initpop)
 
 
   } 
@@ -96,7 +96,7 @@ if(currentTest == "unitTestProbDiff"){
     name = paste0("holdVal",seq_id,"_",paste0("rat",rat))
     print(sprintf("Test = validateHoldout, start_idx=%i, end_idx=%i",start_idx,end_idx))
  
-    HoldoutTestV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count,gridMat, name)
+    HoldoutTestV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count,gridMat, name, initpop)
     #model.data.dir = paste(model.data.dir,"holdoutTest",ratdata@rat,sep="/")
     #printMatRes(ratdata,testData,model.data.dir)
   }

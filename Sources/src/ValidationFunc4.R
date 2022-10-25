@@ -244,7 +244,7 @@ generateDataV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
 }
 
 
-HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
+HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name, initpop)
 {
   
   ## Test settings ###############
@@ -570,7 +570,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
 
 
-testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,gridMat,name)
+testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,gridMat,name,initpop)
 {
   ## Test settings ###############
   

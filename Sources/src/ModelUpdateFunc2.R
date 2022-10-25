@@ -163,7 +163,7 @@ generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
     resMatList[[i]] <- resMat
   }
   resMat <- Reduce(rbind,resMatList)
-  save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMatList.Rdata")) 
+  save(resMat, file = paste0(model.data.dir,"/",rat,"_", format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMatList.Rdata")) 
 
   # df <- as.data.frame(resMat)
   # cols.num <- c(1,3,4,5,6,7)

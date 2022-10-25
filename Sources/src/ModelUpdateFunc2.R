@@ -66,9 +66,9 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
        #attach(myEnv, name="sourced_scripts")
      }
   
-  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  #chunkSize = length(gridMat[,1])/getDoParWorkers()
   #chunkSize = 150
-  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
+  opts <- list(initEnvir=initWorkers) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    

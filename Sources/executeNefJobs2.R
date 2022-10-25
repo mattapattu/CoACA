@@ -27,7 +27,7 @@ if(currentTest == "computeModelParams")
   
   seq_id <- which((sequences+1) %in% start_idx)
   name = paste0("mParams",seq_id,"_",paste0("rat",rat))
-  analyzeParamSpaceV2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop)
+  analyzeParamSpaceV2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)
 }
 
 ################### Test 2: generateModelParamMat #################333
@@ -58,7 +58,7 @@ if(currentTest == "unitTestProbDiff"){
     seq_id <- which((sequences+1) %in% start_idx)
     name = paste0("GenData",seq_id,"_",paste0("rat",rat))
 
-    generateDataV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name)
+    generateDataV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name, testSuite)
 
 
   } 
@@ -72,7 +72,7 @@ if(currentTest == "unitTestProbDiff"){
     seq_id <- which((sequences+1) %in% start_idx)
     name = paste0("paramEs",seq_id,"_",paste0("rat",rat))
     print(sprintf("Test = paramEstTest, start_idx=%i, end_idx=%i",start_idx,end_idx))
-    testParamEstimationV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name, initpop)
+    testParamEstimationV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name, initpop, testSuite)
 
 
   } 
@@ -81,7 +81,7 @@ if(currentTest == "unitTestProbDiff"){
 
   if(currentTest == "combineParamEstResLists"){
 
-    combineParamEstResListsV4(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+    combineParamEstResListsV4(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite)
 
   } 
   
@@ -96,7 +96,7 @@ if(currentTest == "unitTestProbDiff"){
     name = paste0("holdVal",seq_id,"_",paste0("rat",rat))
     print(sprintf("Test = validateHoldout, start_idx=%i, end_idx=%i",start_idx,end_idx))
  
-    HoldoutTestV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count,gridMat, name, initpop)
+    HoldoutTestV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count,gridMat, name, initpop, testSuite)
     #model.data.dir = paste(model.data.dir,"holdoutTest",ratdata@rat,sep="/")
     #printMatRes(ratdata,testData,model.data.dir)
   }
@@ -105,7 +105,7 @@ if(currentTest == "unitTestProbDiff"){
 
   if(currentTest == "combineHoldoutResLists"){
 
-    combineHoldoutResListsV4(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+    combineHoldoutResListsV4(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite)
 
   } 
 

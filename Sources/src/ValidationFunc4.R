@@ -113,7 +113,7 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,se
 }
 
 
-generateDataV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name)
+generateDataV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name, testSuite)
 {
   ## Test settings ###############
   
@@ -140,7 +140,7 @@ generateDataV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
   registerDoMPI(cl)
     
    initWorkers <-  function() {
@@ -244,7 +244,7 @@ generateDataV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
 }
 
 
-HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name,initpop)
+HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name,initpop, testSuite)
 {
   
   ## Test settings ###############
@@ -283,7 +283,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed) 
-  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
   registerDoMPI(cl)
    
   cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
@@ -396,7 +396,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   
 }
 
-combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite)
 {
       ## Test settings ###############
   
@@ -451,7 +451,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
   registerDoMPI(cl)
     
    initWorkers <-  function() {
@@ -570,7 +570,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
 
 
-testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,gridMat,name,initpop)
+testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,gridMat,name,initpop, testSuite)
 {
   ## Test settings ###############
   
@@ -602,7 +602,7 @@ testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
   registerDoMPI(cl)
     
    initWorkers <-  function() {
@@ -717,7 +717,7 @@ testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
 }
 
 
-combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite)
 {
   
     ## Test settings ###############
@@ -770,7 +770,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
   registerDoMPI(cl)
     
    initWorkers <-  function() {

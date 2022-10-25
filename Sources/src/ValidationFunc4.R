@@ -244,7 +244,7 @@ generateDataV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
 }
 
 
-HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name, initpop)
+HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name, )
 {
   
   ## Test settings ###############
@@ -366,7 +366,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
         modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
 
         #modelData = setModelResults(modelData,generatedData,allModels)
-        list(model=model,trueModel=trueModelData@Model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
+        list(model=modelName,trueModel=trueModelData@Model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
       }
   
   

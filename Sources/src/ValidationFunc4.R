@@ -460,11 +460,11 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   resList <- Reduce(rbind,resMatList)
   save(resList, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resList.Rdata"))
 
-  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  setRngDoMPI(cl, seed=seed)
+  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  # setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
-  registerDoMPI(cl)
+  # exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
+  # registerDoMPI(cl)
     
    initWorkers <-  function() {
        source(paste(src.dir, "ModelClasses.R", sep = "/"))
@@ -497,7 +497,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   
   resList<-
   foreach(genDataFile = c(1:5), .combine='rbind', .options.mpi=opts, .packages=c("stringr"), .export=c("model.src")) %:%
-    foreach(genDataNum = c(1:60), .combine='rbind')  %dopar%
+    foreach(genDataNum = c(1:60), .combine='rbind')  %do%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
       genData_minlik = 1000000

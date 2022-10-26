@@ -272,8 +272,8 @@ if(isTRUE(combineHoldoutResLists))
   paramMat <-
     foreach(i = c(1), .combine='rbind')%do%
     {
-      start_idx = sequences[i]+1
-      end_idx = sequences[i+1]
+      start_idx = 0
+      end_idx = 0
       seed = start_idx
       spawnslaves = cores-1
         #name = paste0("modelParams_",i,"_",rats[[rat]])

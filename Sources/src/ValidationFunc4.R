@@ -289,7 +289,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
     res=list.files(".", pattern=pattern, full.names=FALSE)
     load(res)
     print(res)
-    genDataFiles[[i]] <- res
+    genDataFiles[[i]] <- allData
 
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
@@ -298,7 +298,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed) 
-  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global"), envir=environment())
+  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global", "genDataFiles"), envir=environment())
   registerDoMPI(cl)
    
   cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
@@ -328,7 +328,6 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
       foreach(idx = 1:length(gridMat[,1]), .packages=c("DEoptim","stringr","tictoc"), .options.mpi=opts) %dopar%
       { 
         
-        
         #source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
 
         genDataFileNum = as.numeric(gridMat[idx,1])
@@ -336,7 +335,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
         testModel = gridMat[idx,3]
 
         genDataList <- genDataFiles[[genDataFileNum]]
-        cat(sprintf("genDataFileNum= %i,genDataNum=%i\n", genDataNum,genDataNum))
+        cat(sprintf("genDataFileNum= %i,genDataNum=%i\n", genDataFileNum,genDataNum))
 
         if(length(genDataList) < genDataNum)
         {

@@ -316,7 +316,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
    
        #attach(myEnv, name="sourced_scripts")
      }
-    source(paste(src.dir,"../exportFunctions.R", sep="/"))
+    source(paste(src.dir,"exportFunctions.R", sep="/"))
   
   #modelNum =  length(allData)
   

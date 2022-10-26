@@ -6,17 +6,9 @@ cat(names(environment()))
 cat("\n")
 ############### Default parameters #######################
 
-if(testSuite == "ARLTestSuite")
-{
-  gamma2 = 0.5
-  lambda = 0
-}else if(testSuite == "CoACAR1")
-{
-  gamma2 = 0
-  lambda = 0
-}
 
-print(sprintf("testSuite is %s, setting gamma2=%f, lambda=%f", testSuite, gamma2, lambda))
+
+print(sprintf("testSuite is %s, setting gamma2=%f, lambda=%f", testSuite, gamma2_Global, lambda_Global))
 
 
 #######################################################
@@ -103,8 +95,8 @@ setMethod("initialize", "ModelData", function(.Object, ...) {
   if(length(.Object@creditAssignment) > 0) {
     if(.Object@creditAssignment == "qlearningAvgRwd")
     {
-      .Object@gamma2 = gamma2
-      .Object@lambda = lambda
+      .Object@gamma2 = gamma2_Global
+      .Object@lambda = lambda_Global
     }
   }
   .Object

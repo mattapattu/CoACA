@@ -363,6 +363,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
 
         myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 30)
         out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1,myList)
+        
         modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
         cat(sprintf('rat=%s, model = %s, creditAssignment=%s\n', ratName,modelName,creditAssignment))
         #modelData = setModelResults(modelData,generatedData,allModels)

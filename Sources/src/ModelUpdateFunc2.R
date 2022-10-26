@@ -49,7 +49,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=count)
-  exportDoMPI(cl, c("src.dir","model.data.dir","model.src", "gamma2_Global", "lambda_Global", "negLogLikFunc"), envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src", "gamma2_Global", "lambda_Global"), envir=environment())
   registerDoMPI(cl)
   
    initWorkers <-  function() {
@@ -60,7 +60,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
        source(paste(model.src, "HybridModel2.R", sep = "/"), local=environment())
        source(paste(model.src, "HybridModel3.R", sep = "/"), local=environment())
        source(paste(model.src, "HybridModel4.R", sep = "/"), local=environment())
-       source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+       #source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
        source(paste(src.dir,"exportFunctions.R", sep="/"), local=environment())
    
        #attach(myEnv, name="sourced_scripts")
@@ -68,17 +68,17 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
   #chunkSize = 150
-  #opts <- list(initEnvir=initWorkers) 
-
+  opts <- list(initEnvir=initWorkers) 
+  source(paste(src.dir,"../exportFunctions.R", sep="/")) 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resMat <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim") %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim",.options.mpi=opts) %dopar% {
             
             cat(names(environment()))
             cat("\n")
             cat(sprintf('gamma2_Global=%f, lambda_Global=%f\n', gamma2_Global,lambda_Global))
-            initWorkers()
+            source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
             #start_idx=sequences[i]
             #idx = start_idx+j
             #alpha = gridMat[idx,1]

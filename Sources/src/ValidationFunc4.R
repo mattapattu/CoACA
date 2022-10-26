@@ -440,15 +440,12 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
-  resMatList <- listenv()
-
-
   res.model.data.dir=file.path(model.data.dir, ratName)
   res.model.data.dir=file.path(res.model.data.dir, "holdoutTest")
   setwd(res.model.data.dir)
 
-
-  for(i in c(1:10))
+  resMatList <- listenv()
+  for(i in c(1:20))
   {
     pattern=paste0(ratName,"_holdVal",i,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
@@ -466,26 +463,26 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   # exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
   # registerDoMPI(cl)
     
-   initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"))
-       source(paste(model.src, "PathModel.R", sep = "/"))
-       source(paste(model.src, "TurnModel.R", sep = "/"))
-       source(paste(model.src, "HybridModel1.R", sep = "/"))
-       source(paste(model.src, "HybridModel2.R", sep = "/"))
-       source(paste(model.src, "HybridModel3.R", sep = "/"))
-       source(paste(model.src, "HybridModel4.R", sep = "/"))
-       source(paste(src.dir, "BaseClasses.R", sep = "/"))
-       source(paste(src.dir,"exportFunctions.R", sep="/"))
+  #  initWorkers <-  function() {
+  #      source(paste(src.dir, "ModelClasses.R", sep = "/"))
+  #      source(paste(model.src, "PathModel.R", sep = "/"))
+  #      source(paste(model.src, "TurnModel.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel1.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel2.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel3.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel4.R", sep = "/"))
+  #      source(paste(src.dir, "BaseClasses.R", sep = "/"))
+  #      source(paste(src.dir,"exportFunctions.R", sep="/"))
    
-       #attach(myEnv, name="sourced_scripts")
-     }
+  #      #attach(myEnv, name="sourced_scripts")
+  #    }
 
     
-  chunkSize = ceiling(600/getDoParWorkers())
-  #print(sprintf("chunkSize=%i",chunkSize))
-  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
+  # chunkSize = ceiling(600/getDoParWorkers())
+  # #print(sprintf("chunkSize=%i",chunkSize))
+  # opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
-  df <- as.data.frame(resMat)
+  df <- as.data.frame(resList)
   cols.num <- c(3,4,5,6,7,8,9,10,11,12)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))
   #anyNA <- any(!complete.cases(df))
@@ -496,7 +493,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   
   
   resList<-
-  foreach(genDataFile = c(1:5), .combine='rbind', .options.mpi=opts, .packages=c("stringr"), .export=c("model.src")) %:%
+  foreach(genDataFile = c(1:5), .combine='rbind',  .packages=c("stringr"), .export=c("model.src")) %:%
     foreach(genDataNum = c(1:60), .combine='rbind')  %do%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
@@ -510,9 +507,9 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
       for(model in models)
       {
-        df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
+        df_genData_model = df_genData[which(df_genData[,1]==modelName),]
         modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
         modelData@alpha = df_genData_model[idx,3]
         modelData@gamma1 = df_genData_model[idx,4]

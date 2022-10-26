@@ -298,7 +298,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed) 
-  exportDoMPI(cl, c("src.dir","model.data.dir","gamma2_Global", "lambda_Global"), envir=environment())
+  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global"), envir=environment())
   registerDoMPI(cl)
    
   cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))

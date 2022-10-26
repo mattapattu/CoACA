@@ -511,10 +511,10 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         df_genData_model = df_genData[which(df_genData[,1]==modelName),]
         modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
-        modelData@alpha = df_genData_model[idx,3]
-        modelData@gamma1 = df_genData_model[idx,4]
-        modelData@gamma2 = df_genData_model[idx,5]
-        modelData@lambda = df_genData_model[idx,6]    
+        modelData@alpha = df_genData_model[3]
+        modelData@gamma1 = df_genData_model[4]
+        modelData@gamma2 = df_genData_model[5]
+        modelData@lambda = df_genData_model[6]    
         argList <- getArgList(modelData, generatedData)
 
         lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
@@ -536,10 +536,10 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
           genData_minlik = holdoutLik
           minmodel@Model = modelName
           minModel@creditAssignment = creditAssignment
-          minmodel@alpha = df_genData_model[idx,3]
-          minmodel@gamma1 = df_genData_model[idx,4]
-          minmodel@gamma2 = df_genData_model[idx,5]
-          minmodel@lambda = df_genData_model[idx,6]
+          minmodel@alpha = df_genData_model[3]
+          minmodel@gamma1 = df_genData_model[4]
+          minmodel@gamma2 = df_genData_model[5]
+          minmodel@lambda = df_genData_model[6]
         }
 
         cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))

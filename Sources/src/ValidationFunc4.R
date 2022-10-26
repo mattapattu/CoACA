@@ -496,7 +496,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   
   
   resList<-
-  foreach(genDataFile = c(1:10), .combine='rbind', .options.mpi=opts, .packages=c("stringr"), .export=c("model.src")) %:%
+  foreach(genDataFile = c(1:5), .combine='rbind', .options.mpi=opts, .packages=c("stringr"), .export=c("model.src")) %:%
     foreach(genDataNum = c(1:60), .combine='rbind')  %dopar%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]

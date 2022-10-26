@@ -68,16 +68,17 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
   #chunkSize = 150
-  opts <- list(initEnvir=initWorkers) 
+  #opts <- list(initEnvir=initWorkers) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resMat <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim", .options.mpi=opts) %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim") %dopar% {
             
             cat(search())
             cat("\n")
             cat(sprintf('gamma2_Global=%f, lambda_Global=%f\n', gamma2_Global,lambda_Global))
+            initWorkers()
             #start_idx=sequences[i]
             #idx = start_idx+j
             #alpha = gridMat[idx,1]

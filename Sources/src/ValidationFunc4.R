@@ -314,7 +314,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
     #source(paste(src.dir,"../BaseClasses.R", sep="/"))
     source(paste(src.dir,"../exportFunctions.R", sep="/"))
     source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
-    source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+    source(paste(src.dir, "BaseClasses.R", sep = "/"))
       #attach(myEnv, name="sourced_scripts")
   }
     source(paste(src.dir,"../exportFunctions.R", sep="/"))

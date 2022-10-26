@@ -60,7 +60,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
        source(paste(model.src, "HybridModel2.R", sep = "/"))
        source(paste(model.src, "HybridModel3.R", sep = "/"))
        source(paste(model.src, "HybridModel4.R", sep = "/"))
-       source(paste(src.dir, "BaseClasses.R", sep = "/"))
+       sys.source(file=paste(src.dir, "BaseClasses.R", sep = "/"), envir=environment())
        source(paste(src.dir,"exportFunctions.R", sep="/"))
    
        #attach(myEnv, name="sourced_scripts")
@@ -75,6 +75,8 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   resMat <- 
       foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim") %dopar% {
             cat(sprintf("testSuite is %s\n", testSuite))
+            cat(names(environment()))
+            cat("\n")
             initWorkers()
             #start_idx=sequences[i]
             #idx = start_idx+j

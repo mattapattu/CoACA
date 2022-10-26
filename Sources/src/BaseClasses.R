@@ -2,7 +2,8 @@
 #Paths = new("Model", Name = "PathsDummy")
 allModels = new("AllModels",Paths = PathModel, Turns = TurnModel,Hybrid1 = Hybrid1,Hybrid2 = Hybrid2, Hybrid3 = Hybrid3,Hybrid4 = Hybrid4)
 
-
+cat(names(environment()))
+cat("\n")
 ############### Default parameters #######################
 
 if(testSuite == "ARLTestSuite")

@@ -121,7 +121,7 @@ if(currentTest == "paramEstTest")
 if(currentTest == "validateHoldout")
 {
   models = testData@Models
-  genDataList = c(1:10)
+  genDataList = c(1:5)
   genData = c(1:60)
   gridMat<- expand.grid(genDataList, genData,models,stringsAsFactors = FALSE)
   sequences = seq(0,length(gridMat[,1]), length.out=11)

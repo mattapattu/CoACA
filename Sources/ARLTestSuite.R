@@ -15,10 +15,10 @@ testSuite = "ARLTestSuite"
 unitTestProbDiff = F
 
 
-computeModelParams = T
-generateModelParamMat = T
-generateDataset = T
-paramEstTest = T
+computeModelParams = F
+generateModelParamMat = F
+generateDataset = F
+paramEstTest = F
 combineParamEstResLists = F
 validateHoldout = T
 combineHoldoutResLists = F
@@ -168,7 +168,7 @@ if(isTRUE(paramEstTest))
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:10), .combine='rbind')%do%
+    foreach(i = c(1:20), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -235,7 +235,7 @@ if(isTRUE(validateHoldout))
     stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:10), .combine='rbind')%do%
+    foreach(i = c(1:20), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]

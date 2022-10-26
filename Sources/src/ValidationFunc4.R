@@ -283,7 +283,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed) 
-  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir","gamma2_Global", "lambda_Global"), envir=environment())
   registerDoMPI(cl)
    
   cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
@@ -296,7 +296,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
     source(paste(src.dir,"HybridModel2.R", sep="/"))
     source(paste(src.dir,"HybridModel3.R", sep="/"))
     source(paste(src.dir,"HybridModel4.R", sep="/"))
-    source(paste(src.dir,"../BaseClasses.R", sep="/"))
+    #source(paste(src.dir,"../BaseClasses.R", sep="/"))
     source(paste(src.dir,"../exportFunctions.R", sep="/"))
     source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
       #attach(myEnv, name="sourced_scripts")
@@ -311,7 +311,13 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   genDataFiles <- list()
   for(i in 1:length(dfData))
   {
-    genDataFiles[[i]] <- get(load(dfData[[i]]))
+    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
+    #print(pattern)
+    res=list.files(".", pattern=pattern, full.names=FALSE)
+    load(res)
+    genDataFiles[[i]] <- res
+
+    #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
   #modelNum =  length(allData)
@@ -320,11 +326,15 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   chunkSize = length(gridMat[,1])/getDoParWorkers()
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
-  
+  source(paste(src.dir,"../exportFunctions.R", sep="/"))
+
   resList<-
       foreach(idx = 1:length(gridMat[,1]), .packages=c("DEoptim","stringr","tictoc"), .options.mpi=opts) %dopar%
       { 
         
+        
+        source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+
         genDataFileNum = as.numeric(gridMat[idx,1])
         genDataNum = as.numeric(gridMat[idx,2])
         testModel = gridMat[idx,3]
@@ -426,7 +436,13 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
   for(i in 1:length(dfData))
   {
-    genDataFiles[[i]] <- get(load(dfData[[i]]))
+    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
+    #print(pattern)
+    res=list.files(".", pattern=pattern, full.names=FALSE)
+    load(res)
+    genDataFiles[[i]] <- res
+
+    #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
   resMatList <- listenv()
@@ -442,7 +458,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
     pattern=paste0(ratName,"_holdVal",i,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
-    print(any(!complete.cases(resList)))
+    #print(any(!complete.cases(resList)))
     load(resList)
     resMatList[[i]] <- resList
   }
@@ -627,7 +643,13 @@ testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   genDataFiles <- list()
   for(i in 1:length(dfData))
   {
-    genDataFiles[[i]] <- get(load(dfData[[i]]))
+    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
+    #print(pattern)
+    res=list.files(".", pattern=pattern, full.names=FALSE)
+    load(res)
+    genDataFiles[[i]] <- res
+
+    #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
   chunkSize = ceiling(length(gridMat[,1])/(getDoParWorkers()))
@@ -764,7 +786,13 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
   genDataFiles <- list()
   for(i in 1:length(dfData))
   {
-    genDataFiles[[i]] <- get(load(dfData[[i]]))
+    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
+    #print(pattern)
+    res=list.files(".", pattern=pattern, full.names=FALSE)
+    load(res)
+    genDataFiles[[i]] <- res
+
+    #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
  

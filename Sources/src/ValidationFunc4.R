@@ -535,7 +535,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
         {
           genData_minlik = holdoutLik
           minmodel@Model = modelName
-          minModel@creditAssignment = creditAssignment
+          minmodel@creditAssignment = creditAssignment
           minmodel@alpha = as.numeric(df_genData_model[3])
           minmodel@gamma1 = as.numeric(df_genData_model[4])
           minmodel@gamma2 = as.numeric(df_genData_model[5])

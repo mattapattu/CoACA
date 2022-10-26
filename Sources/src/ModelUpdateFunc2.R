@@ -53,15 +53,15 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   registerDoMPI(cl)
   
    initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"))
-       source(paste(model.src, "PathModel.R", sep = "/"))
-       source(paste(model.src, "TurnModel.R", sep = "/"))
-       source(paste(model.src, "HybridModel1.R", sep = "/"))
-       source(paste(model.src, "HybridModel2.R", sep = "/"))
-       source(paste(model.src, "HybridModel3.R", sep = "/"))
-       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       sys.source(paste(src.dir, "ModelClasses.R", sep = "/"), envir=environment())
+       sys.source(paste(model.src, "PathModel.R", sep = "/"), envir=environment())
+       sys.source(paste(model.src, "TurnModel.R", sep = "/"), envir=environment())
+       sys.source(paste(model.src, "HybridModel1.R", sep = "/"), envir=environment())
+       sys.source(paste(model.src, "HybridModel2.R", sep = "/"), envir=environment())
+       sys.source(paste(model.src, "HybridModel3.R", sep = "/"), envir=environment())
+       sys.source(paste(model.src, "HybridModel4.R", sep = "/"), envir=environment())
        sys.source(file=paste(src.dir, "BaseClasses.R", sep = "/"), envir=environment())
-       source(paste(src.dir,"exportFunctions.R", sep="/"))
+       sys.source(paste(src.dir,"exportFunctions.R", sep="/"), envir=environment())
    
        #attach(myEnv, name="sourced_scripts")
      }
@@ -75,8 +75,8 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   resMat <- 
       foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim") %dopar% {
             cat(sprintf("testSuite is %s\n", testSuite))
-            cat(names(environment()))
-            cat("\n")
+            #cat(names(environment()))
+            #cat("\n")
             initWorkers()
             #start_idx=sequences[i]
             #idx = start_idx+j
@@ -99,13 +99,13 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
             argList<-getArgList(modelData,ratdata)
 
             #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
-            #cat("Here1")
+            cat("Here1")
             myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 30)
             out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2,myList)
 
             # res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
             #              fn = negLogLikFunc,ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2)
-            #cat("Here2")
+            cat("Here2")
             if(out$optim$bestval >= 1000000)
             {
               modelData = setModelParams(modelData, c(NA,NA,modelData@gamma2,modelData@lambda))
@@ -126,7 +126,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
                   #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
                   lik1 = 1000000
                 }
-                #cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik1=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik1))
+                cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik1=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik1))
                 c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx)
             }
             

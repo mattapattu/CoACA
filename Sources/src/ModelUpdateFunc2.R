@@ -49,19 +49,19 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=count)
-  exportDoMPI(cl, c("src.dir","model.data.dir","model.src", "gamma2_Global", "lambda_Global"))
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src", "gamma2_Global", "lambda_Global"), envir=environment())
   registerDoMPI(cl)
   
    initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"))
-       source(paste(model.src, "PathModel.R", sep = "/"))
-       source(paste(model.src, "TurnModel.R", sep = "/"))
-       source(paste(model.src, "HybridModel1.R", sep = "/"))
-       source(paste(model.src, "HybridModel2.R", sep = "/"))
-       source(paste(model.src, "HybridModel3.R", sep = "/"))
-       source(paste(model.src, "HybridModel4.R", sep = "/"))
-       source(paste(src.dir, "BaseClasses.R", sep = "/"))
-       source(paste(src.dir,"exportFunctions.R", sep="/"))
+       source(paste(src.dir, "ModelClasses.R", sep = "/"), local=environment())
+       source(paste(model.src, "PathModel.R", sep = "/"), local=environment())
+       source(paste(model.src, "TurnModel.R", sep = "/"), local=environment())
+       source(paste(model.src, "HybridModel1.R", sep = "/"), local=environment())
+       source(paste(model.src, "HybridModel2.R", sep = "/"), local=environment())
+       source(paste(model.src, "HybridModel3.R", sep = "/"), local=environment())
+       source(paste(model.src, "HybridModel4.R", sep = "/"), local=environment())
+       source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+       source(paste(src.dir,"exportFunctions.R", sep="/"), local=environment())
    
        #attach(myEnv, name="sourced_scripts")
      }
@@ -74,6 +74,10 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
    
   resMat <- 
       foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim", .options.mpi=opts) %dopar% {
+            
+            cat(search())
+            cat("\n")
+            cat(sprintf('gamma2_Global=%f, lambda_Global=%f\n', gamma2_Global,lambda_Global))
             #start_idx=sequences[i]
             #idx = start_idx+j
             #alpha = gridMat[idx,1]

@@ -8,6 +8,8 @@ rat <- as.integer(args[1])
 options(error=function()traceback(2))
 
 testSuite = "CoACAR1"
+gamma2_Global <<- 0
+lambda_Global <<- 0
 
 #### Tests ##############
 unitTestProbDiff = F

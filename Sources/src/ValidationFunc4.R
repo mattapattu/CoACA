@@ -372,7 +372,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
         modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
         cat(sprintf('rat=%s, model = %s, creditAssignment=%s\n', ratName,modelName,creditAssignment))
         #modelData = setModelResults(modelData,generatedData,allModels)
-        list(model=modelName,trueModel=trueModelData@Model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
+        list(model=testModel,trueModel=trueModelData@Model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
       }
   
   
@@ -548,6 +548,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
+      minModel = paste0(minmodel@Model,minmodel@creditAssignment)
       c(trueModel=trueModel,minModel=minmodel@Model,genDataFile=genDataFile,genDataNum=genDataNum)
     }
     
@@ -566,6 +567,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   
   for(i in c(1:length(df[,1])))
   {
+    print(sprintf("i=%i",i))
     trueModel = df[i,1]
     minModel = df[i,2]
     confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 

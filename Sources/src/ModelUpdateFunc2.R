@@ -73,9 +73,9 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resMat <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim") %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim", .export="negLogLikFunc") %dopar% {
             
-            cat(search())
+            cat(names(environment()))
             cat("\n")
             cat(sprintf('gamma2_Global=%f, lambda_Global=%f\n', gamma2_Global,lambda_Global))
             initWorkers()

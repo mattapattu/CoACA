@@ -49,7 +49,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=count)
-  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"), envir=.GlobalEnv)
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src"), envir=environment())
   registerDoMPI(cl)
   
    initWorkers <-  function() {
@@ -68,12 +68,14 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   #chunkSize = length(gridMat[,1])/getDoParWorkers()
   #chunkSize = 150
-  opts <- list(initEnvir=initWorkers) 
+  #opts <- list(initEnvir=initWorkers) 
 
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resMat <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim", .options.mpi=opts) %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim") %dopar% {
+            cat(sprintf("testSuite is %s\n", testSuite))
+            initWorkers()
             #start_idx=sequences[i]
             #idx = start_idx+j
             #alpha = gridMat[idx,1]

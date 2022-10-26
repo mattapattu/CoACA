@@ -53,15 +53,15 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   registerDoMPI(cl)
   
    initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"), local=environment())
-       source(paste(model.src, "PathModel.R", sep = "/"), local=environment())
-       source(paste(model.src, "TurnModel.R", sep = "/"), local=environment())
-       source(paste(model.src, "HybridModel1.R", sep = "/"), local=environment())
-       source(paste(model.src, "HybridModel2.R", sep = "/"), local=environment())
-       source(paste(model.src, "HybridModel3.R", sep = "/"), local=environment())
-       source(paste(model.src, "HybridModel4.R", sep = "/"), local=environment())
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
        #source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
-       source(paste(src.dir,"exportFunctions.R", sep="/"), local=environment())
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
    
        #attach(myEnv, name="sourced_scripts")
      }

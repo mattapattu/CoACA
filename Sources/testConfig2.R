@@ -22,7 +22,15 @@ source(paste(src.dir,"ModelClasses.R", sep="/"))
 
 setup.hpc = TRUE
 
+if(testSuite=="ARLTestSuite")
+{
+  gamma2_Global <<- 0.5
+  lambda_Global <<- 0
 
+}else if(testSuite=="CoACAR1"){
+  gamma2_Global <<- 0
+  lambda_Global <<- 0
+}
 
 ## Model files
 model.src = paste(src.dir,model, sep="/")

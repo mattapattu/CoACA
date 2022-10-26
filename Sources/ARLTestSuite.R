@@ -8,8 +8,6 @@ rat <- as.integer(args[1])
 options(error=function()traceback(2))
 
 testSuite = "ARLTestSuite"
-gamma2_Global <<- 0.5
-lambda_Global <<- 0
 
 
 

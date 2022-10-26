@@ -243,8 +243,8 @@ generateDataV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,c
     
 }
 
-
-HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count, gridMat, name,initpop, testSuite)
+                      
+HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)
 {
   
   ## Test settings ###############
@@ -303,20 +303,19 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
    
   cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
    
-  initWorkers <-  function() {
-    source(paste(src.dir,"../ModelClasses.R", sep="/"))
-    source(paste(src.dir,"PathModel.R", sep="/"))
-    source(paste(src.dir,"TurnModel.R", sep="/"))
-    source(paste(src.dir,"HybridModel1.R", sep="/"))
-    source(paste(src.dir,"HybridModel2.R", sep="/"))
-    source(paste(src.dir,"HybridModel3.R", sep="/"))
-    source(paste(src.dir,"HybridModel4.R", sep="/"))
-    #source(paste(src.dir,"../BaseClasses.R", sep="/"))
-    source(paste(src.dir,"../exportFunctions.R", sep="/"))
-    source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
-    source(paste(src.dir, "BaseClasses.R", sep = "/"))
-      #attach(myEnv, name="sourced_scripts")
-  }
+   initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
     source(paste(src.dir,"../exportFunctions.R", sep="/"))
   
   #modelNum =  length(allData)
@@ -584,7 +583,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
 
 
-testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count,gridMat,name,initpop, testSuite)
+testParamEstimationV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)
 {
   ## Test settings ###############
   
@@ -619,19 +618,20 @@ testParamEstimationV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir
   exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
   registerDoMPI(cl)
     
-   initWorkers <-  function() {
-      source(paste(src.dir,"../ModelClasses.R", sep="/"))
-      source(paste(src.dir,"PathModel.R", sep="/"))
-      source(paste(src.dir,"TurnModel.R", sep="/"))
-      source(paste(src.dir,"HybridModel1.R", sep="/"))
-      source(paste(src.dir,"HybridModel2.R", sep="/"))
-      source(paste(src.dir,"HybridModel3.R", sep="/"))
-      source(paste(src.dir,"HybridModel4.R", sep="/"))
-      source(paste(src.dir,"../BaseClasses.R", sep="/"))
-      source(paste(src.dir,"../exportFunctions.R", sep="/"))
-      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
-      #attach(myEnv, name="sourced_scripts")
-    }
+      initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
+
   
 
   setwd(gen.data.dir)

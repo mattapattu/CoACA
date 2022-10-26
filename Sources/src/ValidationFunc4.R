@@ -435,7 +435,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
     #print(pattern)
     res=list.files(".", pattern=pattern, full.names=FALSE)
     load(res)
-    genDataFiles[[i]] <- res
+    genDataFiles[[i]] <- allData
 
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
@@ -643,7 +643,7 @@ testParamEstimationV4=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
     #print(pattern)
     res=list.files(".", pattern=pattern, full.names=FALSE)
     load(res)
-    genDataFiles[[i]] <- res
+    genDataFiles[[i]] <- allData
 
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
@@ -786,7 +786,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
     #print(pattern)
     res=list.files(".", pattern=pattern, full.names=FALSE)
     load(res)
-    genDataFiles[[i]] <- res
+    genDataFiles[[i]] <- allData
 
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }

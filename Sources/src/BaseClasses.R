@@ -8,7 +8,7 @@ cat("\n")
 
 
 
-print(sprintf("testSuite is %s, setting gamma2=%f, lambda=%f", testSuite, gamma2_Global, lambda_Global))
+print(sprintf("setting gamma2=%f, lambda=%f", gamma2_Global, lambda_Global))
 
 
 #######################################################

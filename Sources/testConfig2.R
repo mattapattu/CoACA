@@ -23,6 +23,16 @@ source(paste(src.dir,"ModelClasses.R", sep="/"))
 setup.hpc = TRUE
 
 
+if(testSuite == "ARLTestSuite")
+{
+  gamma2_Global <<- 0.5
+  lambda_Global <<- 0
+}else if(testSuite == "CoACAR1")
+{
+  gamma2_Global <<- 0.5
+  lambda_Global <<- 0
+}
+
 ## Model files
 model.src = paste(src.dir,model, sep="/")
 source(paste(model.src,"PathModel.R", sep="/"))
@@ -53,15 +63,7 @@ if(testSuite=="ARLTestSuite")
 }
 testData = new("TestModels", Name = testSuite,Models=testModels)
 
-if(testSuite == "ARLTestSuite")
-{
-  gamma2_Global <<- 0.5
-  lambda_Global <<- 0
-}else if(testSuite == "CoACAR1")
-{
-  gamma2_Global <<- 0.5
-  lambda_Global <<- 0
-}
+
 rawData <- donnees_ash[[rat]] 
 enregres = enregCombine(rawData,rats[rat])
 allpaths = enregres$allpaths

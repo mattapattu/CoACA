@@ -277,7 +277,22 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
   
   print(sprintf("models: %s",toString(models)))
   
-  
+  setwd(gen.data.dir)
+  #dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  #print(dfData)
+  #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
+  {
+    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
+    #print(pattern)
+    res=list.files(".", pattern=pattern, full.names=FALSE)
+    load(res)
+    print(res)
+    genDataFiles[[i]] <- res
+
+    #genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
     #worker.nodes = mpi.universe.size()-1
     #print(sprintf("worker.nodes=%i",worker.nodes))
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
@@ -302,32 +317,13 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
     source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
       #attach(myEnv, name="sourced_scripts")
   }
-    
-    
-  setwd(gen.data.dir)
-  print(param.model.data.dir)
-  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
-  print(dfData)
-  #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
-  genDataFiles <- list()
-  for(i in 1:length(dfData))
-  {
-    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
-    #print(pattern)
-    res=list.files(".", pattern=pattern, full.names=FALSE)
-    load(res)
-    genDataFiles[[i]] <- res
-
-    #genDataFiles[[i]] <- get(load(dfData[[i]]))
-  }
-
+    source(paste(src.dir,"../exportFunctions.R", sep="/"))
+  
   #modelNum =  length(allData)
   
   #chunkSize = 300
   chunkSize = length(gridMat[,1])/getDoParWorkers()
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
-
-  source(paste(src.dir,"../exportFunctions.R", sep="/"))
 
   resList<-
       foreach(idx = 1:length(gridMat[,1]), .packages=c("DEoptim","stringr","tictoc"), .options.mpi=opts) %dopar%
@@ -341,7 +337,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,co
         testModel = gridMat[idx,3]
 
         genDataList <- genDataFiles[[genDataFileNum]]
-        #cat(sprintf("length(genDataList)= %i,genDataNum=%i\n", length(genDataList),genDataNum))
+        cat(sprintf("genDataFileNum= %i,genDataNum=%i\n", genDataNum,genDataNum))
 
         if(length(genDataList) < genDataNum)
         {

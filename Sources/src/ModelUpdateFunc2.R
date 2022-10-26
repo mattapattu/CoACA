@@ -49,7 +49,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=count)
-  exportDoMPI(cl, c("src.dir","model.data.dir","model.src", "gamma2_Global", "lambda_Global"), envir=environment())
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src", "gamma2_Global", "lambda_Global", "negLogLikFunc"), envir=environment())
   registerDoMPI(cl)
   
    initWorkers <-  function() {
@@ -73,7 +73,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
   print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
    
   resMat <- 
-      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim", .export="negLogLikFunc") %dopar% {
+      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim") %dopar% {
             
             cat(names(environment()))
             cat("\n")

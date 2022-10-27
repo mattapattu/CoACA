@@ -140,6 +140,58 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
 }
 
 
+getMinModel=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir)
+{
+  min_index = 0
+  min = 100000
+  min_method = "null"
+  ratName = ratdata@rat
+  #endLearningStage = getEndIndex(ratName,ratdata@allpaths,sim=sim, limit=0.95)
+  #endLearningStage = endLearningStage/2
+  #half_stage = endLearningStage/2
+
+  setwd(param.model.data.dir)
+  print(sprintf("param.model.data.dir=%s",param.model.data.dir))
+  ratName = ratdata@rat
+  load(list.files(".", pattern=paste0(ratName,".*resMatList.Rdata"), full.names=FALSE))
+
+  half_stage = 800
+  for(m in testData@Models)
+  {
+    modelName = strsplit(m,"\\.")[[1]][1]
+    creditAssignment = strsplit(m,"\\.")[[1]][2]
+    modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
+    modelData@alpha <- resMat[which(as.numeric(resMat[,1])==half_index & resMat[,2] == modelName),3]
+    modelData@gamma1 <- resMat[which(as.numeric(resMat[,1])==half_index & resMat[,2] == modelName),4]
+    modelData@gamma2 <- resMat[which(as.numeric(resMat[,1])==half_index & resMat[,2] == modelName),5]
+    modelData@lambda <- resMat[which(as.numeric(resMat[,1])==half_index & resMat[,2] == modelName),6]
+     
+    argList<-getArgList(modelData,ratdata)
+    lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2) 
+    lik = (-1)*sum(lik[-(1:half_stage)])
+      #lik = (-1)*sum(lik[(half_stage:endLearningStage)])
+    #modelName = paste(modelData@Model,modelData@creditAssignment,sep=".")
+
+    print(sprintf("model=%s,likelihood=%f",m,lik))
+
+    if(is.nan(lik))
+    {
+       print(sprintf("model=%s,likelihood is NAN, skipping to next method",m))
+       next
+    }
+    
+    if(lik < min)
+    {
+      min = lik
+      min_method = modelName
+    } 
+      
+    
+  }
+  return(min_method)
+
+}
+
 generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
 {
   
@@ -256,7 +308,6 @@ generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
 
 
 }
-
 
 
 readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){

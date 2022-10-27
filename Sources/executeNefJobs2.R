@@ -30,6 +30,13 @@ if(currentTest == "computeModelParams")
   analyzeParamSpaceV2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)
 }
 
+################# getMinModel #########################################
+
+if(currentTest == "getMinModel")
+{            
+  getMinModel(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+}
+
 ################### Test 2: generateModelParamMat #################333
 
 

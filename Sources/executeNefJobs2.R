@@ -34,7 +34,7 @@ if(currentTest == "computeModelParams")
 
 if(currentTest == "getMinModel")
 {            
-  getMinModel(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+  getMinModel(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir)
 }
 
 ################### Test 2: generateModelParamMat #################333

@@ -65,7 +65,7 @@ if(currentTest == "unitTestProbDiff"){
     seq_id <- which((sequences+1) %in% start_idx)
     name = paste0("GenData",seq_id,"_",paste0("rat",rat))
 
-    generateDataV4(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name, testSuite)
+    generateDataV4(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,seed,count, gridMat, name)
 
 
   } 

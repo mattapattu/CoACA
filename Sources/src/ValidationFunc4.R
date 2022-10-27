@@ -159,8 +159,7 @@ initWorkers <-  function() {
    #chunkSize = 150
    opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
  
-   source(paste(src.dir,"../exportFunctions.R", sep="/")) 
-   
+  
    generatedDataList <-  
    foreach(i=1:length(gridMat[,1]), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
    {

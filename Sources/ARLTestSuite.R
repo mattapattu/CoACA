@@ -15,12 +15,12 @@ testSuite = "ARLTestSuite"
 unitTestProbDiff = F
 
 
-computeModelParams = F
-generateModelParamMat = F
+computeModelParams = T
+generateModelParamMat = T
 generateDataset = F
 paramEstTest = F
 combineParamEstResLists = F
-validateHoldout = T
+validateHoldout = F
 combineHoldoutResLists = F
 
 ########################## Test 1: computeModelParams  ########################

@@ -139,7 +139,7 @@ generateDataV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global"), envir=environment())
+  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global","allModels"), envir=environment())
   registerDoMPI(cl)
     
 initWorkers <-  function() {

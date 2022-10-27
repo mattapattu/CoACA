@@ -155,7 +155,10 @@ getMinModel=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir
   setwd(model.data.dir)
   print(model.data.dir)
   ratName = ratdata@rat
-  load(list.files(".", pattern=paste0(ratName,".*resMatList.Rdata"), full.names=FALSE))
+  details = file.info(list.files(".", pattern=paste0(ratName,".*resMatList.Rdata"), full.names=FALSE))
+  details = details[with(details, order(as.POSIXct(mtime))), ]
+  files = rownames(details)
+  load(files[length(files)])
 
   half_stage = 800
   for(m in testData@Models)

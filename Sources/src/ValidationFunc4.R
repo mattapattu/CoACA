@@ -468,7 +468,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
   
   
-  resList<-
+  resList1<-
   foreach(genDataFile = c(1:5), .combine='rbind',  .packages=c("stringr"), .export=c("model.src")) %:%
     foreach(genDataNum = c(1:60), .combine='rbind')  %do%
     {
@@ -524,7 +524,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
-      minModel = paste0(minmodel@Model,minmodel@creditAssignment)
+      minModel = paste(minmodel@Model,minmodel@creditAssignment,sep=".")
       c(trueModel=trueModel,minModel=minmodel@Model,genDataFile=genDataFile,genDataNum=genDataNum)
     }
     
@@ -533,10 +533,10 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
   #print(resList)
-  save(resList, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_HoldoutRes.Rdata"))
+  save(resList1, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_HoldoutRes.Rdata"))
 
 
-  df <- as.data.frame(resList)
+  df <- as.data.frame(resList1)
   confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
   colnames(confusionMatrix) <- c(testData@Models)
   rownames(confusionMatrix) <- c(testData@Models)

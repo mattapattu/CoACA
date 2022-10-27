@@ -536,25 +536,27 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   #minDflist <- unlist(minDfModels, recursive = FALSE)
   #minDfModels <- Reduce(rbind,minDflist)
   #print(resList)
+  resList1<-Reduce(rbind,resList1)
   save(resList1, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_HoldoutRes.Rdata"))
 
 
-  # df <- as.data.frame(resList1)
-  # confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
-  # colnames(confusionMatrix) <- c(testData@Models)
-  # rownames(confusionMatrix) <- c(testData@Models)
+  #df <- as.data.frame(resList1)
+  confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
+  colnames(confusionMatrix) <- c(testData@Models)
+  rownames(confusionMatrix) <- c(testData@Models)
   
-  # for(i in c(1:length(df[,1])))
-  # {
-  #   #print(sprintf("i=%i",i))
-  #   trueModel = df[i,1]
-  #   minModel = df[i,2]
-  #   print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
-  #   confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
-  # }
+  for(i in c(1:length(resList1)))
+  {
+    #print(sprintf("i=%i",i))
 
-  # print(confusionMatrix)
-  # save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
+    trueModel = resList1[[i]]$trueModel
+    minModel = resList1[[i]]$minModel
+    #print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
+    confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
+  }
+
+  print(confusionMatrix)
+  save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
 
 }
 

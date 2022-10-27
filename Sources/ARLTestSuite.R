@@ -98,7 +98,7 @@ if(isTRUE(unitTestProbDiff))
   currentTest = "unitTestProbDiff"
   source("testConfig2.R")
 
-  cores = 7
+  cores = 10
   walltime = "1:00"
   spawnslaves = cores-1
   start_idx = 0

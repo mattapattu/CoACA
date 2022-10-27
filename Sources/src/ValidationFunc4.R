@@ -520,13 +520,15 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
         }
 
         cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        
+        modelData
       }
       cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
       minModel = paste(minmodel@Model,minmodel@creditAssignment,sep=".")
-      c(trueModel=trueModel,minModel=minModel,genDataFile=genDataFile,genDataNum=genDataNum, modelDataList=modelDataList)
+      list(trueModel=trueModel,minModel=minModel,genDataFile=genDataFile,genDataNum=genDataNum, modelDataList=modelDataList)
     }
     
   

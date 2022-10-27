@@ -150,8 +150,10 @@ getMinModel=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir
   #endLearningStage = endLearningStage/2
   #half_stage = endLearningStage/2
 
-  setwd(param.model.data.dir)
-  print(sprintf("param.model.data.dir=%s",param.model.data.dir))
+  model.data.dir=file.path(model.data.dir, ratName)
+  model.data.dir=file.path(model.data.dir, "modelParams")
+  setwd(model.data.dir)
+  print(model.data.dir))
   ratName = ratdata@rat
   load(list.files(".", pattern=paste0(ratName,".*resMatList.Rdata"), full.names=FALSE))
 

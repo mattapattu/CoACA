@@ -469,8 +469,8 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   
   
   resList1<-
-  foreach(genDataFile = c(1:5), .combine='rbind',  .packages=c("stringr"), .export=c("model.src")) %:%
-    foreach(genDataNum = c(1:60), .combine='rbind')  %do%
+  foreach(genDataFile = c(1:5), .packages=c("stringr"), .export=c("model.src")) %:%
+    foreach(genDataNum = c(1:60))  %do%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
       genData_minlik = 1000000
@@ -481,7 +481,8 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
       generatedData = genDataList[[genDataNum]]
       cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))
 
-      for(model in models)
+     modelDataList <- 
+      foreach(model = models) %do%
       {
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
@@ -525,7 +526,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
       minModel = paste(minmodel@Model,minmodel@creditAssignment,sep=".")
-      c(trueModel=trueModel,minModel=minmodel@Model,genDataFile=genDataFile,genDataNum=genDataNum)
+      c(trueModel=trueModel,minModel=minModel,genDataFile=genDataFile,genDataNum=genDataNum, modelDataList=modelDataList)
     }
     
   
@@ -536,22 +537,22 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   save(resList1, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_HoldoutRes.Rdata"))
 
 
-  df <- as.data.frame(resList1)
-  confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
-  colnames(confusionMatrix) <- c(testData@Models)
-  rownames(confusionMatrix) <- c(testData@Models)
+  # df <- as.data.frame(resList1)
+  # confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
+  # colnames(confusionMatrix) <- c(testData@Models)
+  # rownames(confusionMatrix) <- c(testData@Models)
   
-  for(i in c(1:length(df[,1])))
-  {
-    print(sprintf("i=%i",i))
-    trueModel = df[i,1]
-    minModel = df[i,2]
-    print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
-    confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
-  }
+  # for(i in c(1:length(df[,1])))
+  # {
+  #   #print(sprintf("i=%i",i))
+  #   trueModel = df[i,1]
+  #   minModel = df[i,2]
+  #   print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
+  #   confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
+  # }
 
-  print(confusionMatrix)
-  save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
+  # print(confusionMatrix)
+  # save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
 
 }
 

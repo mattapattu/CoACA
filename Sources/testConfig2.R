@@ -82,7 +82,7 @@ if(currentTest == "computeModelParams")
 {
   #alpha_seq = seq_log(1e-3, 0.9,10)
   #gamma1_seq = seq_log(1e-8, 1e-4, 5)
-  iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
+  iters=c(seq(from = 0, to = length(allpaths[,1]), by = 200)[-1],length(allpaths[,1]))
   models = testData@Models
   gridMat<- expand.grid(iters,models,stringsAsFactors = FALSE)
   sequences = seq(0,length(gridMat[,1]), length.out=7)

@@ -166,10 +166,10 @@ getMinModel=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir
     modelName = strsplit(m,"\\.")[[1]][1]
     creditAssignment = strsplit(m,"\\.")[[1]][2]
     modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
-    modelData@alpha <- resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),3]
-    modelData@gamma1 <- resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),4]
-    modelData@gamma2 <- resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),5]
-    modelData@lambda <- resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),6]
+    modelData@alpha <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),3])
+    modelData@gamma1 <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),4])
+    modelData@gamma2 <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),5])
+    modelData@lambda <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),6])
      
     argList<-getArgList(modelData,ratdata)
     lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2) 

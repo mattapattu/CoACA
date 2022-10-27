@@ -457,30 +457,6 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   resList <- Reduce(rbind,resMatList)
   save(resList, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resList.Rdata"))
 
-  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  # setRngDoMPI(cl, seed=seed)
-    
-  # exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
-  # registerDoMPI(cl)
-    
-  #  initWorkers <-  function() {
-  #      source(paste(src.dir, "ModelClasses.R", sep = "/"))
-  #      source(paste(model.src, "PathModel.R", sep = "/"))
-  #      source(paste(model.src, "TurnModel.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel1.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel2.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel3.R", sep = "/"))
-  #      source(paste(model.src, "HybridModel4.R", sep = "/"))
-  #      source(paste(src.dir, "BaseClasses.R", sep = "/"))
-  #      source(paste(src.dir,"exportFunctions.R", sep="/"))
-   
-  #      #attach(myEnv, name="sourced_scripts")
-  #    }
-
-    
-  # chunkSize = ceiling(600/getDoParWorkers())
-  # #print(sprintf("chunkSize=%i",chunkSize))
-  # opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   df <- as.data.frame(resList)
   cols.num <- c(3,4,5,6,7,8,9,10,11,12)
@@ -906,7 +882,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
               #print(minmodel)
               idx = length(df_genData[,1])
               
-              trueModelData <- new("ModelData", Model = modelName, creditAssignment = "qlearningAvgRwd", sim = 1)
+              trueModelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
               trueModelData@alpha = df_genData[idx,7]
               trueModelData@gamma1 = df_genData[idx,8]
               #trueModelData@gamma2 = df_genData[idx,9]
@@ -929,108 +905,65 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
   #minDfModels <- Reduce(rbind,minDflist)
   save(minDflist, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_minDflist.Rdata"))
 
-    print("Generating Df")
+  print("Generating Df")
    
 
-    if(any(grepl("qlearningAvgRwd",models)))
-    {
-      df <- data.frame(model=character(),
-                    iter=integer(),
-                    genDataFileNum=integer(),
-                    genDataNum = integer(),
-                    alpha=double(),
-                    gamma1=double(),
-                    gamma2=double(),
-                    lambda=double(),
-                    trueAlpha=double(),
-                    trueGamma1=double(),
-                    trueGamma2=double(),
-                    trueLambda=double(),
-                    stringsAsFactors=FALSE)
-
-      for(k in c(1:length(minDflist[,1])))
-      {
-        iter = minDflist[k,]$iter
-        genDataFileNum = minDflist[k,]$genDataFileNum
-        genDataNum = minDflist[k,]$genDataNum
-        model = minDflist[k,]$model
-        #modelDataRes = minDflist[[k]]$res
-        #trueModelData = minDflist[[k]]$trueModelData
-
-        res_alpha = minDflist[k,]$res_alpha
-        res_gamma1 = minDflist[k,]$res_gamma1
-        res_gamma2 = minDflist[k,]$res_gamma2
-        res_lambda = minDflist[k,]$res_lambda
-
-        trueAlpha = minDflist[k,]$trueAlpha
-        trueGamma1 = minDflist[k,]$trueGamma1
-        trueGamma2 = minDflist[k,]$trueGamma2
-        trueLambda= minDflist[k,]$trueLambda
-        
-        df[k,1] <- model
-        df[k,2] <- iter
-        df[k,3] <- genDataFileNum
-        df[k,4] <- genDataNum
-        df[k,5] <- res_alpha
-        df[k,6] <- res_gamma1
-        df[k,7] <- res_gamma2
-        df[k,8] <- res_lambda
-        df[k,9] <- trueAlpha
-        df[k,10] <- trueGamma1
-        df[k,11] <- trueGamma2
-        df[k,12] <- trueLambda
-
-      }
-      rat = ratdata@rat
-      if(StabilityTest)
-      {
-        save(df, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Stability_df.Rdata"))
-      }
-      else
-      {
-        save(df,  file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Conv_df.Rdata"))
-      }
-
-   }
-   else
-   {
-      df <- data.frame(model=character(),
-                    iter=integer(),
-                    genIndex=integer(),
-                    alpha=double(),
-                    gamma=double(),
-                    trueAlpha=double(),
-                    trueGamma=double(),
-                    stringsAsFactors=FALSE)
-      
-      for(k in c(1:length(minDflist)))
-      {
-        iter = minDflist[[k]]$iter
-        genIndex = minDflist[[k]]$genDataIndex
-        generatedData = allData[[genIndex]]
-        modelDataRes = minDflist[[k]]$res
-        trueModelData = minDflist[[k]]$trueModelData
-        
-        df[k,1] <- modelDataRes@Model
-        df[k,2] <- iter
-        df[k,3] <- genIndex
-        df[k,4] <- modelDataRes@alpha
-        df[k,5] <- modelDataRes@gamma1
-        df[k,6] <- trueModelData@alpha
-        df[k,7] <- trueModelData@gamma1 
-
-      }
-      rat = ratdata@rat
-
-      if(StabilityTest)
-      {
-        save(df, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Stability_df.Rdata"))
-      }
-      else
-      {
-        save(df, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Conv_df.Rdata"))
-      }
    
-   }
+  df <- data.frame(model=character(),
+                  iter=integer(),
+                  genDataFileNum=integer(),
+                  genDataNum = integer(),
+                  alpha=double(),
+                  gamma1=double(),
+                  gamma2=double(),
+                  lambda=double(),
+                  trueAlpha=double(),
+                  trueGamma1=double(),
+                  trueGamma2=double(),
+                  trueLambda=double(),
+                  stringsAsFactors=FALSE)
 
+  for(k in c(1:length(minDflist[,1])))
+  {
+    iter = minDflist[k,]$iter
+    genDataFileNum = minDflist[k,]$genDataFileNum
+    genDataNum = minDflist[k,]$genDataNum
+    model = minDflist[k,]$model
+    #modelDataRes = minDflist[[k]]$res
+    #trueModelData = minDflist[[k]]$trueModelData
+
+    res_alpha = minDflist[k,]$res_alpha
+    res_gamma1 = minDflist[k,]$res_gamma1
+    res_gamma2 = minDflist[k,]$res_gamma2
+    res_lambda = minDflist[k,]$res_lambda
+
+    trueAlpha = minDflist[k,]$trueAlpha
+    trueGamma1 = minDflist[k,]$trueGamma1
+    trueGamma2 = minDflist[k,]$trueGamma2
+    trueLambda= minDflist[k,]$trueLambda
+        
+    df[k,1] <- model
+    df[k,2] <- iter
+    df[k,3] <- genDataFileNum
+    df[k,4] <- genDataNum
+    df[k,5] <- res_alpha
+    df[k,6] <- res_gamma1
+    df[k,7] <- res_gamma2
+    df[k,8] <- res_lambda
+    df[k,9] <- trueAlpha
+    df[k,10] <- trueGamma1
+    df[k,11] <- trueGamma2
+    df[k,12] <- trueLambda
+
+  }
+  rat = ratdata@rat
+  if(StabilityTest)
+  {
+    save(df, file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Stability_df.Rdata"))
+  }
+  else
+  {
+    save(df,  file = paste0(res.model.data.dir, "/" , rat,"_", timestamp,"_ParamEs_Conv_df.Rdata"))
+  }
+   
 }

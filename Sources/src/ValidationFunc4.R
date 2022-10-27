@@ -546,6 +546,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
     print(sprintf("i=%i",i))
     trueModel = df[i,1]
     minModel = df[i,2]
+    print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
     confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
   }
 

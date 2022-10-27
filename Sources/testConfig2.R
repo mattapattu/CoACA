@@ -78,8 +78,8 @@ if(testSuite=="ARLTestSuite")
 
 }else if(testSuite=="CoACAR1"){
 
-  alpha_seq = seq_log(0, 1,5)
-  gamma1_seq = seq_log(0, 1,5)
+  alpha_seq = seq_log(0.01, 0.9,5)
+  gamma1_seq = seq_log(0.01, 0.9,5)
   initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
 
 }

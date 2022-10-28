@@ -197,7 +197,7 @@ getMinModel=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir
 
 }
 
-generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,testSuite)
 {
   
   #################################
@@ -225,7 +225,7 @@ generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
     resMatList[[i]] <- resMat
   }
   resMat <- Reduce(rbind,resMatList)
-  save(resMat, file = paste0(model.data.dir,"/",ratName,"_",creditAssignment, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMatList.Rdata")) 
+  save(resMat, file = paste0(model.data.dir,"/",ratName,"_",testSuite, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMatList.Rdata")) 
 
   # df <- as.data.frame(resMat)
   # cols.num <- c(1,3,4,5,6,7)

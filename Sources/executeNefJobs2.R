@@ -42,7 +42,7 @@ if(currentTest == "getMinModel")
 
 if(currentTest == "generateModelParamMat"){
 
-  generateParamResMatV2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count)
+  generateParamResMatV2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,testSuite)
 
 
 }

@@ -98,7 +98,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
             #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
             modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
             argList<-getArgList(modelData,ratdata)
-
+            #cat(sprintf('gamma2=%f, lambda=%f\n', modelData@gamma2,modelData@lambda))
             #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
             #cat("Here1")
             myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 30)

@@ -18,35 +18,12 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   //Rcpp::Rcout << "model=" << model << std::endl;
   arma::mat turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));;
   
- /* if(model == "Paths")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
-  }
-  else if(model == "Turns")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("turnTimes"));
-  }
-  else if(model == "Hybrid1")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel1"));
-  }
-  else if(model == "Hybrid2")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel2"));
-  }
-  else if(model == "Hybrid3")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel3"));
-  }
-  else if(model == "Hybrid4")
-  {
-    turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
-  }
-   */
   //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
-  double gamma = Rcpp::as<double>(modelData.slot("gamma1"));  
+  double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
+  double reward = Rcpp::as<double>(modelData.slot("gamma2"));
+  reward = reward * 10;  
   int episodeNb = 0;
 
   //Rcpp::Rcout << "alpha=" << alpha << ", gamma1=" << gamma << std::endl;
@@ -56,8 +33,8 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
   
   
   arma::mat R = arma::zeros(2, 6);
-  R(0, 3) = 1;
-  R(1, 3) = 1;
+  R(0, 3) = reward;
+  R(1, 3) = reward;
   arma::mat generated_PathData;
   arma::mat generated_TurnData;
   arma::vec allpath_actions = allpaths.col(0);
@@ -277,11 +254,11 @@ Rcpp::List simulateAca2TurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S
       generated_PathData_sess(i, 5) = actionNb;
       
       
-      if (R(S, A) == 1)
+      if (R(S, A) > 0)
       {
         //Rcpp::Rcout << "turnNb=" << generated_TurnsData_sess((turnIdx - 1), 0) << ", receives reward"<< std::endl;
-        generated_TurnsData_sess((turnIdx - 1), 2) = 1;
-        score_episode = score_episode + 1;
+        generated_TurnsData_sess((turnIdx - 1), 2) = reward;
+        score_episode = score_episode + reward;
       }
       
       int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
@@ -378,6 +355,9 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
+  double reward = Rcpp::as<double>(modelData.slot("gamma2"));
+  reward = reward * 10;
+
   int episodeNb = 0; 
   
   //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
@@ -472,7 +452,7 @@ std::vector<double> getAca2Likelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp
       
       if (R > 0)
       {
-        score_episode = score_episode + 1;
+        score_episode = score_episode + reward;
       }
       
       if (sim == 1)
@@ -654,6 +634,9 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double gamma = Rcpp::as<double>(modelData.slot("gamma1"));
+  double reward = Rcpp::as<double>(modelData.slot("gamma2"));
+  reward = reward * 10;
+
   //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
  int episodeNb = 0; 
   arma::mat mseMatrix;
@@ -754,7 +737,7 @@ arma::mat getAca2ProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testM
       
       if (R > 0)
       {
-        score_episode = score_episode + 1;
+        score_episode = score_episode + reward;
       }
       
       

@@ -30,6 +30,9 @@ if(testSuite=="ARLTestSuite")
 }else if(testSuite=="CoACAR1"){
   gamma2_Global <<- 0
   lambda_Global <<- 0
+}else if(testSuite=="CoACAR5"){
+  gamma2_Global <<- 0.5
+  lambda_Global <<- 0
 }
 
 ## Model files
@@ -54,11 +57,10 @@ source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 if(testSuite=="ARLTestSuite")
 {
   testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
-
 }else if(testSuite=="CoACAR1"){
-
   testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
-
+}else if(testSuite=="CoACAR5"){
+  testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 }
 testData = new("TestModels", Name = testSuite,Models=testModels)
 
@@ -77,11 +79,13 @@ if(testSuite=="ARLTestSuite")
   initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
 
 }else if(testSuite=="CoACAR1"){
-
   alpha_seq = seq_log(0.01, 0.9,5)
   gamma1_seq = seq_log(0.01, 0.9,5)
   initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-
+}else if(testSuite=="CoACAR5"){
+  alpha_seq = seq_log(0.01, 0.9,5)
+  gamma1_seq = seq_log(0.01, 0.9,5)
+  initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
 }
 
 ############### Tests #############################################

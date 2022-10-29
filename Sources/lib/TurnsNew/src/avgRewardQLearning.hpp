@@ -27,8 +27,8 @@ Rcpp::List simulateQLearn(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testMod
   Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(turnModel.slot("nodeGroups"));
   
   arma::mat R = arma::zeros(2, 6);
-  R(0, 3) = 1;
-  R(1, 3) = 1;
+  R(0, 3) = reward;
+  R(1, 3) = reward;
   arma::mat generated_PathData;
   arma::mat generated_TurnData;
   arma::vec allpath_actions = allpaths.col(0);
@@ -607,7 +607,7 @@ std::vector<double> getQLearningLik(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::
         rootNode = graph->getNode("I"); 
       }
       double R = rewards_sess(i);
-      if(R==1)
+      if(R > 0)
       {
         R = reward;
       }
@@ -933,7 +933,7 @@ arma::mat getQLearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 tes
         rootNode = graph->getNode("I"); 
       }
       double R = rewards_sess(i);
-      if(R==1)
+      if(R > 0)
       {
         R = reward;
       }

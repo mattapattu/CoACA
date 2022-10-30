@@ -465,7 +465,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   
   
   resList1<-
-  foreach(genDataFile = c(1:5), .packages=c("stringr"), .export=c("model.src")) %:%
+  foreach(genDataFile = c(1:10), .packages=c("stringr"), .export=c("model.src")) %:%
     foreach(genDataNum = c(1:60))  %do%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
@@ -591,10 +591,12 @@ testParamEstimationV4=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
+  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global", "genDataFiles"), envir=environment())
   registerDoMPI(cl)
-    
-      initWorkers <-  function() {
+   
+  cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
+   
+   initWorkers <-  function() {
        source(paste(src.dir, "ModelClasses.R", sep = "/"))
        source(paste(model.src, "PathModel.R", sep = "/"))
        source(paste(model.src, "TurnModel.R", sep = "/"))
@@ -607,6 +609,7 @@ testParamEstimationV4=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
    
        #attach(myEnv, name="sourced_scripts")
      }
+    source(paste(src.dir,"exportFunctions.R", sep="/"))
 
   
 

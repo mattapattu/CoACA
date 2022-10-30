@@ -16,13 +16,13 @@ unitTestProbDiff = F
 
 
 computeModelParams = F
-getMinModel = T
+getMinModel = F
 generateModelParamMat = F
-generateDataset = F
-paramEstTest = F
-combineParamEstResLists = F
-validateHoldout = F
-combineHoldoutResLists = F
+generateDataset = T
+paramEstTest = T
+combineParamEstResLists = T
+validateHoldout = T
+combineHoldoutResLists = T
 
 ########################## Test 1: computeModelParams  ########################
 
@@ -213,7 +213,7 @@ if(isTRUE(paramEstTest))
     }
   write.table(paramMat, file="ARL_paramMat_T4.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T4.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T4.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -249,7 +249,7 @@ if(isTRUE(combineParamEstResLists))
     }
   write.table(t(paramMat), file="ARL_paramMat_T5.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T5.txt",cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T5.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -280,7 +280,7 @@ if(isTRUE(validateHoldout))
     }
     write.table(paramMat, file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
 
-    command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
+    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
     cat(command)
     cat("\n")
     system(command)

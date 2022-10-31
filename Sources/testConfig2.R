@@ -33,6 +33,17 @@ if(testSuite=="ARLTestSuite")
 }else if(testSuite=="CoACAR5"){
   gamma2_Global <<- 0.5
   lambda_Global <<- 0
+}else if(testSuite=="ARLCoACA"){
+  if(currentTest=="coACA_on_ARL")
+  {
+      gamma2_Global <<- 0
+      lambda_Global <<- 0
+
+  }else if(currentTest=="ARL_on_CoACA"){
+      gamma2_Global <<- 0.5
+      lambda_Global <<- 0
+
+  }
 }
 
 ## Model files

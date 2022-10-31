@@ -128,7 +128,6 @@ if(testSuite=="ARLTestSuite")
     gen.data.dir = file.path(data.dir, "ARL", "Datasets")
   }
   
-  currentTest = "holdoutMultiTest"
 }
 
 ############### Tests #############################################

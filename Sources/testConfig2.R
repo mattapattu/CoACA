@@ -75,11 +75,11 @@ if(testSuite=="ARLTestSuite")
 }else if(testSuite=="CoACAR5"){
   testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 }else if(testSuite=="ARL-CoACA"){
-  if(currentTest=="coACA_on_ARL")
+  if(currentTest=="coaca_on_arl")
   {
     testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 
-  }else if(currentTest=="ARL_on_CoACA"){
+  }else if(currentTest=="arl_on_coaca"){
     testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
   }
 }

@@ -187,7 +187,7 @@ if(currentTest == "validateHoldout")
 
 ######################
 
-if(currentTest == "holdoutMultiTest")
+if(currentTest == "coaca_on_arl"||currentTest == "arl_on_coaca")
 {
   models = testData@Models
   genDataList = c(1:10)
@@ -196,3 +196,5 @@ if(currentTest == "holdoutMultiTest")
   sequences = seq(0,length(gridMat[,1]), length.out=21)
   
 }
+
+

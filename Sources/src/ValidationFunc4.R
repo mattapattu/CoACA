@@ -557,7 +557,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
 
 }
-
+                                    
 multiTestHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.data.dir)
 {
     ## Test settings ###############
@@ -636,6 +636,7 @@ multiTestHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hp
   #modelNum =  length(allData)
   
   #chunkSize = 300
+  print(sprintf("gridMat len=%i",length(gridMat[,1])))
   chunkSize = length(gridMat[,1])/getDoParWorkers()
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 

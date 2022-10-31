@@ -465,7 +465,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   
   
   resList1<-
-  foreach(genDataFile = c(1:10), .packages=c("stringr"), .export=c("model.src")) %:%
+  foreach(genDataFile = c(1:10), .packages=c("stringr"), .export=c("model.src"),.errorhandling='pass') %:%
     foreach(genDataNum = c(1:60))  %do%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
@@ -475,12 +475,13 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
       trueModel = paste0(df_genData[1,2],".qlearningAvgRwd")
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]
-      cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))
-      cat(models)
-      cat("\n")
+      #cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))
+      #cat(models)
+      #cat("\n")
      modelDataList <- 
       foreach(model = models,.errorhandling='pass') %do%
       {
+        cat(sprintf("model=%s\n", model))
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         df_genData_model = df_genData[which(df_genData[,1]==modelName),]

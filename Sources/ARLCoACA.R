@@ -7,7 +7,7 @@ rat <- as.integer(args[1])
 #options(error=recover)
 options(error=function()traceback(2))
 
-testSuite = "ARLTestSuite"
+testSuite = "ARLCoACA"
 
 
 
@@ -17,7 +17,7 @@ unitTestProbDiff = F
 
 coaca_on_arl = T          
 arl_on_coaca = T
-combineHoldoutResLists = T
+combineHoldoutResLists = F
 
 
 ################## Test 1: Holdout test using CoACA on ARL dataset ################

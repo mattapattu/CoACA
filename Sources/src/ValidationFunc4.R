@@ -461,8 +461,6 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   #print(sprintf("anyNA=%s",anyNA))
 
   #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
-
-  
   
   resList1<-
   foreach(genDataFile = c(1:10), .packages=c("stringr"), .export=c("model.src"),.errorhandling='pass') %:%
@@ -560,7 +558,156 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
 }
 
+multiTestHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.data.dir)
+{
+    ## Test settings ###############
+  StabilityTest = TRUE 
+  DataGenerated = TRUE
+  
+  ##################################
 
+  testDataName = testData@Name
+  models = testData@Models
+  ratName = ratdata@rat
+  creditAssignment = strsplit(models[1],"\\.")[[1]][2]
+  # param.model.data.dir=file.path(model.data.dir, ratName)
+  # param.model.data.dir=file.path(param.model.data.dir, "modelParams")
+
+  # #gen.data.dir=file.path(model.data.dir, ratName)
+  # #gen.data.dir=file.path(gen.data.dir, "Datasets")
+  # allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
+  
+
+  res.model.data.dir=file.path(model.data.dir, ratName)
+  dir.create(file.path(res.model.data.dir,creditAssignment), showWarnings = FALSE)
+  res.model.data.dir=file.path(res.model.data.dir, creditAssignment)
+  print(sprintf("multiTestHoldoutValidation: creditAssignment=%s, dataset:%s",creditAssignment,gen.data.dir))
+   
+  timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+
+  mat_res = matrix(0, length(models), length(models))
+  colnames(mat_res) <- models
+  rownames(mat_res) <- models
+  
+  
+  print(sprintf("models: %s",toString(models)))
+  
+  setwd(gen.data.dir)
+  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  #print(dfData)
+  #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
+  {
+    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
+    #print(pattern)
+    res=list.files(".", pattern=pattern, full.names=FALSE)
+    load(res)
+    print(res)
+    genDataFiles[[i]] <- allData
+
+    #genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
+    #worker.nodes = mpi.universe.size()-1
+    #print(sprintf("worker.nodes=%i",worker.nodes))
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=seed) 
+  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global", "genDataFiles"), envir=environment())
+  registerDoMPI(cl)
+   
+  cat(sprintf('Running validation with %d worker(s)\n', getDoParWorkers()))
+   
+   initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
+    source(paste(src.dir,"exportFunctions.R", sep="/"))
+  
+  #modelNum =  length(allData)
+  
+  #chunkSize = 300
+  chunkSize = length(gridMat[,1])/getDoParWorkers()
+  opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
+
+  resList<-
+      foreach(idx = 1:length(gridMat[,1]), .packages=c("DEoptim","stringr","tictoc"), .options.mpi=opts) %dopar%
+      { 
+        
+        #source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+
+        genDataFileNum = as.numeric(gridMat[idx,1])
+        genDataNum = as.numeric(gridMat[idx,2])
+        testModel = gridMat[idx,3]
+
+        genDataList <- genDataFiles[[genDataFileNum]]
+        cat(sprintf("genDataFileNum= %i,genDataNum=%i\n", genDataFileNum,genDataNum))
+
+        if(length(genDataList) < genDataNum)
+        {
+          print(sprintf("idx=%i,genDataFileNum=%i,genDataNum=%i does not exist ",idx,genDataFileNum,genDataNum))
+          #return(c(iter = iter,model=model,NA, NA,NA,NA, NA, NA,NA,NA,genDataFileNum=genDataFileNum,genDataNum=genDataNum))
+          return(NULL)
+        }else
+        {
+          generatedData = genDataList[[genDataNum]]
+        }
+
+        trueModelData = generatedData@simModelData
+
+         
+
+        modelName = strsplit(testModel,"\\.")[[1]][1]
+        creditAssignment = strsplit(testModel,"\\.")[[1]][2]
+        modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=1)
+        argList<-getArgList(modelData,generatedData)
+        
+
+        #cat(sprintf('rat=%s, model = %s, creditAssignment=%s\n', ratName,modelName,creditAssignment))
+            #cat(sprintf('rat=%s, iter=%i,creditAssignment = %s\n', ratName,iter,creditAssignment))
+
+
+        #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
+            #cat("Here1")
+        #  res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
+        #                  fn = negLogLikFunc,ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1)
+
+        myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 30)
+        out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=generatedData,half_index=800,modelData=modelData,testModel = argList[[6]],sim = 1,myList)
+        
+        modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
+        cat(sprintf('rat=%s, model = %s, creditAssignment=%s\n', ratName,modelName,creditAssignment))
+        #modelData = setModelResults(modelData,generatedData,allModels)
+        list(model=testModel,trueModel=trueModelData@Model,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda, trueModelData@alpha, trueModelData@gamma1,trueModelData@gamma2,trueModelData@lambda,genDataFileNum=genDataFileNum,genDataNum=genDataNum)
+      }
+  
+  
+  resList <- Reduce(rbind,resList)
+  rat = ratdata@rat
+  save(resList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_HoldoutResList.Rdata"))
+ 
+  
+  if(setup.hpc)
+  {
+    #stopCluster(cl)
+    #stopImplicitCluster()
+    closeCluster(cl)
+  }
+  else
+  {
+    stopCluster(cl)
+    stopImplicitCluster()
+  }
+}
 
 
 testParamEstimationV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)

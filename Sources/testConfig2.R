@@ -8,9 +8,9 @@ load(data.path)
 
 plot.dir = file.path("/home/amoongat/Projects/Rats-Credit/Plots")
 
-model.data.dir = file.path("/home/amoongat/Projects/Rats-Credit/Data/Rat_Model_Data")
-dir.create(file.path(model.data.dir, testSuite), showWarnings = FALSE)
-model.data.dir=file.path(model.data.dir, testSuite)
+data.dir = file.path("/home/amoongat/Projects/Rats-Credit/Data/Rat_Model_Data")
+dir.create(file.path(data.dir, testSuite), showWarnings = FALSE)
+model.data.dir=file.path(data.dir, testSuite)
 dir.create(file.path(model.data.dir, "rat_106"), showWarnings = FALSE)
 dir.create(file.path(model.data.dir, "rat_112"), showWarnings = FALSE)
 dir.create(file.path(model.data.dir, "rat_113"), showWarnings = FALSE)
@@ -61,6 +61,14 @@ if(testSuite=="ARLTestSuite")
   testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 }else if(testSuite=="CoACAR5"){
   testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+}else if(testSuite=="ARL-CoACA"){
+  if(currentTest=="coACA_on_ARL")
+  {
+    testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+
+  }else if(currentTest=="ARL_on_CoACA"){
+    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+  }
 }
 testData = new("TestModels", Name = testSuite,Models=testModels)
 
@@ -72,12 +80,13 @@ boxTimes = enregres$boxTimes
     
 ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
 
+
+### Define test variables
 if(testSuite=="ARLTestSuite")
 {
   alpha_seq = seq_log(1e-3, 0.1,20)
   gamma1_seq = seq_log(1e-8, 1e-4,20)
   initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-
 }else if(testSuite=="CoACAR1"){
   alpha_seq = seq_log(0.01, 0.9,5)
   gamma1_seq = seq_log(0.01, 0.9,5)
@@ -86,6 +95,21 @@ if(testSuite=="ARLTestSuite")
   alpha_seq = seq_log(0.01, 0.9,5)
   gamma1_seq = seq_log(0.01, 0.9,5)
   initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+}else if(testSuite=="ARL-CoACA"){
+  if(currentTest=="coaca_on_arl")
+  {
+    alpha_seq = seq_log(0.01, 0.9,5)
+    gamma1_seq = seq_log(0.01, 0.9,5)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+    gen.data.dir = file.path(data.dir, "CoACAR1", "Datasets")
+  }else if(currentTest=="arl_on_coaca"){
+    alpha_seq = seq_log(1e-3, 0.1,20)
+    gamma1_seq = seq_log(1e-8, 1e-4,20)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+    gen.data.dir = file.path(data.dir, "ARL", "Datasets")
+  }
+  
+  currentTest = "holdoutMultiTest"
 }
 
 ############### Tests #############################################
@@ -140,4 +164,16 @@ if(currentTest == "validateHoldout")
   gridMat<- expand.grid(genDataList, genData,models,stringsAsFactors = FALSE)
   sequences = seq(0,length(gridMat[,1]), length.out=21)
 
+}
+
+######################
+
+if(currentTest == "holdoutMultiTest")
+{
+  models = testData@Models
+  genDataList = c(1:10)
+  genData = c(1:60)
+  gridMat<- expand.grid(genDataList, genData,models,stringsAsFactors = FALSE)
+  sequences = seq(0,length(gridMat[,1]), length.out=21)
+  
 }

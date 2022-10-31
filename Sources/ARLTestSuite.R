@@ -225,7 +225,7 @@ print(is.logical(combineParamEstResLists))
 if(isTRUE(combineParamEstResLists))
 {
   currentTest = "combineParamEstResLists"
-  source("testConfig.R")
+  source("testConfig2.R")
 
   cores = 10
   walltime = "1:00"

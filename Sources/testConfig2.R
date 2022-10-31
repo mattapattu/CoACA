@@ -74,7 +74,7 @@ if(testSuite=="ARLTestSuite")
   testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 }else if(testSuite=="CoACAR5"){
   testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
-}else if(testSuite=="ARL-CoACA"){
+}else if(testSuite=="ARLCoACA"){
   if(currentTest=="coaca_on_arl")
   {
     testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")

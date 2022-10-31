@@ -2,13 +2,13 @@
 #Paths = new("Model", Name = "PathsDummy")
 allModels = new("AllModels",Paths = PathModel, Turns = TurnModel,Hybrid1 = Hybrid1,Hybrid2 = Hybrid2, Hybrid3 = Hybrid3,Hybrid4 = Hybrid4)
 
-cat(names(environment()))
-cat("\n")
-############### Default parameters #######################
+#cat(names(environment()))
+#cat("\n")
+################ Default parameters #######################
 
 
 
-print(sprintf("setting gamma2=%f, lambda=%f", gamma2_Global, lambda_Global))
+#print(sprintf("setting gamma2=%f, lambda=%f", gamma2_Global, lambda_Global))
 
 
 #######################################################

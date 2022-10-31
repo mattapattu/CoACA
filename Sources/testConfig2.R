@@ -46,6 +46,8 @@ if(testSuite=="ARLTestSuite")
   }
 }
 
+print(sprintf("setting gamma2=%f, lambda=%f", gamma2_Global, lambda_Global))
+
 ## Model files
 model.src = paste(src.dir,model, sep="/")
 source(paste(model.src,"PathModel.R", sep="/"))

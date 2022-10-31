@@ -100,15 +100,21 @@ if(testSuite=="ARLTestSuite")
   alpha_seq = seq_log(1e-3, 0.1,20)
   gamma1_seq = seq_log(1e-8, 1e-4,20)
   initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+
 }else if(testSuite=="CoACAR1"){
+
   alpha_seq = seq_log(0.01, 0.9,5)
   gamma1_seq = seq_log(0.01, 0.9,5)
   initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+
 }else if(testSuite=="CoACAR5"){
+
   alpha_seq = seq_log(0.01, 0.9,5)
   gamma1_seq = seq_log(0.01, 0.9,5)
   initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-}else if(testSuite=="ARL-CoACA"){
+
+}else if(testSuite=="ARLCoACA"){
+
   if(currentTest=="coaca_on_arl")
   {
     alpha_seq = seq_log(0.01, 0.9,5)

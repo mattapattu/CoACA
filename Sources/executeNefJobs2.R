@@ -118,7 +118,7 @@ if(currentTest == "unitTestProbDiff"){
 
   ########### Test 7: Holdout on diif dtasets ####################
 
-  if(currentTest == "holdoutMultiTest")
+  if(currentTest == "coaca_on_arl"||currentTest == "arl_on_coaca")
   {
 
     gridMat <- gridMat[start_idx:end_idx,]

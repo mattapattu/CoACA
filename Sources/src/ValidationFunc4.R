@@ -479,7 +479,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
       cat(models)
       cat("\n")
      modelDataList <- 
-      foreach(model = models) %do%
+      foreach(model = models,.errorhandling='pass') %do%
       {
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]

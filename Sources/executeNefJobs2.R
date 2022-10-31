@@ -121,9 +121,10 @@ if(currentTest == "unitTestProbDiff"){
   if(currentTest == "coaca_on_arl"||currentTest == "arl_on_coaca")
   {
 
+    print(sprintf("gen.data.dir=%s",gen.data.dir))
     gridMat <- gridMat[start_idx:end_idx,]
     seq_id <- which((sequences+1) %in% start_idx)
-    name = paste0("holdMul",seq_id,"_",paste0("rat",rat))
+    name = paste0("multiHold",seq_id,"_",paste0("rat",rat))
     print(sprintf("Test = holdoutMultiTest, start_idx=%i, end_idx=%i",start_idx,end_idx))
                                 
     multiTestHoldoutValidation(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.data.dir)

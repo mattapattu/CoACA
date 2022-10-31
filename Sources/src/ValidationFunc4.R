@@ -476,7 +476,8 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]
       cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))
-
+      cat(models)
+      cat("\n")
      modelDataList <- 
       foreach(model = models) %do%
       {

@@ -481,10 +481,10 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
      modelDataList <- 
       foreach(model = models,.errorhandling='pass') %do%
       {
-        cat(sprintf("model=%s\n", model))
+        #cat(sprintf("model=%s\n", model))
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
-        df_genData_model = df_genData[which(df_genData[,1]==modelName),]
+        df_genData_model = df_genData[which(df_genData[,1]==model),]
         modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
         modelData@alpha = as.numeric(df_genData_model[3])
         modelData@gamma1 = as.numeric(df_genData_model[4])
@@ -495,7 +495,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
         lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
         holdoutLik <- sum(lik[-c(1:800)])*-1
 
-        print(sprintf("holdoutLik=%f",holdoutLik))
+        #print(sprintf("holdoutLik=%f",holdoutLik))
         if (is.infinite(holdoutLik)) {
           #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
           holdoutLik= 1000000
@@ -527,7 +527,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
       minModel = paste(minmodel@Model,minmodel@creditAssignment,sep=".")
-      print(sprintf("minModel=%s",minModel))
+      #print(sprintf("minModel=%s",minModel))
       list(trueModel=trueModel,minModel=minModel,genDataFile=genDataFile,genDataNum=genDataNum, modelDataList=modelDataList)
     }
     

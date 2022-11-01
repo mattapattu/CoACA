@@ -947,7 +947,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
   iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))  
   #chunkSize = ceiling(length(models)*length(iters)/getDoParWorkers())
   #print(sprintf("chunkSize=%i",chunkSize))
-  opts <- list(initEnvir=initWorkers, profile=TRUE) 
+  #opts <- list(initEnvir=initWorkers, profile=TRUE) 
 
   df <- as.data.frame(resMat)
   cols.num <- c(1,3,4,5,6,7,8,9,10,11,12)

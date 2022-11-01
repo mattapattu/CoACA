@@ -121,7 +121,7 @@ if(testSuite=="ARLTestSuite")
     alpha_seq = seq_log(0.01, 0.9,5)
     gamma1_seq = seq_log(0.01, 0.9,5)
     initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-    gen.data.dir = file.path(data.dir, "ARL",ratName, "Datasets")
+    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
 
   }else if(currentTest=="arl_on_coaca"){
     alpha_seq = seq_log(1e-3, 0.1,20)

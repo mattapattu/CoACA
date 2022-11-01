@@ -958,7 +958,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
   #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
 
  
-  minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
+  minDflist <- foreach(model = models, .inorder=TRUE, .combine='rbind') %:% 
     foreach(iter = iters, .inorder=TRUE, .combine='rbind') %do%
     {
       #print(sprintf("it=%i,model=%s",iter,model))

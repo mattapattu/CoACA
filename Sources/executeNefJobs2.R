@@ -127,7 +127,7 @@ if(currentTest == "unitTestProbDiff"){
     name = paste0("multiHold",seq_id,"_",paste0("rat",rat))
     print(sprintf("Test = holdoutMultiTest, start_idx=%i, end_idx=%i",start_idx,end_idx))
                                 
-    multiTestHoldoutValidation(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.data.dir)
+    multiHoldoutValidation(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.data.dir)
     #model.data.dir = paste(model.data.dir,"holdoutTest",ratdata@rat,sep="/")
     #printMatRes(ratdata,testData,model.data.dir)
   }

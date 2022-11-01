@@ -558,7 +558,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
 
 }
                                     
-multiTestHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.data.dir)
+multiHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.data.dir)
 {
     ## Test settings ###############
   StabilityTest = TRUE 
@@ -581,7 +581,7 @@ multiTestHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hp
   res.model.data.dir=file.path(model.data.dir, ratName)
   dir.create(file.path(res.model.data.dir,creditAssignment), showWarnings = FALSE)
   res.model.data.dir=file.path(res.model.data.dir, creditAssignment)
-  print(sprintf("multiTestHoldoutValidation: creditAssignment=%s, dataset:%s",creditAssignment,gen.data.dir))
+  print(sprintf("multiHoldoutValidation: creditAssignment=%s, dataset:%s",creditAssignment,gen.data.dir))
    
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 
@@ -641,7 +641,7 @@ multiTestHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hp
   opts <- list(initEnvir=initWorkers,chunkSize=chunkSize) 
 
   resList<-
-      foreach(idx = 1:length(gridMat[,1]), .packages=c("DEoptim","stringr","tictoc"), .options.mpi=opts) %dopar%
+      foreach(idx = 1:length(gridMat[,1]), .packages=c("DEoptim","stringr"), .options.mpi=opts) %dopar%
       { 
         
         #source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())

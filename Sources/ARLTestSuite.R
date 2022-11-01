@@ -202,7 +202,7 @@ if(isTRUE(paramEstTest))
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:20), .combine='rbind')%do%
+    foreach(i = c(1:10), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -227,7 +227,7 @@ if(isTRUE(combineParamEstResLists))
   currentTest = "combineParamEstResLists"
   source("testConfig2.R")
 
-  cores = 10
+  cores = 2
   walltime = "1:00"
   spawnslaves = cores-1
   start_idx = 0

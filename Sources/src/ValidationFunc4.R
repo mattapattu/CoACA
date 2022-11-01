@@ -891,7 +891,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
 
   resMatList <- listenv()
   setwd(res.model.data.dir)
-  for(i in c(1:20))
+  for(i in c(1:10))
   {
     
     pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
@@ -923,25 +923,25 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
   }
 
  
-  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  setRngDoMPI(cl, seed=seed)
+  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  # setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
-  registerDoMPI(cl)
+  # exportDoMPI(cl, c("src.dir","model.data.dir", "testSuite"),envir=environment())
+  # registerDoMPI(cl)
     
-   initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"))
-       source(paste(model.src, "PathModel.R", sep = "/"))
-       source(paste(model.src, "TurnModel.R", sep = "/"))
-       source(paste(model.src, "HybridModel1.R", sep = "/"))
-       source(paste(model.src, "HybridModel2.R", sep = "/"))
-       source(paste(model.src, "HybridModel3.R", sep = "/"))
-       source(paste(model.src, "HybridModel4.R", sep = "/"))
-       source(paste(src.dir, "BaseClasses.R", sep = "/"))
-       source(paste(src.dir,"exportFunctions.R", sep="/"))
+  #  initWorkers <-  function() {
+  #      source(paste(src.dir, "ModelClasses.R", sep = "/"))
+  #      source(paste(model.src, "PathModel.R", sep = "/"))
+  #      source(paste(model.src, "TurnModel.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel1.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel2.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel3.R", sep = "/"))
+  #      source(paste(model.src, "HybridModel4.R", sep = "/"))
+  #      source(paste(src.dir, "BaseClasses.R", sep = "/"))
+  #      source(paste(src.dir,"exportFunctions.R", sep="/"))
    
-       #attach(myEnv, name="sourced_scripts")
-     }
+  #      #attach(myEnv, name="sourced_scripts")
+  #    }
 
     
   iters=c(seq(from = 0, to = length(ratdata@allpaths[,1]), by = 400)[-1],length(ratdata@allpaths[,1]))  
@@ -959,7 +959,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
 
  
   minDflist <- foreach(model = models, .inorder=TRUE, .options.mpi=opts, .packages=c("stringr"), .export=c("model.src"), .combine='rbind') %:% 
-    foreach(iter = iters, .inorder=TRUE, .combine='rbind') %dopar%
+    foreach(iter = iters, .inorder=TRUE, .combine='rbind') %do%
     {
       #print(sprintf("it=%i,model=%s",iter,model))
       modelName = strsplit(model,"\\.")[[1]][1]

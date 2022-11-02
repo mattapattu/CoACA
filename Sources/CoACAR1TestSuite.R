@@ -13,8 +13,8 @@ unitTestProbDiff = F
 
 
 computeModelParams = F
-getMinModel = T
 generateModelParamMat = F
+getMinModel = T
 generateDataset = F
 paramEstTest = F
 combineParamEstResLists = F
@@ -55,37 +55,6 @@ if(isTRUE(computeModelParams)){
   cat("\n")
   system(command)
 }
-################# getMinModel #####################################
-if(isTRUE(getMinModel)){
-  currentTest = "getMinModel"
-  source("testConfig2.R")
-  name = paste0("minLik_",paste0("rat",rat))
-  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
-  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
-  cores = 2
-  walltime = "1:00"
-  spawnslaves = cores-1
-  paramMat <-
-    foreach(i = c(1), .combine='rbind')%do%
-    {
-      
-      start_idx = 0
-      end_idx = 0
-      seed = 0
-        #name = paste0("modelParams_",i,"_",rats[[rat]])
-      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
-    }
-  write.table(t(paramMat), file="CoACA_paramMat_T7.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
-
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T7.txt",cores, walltime,name,stdout,stderr)
-
-  #command <- sprintf("oarsub -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh%i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
-  cat(command)
-  cat("\n")
-  system(command)
-  #generateParamResMat(ratdata,model.data.dir,count)
-}
-
 
 ################### Test 2: generateModelParamMat #################333
 
@@ -118,6 +87,39 @@ if(isTRUE(generateModelParamMat)){
   system(command)
   #generateParamResMat(ratdata,model.data.dir,count)
 }
+
+################# getMinModel #####################################
+if(isTRUE(getMinModel)){
+  currentTest = "getMinModel"
+  source("testConfig2.R")
+  name = paste0("minLik_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+  cores = 2
+  walltime = "1:00"
+  spawnslaves = cores-1
+  paramMat <-
+    foreach(i = c(1), .combine='rbind')%do%
+    {
+      
+      start_idx = 0
+      end_idx = 0
+      seed = 0
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+  write.table(t(paramMat), file="CoACA_paramMat_T7.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
+
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T7.txt",cores, walltime,name,stdout,stderr)
+
+  #command <- sprintf("oarsub -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh%i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+  cat(command)
+  cat("\n")
+  system(command)
+  #generateParamResMat(ratdata,model.data.dir,count)
+}
+
+
 
 ############## Unit Test ###############################
 if(isTRUE(unitTestProbDiff))

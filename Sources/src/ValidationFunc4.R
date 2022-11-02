@@ -467,6 +467,10 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
     foreach(genDataNum = c(1:60))  %do%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
+      if(length(df_genData[,1]) == 0)
+      {
+        return(NULL)
+      }
       genData_minlik = 1000000
       minmodel <- new("ModelData", sim = 1)
       creditAssignment = strsplit(models[1],"\\.")[[1]][2]

@@ -517,11 +517,11 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
           minmodel@lambda = as.numeric(df_genData_model[6])
         }
 
-        print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        #print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
         
         modelData
       }
-      print(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
+      #print(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
@@ -544,11 +544,10 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   colnames(confusionMatrix) <- c(testData@Models)
   rownames(confusionMatrix) <- c(testData@Models)
   
-  print(confusionMatrix)
+  #print(confusionMatrix)
   for(i in c(1:length(resList1)))
   {
-    #print(sprintf("i=%i",i))
-
+    print(sprintf("i=%i",i))
     trueModel = resList1[[i]]$trueModel
     minModel = resList1[[i]]$minModel
     print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))

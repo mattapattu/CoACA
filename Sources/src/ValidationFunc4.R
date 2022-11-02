@@ -486,8 +486,8 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
         modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
         modelData@alpha = as.numeric(df_genData_model[3])
         modelData@gamma1 = as.numeric(df_genData_model[4])
-        if(!is.null(df_genData_model[5]))  modelData@gamma2 = as.numeric(df_genData_model[5])
-        if(!is.null(df_genData_model[6]))  modelData@lambda = as.numeric(df_genData_model[6]) 
+        if(!is.na(df_genData_model[5]))  modelData@gamma2 = as.numeric(df_genData_model[5])
+        if(!is.na(df_genData_model[6]))  modelData@lambda = as.numeric(df_genData_model[6]) 
           
         argList <- getArgList(modelData, generatedData)
 

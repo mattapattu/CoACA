@@ -172,9 +172,6 @@ getMinModel=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir
     modelData@gamma2 <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),5])
     modelData@lambda <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),6])
      
-            if(!is.na(df_genData_model[5]))  modelData@gamma2 = as.numeric(df_genData_model[5])
-        if(!is.na(df_genData_model[6]))  modelData@lambda = as.numeric(df_genData_model[6]) 
- 
     argList<-getArgList(modelData,ratdata)
     lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2) 
     lik = (-1)*sum(lik[-(1:half_stage)])

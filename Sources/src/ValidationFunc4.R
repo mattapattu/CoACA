@@ -486,8 +486,9 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
         modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = 1)
         modelData@alpha = as.numeric(df_genData_model[3])
         modelData@gamma1 = as.numeric(df_genData_model[4])
-        modelData@gamma2 = as.numeric(df_genData_model[5])
-        modelData@lambda = as.numeric(df_genData_model[6])   
+        if(!is.null(df_genData_model[5]))  modelData@gamma2 = as.numeric(df_genData_model[5])
+        if(!is.null(df_genData_model[6]))  modelData@lambda = as.numeric(df_genData_model[6]) 
+          
         argList <- getArgList(modelData, generatedData)
 
         lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)

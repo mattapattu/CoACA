@@ -544,13 +544,14 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   colnames(confusionMatrix) <- c(testData@Models)
   rownames(confusionMatrix) <- c(testData@Models)
   
+  print(confusionMatrix)
   for(i in c(1:length(resList1)))
   {
     #print(sprintf("i=%i",i))
 
     trueModel = resList1[[i]]$trueModel
     minModel = resList1[[i]]$minModel
-    #print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
+    print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
     confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
   }
 

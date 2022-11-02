@@ -152,8 +152,9 @@ getMinModel=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir
 
   model.data.dir=file.path(model.data.dir, ratName)
   model.data.dir=file.path(model.data.dir, "modelParams")
-  setwd(model.data.dir)
   print(model.data.dir)
+  setwd(model.data.dir)
+  
   ratName = ratdata@rat
   details = file.info(list.files(".", pattern=paste0(ratName,".*resMatList.Rdata"), full.names=FALSE))
   details = details[with(details, order(as.POSIXct(mtime))), ]

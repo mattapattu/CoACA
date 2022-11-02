@@ -477,7 +477,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
       trueModel = paste0(df_genData[1,2],".",creditAssignment)
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]
-      #cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))
+      print(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))
       #cat(models)
       #cat("\n")
      modelDataList <- 
@@ -521,11 +521,11 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
           minmodel@lambda = as.numeric(df_genData_model[6])
         }
 
-        #print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
         
         modelData
       }
-      #print(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
+      print(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
@@ -551,7 +551,11 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   #print(confusionMatrix)
   for(i in c(1:length(resList1)))
   {
-    print(sprintf("i=%i",i))
+    #print(sprintf("i=%i",i))
+    if(is.null(resList1[[i]]))
+    {
+      next
+    }
     trueModel = resList1[[i]]$trueModel
     minModel = resList1[[i]]$minModel
     print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))

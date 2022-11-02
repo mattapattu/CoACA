@@ -28,7 +28,7 @@ if(testSuite=="ARLTestSuite")
   lambda_Global <<- 0
 
 }else if(testSuite=="CoACAR1"){
-  gamma2_Global <<- 0
+  gamma2_Global <<- 0.1
   lambda_Global <<- 0
 }else if(testSuite=="CoACAR5"){
   gamma2_Global <<- 0.5
@@ -36,7 +36,7 @@ if(testSuite=="ARLTestSuite")
 }else if(testSuite=="ARLCoACA"){
   if(currentTest=="coaca_on_arl")
   {
-      gamma2_Global <<- 0
+      gamma2_Global <<- 0.1
       lambda_Global <<- 0
 
   }else if(currentTest=="arl_on_coaca"){

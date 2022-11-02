@@ -271,8 +271,8 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
   rownames(mat_res) <- models
   
   
-  print(sprintf("models: %s",toString(models)))
-  
+  #print(sprintf("models: %s",toString(models)))
+  print(gen.data.dir)
   setwd(gen.data.dir)
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
   #print(dfData)
@@ -283,8 +283,9 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
     pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
     #print(pattern)
     res=list.files(".", pattern=pattern, full.names=FALSE)
-    load(res)
     print(res)
+    load(res)
+    
     genDataFiles[[i]] <- allData
 
     #genDataFiles[[i]] <- get(load(dfData[[i]]))

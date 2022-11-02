@@ -469,8 +469,8 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
       genData_minlik = 1000000
       minmodel <- new("ModelData", sim = 1)
-
-      trueModel = paste0(df_genData[1,2],".qlearningAvgRwd")
+      creditAssignment = strsplit(models[1],"\\.")[[1]][2]
+      trueModel = paste0(df_genData[1,2],".",creditAssignment)
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]
       #cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))

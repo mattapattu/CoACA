@@ -59,7 +59,6 @@ if(testSuite=="ARLTestSuite")
     alpha_seq = seq_log(0.01, 0.9,5)
     gamma1_seq = seq_log(0.01, 0.9,5)
     initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
     
     gamma2_Global <<- 0.1
     lambda_Global <<- 0
@@ -70,7 +69,6 @@ if(testSuite=="ARLTestSuite")
     alpha_seq = seq_log(1e-3, 0.1,20)
     gamma1_seq = seq_log(1e-8, 1e-4,20)
     initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-    gen.data.dir = file.path(data.dir, "CoACAR1",ratName, "Datasets")
 
     gamma2_Global <<- 0.5
     lambda_Global <<- 0
@@ -83,7 +81,6 @@ if(testSuite=="ARLTestSuite")
     alpha_seq = seq_log(0.01, 0.9,5)
     gamma1_seq = seq_log(0.01, 0.9,5)
     initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
     
     gamma2_Global <<- 0.5
     lambda_Global <<- 0
@@ -94,7 +91,6 @@ if(testSuite=="ARLTestSuite")
     alpha_seq = seq_log(1e-3, 0.1,20)
     gamma1_seq = seq_log(1e-8, 1e-4,20)
     initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-    gen.data.dir = file.path(data.dir, "CoACAR1",ratName, "Datasets")
 
     gamma2_Global <<- 0.5
     lambda_Global <<- 0

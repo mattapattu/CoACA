@@ -193,7 +193,7 @@ if(currentTest == "paramEstTest")
   genDataList = c(1:4)
   genData = c(1:60)
   gridMat<- expand.grid(genDataList, genData,iters,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=11)
+  sequences = seq(0,length(gridMat[,1]), length.out=21)
 }
 
 
@@ -205,7 +205,7 @@ if(currentTest == "validateHoldout")
   genDataList = c(1:10)
   genData = c(1:60)
   gridMat<- expand.grid(genDataList, genData,models,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=21)
+  sequences = seq(0,length(gridMat[,1]), length.out=41)
 
 }
 

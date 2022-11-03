@@ -18,7 +18,7 @@ unitTestProbDiff = F
 computeModelParams = F
 generateModelParamMat = F
 getMinModel = F
-generateDataset = T
+generateDataset = F
 paramEstTest = T
 combineParamEstResLists = T
 validateHoldout = T
@@ -204,7 +204,7 @@ if(isTRUE(paramEstTest))
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:10), .combine='rbind')%do%
+    foreach(i = c(1:20), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -271,7 +271,7 @@ if(isTRUE(validateHoldout))
     stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:20), .combine='rbind')%do%
+    foreach(i = c(1:40), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]

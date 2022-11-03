@@ -283,6 +283,7 @@ if(isTRUE(validateHoldout))
 }
 
 ############# Test ####################################################
+print(is.logical(combineHoldoutResLists))
 
 if(isTRUE(combineHoldoutResLists))
 {

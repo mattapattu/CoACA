@@ -21,7 +21,7 @@ model = "Model2"  ## {Model1,Model2,Model3}
 source(paste(src.dir,"ModelClasses.R", sep="/"))
 
 setup.hpc = TRUE
-ratName = ratdata@rat
+
 
 if(testSuite=="ARLTestSuite")
 {
@@ -132,7 +132,30 @@ allpaths = enregres$allpaths
 boxTimes = enregres$boxTimes
     
 ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
+ratName = ratdata@rat
 
+if(testSuite=="ARLCoACA"){
+  if(currentTest=="coaca_on_arl")
+  {
+    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
+
+  }else if(currentTest=="arl_on_coaca"){
+
+    gen.data.dir = file.path(data.dir, "CoACAR1",ratName, "Datasets")
+
+  }
+}else if(testSuite=="ARLCoACAR5"){
+  if(currentTest=="coaca_on_arl")
+  {
+
+    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
+    
+  }else if(currentTest=="arl_on_coaca"){
+
+    gen.data.dir = file.path(data.dir, "CoACAR5",ratName, "Datasets")
+
+  }
+}
 
 ############### Tests #############################################
 

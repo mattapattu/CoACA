@@ -7,7 +7,7 @@ rat <- as.integer(args[1])
 #options(error=recover)
 options(error=function()traceback(2))
 
-testSuite = "ARLCoACA"
+testSuite = "ARLCoACAR1"
 
 
 

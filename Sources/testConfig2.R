@@ -21,27 +21,84 @@ model = "Model2"  ## {Model1,Model2,Model3}
 source(paste(src.dir,"ModelClasses.R", sep="/"))
 
 setup.hpc = TRUE
+ratName = ratdata@rat
 
 if(testSuite=="ARLTestSuite")
 {
+  alpha_seq = seq_log(1e-3, 0.1,20)
+  gamma1_seq = seq_log(1e-8, 1e-4,20)
+  initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+  
   gamma2_Global <<- 0.5
   lambda_Global <<- 0
+  testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
 }else if(testSuite=="CoACAR1"){
+  
+  alpha_seq = seq_log(0.01, 0.9,5)
+  gamma1_seq = seq_log(0.01, 0.9,5)
+  initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+  
   gamma2_Global <<- 0.1
   lambda_Global <<- 0
+  testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+
 }else if(testSuite=="CoACAR5"){
+  
+  alpha_seq = seq_log(0.01, 0.9,5)
+  gamma1_seq = seq_log(0.01, 0.9,5)
+  initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+  
   gamma2_Global <<- 0.5
   lambda_Global <<- 0
+  testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+
 }else if(testSuite=="ARLCoACA"){
   if(currentTest=="coaca_on_arl")
   {
-      gamma2_Global <<- 0.1
-      lambda_Global <<- 0
+    alpha_seq = seq_log(0.01, 0.9,5)
+    gamma1_seq = seq_log(0.01, 0.9,5)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
+    
+    gamma2_Global <<- 0.1
+    lambda_Global <<- 0
+    testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 
   }else if(currentTest=="arl_on_coaca"){
-      gamma2_Global <<- 0.5
-      lambda_Global <<- 0
+
+    alpha_seq = seq_log(1e-3, 0.1,20)
+    gamma1_seq = seq_log(1e-8, 1e-4,20)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+    gen.data.dir = file.path(data.dir, "CoACAR1",ratName, "Datasets")
+
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+
+  }
+}else if(testSuite=="ARLCoACAR5"){
+  if(currentTest=="coaca_on_arl")
+  {
+    alpha_seq = seq_log(0.01, 0.9,5)
+    gamma1_seq = seq_log(0.01, 0.9,5)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
+    
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+
+  }else if(currentTest=="arl_on_coaca"){
+
+    alpha_seq = seq_log(1e-3, 0.1,20)
+    gamma1_seq = seq_log(1e-8, 1e-4,20)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+    gen.data.dir = file.path(data.dir, "CoACAR1",ratName, "Datasets")
+
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
   }
 }
@@ -66,23 +123,6 @@ source(paste(src.dir,"ModelUpdateFunc2.R", sep="/"))
 source(paste(src.dir,"ValidationFunc4.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
-
-if(testSuite=="ARLTestSuite")
-{
-  testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
-}else if(testSuite=="CoACAR1"){
-  testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
-}else if(testSuite=="CoACAR5"){
-  testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
-}else if(testSuite=="ARLCoACA"){
-  if(currentTest=="coaca_on_arl")
-  {
-    testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
-
-  }else if(currentTest=="arl_on_coaca"){
-    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
-  }
-}
 testData = new("TestModels", Name = testSuite,Models=testModels)
 
 
@@ -93,44 +133,6 @@ boxTimes = enregres$boxTimes
     
 ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
 
-
-### Define test variables
-if(testSuite=="ARLTestSuite")
-{
-  alpha_seq = seq_log(1e-3, 0.1,20)
-  gamma1_seq = seq_log(1e-8, 1e-4,20)
-  initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-
-}else if(testSuite=="CoACAR1"){
-
-  alpha_seq = seq_log(0.01, 0.9,5)
-  gamma1_seq = seq_log(0.01, 0.9,5)
-  initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-
-}else if(testSuite=="CoACAR5"){
-
-  alpha_seq = seq_log(0.01, 0.9,5)
-  gamma1_seq = seq_log(0.01, 0.9,5)
-  initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-
-}else if(testSuite=="ARLCoACA"){
-
-  ratName = ratdata@rat
-  if(currentTest=="coaca_on_arl")
-  {
-    alpha_seq = seq_log(0.01, 0.9,5)
-    gamma1_seq = seq_log(0.01, 0.9,5)
-    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
-
-  }else if(currentTest=="arl_on_coaca"){
-    alpha_seq = seq_log(1e-3, 0.1,20)
-    gamma1_seq = seq_log(1e-8, 1e-4,20)
-    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
-    gen.data.dir = file.path(data.dir, "CoACAR1",ratName, "Datasets")
-  }
-  print(sprintf("gen.data.dir=%s",gen.data.dir))
-}
 
 ############### Tests #############################################
 

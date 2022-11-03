@@ -1,3 +1,5 @@
+library(bigsnpr)
+
 rats = c("rat_101","rat_103","rat_106","rat_112","rat_113","rat_114","robert")
 names=c('e','f','g','c','d','h','i','j','a','b','k')
 

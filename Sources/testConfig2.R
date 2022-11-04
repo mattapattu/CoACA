@@ -162,7 +162,7 @@ if(testSuite=="ARLCoACA"){
     gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
   }
 }
-
+#print(sprintf("gen.model.dir=%s",gen.model.dir))
 ############### Tests #############################################
 
 print(sprintf("currentTest=%s",currentTest))

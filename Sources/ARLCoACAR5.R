@@ -132,7 +132,7 @@ if(isTRUE(arl_on_coaca_combineRes))
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("coaca_on_arl_combineRes_",paste0("rat",rat))
+  name = paste0("arl_on_coaca_combineRes_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 

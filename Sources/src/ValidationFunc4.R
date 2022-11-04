@@ -765,9 +765,9 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
   print(sprintf("res.model.data.dir=%s",res.model.data.dir))
 
   setwd(res.model.data.dir)
-  holdoutResLists <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
+  holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
   resMatList <- listenv()
-  for(i in c(1:length(holdoutResLists)))
+  for(i in c(1:length(holdoutResLists1)))
   {
     pattern=paste0(ratName,"_multiHold",i,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
@@ -780,14 +780,15 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
   gen.resMat.dir = file.path(gen.model.dir, "holdoutTest")
   print(sprintf("gen.resMat.dir=%s",gen.resMat.dir))
   setwd(gen.resMat.dir)
-  holdoutResLists <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
-  for(i in c(1:length(holdoutResLists)))
+  holdoutResLists2 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
+  for(k in c(1:length(holdoutResLists2)))
   {
-    pattern=paste0(ratName,"_holdVal",i,"_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,"_holdVal",k,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))
     load(resList)
+    i=i+k
     resMatList[[i]] <- resList
   }  
 

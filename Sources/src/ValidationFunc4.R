@@ -760,8 +760,8 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
   }
 
 
-  res.model.data.dir=file.path(model.data.dir, ratName)
-  res.model.data.dir=paste(model.data.dir,creditAssignment,sep="/")
+  res.model.data.dir=file.path(model.data.dir, ratName, creditAssignment)
+  #res.model.data.dir=paste(model.data.dir,creditAssignment,sep="/")
   print(sprintf("res.model.data.dir=%s",res.model.data.dir))
 
   setwd(res.model.data.dir)

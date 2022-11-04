@@ -803,7 +803,8 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
   #print(sprintf("anyNA=%s",anyNA))
 
   #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
-  
+  all.models <-unique(Reduce(rbind,resList[,1]))
+
   resList1<-
   foreach(genDataFile = c(1:10), .packages=c("stringr"), .export=c("model.src"),.errorhandling='pass') %:%
     foreach(genDataNum = c(1:60))  %do%
@@ -826,7 +827,7 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
       #cat(models)
       #cat("\n")
      modelDataList <- 
-      foreach(model = models,.errorhandling='pass') %do%
+      foreach(model = all.models,.errorhandling='pass') %do%
       {
         #cat(sprintf("model=%s\n", model))
         modelName = strsplit(model,"\\.")[[1]][1]
@@ -889,10 +890,11 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
 
 
   #df <- as.data.frame(resList1)
-  all.models <-unique(Reduce(rbind,resList[,1]))
-  confusionMatrix <- matrix(0,length(all.models),length(all.models))
+  
+  trueModels <- all.models[!all.models %in% testData@Models]
+  confusionMatrix <- matrix(0,trueModels,length(all.models))
   colnames(confusionMatrix) <- c(all.models)
-  rownames(confusionMatrix) <- c(all.models)
+  rownames(confusionMatrix) <- c(trueModels)
   
   #print(confusionMatrix)
   for(i in c(1:length(resList1)))

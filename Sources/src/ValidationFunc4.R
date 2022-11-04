@@ -807,7 +807,7 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
 
   resList1<-
   foreach(genDataFile = c(1:10), .packages=c("stringr"), .export=c("model.src"),.errorhandling='pass') %:%
-    foreach(genDataNum = c(1:60))  %do%
+    foreach(genDataNum = c(1:60),.errorhandling='pass')  %do%
     {
       df_genData = df[which(df[,11]== genDataFile & df[,12]==genDataNum),]
       if(length(df_genData[,1]) == 0)
@@ -829,7 +829,7 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
      modelDataList <- 
       foreach(model = all.models,.errorhandling='pass') %do%
       {
-        #cat(sprintf("model=%s\n", model))
+        cat(sprintf("model=%s\n", model))
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         df_genData_model = df_genData[which(df_genData[,1]==model),]
@@ -844,7 +844,7 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
         lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
         holdoutLik <- sum(lik[-c(1:800)])*-1
 
-        #print(sprintf("holdoutLik=%f",holdoutLik))
+        cat(sprintf("holdoutLik=%f\n",holdoutLik))
         if (is.infinite(holdoutLik)) {
           #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
           holdoutLik= 1000000

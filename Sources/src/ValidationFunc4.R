@@ -889,9 +889,10 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
 
 
   #df <- as.data.frame(resList1)
-  confusionMatrix <- matrix(0,length(testData@Models),length(testData@Models))
-  colnames(confusionMatrix) <- c(testData@Models)
-  rownames(confusionMatrix) <- c(testData@Models)
+  all.models <-unique(Reduce(rbind,resList[,1]))
+  confusionMatrix <- matrix(0,length(all.models),length(all.models))
+  colnames(confusionMatrix) <- c(all.models)
+  rownames(confusionMatrix) <- c(all.models)
   
   #print(confusionMatrix)
   for(i in c(1:length(resList1)))

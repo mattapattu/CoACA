@@ -98,6 +98,18 @@ if(testSuite=="ARLTestSuite")
     lambda_Global <<- 0
     testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
+  }else if(currentTest=="coaca_on_arl_combineRes"){
+    
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+
+  }else if(currentTest=="arl_on_coaca_combineRes"){
+    
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+
   }
 }
 
@@ -135,23 +147,19 @@ ratName = ratdata@rat
 if(testSuite=="ARLCoACA"){
   if(currentTest=="coaca_on_arl")
   {
-    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
-
+    gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
   }else if(currentTest=="arl_on_coaca"){
-
-    gen.data.dir = file.path(data.dir, "CoACAR1",ratName, "Datasets")
-
+    gen.model.dir = file.path(data.dir, "CoACAR1",ratName)
   }
 }else if(testSuite=="ARLCoACAR5"){
-  if(currentTest=="coaca_on_arl")
-  {
-
-    gen.data.dir = file.path(data.dir, "ARLTestSuite",ratName, "Datasets")
-    
+  if(currentTest=="coaca_on_arl"){
+    gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
   }else if(currentTest=="arl_on_coaca"){
-
-    gen.data.dir = file.path(data.dir, "CoACAR5",ratName, "Datasets")
-
+    gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
+  }else if(currentTest=="coaca_on_arl_combineRes"){
+    gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
+  }else if(currentTest=="arl_on_coaca_combineRes"){
+    gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
   }
 }
 
@@ -220,5 +228,11 @@ if(currentTest == "coaca_on_arl"||currentTest == "arl_on_coaca")
   sequences = seq(0,length(gridMat[,1]), length.out=21)
   
 }
+
+# if(currentTest == "coaca_on_arl_combineRes")
+# {
+#   trueTestModels =  c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+#   trueTestData = new("TestModels", Name = testSuite,Models=trueTestModels)
+# }
 
 

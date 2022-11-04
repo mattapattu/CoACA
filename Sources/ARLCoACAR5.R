@@ -15,9 +15,10 @@ testSuite = "ARLCoACAR5"
 unitTestProbDiff = F
 
 
-coaca_on_arl = T          
-arl_on_coaca = T
-combineHoldoutResLists = F
+coaca_on_arl = F          
+arl_on_coaca = F
+coaca_on_arl_combineRes = T
+arl_on_coaca_combineRes = T
 
 
 ################## Test 1: Holdout test using CoACA on ARL dataset ################
@@ -87,17 +88,51 @@ if(isTRUE(arl_on_coaca))
 
 ############# Test ####################################################
 
-if(isTRUE(combineHoldoutResLists))
+if(isTRUE(coaca_on_arl_combineRes))
 {
-  currentTest = "combineHoldoutResLists"
+  currentTest = "coaca_on_arl_combineRes"
   source("testConfig2.R")
-  cores = 10
+  cores = 2
   walltime = "1:00"
   spawnslaves = cores-1
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("combineHoldoutResLists_",paste0("rat",rat))
+  name = paste0("coaca_on_arl_combineRes_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+  paramMat <-
+    foreach(i = c(1), .combine='rbind')%do%
+    {
+      start_idx = 0
+      end_idx = 0
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+  write.table(t(paramMat), file="ARL_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
+
+  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "ARL_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
+  cat(command)
+  cat("\n")
+  system(command)
+}
+
+###############
+
+if(isTRUE(arl_on_coaca_combineRes))
+{
+  currentTest = "arl_on_coaca_combineRes"
+  source("testConfig2.R")
+  cores = 2
+  walltime = "1:00"
+  spawnslaves = cores-1
+  start_idx = 0
+  end_idx = 0
+  seed = 0
+  name = paste0("coaca_on_arl_combineRes_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 

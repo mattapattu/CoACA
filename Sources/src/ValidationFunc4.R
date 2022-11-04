@@ -821,7 +821,7 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
       trueModel = generatedData@simModel
       trueCreditAssignment = generatedData@simMethod
       trueModel = paste0(trueModel,".",trueCreditAssignment)
-      print(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, generatedData@simModel))
+      cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, trueModel))
       #cat(models)
       #cat("\n")
      modelDataList <- 
@@ -865,11 +865,11 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
           minmodel@lambda = as.modelData@lambda
         }
 
-        print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
         
         modelData
       }
-      print(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
+      cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  
@@ -902,7 +902,7 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
     }
     trueModel = resList1[[i]]$trueModel
     minModel = resList1[[i]]$minModel
-    print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
+    cat(sprintf("trueModel=%s, minModel=%s\n", trueModel, minModel))
     confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
   }
 

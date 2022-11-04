@@ -769,7 +769,7 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
   resMatList <- listenv()
   for(i in c(1:length(holdoutResLists)))
   {
-    pattern=paste0(ratName,"_holdVal",i,"_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,"_multiHold",i,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))

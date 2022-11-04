@@ -803,7 +803,7 @@ combinemultiHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.
   #print(sprintf("anyNA=%s",anyNA))
 
   #save(df, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_ParamEs_Stability_df.Rdata"))
-  all.models <-unique(Reduce(rbind,resList[,1]))
+  all.models <- c(unique(Reduce(rbind,resList[,1])))
   print(all.models)
 
   resList1<-

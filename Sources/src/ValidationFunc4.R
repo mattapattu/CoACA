@@ -440,9 +440,10 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   res.model.data.dir=file.path(model.data.dir, ratName)
   res.model.data.dir=file.path(res.model.data.dir, "holdoutTest")
   setwd(res.model.data.dir)
+  holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
 
   resMatList <- listenv()
-  for(i in c(1:20))
+  for(i in c(1:length(holdoutResLists1)))
   {
     pattern=paste0(ratName,"_holdVal",i,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)

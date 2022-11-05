@@ -485,7 +485,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
      modelDataList <- 
       foreach(model = models,.errorhandling='pass') %do%
       {
-        #cat(sprintf("model=%s\n", model))
+        cat(sprintf("model=%s\n", model))
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         df_genData_model = df_genData[which(df_genData[,1]==model),]
@@ -500,7 +500,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
         lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
         holdoutLik <- sum(lik[-c(1:800)])*-1
 
-        #print(sprintf("holdoutLik=%f",holdoutLik))
+        print(sprintf("model=%s,holdoutLik=%f",model,holdoutLik))
         if (is.infinite(holdoutLik)) {
           #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
           holdoutLik= 1000000
@@ -523,7 +523,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
           minmodel@lambda = as.modelData@lambda
         }
 
-        print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        #print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
         
         modelData
       }

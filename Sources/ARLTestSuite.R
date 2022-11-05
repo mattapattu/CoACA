@@ -198,7 +198,7 @@ if(isTRUE(paramEstTest))
   currentTest = "paramEstTest"
   source("testConfig2.R")
   cores = 10
-  walltime = "14:00"
+  walltime = "16:00"
   name = paste0("paramEs","_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")

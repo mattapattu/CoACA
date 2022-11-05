@@ -485,7 +485,7 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
      modelDataList <- 
       foreach(model = models,.errorhandling='pass') %do%
       {
-        cat(sprintf("model=%s\n", model))
+        #cat(sprintf("model=%s\n", model))
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         df_genData_model = df_genData[which(df_genData[,1]==model),]

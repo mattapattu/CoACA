@@ -1098,9 +1098,12 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
 
   resMatList <- listenv()
   setwd(res.model.data.dir)
-  for(i in c(1:10))
+
+  dfData <- list.files(".", pattern=paste0(ratName,"*_ParamEstResList1.Rdata"), full.names=FALSE)
+  #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
   {
-    
     pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
     resList1=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList1)
@@ -1108,6 +1111,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
     load(resList1)
     resMatList[[i]] <- resList1
   }
+
   resMat <- Reduce(rbind,resMatList)
   save(resMat, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resMat.Rdata"))
 

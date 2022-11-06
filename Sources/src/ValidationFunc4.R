@@ -593,7 +593,6 @@ multiHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hpc,mo
   res.model.data.dir=file.path(model.data.dir, ratName)
   dir.create(file.path(res.model.data.dir,creditAssignment), showWarnings = FALSE)
   res.model.data.dir=file.path(res.model.data.dir, creditAssignment)
-  print(sprintf("multiHoldoutValidation: creditAssignment=%s, dataset:%s",creditAssignment,gen.data.dir))
    
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 
@@ -604,6 +603,8 @@ multiHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hpc,mo
   
   print(sprintf("models: %s",toString(models)))
   gen.data.dir = file.path(gen.model.dir, "Datasets")
+  print(sprintf("multiHoldoutValidation: creditAssignment=%s, dataset:%s",creditAssignment,gen.data.dir))
+
   setwd(gen.data.dir)
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
   #print(dfData)

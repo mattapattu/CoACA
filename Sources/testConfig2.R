@@ -144,7 +144,11 @@ boxTimes = enregres$boxTimes
 ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],TurnModel)
 ratName = ratdata@rat
 
-if(testSuite=="ARLCoACA"){
+if(testSuite=="ARLTestSuite"){
+  gen.model.dir = model.data.dir 
+}else if(testSuite=="CoACAR5"){
+  gen.model.dir = model.data.dir 
+}else if(testSuite=="ARLCoACA"){
   if(currentTest=="coaca_on_arl")
   {
     gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)

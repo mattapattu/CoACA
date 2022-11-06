@@ -1105,6 +1105,7 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
   {
     pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
     resList1=list.files(".", pattern=pattern, full.names=FALSE)
+    print(sprintf("i=%i",i=1))
     print(resList1)
     #print(any(!complete.cases(resList1)))
     load(resList1)

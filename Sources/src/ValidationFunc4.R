@@ -1092,22 +1092,21 @@ combineParamEstResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,
   res.model.data.dir=file.path(model.data.dir, ratName)
   res.model.data.dir=file.path(res.model.data.dir, "paramEstTest")
   print(res.model.data.dir) 
-  print(model.src)
+  #print(model.src)
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
 
   resMatList <- listenv()
   setwd(res.model.data.dir)
-
-  dfData <- list.files(".", pattern=paste0(ratName,"*_ParamEstResList1.Rdata"), full.names=FALSE)
+  dfData <- list.files(".", pattern=paste0(ratName,".*_ParamEstResList1.Rdata"), full.names=FALSE)
+  print(dfData)
   #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
-  genDataFiles <- list()
   for(i in 1:length(dfData))
   {
     pattern=paste0(ratName,"_paramEs",i,"_.*_ParamEstResList1.Rdata")
     resList1=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList1)
-    print(any(!complete.cases(resList1)))
+    #print(any(!complete.cases(resList1)))
     load(resList1)
     resMatList[[i]] <- resList1
   }

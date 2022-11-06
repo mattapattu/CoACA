@@ -121,7 +121,7 @@ if(currentTest == "unitTestProbDiff"){
   if(currentTest == "coaca_on_arl"||currentTest == "arl_on_coaca")
   {
 
-    print(sprintf("gen.data.dir=%s",gen.data.dir))
+    #print(sprintf("gen.data.dir=%s",gen.data.dir))
     gridMat <- gridMat[start_idx:end_idx,]
     seq_id <- which((sequences+1) %in% start_idx)
     name = paste0("multiHold",seq_id,"_",paste0("rat",rat))

@@ -168,7 +168,7 @@ if(testSuite=="ARLTestSuite"){
 }
 print(sprintf("testSuite=%s,currentTest=%s",testSuite,currentTest))
 
-print(sprintf("gen.model.dir=%s",gen.model.dir))
+#print(sprintf("gen.model.dir=%s",gen.model.dir))
 ############### Tests #############################################
 
 

@@ -127,9 +127,6 @@ testLikelihoodModelSelection=function(ratdata,testData,src.dir,model.src,setup.h
   #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
-  dir.create(file.path(model.data.dir,ratName,"likelihoodModelSelection"), showWarnings = FALSE)
-  res.model.data.dir=file.path(model.data.dir, ratName,"likelihoodModelSelection")
-
   gen.data.dir=file.path(model.data.dir, ratName)
   gen.data.dir=file.path(gen.data.dir, "Datasets")
   #print(res.model.data.dir) 
@@ -153,8 +150,8 @@ testLikelihoodModelSelection=function(ratdata,testData,src.dir,model.src,setup.h
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
-  res.model.data.dir=file.path(model.data.dir, ratName)
-  res.model.data.dir=file.path(res.model.data.dir, "holdoutTest")
+  dir.create(file.path(model.data.dir,ratName,"likelihoodModelSelection"), showWarnings = FALSE)
+  res.model.data.dir=file.path(model.data.dir, ratName,"likelihoodModelSelection")
   setwd(res.model.data.dir)
   holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
 
@@ -276,7 +273,7 @@ testLikelihoodModelSelection=function(ratdata,testData,src.dir,model.src,setup.h
     }
     trueModel = resList1[[i]]$trueModel
     minModel = resList1[[i]]$minModel
-    print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
+    #print(sprintf("trueModel=%s, minModel=%s", trueModel, minModel))
     confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
   }
 

@@ -361,8 +361,8 @@ multiLikModelSelectionTest=function(ratdata,testData,src.dir,model.src,setup.hpc
 
   resList <- Reduce(rbind,resMatList)
 
-  dir.create(file.path(model.data.dir,ratName,"likelihoodValidation"), showWarnings = FALSE)
-  res.data.dir=file.path(model.data.dir, ratName,"likelihoodValidation")
+  dir.create(file.path(model.data.dir,ratName,"likelihoodValidation", creditAssignment), showWarnings = FALSE)
+  res.data.dir=file.path(model.data.dir, ratName,"likelihoodValidation", creditAssignment)
 
   save(resList, file = paste0(res.data.dir, "/" , ratName,"_",timestamp,"_Stability_resList.Rdata"))
 

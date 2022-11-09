@@ -148,5 +148,13 @@ if(currentTest == "testLikelihoodModelSelection")
   testLikelihoodModelSelection(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite)
 }
 
+########################
+
+if(currentTest == "coaca_on_arl_likVal" || currentTest == "arl_on_coaca_likVal")
+{
+  multiLikModelSelectionTest(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,testSuite,gen.model.dir)
+
+}
+
 
 print(sprintf("End of script"))

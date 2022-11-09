@@ -110,6 +110,18 @@ if(testSuite=="ARLTestSuite")
     lambda_Global <<- 0
     testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
+  }else if(currentTest=="coaca_on_arl_likVal"){
+    
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+
+  }else if(currentTest=="arl_on_coaca_likVal"){
+    
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+
   }
 }
 
@@ -150,8 +162,7 @@ if(testSuite=="ARLTestSuite"){
 }else if(testSuite=="CoACAR5"){
   gen.model.dir = model.data.dir 
 }else if(testSuite=="ARLCoACA"){
-  if(currentTest=="coaca_on_arl")
-  {
+  if(currentTest=="coaca_on_arl"){
     gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
   }else if(currentTest=="arl_on_coaca"){
     gen.model.dir = file.path(data.dir, "CoACAR1",ratName)
@@ -164,6 +175,10 @@ if(testSuite=="ARLTestSuite"){
   }else if(currentTest=="coaca_on_arl_combineRes"){
     gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
   }else if(currentTest=="arl_on_coaca_combineRes"){
+    gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
+  }else if(currentTest=="coaca_on_arl_likVal"){
+    gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
+  }else if(currentTest=="arl_on_coaca_likVal"){
     gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
   }
 }

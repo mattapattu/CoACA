@@ -150,9 +150,10 @@ testLikelihoodModelSelection=function(ratdata,testData,src.dir,model.src,setup.h
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
-  dir.create(file.path(model.data.dir,ratName,"likelihoodModelSelection"), showWarnings = FALSE)
-  res.model.data.dir=file.path(model.data.dir, ratName,"likelihoodModelSelection")
+  res.model.data.dir=file.path(model.data.dir, ratName)
+  res.model.data.dir=file.path(res.model.data.dir, "holdoutTest")
   setwd(res.model.data.dir)
+
   holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
 
   resMatList <- listenv()
@@ -166,7 +167,11 @@ testLikelihoodModelSelection=function(ratdata,testData,src.dir,model.src,setup.h
     resMatList[[i]] <- resList
   }
   resList <- Reduce(rbind,resMatList)
-  save(resList, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resList.Rdata"))
+
+  dir.create(file.path(model.data.dir,ratName,"likelihoodModelSelection"), showWarnings = FALSE)
+  res.data.dir=file.path(model.data.dir, ratName,"likelihoodModelSelection")
+
+  save(resList, file = paste0(res.data.dir, "/" , ratName,"_",timestamp,"_Stability_resList.Rdata"))
 
 
   df <- as.data.frame(resList)
@@ -255,7 +260,7 @@ testLikelihoodModelSelection=function(ratdata,testData,src.dir,model.src,setup.h
   #minDfModels <- Reduce(rbind,minDflist)
   #print(resList)
   resList1<-Reduce(rbind,resList1)
-  save(resList1, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_HoldoutRes.Rdata"))
+  save(resList1, file = paste0(res.data.dir, "/" , ratName,"_", timestamp,"_HoldoutRes.Rdata"))
 
 
   #df <- as.data.frame(resList1)
@@ -278,7 +283,7 @@ testLikelihoodModelSelection=function(ratdata,testData,src.dir,model.src,setup.h
   }
 
   print(confusionMatrix)
-  save(confusionMatrix, file = paste0(res.model.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
+  save(confusionMatrix, file = paste0(res.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
 
 }
 

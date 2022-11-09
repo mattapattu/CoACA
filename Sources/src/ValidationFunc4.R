@@ -413,7 +413,6 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
-  res.model.data.dir=paste(model.data.dir,"holdoutTest",ratName,sep="/")
   gen.data.dir=file.path(model.data.dir, ratName)
   gen.data.dir=file.path(gen.data.dir, "Datasets")
   #print(res.model.data.dir) 

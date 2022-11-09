@@ -141,4 +141,12 @@ if(currentTest == "coaca_on_arl_combineRes" || currentTest == "arl_on_coaca_comb
 }
 
 
+########################
+
+if(currentTest == "testLikelihoodModelSelection")
+{
+  testLikelihoodModelSelection(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite)
+}
+
+
 print(sprintf("End of script"))

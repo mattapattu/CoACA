@@ -131,6 +131,7 @@ source(paste(src.dir,"ModelUpdateFunc2.R", sep="/"))
 #source(paste(src.dir,"ValidationFunc.R", sep="/"))
 #source(paste(src.dir,"ValidationFunc2.R", sep="/"))
 source(paste(src.dir,"ValidationFunc4.R", sep="/"))
+source(paste(src.dir,"ValidationFunc5.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
 
 testData = new("TestModels", Name = testSuite,Models=testModels)

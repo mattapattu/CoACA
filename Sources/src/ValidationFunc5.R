@@ -363,7 +363,8 @@ multiLikModelSelectionTest=function(ratdata,testData,src.dir,model.src,setup.hpc
 
   res.data.dir=file.path(model.data.dir, ratName,"likelihoodValidation", creditAssignment)
   print(sprintf("res.data.dir=%s",res.data.dir))
-  dir.create(res.data.dir)
+  dir.create(file.path(model.data.dir,ratName,"likelihoodValidation"), showWarnings = TRUE)
+  dir.create(file.path(model.data.dir,ratName,"likelihoodValidation",creditAssignment), showWarnings = TRUE)
   setwd(res.data.dir)
 
   save(resList, file = paste0(res.data.dir, "/" , ratName,"_",timestamp,"_Stability_resList.Rdata"))

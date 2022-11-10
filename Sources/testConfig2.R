@@ -246,7 +246,7 @@ if(currentTest == "coaca_on_arl"||currentTest == "arl_on_coaca")
   genDataList = c(1:10)
   genData = c(1:60)
   gridMat<- expand.grid(genDataList, genData,models,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=21)
+  sequences = seq(0,length(gridMat[,1]), length.out=41)
   
 }
 

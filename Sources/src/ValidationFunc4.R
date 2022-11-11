@@ -454,7 +454,6 @@ combineHoldoutResListsV4=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   resList <- Reduce(rbind,resMatList)
   save(resList, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resList.Rdata"))
 
-
   df <- as.data.frame(resList)
   cols.num <- c(3,4,5,6,7,8,9,10,11,12)
   df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))

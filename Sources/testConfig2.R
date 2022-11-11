@@ -37,6 +37,16 @@ if(testSuite=="ARLTestSuite")
   lambda_Global <<- 0
   testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
+}if(testSuite=="DRLTestSuite")
+{
+  alpha_seq = seq_log(1e-3, 0.1,20)
+  gamma1_seq = seq_log(1e-8, 1e-4,20)
+  initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+  
+  gamma2_Global <<- 0.5
+  lambda_Global <<- 0
+  testModels = c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd")
+
 }else if(testSuite=="CoACAR1"){
   
   alpha_seq = seq_log(0.01, 0.9,5)
@@ -160,6 +170,8 @@ ratdata = populateRatModel(allpaths=allpaths,rat=rats[rat],donnees_ash[[rat]],Tu
 ratName = ratdata@rat
 
 if(testSuite=="ARLTestSuite"){
+  gen.model.dir = model.data.dir 
+}else if(testSuite=="DRLTestSuite"){
   gen.model.dir = model.data.dir 
 }else if(testSuite=="CoACAR5"){
   gen.model.dir = model.data.dir 

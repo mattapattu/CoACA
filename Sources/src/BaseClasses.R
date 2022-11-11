@@ -214,8 +214,8 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
             }
             else if(x@creditAssignment == "qlearningAvgRwd")
             {
-              argList = list(lower = c(0,1e-8,0.1,0),
-                             upper = c(1,1e-3, 0.1,0),
+              argList = list(lower = c(0,1e-8,0.5,0),
+                             upper = c(1,1e-3, 0.5,0),
                              ratdata = ratdata,
                              half_index = 0,
                              modelData = x,
@@ -224,8 +224,8 @@ setMethod("getArgList",  signature=c("ModelData","RatData"),
             }
             else if(x@creditAssignment == "qlearningDisRwd")
             {
-              argList = list(lower = c(0,1,0.1,0),
-                             upper = c(1,1, 0.1,0),
+              argList = list(lower = c(0,0,0.5,0),
+                             upper = c(1,1, 0.5,0),
                              ratdata = ratdata,
                              half_index = 0,
                              modelData = x,

@@ -19,10 +19,6 @@ Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
     {
         ret =   simulateAca2TurnsModels(ratdata, modelData, testModel, turnModel,turnStages, debug);
     }
-    else if(creditAssignment == "aca4")
-    {
-        ret =   simulateAca4TurnsModels(ratdata, modelData, testModel, turnModel,turnStages, debug);
-    }
     else if(creditAssignment == "sarsa")
     {
 
@@ -39,7 +35,7 @@ Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
 }
 
 // [[Rcpp::export()]]
-std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim)
+std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug = false)
 {
     std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
     std::string creditAssignment = Rcpp::as<std::string>(modelData.slot("creditAssignment"));
@@ -50,11 +46,11 @@ std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcp
     }
     else if(creditAssignment == "aca2")
     {
-        ret =   getAca2Likelihood(ratdata, modelData, testModel, sim);
+        ret =   getAca2Likelihood(ratdata, modelData, testModel, sim, debug);
     }
     else if(creditAssignment == "aca4")
     {
-        ret =   getAca4Likelihood(ratdata, modelData, testModel, sim);
+      ret =   getAca4Likelihood(ratdata, modelData, testModel, sim, debug);
     }
     else if(creditAssignment == "sarsa")
     {
@@ -62,7 +58,7 @@ std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcp
     }
     else if(creditAssignment == "qlearningAvgRwd")
     {
-      ret =   getQLearningLik(ratdata, modelData, testModel, sim);
+      ret =   getQLearningLik(ratdata, modelData, testModel, sim, debug);
     }
     else if(creditAssignment == "qlearningDisRwd")
     {
@@ -87,7 +83,7 @@ arma::mat getProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel
     }
     else if(creditAssignment == "aca4")
     {
-        ret =   getAca4ProbMatrix(ratdata, modelData, testModel, sim, debug);
+      ret =   getAca4ProbMatrix(ratdata, modelData, testModel, sim, debug);
     }
     else if(creditAssignment == "sarsa")
     {
@@ -95,7 +91,7 @@ arma::mat getProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel
     }
     else if(creditAssignment == "qlearningAvgRwd")
     {
-      ret =   getQLearningProbMat(ratdata, modelData, testModel, sim);
+      ret =   getQLearningProbMat(ratdata, modelData, testModel, sim, debug);
     }
     else if(creditAssignment == "qlearningDisRwd")
     {
@@ -105,16 +101,20 @@ arma::mat getProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel
 }
 
 
-// [[Rcpp::export()]]
-arma::mat getProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug = false)
-{
-  std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
-  std::string creditAssignment = Rcpp::as<std::string>(modelData.slot("creditAssignment"));
-  arma::mat ret;
-  if(creditAssignment == "aca2")
-  {
-    ret =   getAca2ProbMatrix2(ratdata, modelData, testModel, sim, debug);
-  }
+// // [[Rcpp::export()]]
+// arma::mat getProbMatrix2(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug = false)
+// {
+//   std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
+//   std::string creditAssignment = Rcpp::as<std::string>(modelData.slot("creditAssignment"));
+//   arma::mat ret;
+//   if(creditAssignment == "aca2")
+//   {
+//     ret =   getAca2ProbMatrix2(ratdata, modelData, testModel, sim, debug);
+//   }
+//   else if(creditAssignment == "qlearningAvgRwd")
+//   {
+//     ret =   getQLearningProbMat2(ratdata, modelData, testModel, sim, debug);
+//   }
   
-  return(ret);
-}
+//   return(ret);
+// }

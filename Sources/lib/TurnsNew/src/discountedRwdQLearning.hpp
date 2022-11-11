@@ -8,7 +8,6 @@
 //Function simulateTurnTimeFromR = Environment::global_env()["simulateTurnTime"];
 
 
-
 //namespace aca3 {
 Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, Rcpp::S4 turnModel, arma::vec turnStages, bool debug)
 {

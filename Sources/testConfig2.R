@@ -37,7 +37,7 @@ if(testSuite=="ARLTestSuite")
   lambda_Global <<- 0
   testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
-}if(testSuite=="DRLTestSuite")
+}else if(testSuite=="DRLTestSuite")
 {
   alpha_seq = seq_log(1e-3, 0.1,20)
   gamma1_seq = seq_log(1e-8, 1e-4,20)

@@ -762,7 +762,8 @@ std::vector<double> getDiscountedRwdQlearningLik(Rcpp::S4 ratdata, Rcpp::S4 mode
   return (mseMatrix);
 }
 
-arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug)
+
+arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel, int sim, bool debug=false)
 {
   arma::mat allpaths = Rcpp::as<arma::mat>(ratdata.slot("allpaths"));
   std::string model = Rcpp::as<std::string>(modelData.slot("Model"));
@@ -792,22 +793,25 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
   {
     turnTimes = Rcpp::as<arma::mat>(ratdata.slot("hybridModel4"));
   }
+  
   //Rcpp::List nodeGroups = Rcpp::as<Rcpp::List>(testModel.slot("nodeGroups"));
+  
+  int episodeNb = 0; 
   
   double alpha = Rcpp::as<double>(modelData.slot("alpha"));
   double beta = Rcpp::as<double>(modelData.slot("gamma1"));
   double reward = Rcpp::as<double>(modelData.slot("gamma2"));
   reward = reward * 10;
+  
   //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
-  int episodeNb = 0; 
-  arma::mat mseMatrix;
+  
+  std::vector<double> mseMatrix;
   //int mseRowIdx = 0;
   
   arma::vec allpath_actions = allpaths.col(0);
   arma::vec allpath_states = allpaths.col(1);
   arma::vec allpath_rewards = allpaths.col(2);
   arma::vec sessionVec = allpaths.col(4);
-  arma::vec allpaths_pathNb = allpaths.col(5);
   arma::vec uniqSessIdx = arma::unique(sessionVec);
   
   arma::vec turnTime_method;
@@ -827,17 +831,9 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
   int episode = 1;
   
   Graph S0(testModel, 0);
-  Graph S1(testModel, 1);
-  
-  Debugger logger;
-  logger.setDebug(debug);
-  //Rcpp::Rcout <<"Print S0"<<std::endl;
   //S0.printGraph();
-  //Rcpp::Rcout <<"Print S1"<<std::endl;
+  Graph S1(testModel, 1);
   //S1.printGraph();
-  
-  //Rcpp::Rcout <<"rootS1.turn ="<<rootS1->turn<<std::endl;
-  //Rcpp::Rcout <<"rootS2.turn ="<<rootS2->turn<<std::endl;
   
   for (unsigned int session = 0; session < uniqSessIdx.n_elem; session++)
   {
@@ -848,7 +844,6 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
     arma::vec actions_sess = allpath_actions.elem(sessionIdx);
     arma::vec states_sess = allpath_states.elem(sessionIdx);
     arma::vec rewards_sess = allpath_rewards.elem(sessionIdx);
-    arma::vec allpaths_pathNb_sess = allpaths_pathNb.elem(sessionIdx);
     
     arma::uvec turnTimes_idx; 
     if (model == "Paths")
@@ -860,7 +855,6 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
       turnTimes_idx = arma::find(turnTimes.col(4) == sessId); 
     }
     arma::vec turn_times_session = turnTime_method.elem(turnTimes_idx);
-    
     arma::uword session_turn_count = 0;
     
     int initState = 0;
@@ -883,7 +877,7 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
     std::vector<std::string> episodeTurns;
     std::vector<int> episodeTurnStates;
     std::vector<double> episodeTurnTimes;
-    //Rcpp::Rcout <<"nrow="<<nrow<<std::endl;
+    
     for (int i = 0; i < nrow; i++)
     {
       
@@ -900,7 +894,6 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
       {
         R = reward;
       }
-      
       
       if (sim == 1)
       {
@@ -924,7 +917,6 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         }
       }
       
-      
       if (S_prime != initState)
       {
         changeState = true;
@@ -934,11 +926,11 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         returnToInitState = true;
       }
       
-      
       //Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
-      std::ostringstream msg; 
-      msg << "i="<< i << ", S=" << S <<", A=" << A <<", pathNb=" << allpaths_pathNb_sess(i);;
-      logger.Print(msg.str()); 
+      if(debug)
+      {
+        Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
+      }
       
       Rcpp::StringVector turns;
       if(S==0)
@@ -950,10 +942,7 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         turns = S1.getTurnsFromPaths(A);
       }
       int nbOfTurns = turns.length();
-      //Rcpp::Rcout <<"Path="<< A << ", turns=" << turns<<std::endl;
-      msg.str("");
-      msg << "turns=";
-      logger.PrintRcppVec(msg.str(),turns); 
+      //Rcpp::Rcout <<"turns="<< turns << std::endl;
       
       Node *prevNode;
       Node *currNode;
@@ -969,7 +958,6 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         graph = &S1;
         prevNode = graph->getNode("I");
       }
-      
       double pathProb = 1;
       for (int j = 0; j < nbOfTurns; j++)
       {
@@ -981,24 +969,20 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         {
           currTurnReward = 0;
         }
+        
         std::string currTurn = Rcpp::as<std::string>(turns(j));
         currNode = graph->getNode(currTurn);
-        //Edge edge = graph.getEdge(prevNode->node, currNode->node);
-        int turnId = graph->getNodeIndex(currTurn);
-        msg.str("");
-        msg << "currTurn=" << currTurn << ", turnId=" << turnId <<", session_turn_count=" <<session_turn_count;
-        logger.Print(msg.str()); 
-        
+        //currNode->credit = currNode->credit + 1; //Test
+        //Rcpp::Rcout <<"currNode="<< currNode->node<<std::endl;
+        //episodeTurns.push_back(currNode->node);
+        //episodeTurnStates.push_back(S);
+        //episodeTurnTimes.push_back(turn_times_session(session_turn_count));
         double turntime = turn_times_session(session_turn_count);
-        
-        msg  << ", turntime=" << turntime;
-        logger.Print(msg.str()); 
-        
         
         Edge edge = graph->getEdge(prevNode->node, currNode->node);
         double prob_a = edge.probability;
-        
-        pathProb = pathProb* prob_a; 
+        pathProb = pathProb* prob_a;      
+        //Rcpp::Rcout <<"prob_a="<< prob_a << ", pathProb=" <<pathProb <<std::endl;
         
         double qMax = -100000;
         std::vector<Edge> *edges = graph->getOutgoingEdges(currTurn);
@@ -1077,23 +1061,27 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         
         currTurnReward = exp(-beta*turntime)*currTurnReward;
         double td_err = currTurnReward +  exp(-beta*turntime)*qMax -currNode->credit;
+        // if(debug)
+        // {
+        //   Rcpp::Rcout <<"S=" << S << ", A=" << A  <<", currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime << ", qMax=" <<  qMax <<  ", qCurrNode="<< currNode->credit  << ", td_err=" <<td_err << ", pathProb=" << pathProb<< std::endl;
+        // }
         currNode->credit = currNode->credit + (alpha * td_err);
         
         S0.updateEdgeProbs();
         S1.updateEdgeProbs();
         
-        //Rcpp::Rcout <<"src=" <<prevNode->node << ", dest =" <<  currNode->node  << ", prob_a="<< prob_a << ", pathProb=" <<pathProb <<std::endl;     
-        prevNode = currNode;
         session_turn_count++;
+        prevNode = currNode;
       }
       
-      //Rcpp::Rcout << "pathProb=" << pathProb << std::endl;
       arma::rowvec probRow(13);
       probRow.fill(-1);
       probRow(12) = allpaths_pathNb_sess(i);
       
       for (int path = 0; path < 6; path++)
-      {        
+      {
+        //Rcpp::Rcout << "path=" << path << ", state=" << S << std::endl;
+        
         for (int box = 0; box < 2; box++)
         {
           Rcpp::StringVector turnVec;
@@ -1133,52 +1121,33 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
           int index = path + (6 * box);
           probRow[index] = pathProb;
           
-        }
-        
-      }
+         }
+       
+       }
       //Rcpp::Rcout << "probRow=" << probRow << std::endl;
       mseMatrix = arma::join_vert(mseMatrix, probRow);
-      
-      //log_lik=log_lik+ logProb;
+
       
       //Check if episode ended
       if (returnToInitState || (i==nrow-1))
       {
         //Rcpp::Rcout <<  "Inside end episode"<<std::endl;
-        msg.str("");
-        msg <<"Inside end episode";
-        logger.Print(msg.str()); 
+        if(debug)
+        {
+          Rcpp::Rcout <<  "End of episode"<<std::endl;
+        }
         changeState = false;
         returnToInitState = false;
         
-        episodeNb = episodeNb+1;
-        double alpha_prime = getAlphaPrime(alpha,episodeNb);
-        
-        Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha_prime, score_episode, &S0, &S1);
-        //Aca3CreditUpdate(episodeTurns, episodeTurnStates, episodeTurnTimes, alpha, score_episode, &S0, &S1);
-        S0.updateEdgeProbs(false);
-        S1.updateEdgeProbs(false);
-        score_episode = 0;
         episode = episode + 1;
         resetVector = true;
-        episodeTurns.clear();
-        episodeTurnStates.clear();
-        episodeTurnTimes.clear();
       }
-      // msg.str("");
-      // msg <<"Here1";
-      // logger.Print(msg.str());
       
       S = S_prime;
-      // msg.str("");
-      // msg <<"Here2";
-      // logger.Print(msg.str());
       //trial=trial+1;
     }
     
-    //Rcpp::Rcout <<  "Here3"<<std::endl;
   }
-  
   return (mseMatrix);
 }
 

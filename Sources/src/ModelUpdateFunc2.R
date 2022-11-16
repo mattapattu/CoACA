@@ -219,7 +219,7 @@ generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,mode
   {
     
     pattern=paste0(ratName,"_mParams",i,"_.*Rdata")
-    #print(pattern)
+    print(pattern)
     resMat=list.files(".", pattern=pattern, full.names=FALSE)
     print(resMat)
     load(resMat)

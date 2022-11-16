@@ -52,7 +52,7 @@ if(currentTest == "generateModelParamMat"){
 
 if(currentTest == "unitTestProbDiff"){
 
-  unitTestProbDiff(ratdata,testData,model.src,setup.hpc,model.data.dir,seed,count)
+  unitTestProbDiffV4(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,seed,count)
 }
 
 

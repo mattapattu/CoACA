@@ -65,11 +65,14 @@ initWorkers <-  function() {
       while(!simLearns)
       {
       
-         res = testSimulateData(trueModelData,ratdata,allModels)
-         generatedData = res$genData
+        res = testSimulateData(trueModelData,ratdata,allModels)
+        generatedData = res$genData
                   
           #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
-        simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
+        #simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
+        argList <- getArgList(trueModelData,generatedData)
+        simLearns = checkSimLearns(generatedData, modelData = trueModelData, testModel = argList[[6]],sim=1,limit=0.8) 
+
         missedOptimalIter=missedOptimalIter+1
           
         if(missedOptimalIter==500)

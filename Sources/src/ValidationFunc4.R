@@ -3,7 +3,7 @@ library(rlist)
 library(nloptr)
 library(stringr)
 
-unitTestProbDiffV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,seed,count)
+unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,seed,count)
 {
   ## Test settings ###############
   
@@ -28,22 +28,22 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,setup.hpc,model.data.dir,se
   cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
   setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("src.dir","model.data.dir"),envir=environment())
+  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global","allModels"), envir=environment())
   registerDoMPI(cl)
     
-   initWorkers <-  function() {
-      source(paste(src.dir,"../ModelClasses.R", sep="/"))
-      source(paste(src.dir,"PathModel.R", sep="/"))
-      source(paste(src.dir,"TurnModel.R", sep="/"))
-      source(paste(src.dir,"HybridModel1.R", sep="/"))
-      source(paste(src.dir,"HybridModel2.R", sep="/"))
-      source(paste(src.dir,"HybridModel3.R", sep="/"))
-      source(paste(src.dir,"HybridModel4.R", sep="/"))
-      source(paste(src.dir,"../BaseClasses.R", sep="/"))
-      source(paste(src.dir,"../exportFunctions.R", sep="/"))
-      source(paste(src.dir,"../ModelUpdateFunc.R", sep="/"))
-      #attach(myEnv, name="sourced_scripts")
-    }
+initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     } 
    
    #chunkSize = 150
    opts <- list(initEnvir=initWorkers) 

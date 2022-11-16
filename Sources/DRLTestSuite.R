@@ -144,7 +144,22 @@ if(isTRUE(unitTestProbDiff))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
-  command <- sprintf("oarsub -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh %i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
+
+  paramMat <-
+   foreach(i = c(1), .combine='rbind')%do%
+   {
+     
+    start_idx = 0
+    end_idx = 0
+    seed = 0
+       #name = paste0("modelParams_",i,"_",rats[[rat]])
+    c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+  }
+  write.table(t(paramMat), file="DRL_paramMat_T8.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
+
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "DRL_paramMat_T8.txt",cores, walltime,name,stdout,stderr)
+
+
   cat(command)
   cat("\n")
   system(command)

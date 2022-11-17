@@ -48,7 +48,7 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
 #    opts <- list(initEnvir=initWorkers) 
  
    generatedDataList <-  
-    foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %do%
+    foreach(i=1:length(models), .packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData", "checkSimLearns")) %do%
     {
       print(sprintf("model is %s",models[i]))  
       model = models[i] 
@@ -159,7 +159,7 @@ initWorkers <-  function() {
  
   
    generatedDataList <-  
-   foreach(i=1:length(gridMat[,1]), .packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData"),.errorhandling='pass') %dopar%
+   foreach(i=1:length(gridMat[,1]), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
    {
         
       model = gridMat[i,1] 

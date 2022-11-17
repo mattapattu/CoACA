@@ -30,25 +30,26 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
   # exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global","allModels"), envir=environment())
   # registerDoMPI(cl)
     
- initWorkers <-  function() {
-       source(paste(src.dir, "ModelClasses.R", sep = "/"))
-       source(paste(model.src, "PathModel.R", sep = "/"))
-       source(paste(model.src, "TurnModel.R", sep = "/"))
-       source(paste(model.src, "HybridModel1.R", sep = "/"))
-       source(paste(model.src, "HybridModel2.R", sep = "/"))
-       source(paste(model.src, "HybridModel3.R", sep = "/"))
-       source(paste(model.src, "HybridModel4.R", sep = "/"))
-       source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
-       source(paste(src.dir,"exportFunctions.R", sep="/"))
+# initWorkers <-  function() {
+#        source(paste(src.dir, "ModelClasses.R", sep = "/"))
+#        source(paste(model.src, "PathModel.R", sep = "/"))
+#        source(paste(model.src, "TurnModel.R", sep = "/"))
+#        source(paste(model.src, "HybridModel1.R", sep = "/"))
+#        source(paste(model.src, "HybridModel2.R", sep = "/"))
+#        source(paste(model.src, "HybridModel3.R", sep = "/"))
+#        source(paste(model.src, "HybridModel4.R", sep = "/"))
+#        source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+#        source(paste(src.dir,"exportFunctions.R", sep="/"))
    
-       #attach(myEnv, name="sourced_scripts")
-     } 
+#        #attach(myEnv, name="sourced_scripts")
+#      } 
    
-   initWorkers()
-   #chunkSize = 150
-   opts <- list(initEnvir=initWorkers) 
+#    #chunkSize = 150
+#    opts <- list(initEnvir=initWorkers) 
  
-    for(i in c(1:length(models))){
+   generatedDataList <-  
+    foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %do%
+    {
       print(sprintf("model is %s",models[i]))  
       model = models[i] 
 
@@ -102,10 +103,10 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
           cat(sprintf("Pass: Both prob matrices are same\n"))
         }
       }
-        
+      generatedData  
     } 
 
-    save(generatedData,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_unitTestGenDataset.Rdata"))
+    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_unitTestGenDataset.Rdata"))
 
 }
 
@@ -158,7 +159,7 @@ initWorkers <-  function() {
  
   
    generatedDataList <-  
-   foreach(i=1:length(gridMat[,1]), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
+   foreach(i=1:length(gridMat[,1]), .packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData"),.errorhandling='pass') %dopar%
    {
         
       model = gridMat[i,1] 

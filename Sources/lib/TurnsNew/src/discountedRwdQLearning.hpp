@@ -59,6 +59,7 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
   std::vector<int> rewardTurnsS1{2,5,10};
   
   int actionNb = 0;
+  int episode = 1;
   
   // Loop through each session
   for (unsigned int session = 0; session < (uniqSessIdx.n_elem); session++)
@@ -80,8 +81,7 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
     int nrow = actions_sess.n_rows;
     double avg_score = 0;
     double score_episode = 0;
-    int episode = 1;
-    
+
     int S = states_sess(0) - 1;
     std::vector<std::string> episodeTurns;
     std::vector<int> episodeTurnStates;
@@ -135,7 +135,7 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
         
       }
       
-      
+      int S_prime = -1;
       double pathDuration = 0;
       //HERE  the nodes based on testModel from one reward box to another are selected 
       while (!edges->empty())
@@ -143,6 +143,11 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
         Edge edgeSelected = softmax_action_sel(graph, *edges);
         std::string turnSelected = edgeSelected.dest->node;
         //Rcpp::Rcout << "Turn=" << turnSelected <<std::endl;
+        
+        // if(debug)
+        // {
+        //   Rcpp::Rcout <<"currNode="<< turnSelected<<std::endl;
+        // }
         
         //Convert the selected edge to TurnModel components
         //Rcpp::Rcout << "Turn=" << turnSelected  << ", turnNb=" << turnNb <<std::endl;
@@ -232,6 +237,7 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
         double qMax = -100000;
         std::vector<Edge> *edges = graph.getOutgoingEdges(currNode->node);
         
+        //Rcpp::Rcout <<"Current node: " << currNode->node << ", edges nb = " << edges->size() << std::endl;
         if(edges->size() > 0) //If curr turn is an intermediate turn in the maze, determine qmax using edges
         {
           //Rcpp::Rcout <<"Number of edges greater than zero for current turn " << currNode->node << std::endl;
@@ -254,16 +260,33 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
             selectedNode = selectedEdge.dest;
           }
           qMax = selectedNode->credit;
-          //Rcpp::Rcout <<"Edge with max value is: " << selectedNode->node << std::endl;
+          //Rcpp::Rcout <<"Max value at node "<< currNode->node <<" is: " << selectedNode->node << std::endl;
         }
         else if(edges->empty())  //If curr turn leads to next box, then select qmax using actions from next box
         {
           //Rcpp::Rcout <<"Final turn of the path" << std::endl;
+          
+          int A = graph.getPathFromTurns(testTurnNames);
+          
+          int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
+          
+          S_prime = aca_getNextState(S, A, last_turn);
+          
+          if (S_prime != initState)
+          {
+            changeState = true;
+          }
+          else if (S_prime == initState && changeState)
+          {
+            returnToInitState = true;
+          }
+          
+          
           if(i != (nrow-1) && (!returnToInitState))
           {
-            //Rcpp::Rcout <<"Not the final path of the session" << std::endl;
-            int A = graph.getPathFromTurns(testTurnNames);
-            int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
+            //Rcpp::Rcout <<"End of a path, but not end of the episode or session" << std::endl;
+            
+            
             int S_prime = aca_getNextState(S, A, last_turn);
             Node * newRootNode;
             Graph * newGraph=nullptr;
@@ -294,20 +317,27 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
             }
             if(selectedNode == nullptr)
             {
-              //Rcpp::Rcout <<"All actions is box "<< rootNode->node << " have value 0." << std::endl;
+              //Rcpp::Rcout <<"All actions is box "<< newRootNode->node << " have value 0." << std::endl;
               // If all edges have same qval, select edge[0]
               Edge selectedEdge =  edges->at(0);
               selectedNode = selectedEdge.dest;
             }
             qMax = selectedNode->credit;
-            //Rcpp::Rcout <<"Max value action in box "<< rootNode->node << " is: " << selectedNode->node << std::endl;
+            //Rcpp::Rcout <<"Max q-val in box "<< newRootNode->node << " is: " << selectedNode->node << std::endl;
           }else{
+            //Rcpp::Rcout <<"End of an episode or end of a session, returnToInitState=" << returnToInitState  << std::endl;
             qMax = 0;
           }
         }
         
         double currTurnReward = exp(-beta*actionDuration)*turnReward;
         double td_err = currTurnReward +  exp(-beta*actionDuration)*qMax -currNode->credit;
+        
+        // if(debug)
+        // {
+        //   Rcpp::Rcout <<"episode=" << episode << ", S=" << S << ", currTurn="  << currNode->node <<", currTurnReward=" << currTurnReward  << ", turntime=" <<actionDuration << ", qMax=" <<  qMax <<  ", qCurrNode="<< currNode->credit  << ", td_err=" <<td_err << std::endl;
+        // }
+        
         currNode->credit = currNode->credit + (alpha * td_err);
         
         S0.updateEdgeProbs();
@@ -319,8 +349,10 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
       turnsVector.clear();
       //Rcpp::Rcout << "testTurnNames=" << testTurnNames <<std::endl;
       //graph.printPaths();
-      int A = graph.getPathFromTurns(testTurnNames);
+      
       //Rcpp::Rcout << "S=" <<S << ", A=" << A <<std::endl;
+      
+      int A = graph.getPathFromTurns(testTurnNames);
       
       generated_PathData_sess(i, 0) = A;
       generated_PathData_sess(i, 1) = S;
@@ -330,22 +362,28 @@ Rcpp::List simulateDiscountedRwdQlearning(Rcpp::S4 ratdata, Rcpp::S4 modelData, 
       generated_PathData_sess(i, 4) = sessId;
       generated_PathData_sess(i, 5) = actionNb;
       
-      int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
+      // int last_turn = generated_TurnsData_sess((turnIdx - 1), 0);
+      // 
+      // int S_prime = aca_getNextState(S, A, last_turn);
+      // 
+      // if (S_prime != initState)
+      // {
+      //   changeState = true;
+      // }
+      // else if (S_prime == initState && changeState)
+      // {
+      //   returnToInitState = true;
+      // }
       
-      int S_prime = aca_getNextState(S, A, last_turn);
-      
-      if (S_prime != initState)
-      {
-        changeState = true;
-      }
-      else if (S_prime == initState && changeState)
-      {
-        returnToInitState = true;
-      }
-      
+      // if(debug)
+      // {
+      //   Rcpp::Rcout <<"episode=" <<episode << ", i=" <<i <<", S=" <<S << ", A=" << A << ", changeState=" << changeState << ", returnToInitState=" << returnToInitState << ", resetVector=" << resetVector << std::endl;
+      // }
       
       if (returnToInitState || (i==nrow-1))
       {
+        
+        episode = episode +1;
         changeState = false;
         returnToInitState = false;
         resetVector = true;
@@ -583,10 +621,10 @@ std::vector<double> getDiscountedRwdQlearningLik(Rcpp::S4 ratdata, Rcpp::S4 mode
       }
       
       //Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
-      if(debug)
-      {
-        Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
-      }
+      // if(debug)
+      // {
+      //   Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
+      // }
       
       Rcpp::StringVector turns;
       if(S==0)
@@ -743,10 +781,10 @@ std::vector<double> getDiscountedRwdQlearningLik(Rcpp::S4 ratdata, Rcpp::S4 mode
       if (returnToInitState || (i==nrow-1))
       {
         //Rcpp::Rcout <<  "Inside end episode"<<std::endl;
-        if(debug)
-        {
-          Rcpp::Rcout <<  "End of episode"<<std::endl;
-        }
+        // if(debug)
+        // {
+        //   Rcpp::Rcout <<  "End of episode"<<std::endl;
+        // }
         changeState = false;
         returnToInitState = false;
         
@@ -862,8 +900,6 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
     int initState = 0;
     bool changeState = false;
     bool returnToInitState = false;
-    int score_episode = 0;
-    float avg_score = 0;
     bool resetVector = true;
     int nrow = actions_sess.n_rows;
     int S;
@@ -929,10 +965,10 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
       }
       
       //Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
-      if(debug)
-      {
-        Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
-      }
+      // if(debug)
+      // {
+      //   Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
+      // }
       
       Rcpp::StringVector turns;
       if(S==0)
@@ -975,7 +1011,12 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         std::string currTurn = Rcpp::as<std::string>(turns(j));
         currNode = graph->getNode(currTurn);
         //currNode->credit = currNode->credit + 1; //Test
-        //Rcpp::Rcout <<"currNode="<< currNode->node<<std::endl;
+        //
+        // if(debug)
+        // {
+        //   Rcpp::Rcout <<"currNode="<< currNode->node<<std::endl;
+        // }
+        
         //episodeTurns.push_back(currNode->node);
         //episodeTurnStates.push_back(S);
         //episodeTurnTimes.push_back(turn_times_session(session_turn_count));
@@ -988,6 +1029,8 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         
         double qMax = -100000;
         std::vector<Edge> *edges = graph->getOutgoingEdges(currTurn);
+        
+        //Rcpp::Rcout <<"Current node: " << currNode->node << ", edges nb = " << edges->size() << std::endl;
         
         if(edges->size() > 0) //If curr turn is an intermediate turn in the maze, determine qmax using edges
         {
@@ -1011,14 +1054,14 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
             selectedNode = selectedEdge.dest;
           }
           qMax = selectedNode->credit;
-          //Rcpp::Rcout <<"Edge with max value is: " << selectedNode->node << std::endl;
+          //Rcpp::Rcout <<"Max value at node "<< currNode->node <<" is: " << selectedNode->node << std::endl;
         }
         else if(j == (nbOfTurns - 1))  //If curr turn leads to next box, then select qmax using actions from next box
         {
           //Rcpp::Rcout <<"CurrTurn is final action of the path. Searching for Qmax in next box" << std::endl;
           if(i != (nrow-1) && (!returnToInitState))
           {
-            //Rcpp::Rcout <<"Not the final action of the episode or session" << std::endl;
+            //Rcpp::Rcout <<"End of a path, but not end of the episode or session" << std::endl;
             int S_prime = states_sess(i + 1);
             Node * newRootNode;
             Graph * newGraph=nullptr;
@@ -1049,14 +1092,15 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
             }
             if(selectedNode == nullptr)
             {
-              //Rcpp::Rcout <<"All actions is box "<< rootNode->node << " have value 0." << std::endl;
+              //Rcpp::Rcout <<"All actions is box "<< newRootNode->node << " have value 0." << std::endl;
               // If all edges have same qval, select edge[0]
               Edge selectedEdge =  edges->at(0);
               selectedNode = selectedEdge.dest;
             }
             qMax = selectedNode->credit;
-            //Rcpp::Rcout <<"Max value action in box "<< rootNode->node << " is: " << selectedNode->node << std::endl;
+            //Rcpp::Rcout <<"Max q-val in box "<< newRootNode->node << " is: " << selectedNode->node << std::endl;
           }else{
+            //Rcpp::Rcout <<"End of an episode or end of a session, returnToInitState=" << returnToInitState  << std::endl;
             qMax = 0;
           }
         }
@@ -1065,7 +1109,7 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
         double td_err = currTurnReward +  exp(-beta*turntime)*qMax -currNode->credit;
         // if(debug)
         // {
-        //   Rcpp::Rcout <<"S=" << S << ", A=" << A  <<", currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime << ", qMax=" <<  qMax <<  ", qCurrNode="<< currNode->credit  << ", td_err=" <<td_err << ", pathProb=" << pathProb<< std::endl;
+        //   Rcpp::Rcout <<"episode=" << episode << ", S=" << S << ", currTurn="  << currNode->node <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime << ", qMax=" <<  qMax <<  ", qCurrNode="<< currNode->credit  << ", td_err=" <<td_err << std::endl;
         // }
         currNode->credit = currNode->credit + (alpha * td_err);
         
@@ -1128,20 +1172,23 @@ arma::mat getDiscountedRwdQlearningProbMat(Rcpp::S4 ratdata, Rcpp::S4 modelData,
       }
       //Rcpp::Rcout << "probRow=" << probRow << std::endl;
       mseMatrix = arma::join_vert(mseMatrix, probRow);
-      
+      // if(debug)
+      // {
+      //   Rcpp::Rcout <<"episode=" <<episode << ", i=" <<i <<", S=" <<S << ", A=" << A << ", changeState=" << changeState << ", returnToInitState=" << returnToInitState << ", resetVector=" << resetVector << std::endl;
+      // }
       
       //Check if episode ended
       if (returnToInitState || (i==nrow-1))
       {
         //Rcpp::Rcout <<  "Inside end episode"<<std::endl;
-        if(debug)
-        {
-          Rcpp::Rcout <<  "End of episode"<<std::endl;
-        }
+        // if(debug)
+        // {
+        //   Rcpp::Rcout <<  "End of episode"<<std::endl;
+        // }
+        episode = episode+1;
         changeState = false;
         returnToInitState = false;
         
-        episode = episode + 1;
         resetVector = true;
       }
       
@@ -1197,8 +1244,8 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
   
   //Rcpp::Rcout <<  "allpaths.col(4)="<<allpaths.col(4) <<std::endl;
   
-   arma::mat mseMatrix;
-   std::vector<double> likVec;
+  arma::mat mseMatrix;
+  std::vector<double> likVec;
   //int mseRowIdx = 0;
   
   arma::vec allpath_actions = allpaths.col(0);
@@ -1255,8 +1302,6 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
     int initState = 0;
     bool changeState = false;
     bool returnToInitState = false;
-    int score_episode = 0;
-    float avg_score = 0;
     bool resetVector = true;
     int nrow = actions_sess.n_rows;
     int S;
@@ -1322,10 +1367,10 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
       }
       
       //Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
-      if(debug)
-      {
-        Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
-      }
+      // if(debug)
+      // {
+      //   Rcpp::Rcout <<"i="<< i << ", S=" << S <<", A=" << A<<std::endl;
+      // }
       
       Rcpp::StringVector turns;
       if(S==0)
@@ -1368,7 +1413,12 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
         std::string currTurn = Rcpp::as<std::string>(turns(j));
         currNode = graph->getNode(currTurn);
         //currNode->credit = currNode->credit + 1; //Test
-        //Rcpp::Rcout <<"currNode="<< currNode->node<<std::endl;
+        //
+        // if(debug)
+        // {
+        //   Rcpp::Rcout <<"currNode="<< currNode->node<<std::endl;
+        // }
+        
         //episodeTurns.push_back(currNode->node);
         //episodeTurnStates.push_back(S);
         //episodeTurnTimes.push_back(turn_times_session(session_turn_count));
@@ -1381,6 +1431,8 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
         
         double qMax = -100000;
         std::vector<Edge> *edges = graph->getOutgoingEdges(currTurn);
+        
+        //Rcpp::Rcout <<"Current node: " << currNode->node << ", edges nb = " << edges->size() << std::endl;
         
         if(edges->size() > 0) //If curr turn is an intermediate turn in the maze, determine qmax using edges
         {
@@ -1404,14 +1456,14 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
             selectedNode = selectedEdge.dest;
           }
           qMax = selectedNode->credit;
-          //Rcpp::Rcout <<"Edge with max value is: " << selectedNode->node << std::endl;
+          //Rcpp::Rcout <<"Max value at node "<< currNode->node <<" is: " << selectedNode->node << std::endl;
         }
         else if(j == (nbOfTurns - 1))  //If curr turn leads to next box, then select qmax using actions from next box
         {
           //Rcpp::Rcout <<"CurrTurn is final action of the path. Searching for Qmax in next box" << std::endl;
           if(i != (nrow-1) && (!returnToInitState))
           {
-            //Rcpp::Rcout <<"Not the final action of the episode or session" << std::endl;
+            //Rcpp::Rcout <<"End of a path, but not end of the episode or session" << std::endl;
             int S_prime = states_sess(i + 1);
             Node * newRootNode;
             Graph * newGraph=nullptr;
@@ -1442,14 +1494,15 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
             }
             if(selectedNode == nullptr)
             {
-              //Rcpp::Rcout <<"All actions is box "<< rootNode->node << " have value 0." << std::endl;
+              //Rcpp::Rcout <<"All actions is box "<< newRootNode->node << " have value 0." << std::endl;
               // If all edges have same qval, select edge[0]
               Edge selectedEdge =  edges->at(0);
               selectedNode = selectedEdge.dest;
             }
             qMax = selectedNode->credit;
-            //Rcpp::Rcout <<"Max value action in box "<< rootNode->node << " is: " << selectedNode->node << std::endl;
+            //Rcpp::Rcout <<"Max q-val in box "<< newRootNode->node << " is: " << selectedNode->node << std::endl;
           }else{
+            //Rcpp::Rcout <<"End of an episode or end of a session, returnToInitState=" << returnToInitState  << std::endl;
             qMax = 0;
           }
         }
@@ -1458,7 +1511,7 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
         double td_err = currTurnReward +  exp(-beta*turntime)*qMax -currNode->credit;
         // if(debug)
         // {
-        //   Rcpp::Rcout <<"S=" << S << ", A=" << A  <<", currTurn="  << currTurn <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime << ", qMax=" <<  qMax <<  ", qCurrNode="<< currNode->credit  << ", td_err=" <<td_err << ", pathProb=" << pathProb<< std::endl;
+        //   Rcpp::Rcout <<"episode=" << episode << ", S=" << S << ", currTurn="  << currNode->node <<", currTurnReward=" << currTurnReward  << ", turntime=" <<turntime << ", qMax=" <<  qMax <<  ", qCurrNode="<< currNode->credit  << ", td_err=" <<td_err << std::endl;
         // }
         currNode->credit = currNode->credit + (alpha * td_err);
         
@@ -1531,20 +1584,23 @@ Rcpp::List getDiscountedRwdQlearningProbMat2(Rcpp::S4 ratdata, Rcpp::S4 modelDat
       }
       //Rcpp::Rcout << "probRow=" << probRow << std::endl;
       mseMatrix = arma::join_vert(mseMatrix, probRow);
-      
+      // if(debug)
+      // {
+      //   Rcpp::Rcout <<"episode=" <<episode << ", i=" <<i <<", S=" <<S << ", A=" << A << ", changeState=" << changeState << ", returnToInitState=" << returnToInitState << ", resetVector=" << resetVector << std::endl;
+      // }
       
       //Check if episode ended
       if (returnToInitState || (i==nrow-1))
       {
         //Rcpp::Rcout <<  "Inside end episode"<<std::endl;
-        if(debug)
-        {
-          Rcpp::Rcout <<  "End of episode"<<std::endl;
-        }
+        // if(debug)
+        // {
+        //   Rcpp::Rcout <<  "End of episode"<<std::endl;
+        // }
+        episode = episode+1;
         changeState = false;
         returnToInitState = false;
         
-        episode = episode + 1;
         resetVector = true;
       }
       

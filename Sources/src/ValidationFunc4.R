@@ -20,8 +20,7 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
   param.model.data.dir=file.path(param.model.data.dir, "modelParams")
   allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
-  res.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
-   
+  res.model.data.dir=file.path(model.data.dir, ratName)   
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
  
@@ -67,8 +66,7 @@ initWorkers <-  function() {
       
         res = testSimulateData(trueModelData,ratdata,allModels)
         generatedData = res$genData
-                  
-          #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
+        #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
         #simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
         argList <- getArgList(trueModelData,generatedData)
         simLearns = checkSimLearns(generatedData, modelData = trueModelData, testModel = argList[[6]],sim=1,limit=0.8) 
@@ -82,11 +80,9 @@ initWorkers <-  function() {
         }
           #cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
       }
-
         
       if(simLearns)
       {
-        
         cat(sprintf('model = %s, missedOptimalIter = %i, alpha = %f, gamma = %.10f\n', model,missedOptimalIter,trueModelData@alpha, trueModelData@gamma1)) 
         generatedData = populateSimRatModel(ratdata,generatedData,modelName)
         generatedData@simModel = trueModelData@Model
@@ -100,11 +96,11 @@ initWorkers <-  function() {
         y <- probMat[,c(1:12)]-probMat_true[,c(1:12)]
         if(any(y!=0))
         {
-          cat(sprintf("Fail! Non-zero element found."))
+          cat(sprintf("Fail! Non-zero element found.\n"))
           print(which(y!=0,arr.ind = T))
           print(y[which(y!=0)])
         }else{
-          cat(sprintf("Pass: Both prob matrices are same"))
+          cat(sprintf("Pass: Both prob matrices are same\n"))
         }
       }
       generatedData  

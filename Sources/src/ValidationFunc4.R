@@ -68,6 +68,7 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
       
         res = testSimulateData(trueModelData,ratdata,allModels)
         generatedData = res$genData
+        generatedData = populateSimRatModel(ratdata,generatedData,modelName)
         #end_index = getEndIndex(ratName,generated_data@allpaths, sim=1, limit=0.95)
         #simLearns = checkSimLearns(generatedData@allpaths,sim=1,limit=0.8) 
         argList <- getArgList(trueModelData,generatedData)

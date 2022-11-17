@@ -46,10 +46,10 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
    
 #    #chunkSize = 150
 #    opts <- list(initEnvir=initWorkers) 
- 
    generatedDataList <-  
-    foreach(i=1:length(models), .packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData", "checkSimLearns")) %do%
+    foreach(i=1:length(models), .packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %do%
     {
+      source(paste(src.dir, "exportFunctions.R", sep = "/"), local=environment())
       print(sprintf("model is %s",models[i]))  
       model = models[i] 
 

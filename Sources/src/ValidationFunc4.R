@@ -106,10 +106,10 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
           cat(sprintf("Pass: Both prob matrices are same\n"))
         }
       }
-      generatedData  
+        
     } 
 
-    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_unitTestGenDataset.Rdata"))
+    save(generatedData,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_unitTestGenDataset.Rdata"))
 
 }
 

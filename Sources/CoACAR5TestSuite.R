@@ -49,11 +49,11 @@ if(isTRUE(computeModelParams)){
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  print((paramMat))
-  write.table((paramMat), file="CoACA_paramMat_T1.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
+  filename = paste0("CoACA_paramMat_T1_rat",rat)  
+  write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T1.txt",cores, walltime,name,stdout,stderr)
-  cat(command)
+    cat(command)
   cat("\n")
   system(command)
 }
@@ -78,9 +78,9 @@ if(isTRUE(generateModelParamMat)){
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  write.table(t(paramMat), file="CoACA_paramMat_T2.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
-
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T2.txt",cores, walltime,name,stdout,stderr)
+  filename = paste0("CoACA_paramMat_T2_rat",rat)  
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
   #command <- sprintf("oarsub -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh%i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
   cat(command)
@@ -108,9 +108,9 @@ if(isTRUE(getMinModel)){
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  write.table(t(paramMat), file="CoACA_paramMat_T7.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
-
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T7.txt",cores, walltime,name,stdout,stderr)
+  filename = paste0("CoACA_paramMat_T3_rat",rat)  
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
   #command <- sprintf("oarsub -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh%i %i %i %s %i %i\" ", cores, walltime,name,stdout,stderr,rat,seed,spawnslaves,currentTest, start_idx, end_idx)
   cat(command)
@@ -168,9 +168,10 @@ if(isTRUE(generateDataset))
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  write.table(paramMat, file="CoACA_paramMat_T3.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
-
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T3.txt",cores, walltime,name,stdout,stderr)
+  filename = paste0("CoACA_paramMat_T4_rat",rat)  
+  write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  
   cat(command)
   cat("\n")
   system(command)
@@ -205,9 +206,10 @@ if(isTRUE(paramEstTest))
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  write.table(paramMat, file="CoACA_paramMat_T4.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
+  filename = paste0("CoACA_paramMat_T5_rat",rat)  
+  write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T4.txt",cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -241,9 +243,9 @@ if(isTRUE(combineParamEstResLists))
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  write.table(t(paramMat), file="CoACA_paramMat_T5.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
-
-  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T5.txt",cores, walltime,name,stdout,stderr)
+  filename = paste0("CoACA_paramMat_T6_rat",rat)  
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -272,9 +274,9 @@ if(isTRUE(validateHoldout))
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-    write.table(paramMat, file="CoACA_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
-
-    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
+  filename = paste0("CoACA_paramMat_T7_rat",rat)  
+  write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
     cat(command)
     cat("\n")
     system(command)
@@ -307,9 +309,9 @@ if(isTRUE(combineHoldoutResLists))
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  write.table(t(paramMat), file="CoACA_paramMat_T6.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
-
-  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh\" ", "CoACA_paramMat_T6.txt",cores, walltime,name,stdout,stderr)
+  filename = paste0("CoACA_paramMat_T8_rat",rat)  
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)
@@ -341,9 +343,9 @@ if(isTRUE(testLikelihoodModelSelection))
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  write.table(t(paramMat), file="CoACA_paramMat_T7.txt", row.names=FALSE, col.names=FALSE,quote=FALSE)
-
-  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", "CoACA_paramMat_T7.txt",cores, walltime,name,stdout,stderr)
+  filename = paste0("CoACA_paramMat_T9_rat",rat)  
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)

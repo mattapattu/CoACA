@@ -44,6 +44,7 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
        #attach(myEnv, name="sourced_scripts")
      } 
    
+   initWorkers()
    #chunkSize = 150
    opts <- list(initEnvir=initWorkers) 
  

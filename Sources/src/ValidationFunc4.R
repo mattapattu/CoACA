@@ -47,8 +47,7 @@ initWorkers <-  function() {
    #chunkSize = 150
    opts <- list(initEnvir=initWorkers) 
  
-   generatedDataList <-  
-    foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %do%
+    for(i in c(1:length(models))
     {
       print(sprintf("model is %s",models[i]))  
       model = models[i] 
@@ -103,10 +102,10 @@ initWorkers <-  function() {
           cat(sprintf("Pass: Both prob matrices are same\n"))
         }
       }
-      generatedData  
+        
     } 
 
-    save(generatedDataList,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_unitTestGenDataset.Rdata"))
+    save(generatedData,  file = paste0(res.model.data.dir,"/",rat,"_",name, timestamp,"_unitTestGenDataset.Rdata"))
 
 }
 

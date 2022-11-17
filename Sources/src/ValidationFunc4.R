@@ -30,7 +30,7 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
   # exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global","allModels"), envir=environment())
   # registerDoMPI(cl)
     
-initWorkers <-  function() {
+ initWorkers <-  function() {
        source(paste(src.dir, "ModelClasses.R", sep = "/"))
        source(paste(model.src, "PathModel.R", sep = "/"))
        source(paste(model.src, "TurnModel.R", sep = "/"))
@@ -47,8 +47,7 @@ initWorkers <-  function() {
    #chunkSize = 150
    opts <- list(initEnvir=initWorkers) 
  
-    for(i in c(1:length(models))
-    {
+    for(i in c(1:length(models))){
       print(sprintf("model is %s",models[i]))  
       model = models[i] 
 

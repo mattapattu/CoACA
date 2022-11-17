@@ -24,11 +24,11 @@ unitTestProbDiffV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.d
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
  
-  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
-  setRngDoMPI(cl, seed=seed)
+  # cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  # setRngDoMPI(cl, seed=seed)
     
-  exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global","allModels"), envir=environment())
-  registerDoMPI(cl)
+  # exportDoMPI(cl, c("model.src","src.dir","model.data.dir","gamma2_Global", "lambda_Global","allModels"), envir=environment())
+  # registerDoMPI(cl)
     
 initWorkers <-  function() {
        source(paste(src.dir, "ModelClasses.R", sep = "/"))
@@ -48,7 +48,7 @@ initWorkers <-  function() {
    opts <- list(initEnvir=initWorkers) 
  
    generatedDataList <-  
-    foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %dopar%
+    foreach(i=1:length(models), .options.mpi=opts,.packages = c("rlist","DEoptim","dplyr","TTR"),.export=c("testData")) %do%
     {
       print(sprintf("model is %s",models[i]))  
       model = models[i] 

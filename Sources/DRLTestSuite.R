@@ -24,7 +24,7 @@ testSuite = "DRLTestSuite"
 
 
 option_list = list(
-  make_option(c("-r","--rat"), action="store", default=NA, type="integer", dest="rat"
+  make_option(c("-r","--rat"), action="store", default=NA, type="integer"
               ),
   make_option(c("--unitTestProbDiff"), action="store_true", default=FALSE,
               ),
@@ -48,6 +48,7 @@ option_list = list(
               )                                                                                                 
 )
 opt = parse_args(OptionParser(option_list=option_list))
+rat=opt$rat
 print(sprintf("rat=%s",rat))
 ########################## Test 1: computeModelParams  ########################
 

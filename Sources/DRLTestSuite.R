@@ -1,9 +1,6 @@
-library(bigsnpr)
-args <- commandArgs(trailingOnly = TRUE)
-print(args)
+suppressPackageStartupMessages(library("optparse"))
+suppressPackageStartupMessages(library("bigsnpr"))
 
-
-rat <- as.integer(args[1])
 #options(error=recover)
 options(error=function()traceback(2))
 
@@ -12,21 +9,49 @@ testSuite = "DRLTestSuite"
 
 
 #### Tests ##############
-unitTestProbDiff = F
+# unitTestProbDiff = F
 
 
-computeModelParams = T
-generateModelParamMat = F
-getMinModel = F
-generateDataset = F
-paramEstTest = F
-combineParamEstResLists = F
-validateHoldout = F
-combineHoldoutResLists = F
-testLikelihoodModelSelection = F
+# computeModelParams = T
+# generateModelParamMat = F
+# getMinModel = F
+# generateDataset = F
+# paramEstTest = F
+# combineParamEstResLists = F
+# validateHoldout = F
+# combineHoldoutResLists = F
+# testLikelihoodModelSelection = F
+
+
+option_list = list(
+  make_option(c("-r","--rat"), action="store", default=NA, type="integer"
+              ),
+  make_option(c("t1","--unitTestProbDiff"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t2","--computeModelParams"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t3","--generateModelParamMat"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t4","--getMinModel"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t5","--generateDataset"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t6","--paramEstTest"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t7","--combineParamEstResLists"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t8","--validateHoldout"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t9","--combineHoldoutResLists"), action="store_true", default=FALSE,
+              ),
+  make_option(c("t10","--testLikelihoodModelSelection"), action="store_true", default=FALSE,
+              ),                                                                                                  
+)
+opt = parse_args(OptionParser(option_list=option_list))
+
 ########################## Test 1: computeModelParams  ########################
 
-if(isTRUE(computeModelParams)){
+if(opt$computeModelParams){
   
   currentTest = "computeModelParams"
   source("testConfig2.R")
@@ -63,7 +88,7 @@ if(isTRUE(computeModelParams)){
 ################### Test 2: generateModelParamMat #################333
 
 
-if(isTRUE(generateModelParamMat)){
+if(opt$generateModelParamMat){
 
   currentTest = "generateModelParamMat"
   source("testConfig2.R")
@@ -97,7 +122,7 @@ if(isTRUE(generateModelParamMat)){
 
 ###################### getMin model ##############################
 
-if(isTRUE(getMinModel)){
+if(opt$getMinModel){
   currentTest = "getMinModel"
   source("testConfig2.R")
   name = paste0("minLik_",paste0("rat",rat))
@@ -131,7 +156,7 @@ if(isTRUE(getMinModel)){
 
 
 ############## Unit Test ###############################
-if(isTRUE(unitTestProbDiff))
+if(opt$unitTestProbDiff)
 {
   currentTest = "unitTestProbDiff"
   source("testConfig2.R")
@@ -171,7 +196,7 @@ if(isTRUE(unitTestProbDiff))
 
 ############## Generate Datasets ##########################
 
-if(isTRUE(generateDataset))
+if(opt$generateDataset)
 {
   currentTest = "generateDataset"
   source("testConfig2.R")
@@ -207,7 +232,7 @@ if(isTRUE(generateDataset))
 
 ################## Test 3: Estimate params on artificial data ################
 
-if(isTRUE(paramEstTest))
+if(opt$paramEstTest)
 {
     #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
     #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
@@ -243,7 +268,7 @@ if(isTRUE(paramEstTest))
 ################# paramEstTest: combineParamEstResLists #########################
 #print(sprintf("combineParamEstResLists=%s, is",toString(combineParamEstResLists)))
 print(is.logical(combineParamEstResLists))
-if(isTRUE(combineParamEstResLists))
+if(opt$combineParamEstResLists)
 {
   currentTest = "combineParamEstResLists"
   source("testConfig2.R")
@@ -280,7 +305,7 @@ if(isTRUE(combineParamEstResLists))
 
 ################## Test 4: Holdout test on artificial data ################
 
-if(isTRUE(validateHoldout))
+if(opt$validateHoldout)
 {
    
     currentTest = "validateHoldout"
@@ -313,7 +338,7 @@ if(isTRUE(validateHoldout))
 
 ############# Test ####################################################
 
-if(isTRUE(combineHoldoutResLists))
+if(opt$combineHoldoutResLists)
 {
   currentTest = "combineHoldoutResLists"
   source("testConfig2.R")
@@ -348,7 +373,7 @@ if(isTRUE(combineHoldoutResLists))
 
 ############################ testLikelihoodModelSelection ##################
 
-if(isTRUE(testLikelihoodModelSelection))
+if(opt$testLikelihoodModelSelection)
 {
   currentTest = "testLikelihoodModelSelection"
   source("testConfig2.R")

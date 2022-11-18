@@ -282,7 +282,7 @@ HoldoutTestV4=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.d
   for(i in 1:length(dfData))
   {
     pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
-    #print(pattern)
+    print(pattern)
     res=list.files(".", pattern=pattern, full.names=FALSE)
     print(res)
     load(res)

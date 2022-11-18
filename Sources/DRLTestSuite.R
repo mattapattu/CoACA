@@ -62,9 +62,6 @@ if(isTRUE(computeModelParams)){
 
 ################### Test 2: generateModelParamMat #################333
 
-name = paste0("genPMat_",paste0("rat",rat))
-stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
-stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
 if(isTRUE(generateModelParamMat)){
 
@@ -73,6 +70,10 @@ if(isTRUE(generateModelParamMat)){
   cores = 2
   walltime = "1:00"
   spawnslaves = cores-1
+  name = paste0("genPMat_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
   paramMat <-
     foreach(i = c(1), .combine='rbind')%do%
     {

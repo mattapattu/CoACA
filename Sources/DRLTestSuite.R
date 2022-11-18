@@ -24,31 +24,31 @@ testSuite = "DRLTestSuite"
 
 
 option_list = list(
-  make_option(c("-r","--rat"), action="store", default=NA, type="integer"
+  make_option(c("-r","--rat"), action="store", default=NA, type="integer", dest="rat"
               ),
-  make_option(c("1","--unitTestProbDiff"), action="store_true", default=FALSE,
+  make_option(c("--unitTestProbDiff"), action="store_true", default=FALSE,
               ),
-  make_option(c("2","--computeModelParams"), action="store_true", default=FALSE,
+  make_option(c("--computeModelParams"), action="store_true", default=FALSE,
               ),
-  make_option(c("3","--generateModelParamMat"), action="store_true", default=FALSE,
+  make_option(c("--generateModelParamMat"), action="store_true", default=FALSE,
               ),
-  make_option(c("4","--getMinModel"), action="store_true", default=FALSE,
+  make_option(c("--getMinModel"), action="store_true", default=FALSE,
               ),
-  make_option(c("5","--generateDataset"), action="store_true", default=FALSE,
+  make_option(c("--generateDataset"), action="store_true", default=FALSE,
               ),
-  make_option(c("6","--paramEstTest"), action="store_true", default=FALSE,
+  make_option(c("--paramEstTest"), action="store_true", default=FALSE,
               ),
-  make_option(c("7","--combineParamEstResLists"), action="store_true", default=FALSE,
+  make_option(c("--combineParamEstResLists"), action="store_true", default=FALSE,
               ),
-  make_option(c("8","--validateHoldout"), action="store_true", default=FALSE,
+  make_option(c("--validateHoldout"), action="store_true", default=FALSE,
               ),
-  make_option(c("9","--combineHoldoutResLists"), action="store_true", default=FALSE,
+  make_option(c("--combineHoldoutResLists"), action="store_true", default=FALSE,
               ),
-  make_option(c("10","--testLikelihoodModelSelection"), action="store_true", default=FALSE,
+  make_option(c("--testLikelihoodModelSelection"), action="store_true", default=FALSE,
               )                                                                                                 
 )
 opt = parse_args(OptionParser(option_list=option_list))
-
+print(sprintf("rat=%s",rat))
 ########################## Test 1: computeModelParams  ########################
 
 if(opt$computeModelParams){
@@ -267,7 +267,6 @@ if(opt$paramEstTest)
 
 ################# paramEstTest: combineParamEstResLists #########################
 #print(sprintf("combineParamEstResLists=%s, is",toString(combineParamEstResLists)))
-print(is.logical(combineParamEstResLists))
 if(opt$combineParamEstResLists)
 {
   currentTest = "combineParamEstResLists"

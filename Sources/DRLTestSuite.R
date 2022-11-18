@@ -45,7 +45,7 @@ option_list = list(
   make_option(c("t9","--combineHoldoutResLists"), action="store_true", default=FALSE,
               ),
   make_option(c("t10","--testLikelihoodModelSelection"), action="store_true", default=FALSE,
-              ),                                                                                                  
+              )                                                                                                 
 )
 opt = parse_args(OptionParser(option_list=option_list))
 

@@ -26,6 +26,7 @@ source(paste(src.dir,"ModelClasses.R", sep="/"))
 
 setup.hpc = TRUE
 
+print(sprintf("testSuite=%s, currentTest=%s", testSuite, currentTest))
 
 if(testSuite=="ARLTestSuite")
 {

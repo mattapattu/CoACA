@@ -101,6 +101,7 @@ if(testSuite=="ARLTestSuite")
     testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 
   }else if(currentTest %in% c("arl_on_drl", "arl_on_coaca"))
+  {
 
     alpha_seq = seq_log(1e-3, 0.1,20)
     gamma1_seq = seq_log(1e-8, 1e-4,20)
@@ -111,6 +112,7 @@ if(testSuite=="ARLTestSuite")
     testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
   }else if(currentTest %in% c("drl_on_arl", "drl_on_coaca"))
+  {
 
     alpha_seq = seq_log(1e-3, 0.1,20)
     gamma1_seq = seq_log(1e-8, 1e-4,20)
@@ -121,6 +123,7 @@ if(testSuite=="ARLTestSuite")
     testModels = c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd")
 
   }else if(currentTest %in% c("combineRes_on_arl", "combineRes_on_drl","combineRes_on_coaca"))
+  {
     
     gamma2_Global <<- 0.5
     lambda_Global <<- 0

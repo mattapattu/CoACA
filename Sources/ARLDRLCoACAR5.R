@@ -84,7 +84,41 @@ if(opt$coaca_on_arl)
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-    filename = paste0("ARLCoACA_paramMat_T1_rat",rat)  
+    filename = paste0("ARLDRLCoACA_paramMat_T1_rat",rat)  
+    write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+
+    cat(command)
+    cat("\n")
+    system(command)
+
+}
+
+
+###########
+
+if(opt$coaca_on_drl)
+{
+   
+    currentTest = "coaca_on_drl"
+    source("testConfig2.R")
+    cores = 10
+    walltime = "16:00"
+    name = paste0("multiHold","_",paste0("rat",rat))
+    stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+    stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+   paramMat <-
+    foreach(i = c(1:20), .combine='rbind')%do%
+    {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+    filename = paste0("ARLDRLCoACA_paramMat_T2_rat",rat)  
     write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
     command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
@@ -119,7 +153,7 @@ if(opt$arl_on_coaca)
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-    filename = paste0("ARLCoACA_paramMat_T2_rat",rat)  
+    filename = paste0("ARLDRLCoACA_paramMat_T3_rat",rat)  
     write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
     command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
     cat(command)
@@ -127,6 +161,105 @@ if(opt$arl_on_coaca)
     system(command)
 
 }
+
+########################
+
+if(opt$arl_on_drl)
+{
+   
+    currentTest = "arl_on_drl"
+    source("testConfig2.R")
+    cores = 10
+    walltime = "16:00"
+    name = paste0("holdMul","_",paste0("rat",rat))
+    stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+    stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+   paramMat <-
+    foreach(i = c(1:40), .combine='rbind')%do%
+    {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+    filename = paste0("ARLDRLCoACA_paramMat_T4_rat",rat)  
+    write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+    cat(command)
+    cat("\n")
+    system(command)
+
+}
+
+#####################
+
+if(opt$drl_on_coaca)
+{
+   
+    currentTest = "drl_on_coaca"
+    source("testConfig2.R")
+    cores = 10
+    walltime = "16:00"
+    name = paste0("holdMul","_",paste0("rat",rat))
+    stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+    stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+   paramMat <-
+    foreach(i = c(1:40), .combine='rbind')%do%
+    {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+    filename = paste0("ARLDRLCoACA_paramMat_T5_rat",rat)  
+    write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+    cat(command)
+    cat("\n")
+    system(command)
+
+}
+
+
+##################
+
+if(opt$drl_on_arl)
+{
+   
+    currentTest = "drl_on_arl"
+    source("testConfig2.R")
+    cores = 10
+    walltime = "16:00"
+    name = paste0("holdMul","_",paste0("rat",rat))
+    stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+    stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+   paramMat <-
+    foreach(i = c(1:40), .combine='rbind')%do%
+    {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+    filename = paste0("ARLDRLCoACA_paramMat_T6_rat",rat)  
+    write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+    cat(command)
+    cat("\n")
+    system(command)
+
+}
+
+
 
 ############# Test ####################################################
 
@@ -154,7 +287,7 @@ if(opt$combineRes_on_arl)
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  filename = paste0("ARLDRLCoACA_paramMat_T3_rat",rat)  
+  filename = paste0("ARLDRLCoACA_paramMat_T7_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
@@ -189,7 +322,7 @@ if(opt$combineRes_on_drl)
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  filename = paste0("ARLDRLCoACA_paramMat_T3_rat",rat)  
+  filename = paste0("ARLDRLCoACA_paramMat_T8_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
@@ -224,7 +357,7 @@ if(opt$combineRes_on_coaca)
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  filename = paste0("ARLDRLCoACA_paramMat_T4_rat",rat)  
+  filename = paste0("ARLDRLCoACA_paramMat_T9_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
@@ -260,7 +393,7 @@ if(opt$coaca_on_arl_likVal)
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  filename = paste0("ARLCoACA_paramMat_T5_rat",rat)  
+  filename = paste0("ARLCoACA_paramMat_T10_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
@@ -297,7 +430,7 @@ if(opt$arl_on_coaca_likVal)
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
-  filename = paste0("ARLCoACA_paramMat_T6_rat",rat)  
+  filename = paste0("ARLCoACA_paramMat_T11_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 

@@ -90,7 +90,7 @@ if(testSuite=="ARLTestSuite")
     testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
   }
-}else if(testSuite=="ARLCoACAR5"){
+}else if(testSuite=="ARLDRLCoACAR5"){
   if(currentTest %in% c("coaca_on_arl", "coaca_on_drl"))
   {
     alpha_seq = seq_log(0.01, 0.9,5)

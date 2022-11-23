@@ -118,7 +118,7 @@ if(currentTest == "unitTestProbDiff"){
 
   ########### Test 7: Holdout on diif dtasets ####################
 
-if(currentTest %in% c("coaca_on_arl", "coaca_on_drl", "arl_on_drl","arl_on_coaca","drl_on_arl","drl_on_coaca")
+if(currentTest %in% c("coaca_on_arl", "coaca_on_drl", "arl_on_drl","arl_on_coaca","drl_on_arl","drl_on_coaca"))
 {
 
     #print(sprintf("gen.data.dir=%s",gen.data.dir))

@@ -261,7 +261,7 @@ if(currentTest == "validateHoldout")
 
 ###################### Multitest holdout
 
-if(currentTest %in% c("coaca_on_arl", "coaca_on_drl", "arl_on_drl","arl_on_coaca","drl_on_arl","drl_on_coaca")
+if(currentTest %in% c("coaca_on_arl", "coaca_on_drl", "arl_on_drl","arl_on_coaca","drl_on_arl","drl_on_coaca"))
 {
   models = testData@Models
   genDataList = c(1:10)

@@ -118,8 +118,8 @@ if(currentTest == "unitTestProbDiff"){
 
   ########### Test 7: Holdout on diif dtasets ####################
 
-  if(currentTest == "coaca_on_arl"||currentTest == "arl_on_coaca")
-  {
+if(currentTest %in% c("coaca_on_arl", "coaca_on_drl", "arl_on_drl","arl_on_coaca","drl_on_arl","drl_on_coaca")
+{
 
     #print(sprintf("gen.data.dir=%s",gen.data.dir))
     gridMat <- gridMat[start_idx:end_idx,]
@@ -127,14 +127,14 @@ if(currentTest == "unitTestProbDiff"){
     name = paste0("multiHold",seq_id,"_",paste0("rat",rat))
     print(sprintf("Test = holdoutMultiTest, start_idx=%i, end_idx=%i",start_idx,end_idx))
                                 
-    multiHoldoutValidation(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.model.dir)
+    multiHoldoutValidation(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.model.dir, currentTest)
     #model.data.dir = paste(model.data.dir,"holdoutTest",ratdata@rat,sep="/")
     #printMatRes(ratdata,testData,model.data.dir)
-  }
+}
 
   ##############
 
-if(currentTest == "coaca_on_arl_combineRes" || currentTest == "arl_on_coaca_combineRes")
+if(currentTest %in% c("combineRes_on_arl","combineRes_on_drl","combineRes_on_coaca"))
 {
   combinemultiHoldoutResListsV4(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite, gen.model.dir)
 

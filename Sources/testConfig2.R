@@ -190,11 +190,11 @@ if(testSuite=="ARLTestSuite"){
     gen.model.dir = file.path(data.dir, "CoACAR1",ratName)
   }
 }else if(testSuite=="ARLDRLCoACAR5"){
-  if(currentTest %in% c("coaca_on_arl", "drl_on_arl", "combineRes_on_arl"){
+  if(currentTest %in% c("coaca_on_arl", "drl_on_arl", "combineRes_on_arl")){
     gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
-  }else if(currentTest %in% c("arl_on_coaca", "drl_on_coaca", "combineRes_on_coaca"){
+  }else if(currentTest %in% c("arl_on_coaca", "drl_on_coaca", "combineRes_on_coaca")){
     gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
-  }else if(currentTest %in% c("arl_on_drl", "coaca_on_drl", "combineRes_on_drl"){
+  }else if(currentTest %in% c("arl_on_drl", "coaca_on_drl", "combineRes_on_drl")){
     gen.model.dir = file.path(data.dir, "DRLTestSuite",ratName)
   }else if(currentTest=="coaca_on_arl_likVal"){
     gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)

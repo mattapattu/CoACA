@@ -160,6 +160,7 @@ learningStageModelSelection=function(ratdata,data.dir)
 
   for(model.data.dir in c(model.data.dir1,model.data.dir2,model.data.dir3))
   {
+    print(model.data.dir)
     setwd(model.data.dir)
     ratName = ratdata@rat
     details = file.info(list.files(".", pattern=paste0(ratName,".*resMatList.Rdata"), full.names=FALSE))

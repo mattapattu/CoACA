@@ -193,13 +193,13 @@ learningStageModelSelection=function(ratdata,data.dir)
       if(lik < min)
       {
         min = lik
-        min_method = modelName
+        min_method = m
       } 
       
     }
   }
   
-  return(min_method)
+  print(sprintf("Model selected for rat %s is %s",min_method))
 
 }
 

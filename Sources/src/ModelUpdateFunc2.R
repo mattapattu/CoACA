@@ -162,7 +162,7 @@ learningStageModelSelection=function(ratdata,data.dir)
   for(i in c(1:3))
   {
     model.data.dir = model.data.dirs[i]
-    creditAssignment = creditAssignment[i]
+    creditAssignment = crAssgns[i]
     print(model.data.dir)
     setwd(model.data.dir)
     ratName = ratdata@rat

@@ -155,11 +155,14 @@ learningStageModelSelection=function(ratdata,data.dir)
   model.data.dir2=file.path(data.dir, "CoACAR5",ratName,"modelParams")
   model.data.dir3=file.path(data.dir, "DRLTestSuite",ratName,"modelParams")
   
-  
-  
+  model.data.dirs = c(model.data.dir1,model.data.dir2,model.data.dir3)
+  crAssgns = c("qlearningAvgRwd","aca2","qlearningDisRwd")
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
   half_stage = 800
-  for(model.data.dir in c(model.data.dir1,model.data.dir2,model.data.dir3))
+  for(i in c(1:3))
   {
+    model.data.dir = model.data.dirs[i]
+    creditAssignment = creditAssignment[i]
     print(model.data.dir)
     setwd(model.data.dir)
     ratName = ratdata@rat
@@ -169,8 +172,7 @@ learningStageModelSelection=function(ratdata,data.dir)
     load(files[length(files)])
     for(m in testData@Models)
     {
-      modelName = strsplit(m,"\\.")[[1]][1]
-      creditAssignment = strsplit(m,"\\.")[[1]][2]
+      modelName = models[i]
       modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
       modelData@alpha <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),3])
       modelData@gamma1 <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),4])

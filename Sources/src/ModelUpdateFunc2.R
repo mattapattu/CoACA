@@ -157,7 +157,7 @@ learningStageModelSelection=function(ratdata,data.dir)
   
   
   
-
+  half_stage = 800
   for(model.data.dir in c(model.data.dir1,model.data.dir2,model.data.dir3))
   {
     print(model.data.dir)

@@ -32,9 +32,9 @@ if(currentTest == "computeModelParams")
 
 ################# getMinModel #########################################
 
-if(currentTest == "getMinModel")
+if(currentTest == "learningStageModelSelection")
 {            
-  getMinModel(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir)
+  learningStageModelSelection(ratdata,model.data.dir)
 }
 
 ################### Test 2: generateModelParamMat #################333

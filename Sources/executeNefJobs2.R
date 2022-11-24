@@ -34,7 +34,7 @@ if(currentTest == "computeModelParams")
 
 if(currentTest == "learningStageModelSelection")
 {            
-  learningStageModelSelection(ratdata,model.data.dir)
+  learningStageModelSelection(ratdata,data.dir)
 }
 
 ################### Test 2: generateModelParamMat #################333

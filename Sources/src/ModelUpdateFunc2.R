@@ -170,9 +170,9 @@ learningStageModelSelection=function(ratdata,data.dir)
     details = details[with(details, order(as.POSIXct(mtime))), ]
     files = rownames(details)
     load(files[length(files)])
-    for(m in testData@Models)
+    for(m in c(1:6))
     {
-      modelName = models[i]
+      modelName = models[m]
       modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
       modelData@alpha <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),3])
       modelData@gamma1 <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),4])
@@ -183,9 +183,9 @@ learningStageModelSelection=function(ratdata,data.dir)
       lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2) 
       lik = (-1)*sum(lik[(1:half_stage)])
         #lik = (-1)*sum(lik[(half_stage:endLearningStage)])
-      #modelName = paste(modelData@Model,modelData@creditAssignment,sep=".")
+      model = paste(modelData@Model,modelData@creditAssignment,sep=".")
 
-      print(sprintf("model=%s,likelihood=%f",m,lik))
+      print(sprintf("model=%s,likelihood=%f",model,lik))
 
       if(is.nan(lik))
       {
@@ -196,13 +196,13 @@ learningStageModelSelection=function(ratdata,data.dir)
       if(lik < min)
       {
         min = lik
-        min_method = m
+        min_method = model
       } 
       
     }
   }
   
-  print(sprintf("Model selected for rat %s is %s",min_method))
+  print(sprintf("Model selected for rat %s is %s",ratName,min_method))
 
 }
 

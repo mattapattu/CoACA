@@ -767,36 +767,39 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
    for(genDataNum in c(1:60)) 
    {
     genDataList <- genDataFiles[[genDataFile]]
-    generatedData = genDataList[[genDataNum]]
-    allpathsLearning <- generatedData@allpaths[c(1:800),]
-    path1count = length(which(allpathsLearning[,1] == 0))
-    path2count = length(which(allpathsLearning[,1] == 1))
-    path3count = length(which(allpathsLearning[,1] == 2))
-    path4count = length(which(allpathsLearning[,1] == 3))
-    path5count = length(which(allpathsLearning[,1] == 4))
-    path6count = length(which(allpathsLearning[,1] == 5))
+    if(genDataNum <=length(genDataList))
+    {
+      generatedData = genDataList[[genDataNum]]
+      allpathsLearning <- generatedData@allpaths[c(1:800),]
+      path1count = length(which(allpathsLearning[,1] == 0))
+      path2count = length(which(allpathsLearning[,1] == 1))
+      path3count = length(which(allpathsLearning[,1] == 2))
+      path4count = length(which(allpathsLearning[,1] == 3))
+      path5count = length(which(allpathsLearning[,1] == 4))
+      path6count = length(which(allpathsLearning[,1] == 5))
 
-    PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
-    PathCounterLearning = PathCounterLearning/800
-    model = paste0(generatedData@simModel,generatedData@simMethod)
-    PathCounterLearning = c(PathCounterLearning,model)
+      PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
+      PathCounterLearning = PathCounterLearning/800
+      model = paste0(generatedData@simModel,generatedData@simMethod)
+      PathCounterLearning = c(PathCounterLearning,model)
 
-    allpathsPostLearning <- generatedData@allpaths[-c(1:800),]
-    path1count = length(which(allpathsPostLearning[,1] == 0))
-    path2count = length(which(allpathsPostLearning[,1] == 1))
-    path3count = length(which(allpathsPostLearning[,1] == 2))
-    path4count = length(which(allpathsPostLearning[,1] == 3))
-    path5count = length(which(allpathsPostLearning[,1] == 4))
-    path6count = length(which(allpathsPostLearning[,1] == 5))
+      allpathsPostLearning <- generatedData@allpaths[-c(1:800),]
+      path1count = length(which(allpathsPostLearning[,1] == 0))
+      path2count = length(which(allpathsPostLearning[,1] == 1))
+      path3count = length(which(allpathsPostLearning[,1] == 2))
+      path4count = length(which(allpathsPostLearning[,1] == 3))
+      path5count = length(which(allpathsPostLearning[,1] == 4))
+      path6count = length(which(allpathsPostLearning[,1] == 5))
 
-    PathCounterPostLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)  
-    len = length(generatedData@allpaths[,1])-800
-    PathCounterPostLearning = PathCounterPostLearning/len
-    PathCounterPostLearning = c(PathCounterPostLearning,model)
+      PathCounterPostLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)  
+      len = length(generatedData@allpaths[,1])-800
+      PathCounterPostLearning = PathCounterPostLearning/len
+      PathCounterPostLearning = c(PathCounterPostLearning,model)
 
-    index = index + 1
-    PathCounterMatLearning[index,] = PathCounterLearning
-    PathCounterMatPostLearning[index,] = PathCounterPostLearning
+      index = index + 1
+      PathCounterMatLearning[index,] = PathCounterLearning
+      PathCounterMatPostLearning[index,] = PathCounterPostLearning
+    }
    }
   }
 

@@ -733,7 +733,7 @@ multiLikModelSelectionTest=function(ratdata,testData,src.dir,model.src,setup.hpc
 }
 
 
-getGenDataStats=function(ratdata,model.data.dir)
+getGenDataStats=function(ratdata,model.data.dir,testSuite)
 {
 
   ratName = ratdata@rat
@@ -803,8 +803,8 @@ getGenDataStats=function(ratdata,model.data.dir)
   print(sprintf("res.data.dir=%s",res.data.dir))
   dir.create(file.path(model.data.dir,ratName,"PathStats"), showWarnings = TRUE)
      
-  save(PathCounterMatLearning, file = paste0(res.data.dir, "/" , ratName,"_", "_PathCounterMatLearning.Rdata"))
-  save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_", "_PathCounterMatPostLearning.Rdata"))
+  save(PathCounterMatLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
+  save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))
 
 
 }

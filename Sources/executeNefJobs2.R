@@ -76,6 +76,11 @@ if(currentTest == "unitTestProbDiff"){
 
   } 
 
+  if(currentTest == "getGenDataStats")
+  {
+   getGenDataStats(ratdata,model.data.dir) 
+  }
+
 
 ################# Test 3: Param estimation test ######################
 

@@ -731,3 +731,77 @@ multiLikModelSelectionTest=function(ratdata,testData,src.dir,model.src,setup.hpc
   save(confusionMatrix, file = paste0(res.data.dir, "/" , ratName,"_", timestamp,"_confusionMatrix.Rdata"))
 
 }
+
+
+getGenDataStats=function(ratdata,model.data.dir)
+{
+
+  gen.data.dir=file.path(model.data.dir, ratName)
+  gen.data.dir=file.path(gen.data.dir, "Datasets")
+
+  print(gen.data.dir)
+  setwd(gen.data.dir)
+  dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+  #print(dfData)
+  #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+  genDataFiles <- list()
+  for(i in 1:length(dfData))
+  {
+    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
+    print(pattern)
+    res=list.files(".", pattern=pattern, full.names=FALSE)
+    print(res)
+    load(res)
+    
+    genDataFiles[[i]] <- allData
+
+    #genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
+ 
+  PathCounterMatLearning <- matrix(0,600,6)
+  PathCounterMatPostLearning <- matrix(0,600,6)
+  index = 0 
+  foreach(genDataFile = c(1:10)) %:%
+   foreach(genDataNum = c(1:60))  %do%
+   {
+    genDataList <- genDataFiles[[genDataFile]]
+    generatedData = genDataList[[genDataNum]]
+    allpathsLearning <- generatedData@allpaths[c(1:800),]
+    path1count = length(which(allpathsLearning[,1] == 0))
+    path2count = length(which(allpathsLearning[,1] == 1))
+    path3count = length(which(allpathsLearning[,1] == 2))
+    path4count = length(which(allpathsLearning[,1] == 3))
+    path5count = length(which(allpathsLearning[,1] == 4))
+    path6count = length(which(allpathsLearning[,1] == 5))
+
+    PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
+    PathCounterLearning = PathCounterLearning/800
+
+    allpathsPostLearning <- generatedData@allpaths[-c(1:800),]
+    path1count = length(which(allpathsPostLearning[,1] == 0))
+    path2count = length(which(allpathsPostLearning[,1] == 1))
+    path3count = length(which(allpathsPostLearning[,1] == 2))
+    path4count = length(which(allpathsPostLearning[,1] == 3))
+    path5count = length(which(allpathsPostLearning[,1] == 4))
+    path6count = length(which(allpathsPostLearning[,1] == 5))
+
+    PathCounterPostLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)  
+    len = length(generatedData@allpaths[,1])-800
+    PathCounterPostLearning = PathCounterPostLearning/len
+
+    index = index + 1
+    PathCounterMatLearning[index,] = PathCounterLearning
+    PathCounterMatPostLearning[index,] = PathCounterPostLearning
+   }
+
+
+  res.data.dir=file.path(model.data.dir, ratName,"PathStats", creditAssignment)
+  print(sprintf("res.data.dir=%s",res.data.dir))
+  dir.create(file.path(model.data.dir,ratName,"PathStats"), showWarnings = TRUE)
+  dir.create(file.path(model.data.dir,ratName,"PathStats",creditAssignment), showWarnings = TRUE)
+     
+  save(PathCounterMatLearning, file = paste0(res.data.dir, "/" , ratName,"_", timestamp,"_PathCounterMatLearning.Rdata"))
+  save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_", timestamp,"_PathCounterMatPostLearning.Rdata"))
+
+
+}

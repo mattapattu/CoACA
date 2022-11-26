@@ -762,8 +762,9 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
   PathCounterMatLearning <- matrix(0,600,7)
   PathCounterMatPostLearning <- matrix(0,600,7)
   index = 0 
-  foreach(genDataFile = c(1:10)) %:%
-   foreach(genDataNum = c(1:60))  %do%
+  for(genDataFile in c(1:10))
+  {
+   for(genDataNum in c(1:60)) 
    {
     genDataList <- genDataFiles[[genDataFile]]
     generatedData = genDataList[[genDataNum]]
@@ -797,6 +798,8 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
     PathCounterMatLearning[index,] = PathCounterLearning
     PathCounterMatPostLearning[index,] = PathCounterPostLearning
    }
+  }
+
 
 
   res.data.dir=file.path(model.data.dir, ratName,"PathStats")

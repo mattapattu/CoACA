@@ -37,6 +37,12 @@ if(currentTest == "learningStageModelSelection")
   learningStageModelSelection(ratdata,data.dir)
 }
 
+
+if(currentTest == "postlearningStageModelSelection")
+{            
+  postLearningStageModelSelection(ratdata,data.dir)
+}
+
 ################### Test 2: generateModelParamMat #################333
 
 

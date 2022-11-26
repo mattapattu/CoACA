@@ -798,10 +798,9 @@ getGenDataStats=function(ratdata,model.data.dir)
    }
 
 
-  res.data.dir=file.path(model.data.dir, ratName,"PathStats", creditAssignment)
+  res.data.dir=file.path(model.data.dir, ratName,"PathStats")
   print(sprintf("res.data.dir=%s",res.data.dir))
   dir.create(file.path(model.data.dir,ratName,"PathStats"), showWarnings = TRUE)
-  dir.create(file.path(model.data.dir,ratName,"PathStats",creditAssignment), showWarnings = TRUE)
      
   save(PathCounterMatLearning, file = paste0(res.data.dir, "/" , ratName,"_", timestamp,"_PathCounterMatLearning.Rdata"))
   save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_", timestamp,"_PathCounterMatPostLearning.Rdata"))

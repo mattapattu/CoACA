@@ -758,8 +758,8 @@ getGenDataStats=function(ratdata,model.data.dir)
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
  
-  PathCounterMatLearning <- matrix(0,600,6)
-  PathCounterMatPostLearning <- matrix(0,600,6)
+  PathCounterMatLearning <- matrix(0,600,7)
+  PathCounterMatPostLearning <- matrix(0,600,7)
   index = 0 
   foreach(genDataFile = c(1:10)) %:%
    foreach(genDataNum = c(1:60))  %do%
@@ -776,6 +776,8 @@ getGenDataStats=function(ratdata,model.data.dir)
 
     PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
     PathCounterLearning = PathCounterLearning/800
+    model = paste0(generatedData@simModel,generatedData@simMethod)
+    PathCounterLearning = c(PathCounterLearning,model)
 
     allpathsPostLearning <- generatedData@allpaths[-c(1:800),]
     path1count = length(which(allpathsPostLearning[,1] == 0))
@@ -788,6 +790,7 @@ getGenDataStats=function(ratdata,model.data.dir)
     PathCounterPostLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)  
     len = length(generatedData@allpaths[,1])-800
     PathCounterPostLearning = PathCounterPostLearning/len
+    PathCounterPostLearning = c(PathCounterPostLearning,model)
 
     index = index + 1
     PathCounterMatLearning[index,] = PathCounterLearning

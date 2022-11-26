@@ -78,7 +78,7 @@ if(currentTest == "unitTestProbDiff"){
 
   if(currentTest == "getGenDataStats")
   {
-   getGenDataStats(ratdata,model.data.dir) 
+   getGenDataStats(ratdata,model.data.dir,testSuite) 
   }
 
 

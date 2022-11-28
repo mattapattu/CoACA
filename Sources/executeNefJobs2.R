@@ -145,9 +145,9 @@ if(currentTest %in% c("coaca_on_arl", "coaca_on_drl", "arl_on_drl","arl_on_coaca
 
   ##############
 
-if(currentTest %in% c("combineRes_on_arl","combineRes_on_drl","combineRes_on_coaca"))
+if(currentTest %in% c("holdoutValidation_on_coaca","holdoutValidation_on_arl","holdoutValidation_on_drl"))
 {
-  combinemultiHoldoutResListsV4(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite, gen.model.dir)
+  combinemultiHoldoutValidation(ratdata,model.data.dir,count,gen.model.dir,currentTest)
 
 }
 

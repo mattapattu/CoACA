@@ -160,7 +160,7 @@ multiHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hpc,mo
 
 
 ### For DL, add another gen.data.dir as argument                                    
-combinemultiHoldoutResListsV4=function(ratdata,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite, gen.model.dir)
+combinemultiHoldoutValidation=function(ratdata,model.data.dir,count, gen.model.dir,currentTest)
 {
       ## Test settings ###############
   
@@ -181,7 +181,7 @@ combinemultiHoldoutResListsV4=function(ratdata,src.dir,model.src,setup.hpc,model
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
    
   gen.data.dir=file.path(gen.model.dir, "Datasets") 
-  print(sprintf("testSuite=%s, gen.data.dir=%s",testSuite,gen.data.dir))
+  print(sprintf("gen.data.dir=%s",gen.data.dir))
   setwd(gen.data.dir)
   dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
   genDataFiles <- list()
@@ -197,17 +197,33 @@ combinemultiHoldoutResListsV4=function(ratdata,src.dir,model.src,setup.hpc,model
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
 
+  if(currentTest == "holdoutValidation_on_arl")
+  {
+    model.data.dir1=file.path(data.dir, "ARLTestSuite",ratName,"holdoutTest")
+    model.data.dir2=file.path(data.dir, "ARLDRLCoACAR5",ratName,"drl_on_arl")
+    model.data.dir3=file.path(data.dir, "ARLDRLCoACAR5",ratName,"coaca_on_arl")
+  }else if(currentTest == "holdoutValidation_on_coaca")
+  {
+    model.data.dir1=file.path(data.dir, "CoACAR5",ratName,"holdoutTest")
+    model.data.dir2=file.path(data.dir, "ARLDRLCoACAR5",ratName,"arl_on_coaca")
+    model.data.dir3=file.path(data.dir, "ARLDRLCoACAR5",ratName,"drl_on_coaca")
+  }else if(currentTest == "holdoutValidation_on_drl")
+  {
+    model.data.dir1=file.path(data.dir, "DRLTestSuite",ratName,"holdoutTest")
+    model.data.dir2=file.path(data.dir, "ARLDRLCoACAR5",ratName,"arl_on_drl")
+    model.data.dir3=file.path(data.dir, "ARLDRLCoACAR5",ratName,"coaca_on_drl")
+  }
 
-  res.model.data.dir=file.path(model.data.dir, ratName, creditAssignment)
-  #res.model.data.dir=paste(model.data.dir,creditAssignment,sep="/")
-  print(sprintf("res.model.data.dir=%s",res.model.data.dir))
 
-  setwd(res.model.data.dir)
-  holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
   resMatList <- listenv()
+
+
+  print(sprintf("model.data.dir1=%s",model.data.dir1))
+  setwd(model.data.dir1)
+  holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
   for(i in c(1:length(holdoutResLists1)))
   {
-    pattern=paste0(ratName,"_multiHold",i,"_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,".*","_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))
@@ -215,21 +231,33 @@ combinemultiHoldoutResListsV4=function(ratdata,src.dir,model.src,setup.hpc,model
     resMatList[[i]] <- resList
   }
 
-  gen.resMat.dir = file.path(gen.model.dir, "holdoutTest")
-  print(sprintf("gen.resMat.dir=%s",gen.resMat.dir))
-  setwd(gen.resMat.dir)
+  print(sprintf("model.data.dir2=%s",model.data.dir2))
+  setwd(model.data.dir2)
   holdoutResLists2 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
-  for(k in c(1:length(holdoutResLists2)))
+  for(i in c(1:length(holdoutResLists2)))
   {
-    pattern=paste0(ratName,"_holdVal",k,"_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,".*",i,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))
     load(resList)
-    i=i+k
     resMatList[[i]] <- resList
-  }  
+  }
 
+  print(sprintf("model.data.dir3=%s",model.data.dir3))
+  setwd(model.data.dir3)
+  holdoutResLists3 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
+  for(i in c(1:length(holdoutResLists3)))
+  {
+    pattern=paste0(ratName,".*",i,"_.*_HoldoutResList.Rdata")
+    resList=list.files(".", pattern=pattern, full.names=FALSE)
+    print(resList)
+    #print(any(!complete.cases(resList)))
+    load(resList)
+    resMatList[[i]] <- resList
+  }
+
+  
   resList <- Reduce(rbind,resMatList)
   save(resList, file = paste0(res.model.data.dir, "/" , ratName,"_",timestamp,"_Stability_resList.Rdata"))
 
@@ -767,7 +795,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
    for(genDataNum in c(1:60)) 
    {
     genDataList <- genDataFiles[[genDataFile]]
-    if(genDataNum <=length(genDataList))
+    if(genDataNum <= length(genDataList))
     {
       generatedData = genDataList[[genDataNum]]
       allpathsLearning <- generatedData@allpaths[c(1:800),]

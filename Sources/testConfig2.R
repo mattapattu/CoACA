@@ -123,11 +123,13 @@ if(testSuite=="ARLTestSuite")
     lambda_Global <<- 0
     testModels = c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd")
 
-  }else if(currentTest %in% c("combineRes_on_arl", "combineRes_on_drl","combineRes_on_coaca"))
+  }else if(currentTest %in% c("holdoutValidation_on_arl","likelihoodValidation_on_arl","holdoutValidation_on_coaca","likelihoodValidation_on_coaca","holdoutValidation_on_drl","likelihoodValidation_on_drl"))
   {
-    
     gamma2_Global <<- 0.5
     lambda_Global <<- 0
+
+    ### This is not used in combinemultiHoldoutValidation or multiLikModelSelectionTest, just created as a dummy variable
+    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
   }
   # else if(currentTest=="coaca_on_arl_likVal"){
@@ -190,17 +192,12 @@ if(testSuite=="ARLTestSuite"){
     gen.model.dir = file.path(data.dir, "CoACAR1",ratName)
   }
 }else if(testSuite=="ARLDRLCoACAR5"){
-  if(currentTest %in% c("coaca_on_arl", "drl_on_arl", "combineRes_on_arl")){
+  if(currentTest %in% c("coaca_on_arl", "drl_on_arl", "holdoutValidation_on_arl","likelihoodValidation_on_arl")){
     gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
-  }else if(currentTest %in% c("arl_on_coaca", "drl_on_coaca", "combineRes_on_coaca")){
+  }else if(currentTest %in% c("arl_on_coaca", "drl_on_coaca", "combineRes_on_coaca", "holdoutValidation_on_coaca","likelihoodValidation_on_coaca")){
     gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
-  }else if(currentTest %in% c("arl_on_drl", "coaca_on_drl", "combineRes_on_drl")){
+  }else if(currentTest %in% c("arl_on_drl", "coaca_on_drl", "holdoutValidation_on_drl","likelihoodValidation_on_drl")){
     gen.model.dir = file.path(data.dir, "DRLTestSuite",ratName)
-  }else if(currentTest=="coaca_on_arl_likVal"){
-    gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
-  }else if(currentTest=="arl_on_coaca_likVal"){
-    gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
-  }
 }
 print(sprintf("testSuite=%s,currentTest=%s",testSuite,currentTest))
 

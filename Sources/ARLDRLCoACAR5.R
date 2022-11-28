@@ -45,15 +45,17 @@ option_list = list(
               ),
   make_option(c("--drl_on_coaca"), action="store_true", default=FALSE,
               ),
-  make_option(c("--combineRes_on_arl"), action="store_true", default=FALSE,
+  make_option(c("--holdoutValidation_on_arl"), action="store_true", default=FALSE,
               ),
-  make_option(c("--combineRes_on_drl"), action="store_true", default=FALSE,
+  make_option(c("--holdoutValidation_on_drl"), action="store_true", default=FALSE,
               ),
-  make_option(c("--combineRes_on_coaca"), action="store_true", default=FALSE,
+  make_option(c("--holdoutValidation_on_coaca"), action="store_true", default=FALSE,
               ),
-  make_option(c("--coaca_on_arl_likVal"), action="store_true", default=FALSE,
+  make_option(c("--likelihoodValidation_on_coaca"), action="store_true", default=FALSE,
               ),
-  make_option(c("--arl_on_coaca_likVal"), action="store_true", default=FALSE,
+  make_option(c("--likelihoodValidation_on_arl"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--likelihoodValidation_on_drl"), action="store_true", default=FALSE,
               )                                                                                                 
 )
 opt = parse_args(OptionParser(option_list=option_list))
@@ -262,9 +264,9 @@ if(opt$drl_on_arl)
 
 ############# Test ####################################################
 
-if(opt$combineRes_on_arl)
+if(opt$holdoutValidation_on_arl)
 {
-  currentTest = "combineRes_on_arl"
+  currentTest = "holdoutValidation_on_arl"
   source("testConfig2.R")
   cores = 2
   walltime = "1:00"
@@ -272,7 +274,7 @@ if(opt$combineRes_on_arl)
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("combineRes_on_arl_",paste0("rat",rat))
+  name = paste0("holdoutValidation_on_arl_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
@@ -298,9 +300,9 @@ if(opt$combineRes_on_arl)
 
 ###############
 
-if(opt$combineRes_on_drl)
+if(opt$holdoutValidation_on_drl)
 {
-  currentTest = "combineRes_on_drl"
+  currentTest = "holdoutValidation_on_drl"
   source("testConfig2.R")
   cores = 2
   walltime = "1:00"
@@ -333,9 +335,9 @@ if(opt$combineRes_on_drl)
 
 
 ###############
-if(opt$combineRes_on_coaca)
+if(opt$holdoutValidation_on_coaca)
 {
-  currentTest = "combineRes_on_coaca"
+  currentTest = "holdoutValidation_on_coaca"
   source("testConfig2.R")
   cores = 2
   walltime = "1:00"
@@ -343,7 +345,7 @@ if(opt$combineRes_on_coaca)
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("combineRes_on_coaca_",paste0("rat",rat))
+  name = paste0("holdoutValidation_on_coaca_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
@@ -369,9 +371,9 @@ if(opt$combineRes_on_coaca)
 
 ##########################
 
-if(opt$coaca_on_arl_likVal)
+if(opt$likelihoodValidation_on_coaca)
 {
-  currentTest = "coaca_on_arl_likVal"
+  currentTest = "likelihoodValidation_on_coaca"
   source("testConfig2.R")
   cores = 2
   walltime = "1:00"
@@ -379,7 +381,7 @@ if(opt$coaca_on_arl_likVal)
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("coaca_on_arl_likVal_",paste0("rat",rat))
+  name = paste0("likelihoodValidation_on_coaca_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
@@ -406,9 +408,9 @@ if(opt$coaca_on_arl_likVal)
 ############################
 
 
-if(opt$arl_on_coaca_likVal)
+if(opt$likelihoodValidation_on_arl)
 {
-  currentTest = "arl_on_coaca_likVal"
+  currentTest = "likelihoodValidation_on_arl"
   source("testConfig2.R")
   cores = 2
   walltime = "1:00"
@@ -416,7 +418,7 @@ if(opt$arl_on_coaca_likVal)
   start_idx = 0
   end_idx = 0
   seed = 0
-  name = paste0("arl_on_coaca_likVal_",paste0("rat",rat))
+  name = paste0("likelihoodValidation_on_arl_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
@@ -431,6 +433,42 @@ if(opt$arl_on_coaca_likVal)
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
   filename = paste0("ARLCoACA_paramMat_T11_rat",rat)  
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+
+  cat(command)
+  cat("\n")
+  system(command)
+}
+
+
+####################################
+
+if(opt$likelihoodValidation_on_drl)
+{
+  currentTest = "likelihoodValidation_on_drl"
+  source("testConfig2.R")
+  cores = 2
+  walltime = "1:00"
+  spawnslaves = cores-1
+  start_idx = 0
+  end_idx = 0
+  seed = 0
+  name = paste0("likelihoodValidation_on_drl_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+  paramMat <-
+    foreach(i = c(1), .combine='rbind')%do%
+    {
+      start_idx = 0
+      end_idx = 0
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+  filename = paste0("ARLCoACA_paramMat_T12_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 

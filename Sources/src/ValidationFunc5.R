@@ -160,7 +160,7 @@ multiHoldoutValidation=function(ratdata,testData, src.dir,model.src,setup.hpc,mo
 
 
 ### For DL, add another gen.data.dir as argument                                    
-combinemultiHoldoutValidation=function(ratdata,model.data.dir,count, gen.model.dir,currentTest)
+combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, gen.model.dir,currentTest)
 {
       ## Test settings ###############
   
@@ -168,10 +168,9 @@ combinemultiHoldoutValidation=function(ratdata,model.data.dir,count, gen.model.d
   
   ####################################
 
-  print(sprintf("Inside combineHoldoutResLists"))
+  print(sprintf("Inside combinemultiHoldoutValidation"))
   ratName = ratdata@rat
   #models = testData@Models
-  creditAssignment = strsplit(models[1],"\\.")[[1]][2]
   #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
   #allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
 
@@ -179,6 +178,11 @@ combinemultiHoldoutValidation=function(ratdata,model.data.dir,count, gen.model.d
   #print(res.model.data.dir) 
   dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/"))
   timestamp = format(Sys.time(),'_%Y%m%d_%H%M%S')
+
+  res.model.data.dir=file.path(model.data.dir, ratName)
+  dir.create(file.path(res.model.data.dir,currentTest), showWarnings = FALSE)
+  res.model.data.dir=file.path(res.model.data.dir, currentTest)
+  print(sprintf("res.model.data.dir=%s",res.model.data.dir))
    
   gen.data.dir=file.path(gen.model.dir, "Datasets") 
   print(sprintf("gen.data.dir=%s",gen.data.dir))

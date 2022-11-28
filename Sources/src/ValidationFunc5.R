@@ -247,6 +247,7 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
     print(resList)
     #print(any(!complete.cases(resList)))
     idx = i+k
+    print(idx)
     resMatList[[idx]] <- resList
   }
 

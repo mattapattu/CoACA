@@ -292,7 +292,7 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
       }
       genData_minlik = 1000000
       minmodel <- new("ModelData", sim = 1)
-      creditAssignment = strsplit(models[1],"\\.")[[1]][2]
+      #creditAssignment = strsplit(models[1],"\\.")[[1]][2]
       
       genDataList <- genDataFiles[[genDataFile]]
       generatedData = genDataList[[genDataNum]]

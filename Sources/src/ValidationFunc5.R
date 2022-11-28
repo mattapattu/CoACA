@@ -299,13 +299,13 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
       trueModel = generatedData@simModel
       trueCreditAssignment = generatedData@simMethod
       trueModel = paste0(trueModel,".",trueCreditAssignment)
-      cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, trueModel))
+      #cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, trueModel))
       #cat(models)
       #cat("\n")
      modelDataList <- 
       foreach(model = all.models,.errorhandling='pass') %do%
       {
-        cat(sprintf("model=%s\n", model))
+        #cat(sprintf("model=%s\n", model))
         modelName = strsplit(model,"\\.")[[1]][1]
         creditAssignment = strsplit(model,"\\.")[[1]][2]
         df_genData_model = df_genData[which(df_genData[,1]==model),]
@@ -320,7 +320,7 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
         lik <- TurnsNew::getTurnsLikelihood(generatedData, modelData, argList[[6]], sim=1)
         holdoutLik <- sum(lik[-c(1:800)])*-1
 
-        cat(sprintf("holdoutLik=%f\n",holdoutLik))
+        #cat(sprintf("holdoutLik=%f\n",holdoutLik))
         if (is.infinite(holdoutLik)) {
           #cat(sprintf("Alpha = %f, Gamma1=%f, lik=%f", modelData@alpha,modelData@gamma1, lik1))
           holdoutLik= 1000000
@@ -343,11 +343,11 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
           minmodel@lambda = as.modelData@lambda
         }
 
-        cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        #cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
         
         modelData
       }
-      cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
+      #cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  

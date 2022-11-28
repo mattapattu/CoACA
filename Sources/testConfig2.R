@@ -198,6 +198,7 @@ if(testSuite=="ARLTestSuite"){
     gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
   }else if(currentTest %in% c("arl_on_drl", "coaca_on_drl", "holdoutValidation_on_drl","likelihoodValidation_on_drl")){
     gen.model.dir = file.path(data.dir, "DRLTestSuite",ratName)
+  }
 }
 print(sprintf("testSuite=%s,currentTest=%s",testSuite,currentTest))
 

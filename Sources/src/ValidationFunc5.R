@@ -225,6 +225,7 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
   print(sprintf("model.data.dir1=%s",model.data.dir1))
   setwd(model.data.dir1)
   holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
+
   for(i in c(1:length(holdoutResLists1)))
   {
     pattern=paste0(ratName,"_holdVal",i,"_.*_HoldoutResList.Rdata")
@@ -232,7 +233,8 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
     print(resList)
     #print(any(!complete.cases(resList)))
     load(resList)
-    resMatList[[i]] <- resList
+    idx = length(resMatList)+1
+    resMatList[[idx]] <- resList
   }
 
   print(sprintf("model.data.dir2=%s",model.data.dir2))
@@ -244,8 +246,8 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))
-    load(resList)
-    resMatList[[i]] <- resList
+    idx = length(resMatList)+1
+    resMatList[[idx]] <- resList
   }
 
   print(sprintf("model.data.dir3=%s",model.data.dir3))
@@ -257,8 +259,8 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))
-    load(resList)
-    resMatList[[i]] <- resList
+    idx = length(resMatList)+1
+    resMatList[[idx]] <- resList
   }
 
   
@@ -361,9 +363,23 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
 
 
   #df <- as.data.frame(resList1)
+
+  if(currentTest == "holdoutValidation_on_arl")
+  {
+    gen.models = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+
+  }else if(currentTest == "holdoutValidation_on_coaca")
+  {
+    gen.models = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
+
+  }else if(currentTest == "holdoutValidation_on_drl")
+  {
+    gen.models = c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd")
+
+  }
   
   trueModels <- all.models[!all.models %in% testData@Models]
-  confusionMatrix <- matrix(0,length(trueModels),length(all.models))
+  confusionMatrix <- matrix(0,length(gen.models),length(all.models))
   colnames(confusionMatrix) <- c(all.models)
   rownames(confusionMatrix) <- c(trueModels)
   

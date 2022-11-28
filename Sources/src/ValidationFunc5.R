@@ -248,7 +248,7 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
     #print(any(!complete.cases(resList)))
     load(resList)
     idx = i+k
-    print(idx)
+    #print(idx)
     resMatList[[idx]] <- resList
   }
 
@@ -381,10 +381,10 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
 
   }
   
-  trueModels <- all.models[!all.models %in% testData@Models]
+  #trueModels <- all.models[!all.models %in% testData@Models]
   confusionMatrix <- matrix(0,length(gen.models),length(all.models))
   colnames(confusionMatrix) <- c(all.models)
-  rownames(confusionMatrix) <- c(trueModels)
+  rownames(confusionMatrix) <- c(gen.models)
   
   #print(confusionMatrix)
   for(i in c(1:length(resList1)))

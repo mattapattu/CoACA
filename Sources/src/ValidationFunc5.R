@@ -233,33 +233,33 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
     print(resList)
     #print(any(!complete.cases(resList)))
     load(resList)
-    idx = length(resMatList)+1
+    idx = i
     resMatList[[idx]] <- resList
   }
 
   print(sprintf("model.data.dir2=%s",model.data.dir2))
   setwd(model.data.dir2)
   holdoutResLists2 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
-  for(i in c(1:length(holdoutResLists2)))
+  for(k in c(1:length(holdoutResLists2)))
   {
-    pattern=paste0(ratName,"_multiHold",i,"_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,"_multiHold",k,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))
-    idx = length(resMatList)+1
+    idx = i+k
     resMatList[[idx]] <- resList
   }
 
   print(sprintf("model.data.dir3=%s",model.data.dir3))
   setwd(model.data.dir3)
   holdoutResLists3 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
-  for(i in c(1:length(holdoutResLists3)))
+  for(j in c(1:length(holdoutResLists3)))
   {
-    pattern=paste0(ratName,"_multiHold",i,"_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,"_multiHold",j,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))
-    idx = length(resMatList)+1
+    idx = i+k+j
     resMatList[[idx]] <- resList
   }
 

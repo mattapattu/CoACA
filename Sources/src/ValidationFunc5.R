@@ -227,7 +227,7 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
   holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
   for(i in c(1:length(holdoutResLists1)))
   {
-    pattern=paste0(ratName,".*","_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,".*",i,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))

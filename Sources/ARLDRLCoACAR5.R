@@ -77,7 +77,7 @@ if(opt$coaca_on_arl)
     stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
    paramMat <-
-    foreach(i = c(1:20), .combine='rbind')%do%
+    foreach(i = c(21:40), .combine='rbind')%do%
     {
       start_idx = sequences[i]+1
       end_idx = sequences[i+1]
@@ -110,7 +110,7 @@ if(opt$coaca_on_drl)
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-   foreach(i = c(1:20), .combine='rbind')%do%
+   foreach(i = c(21:40), .combine='rbind')%do%
    {
      start_idx = sequences[i]+1
      end_idx = sequences[i+1]

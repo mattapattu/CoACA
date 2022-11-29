@@ -43,6 +43,11 @@ if(currentTest == "postlearningStageModelSelection")
   postLearningStageModelSelection(ratdata,data.dir)
 }
 
+if(currentTest == "modelSelectionWithAllData")
+{            
+  modelSelectionWithAllData(ratdata,data.dir)
+}
+
 ################### Test 2: generateModelParamMat #################333
 
 

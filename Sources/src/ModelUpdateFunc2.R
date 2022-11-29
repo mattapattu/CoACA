@@ -273,6 +273,73 @@ postLearningStageModelSelection=function(ratdata,data.dir)
 }
 
 
+modelSelectionWithAllData=function(ratdata,data.dir)
+{
+  min_index = 0
+  min = 100000
+  min_method = "null"
+  ratName = ratdata@rat
+  #endLearningStage = getEndIndex(ratName,ratdata@allpaths,sim=sim, limit=0.95)
+  #endLearningStage = endLearningStage/2
+  #half_stage = endLearningStage/2
+
+  
+  model.data.dir1=file.path(data.dir, "ARLTestSuite",ratName,"modelParams")
+  model.data.dir2=file.path(data.dir, "CoACAR5",ratName,"modelParams")
+  model.data.dir3=file.path(data.dir, "DRLTestSuite",ratName,"modelParams")
+  
+  model.data.dirs = c(model.data.dir1,model.data.dir2,model.data.dir3)
+  crAssgns = c("qlearningAvgRwd","aca2","qlearningDisRwd")
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+  half_stage = length(ratdata@allpaths[,1])
+  for(i in c(1:3))
+  {
+    model.data.dir = model.data.dirs[i]
+    creditAssignment = crAssgns[i]
+    print(model.data.dir)
+    setwd(model.data.dir)
+    ratName = ratdata@rat
+    details = file.info(list.files(".", pattern=paste0(ratName,".*resMatList.Rdata"), full.names=FALSE))
+    details = details[with(details, order(as.POSIXct(mtime))), ]
+    files = rownames(details)
+    load(files[length(files)])
+    for(m in c(1:6))
+    {
+      modelName = models[m]
+      modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
+      modelData@alpha <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),3])
+      modelData@gamma1 <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),4])
+      modelData@gamma2 <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),5])
+      modelData@lambda <- as.numeric(resMat[which(as.numeric(resMat[,1])==half_stage & resMat[,2] == modelName),6])
+      
+      argList<-getArgList(modelData,ratdata)
+      lik <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2) 
+      lik = (-1)*sum(lik[c(1:half_stage)])
+        #lik = (-1)*sum(lik[(half_stage:endLearningStage)])
+      model = paste(modelData@Model,modelData@creditAssignment,sep=".")
+
+      print(sprintf("model=%s,likelihood=%f",model,lik))
+
+      if(is.nan(lik))
+      {
+        print(sprintf("model=%s,likelihood is NAN, skipping to next method",m))
+        next
+      }
+      
+      if(lik < min)
+      {
+        min = lik
+        min_method = model
+      } 
+      
+    }
+  }
+  
+  print(sprintf("Model selected for rat %s is %s",ratName,min_method))
+
+}
+
+
 
 
 generateParamResMatV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,testSuite)

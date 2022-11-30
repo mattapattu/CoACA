@@ -45,7 +45,12 @@ option_list = list(
   make_option(c("--combineHoldoutResLists"), action="store_true", default=FALSE,
               ),
   make_option(c("--testLikelihoodModelSelection"), action="store_true", default=FALSE,
-              )                                                                                                 
+              ),
+  make_option(c("--likModelSelectionTest2"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--getConfMatLikModelSelTest2"), action="store_true", default=FALSE,
+              )                             
+                                                                                                 
 )
 opt = parse_args(OptionParser(option_list=option_list))
 rat=opt$rat
@@ -401,6 +406,74 @@ if(opt$testLikelihoodModelSelection)
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
 
   command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  cat(command)
+  cat("\n")
+  system(command)
+}
+
+###########
+
+#############################################
+
+if((opt$likModelSelectionTest2))
+{
+   
+    currentTest = "likModelSelectionTest2"
+    source("testConfig2.R")
+    cores = 10
+    walltime = "16:00"
+    name = paste0("likTest","_",paste0("rat",rat))
+    stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+    stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+   paramMat <-
+    foreach(i = c(1:40), .combine='rbind')%do%
+    {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+   filename = paste0("ARL_paramMat_T11_rat",rat)  
+   write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+    cat(command)
+    cat("\n")
+    system(command)
+
+}
+
+############# Test ####################################################
+
+if((opt$getConfMatLikModelSelTest2))
+{
+  currentTest = "getConfMatLikModelSelTest2"
+  source("testConfig2.R")
+  cores = 2
+  walltime = "1:00"
+  spawnslaves = cores-1
+  start_idx = 0
+  end_idx = 0
+  seed = 0
+  name = paste0("getConfMatLikModelSelTest2_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+  paramMat <-
+    foreach(i = c(1), .combine='rbind')%do%
+    {
+      start_idx = 0
+      end_idx = 0
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+   filename = paste0("ARL_paramMat_T12_rat",rat)  
+   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
   cat(command)
   cat("\n")
   system(command)

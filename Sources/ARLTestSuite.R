@@ -12,21 +12,54 @@ testSuite = "ARLTestSuite"
 
 
 #### Tests ##############
-unitTestProbDiff = F
+# unitTestProbDiff = F
 
 
-computeModelParams = F
-generateModelParamMat = F
-getMinModel = F
-generateDataset = F
-paramEstTest = F
-combineParamEstResLists = F
-validateHoldout = F
-combineHoldoutResLists = F
-testLikelihoodModelSelection = T
+# computeModelParams = F
+# generateModelParamMat = F
+# getMinModel = F
+# generateDataset = F
+# paramEstTest = F
+# combineParamEstResLists = F
+# validateHoldout = F
+# combineHoldoutResLists = F
+# testLikelihoodModelSelection = T
+
+option_list = list(
+  make_option(c("-r","--rat"), action="store", default=NA, type="integer"
+              ),
+  make_option(c("--unitTestProbDiff"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--computeModelParams"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--generateModelParamMat"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--getMinModel"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--generateDataset"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--paramEstTest"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--combineParamEstResLists"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--validateHoldout"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--combineHoldoutResLists"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--testLikelihoodModelSelection"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--likModelSelectionTest2"), action="store_true", default=FALSE,
+              ),
+  make_option(c("--getConfMatLikModelSelTest2"), action="store_true", default=FALSE,
+              )                             
+)
+opt = parse_args(OptionParser(option_list=option_list))
+rat=opt$rat
+
+
 ########################## Test 1: computeModelParams  ########################
 
-if(isTRUE(computeModelParams)){
+if((opt$computeModelParams)){
   
   currentTest = "computeModelParams"
   source("testConfig2.R")
@@ -65,7 +98,7 @@ if(isTRUE(computeModelParams)){
 ################### Test 2: generateModelParamMat #################333
 
 
-if(isTRUE(generateModelParamMat)){
+if((opt$generateModelParamMat)){
 
   currentTest = "generateModelParamMat"
   source("testConfig2.R")
@@ -99,7 +132,7 @@ if(isTRUE(generateModelParamMat)){
 
 ###################### getMin model ##############################
 
-if(isTRUE(getMinModel)){
+if((opt$getMinModel)){
   currentTest = "getMinModel"
   source("testConfig2.R")
   name = paste0("minLik_",paste0("rat",rat))
@@ -132,7 +165,7 @@ if(isTRUE(getMinModel)){
 
 
 ############## Unit Test ###############################
-if(isTRUE(unitTestProbDiff))
+if((opt$unitTestProbDiff))
 {
   currentTest = "unitTestProbDiff"
   source("testConfig2.R")
@@ -156,7 +189,7 @@ if(isTRUE(unitTestProbDiff))
 
 ############## Generate Datasets ##########################
 
-if(isTRUE(generateDataset))
+if((opt$generateDataset))
 {
   currentTest = "generateDataset"
   source("testConfig2.R")
@@ -191,7 +224,7 @@ if(isTRUE(generateDataset))
 
 ################## Test 3: Estimate params on artificial data ################
 
-if(isTRUE(paramEstTest))
+if((opt$paramEstTest))
 {
     #allmodelRes = readModelParams(ratdata,model.data.dir,testData, sim=2)
     #testParamEstimation(ratdata,allmodelRes,testData,model.src,setup.hpc,model.data.dir,seed,count)
@@ -225,7 +258,7 @@ if(isTRUE(paramEstTest))
 ################# paramEstTest: combineParamEstResLists #########################
 #print(sprintf("combineParamEstResLists=%s, is",toString(combineParamEstResLists)))
 print(is.logical(combineParamEstResLists))
-if(isTRUE(combineParamEstResLists))
+if((opt$combineParamEstResLists))
 {
   currentTest = "combineParamEstResLists"
   source("testConfig2.R")
@@ -261,7 +294,7 @@ if(isTRUE(combineParamEstResLists))
 
 ################## Test 4: Holdout test on artificial data ################
 
-if(isTRUE(validateHoldout))
+if((opt$validateHoldout))
 {
    
     currentTest = "validateHoldout"
@@ -293,7 +326,7 @@ if(isTRUE(validateHoldout))
 
 ############# Test ####################################################
 
-if(isTRUE(combineHoldoutResLists))
+if((opt$combineHoldoutResLists))
 {
   currentTest = "combineHoldoutResLists"
   source("testConfig2.R")
@@ -327,7 +360,7 @@ if(isTRUE(combineHoldoutResLists))
 
 ############################ testLikelihoodModelSelection ##################
 
-if(isTRUE(testLikelihoodModelSelection))
+if((opt$testLikelihoodModelSelection))
 {
   currentTest = "testLikelihoodModelSelection"
   source("testConfig2.R")
@@ -352,6 +385,72 @@ if(isTRUE(testLikelihoodModelSelection))
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
    filename = paste0("ARL_paramMat_T9_rat",rat)  
+   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  cat(command)
+  cat("\n")
+  system(command)
+}
+
+#############################################
+
+if((opt$likModelSelectionTest2))
+{
+   
+    currentTest = "likModelSelectionTest2"
+    source("testConfig2.R")
+    cores = 10
+    walltime = "16:00"
+    name = paste0("likTest","_",paste0("rat",rat))
+    stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+    stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+   paramMat <-
+    foreach(i = c(1:40), .combine='rbind')%do%
+    {
+      start_idx = sequences[i]+1
+      end_idx = sequences[i+1]
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+   filename = paste0("ARL_paramMat_T10_rat",rat)  
+   write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+   command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+    cat(command)
+    cat("\n")
+    system(command)
+
+}
+
+############# Test ####################################################
+
+if((opt$getConfMatLikModelSelTest2))
+{
+  currentTest = "getConfMatLikModelSelTest2"
+  source("testConfig2.R")
+  cores = 2
+  walltime = "1:00"
+  spawnslaves = cores-1
+  start_idx = 0
+  end_idx = 0
+  seed = 0
+  name = paste0("getConfMatLikModelSelTest2_",paste0("rat",rat))
+  stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
+  stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
+
+  paramMat <-
+    foreach(i = c(1), .combine='rbind')%do%
+    {
+      start_idx = 0
+      end_idx = 0
+      seed = start_idx
+      spawnslaves = cores-1
+        #name = paste0("modelParams_",i,"_",rats[[rat]])
+      c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
+    }
+   filename = paste0("ARL_paramMat_T11_rat",rat)  
    write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
    command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
   cat(command)

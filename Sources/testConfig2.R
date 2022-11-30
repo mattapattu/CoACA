@@ -132,18 +132,48 @@ if(testSuite=="ARLTestSuite")
     testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
 
   }
-  # else if(currentTest=="coaca_on_arl_likVal"){
+}else if(testSuite=="ARLDRLCoACAR5V2"){
+  if(currentTest %in% c("coaca_on_arlV2", "coaca_on_drlV2"))
+  {
+    alpha_seq = seq_log(0.01, 0.9,5)
+    gamma1_seq = seq_log(0.01, 0.9,5)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
     
-  #   gamma2_Global <<- 0.5
-  #   lambda_Global <<- 0
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 
-  # }else if(currentTest=="arl_on_coaca_likVal"){
-    
-  #   gamma2_Global <<- 0.5
-  #   lambda_Global <<- 0
-  #   testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+  }else if(currentTest %in% c("arl_on_drlV2", "arl_on_coacaV2"))
+  {
 
-  # }
+    alpha_seq = seq_log(1e-3, 0.1,20)
+    gamma1_seq = seq_log(1e-8, 1e-4,20)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+
+  }else if(currentTest %in% c("drl_on_arlV2", "drl_on_coacaV2"))
+  {
+
+    alpha_seq = seq_log(1e-3, 0.1,20)
+    gamma1_seq = seq_log(1e-8, 1e-4,20)
+    initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
+  
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+    testModels = c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd")
+
+  }else if(currentTest %in% c("likValidation_on_arl","likValidation_on_coaca","likValidation_on_drl"))
+  {
+    gamma2_Global <<- 0.5
+    lambda_Global <<- 0
+
+    ### This is not used in combinemultiHoldoutValidation or multiLikModelSelectionTest, just created as a dummy variable
+    testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+
+  }
 }
 
 print(sprintf("setting gamma2=%f, lambda=%f", gamma2_Global, lambda_Global))
@@ -197,6 +227,15 @@ if(testSuite=="ARLTestSuite"){
   }else if(currentTest %in% c("arl_on_coaca", "drl_on_coaca", "combineRes_on_coaca", "holdoutValidation_on_coaca","likelihoodValidation_on_coaca")){
     gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
   }else if(currentTest %in% c("arl_on_drl", "coaca_on_drl", "holdoutValidation_on_drl","likelihoodValidation_on_drl")){
+    gen.model.dir = file.path(data.dir, "DRLTestSuite",ratName)
+  }
+}
+else if(testSuite=="ARLDRLCoACAR5V2"){
+  if(currentTest %in% c("coaca_on_arlV2", "drl_on_arlV2", "likValidation_on_arl")){
+    gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
+  }else if(currentTest %in% c("arl_on_coaca", "drl_on_coaca", "likValidation_on_coaca")){
+    gen.model.dir = file.path(data.dir, "CoACAR5",ratName)
+  }else if(currentTest %in% c("arl_on_drl", "coaca_on_drl", "likValidation_on_drl")){
     gen.model.dir = file.path(data.dir, "DRLTestSuite",ratName)
   }
 }
@@ -268,10 +307,30 @@ if(currentTest %in% c("coaca_on_arl", "coaca_on_drl", "arl_on_drl","arl_on_coaca
   
 }
 
-# if(currentTest == "coaca_on_arl_combineRes")
-# {
-#   trueTestModels =  c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
-#   trueTestData = new("TestModels", Name = testSuite,Models=trueTestModels)
-# }
+####################
+
+if(currentTest == "likModelSelectionTest2")
+{
+  models = testData@Models
+  genDataList = c(1:10)
+  genData = c(1:60)
+  gridMat<- expand.grid(genDataList, genData,models,stringsAsFactors = FALSE)
+  sequences = seq(0,length(gridMat[,1]), length.out=41)
+
+}
+
+#####################
+
+if(currentTest %in% c("coaca_on_arlV2", "coaca_on_drlV2", "arl_on_drlV2","arl_on_coacaV2","drl_on_arlV2","drl_on_coacaV2"))
+{
+  models = testData@Models
+  genDataList = c(1:10)
+  genData = c(1:60)
+  gridMat<- expand.grid(genDataList, genData,models,stringsAsFactors = FALSE)
+  sequences = seq(0,length(gridMat[,1]), length.out=41)
+  
+}
+
+
 
 

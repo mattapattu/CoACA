@@ -172,5 +172,54 @@ if(currentTest == "coaca_on_arl_likVal" || currentTest == "arl_on_coaca_likVal")
 
 }
 
+#######################
+
+ if(currentTest == "likModelSelectionTest2")
+  {
+
+    gridMat <- gridMat[start_idx:end_idx,]
+    seq_id <- which((sequences+1) %in% start_idx)
+    name = paste0("holdVal",seq_id,"_",paste0("rat",rat))
+    print(sprintf("Test = likModelSelectionTest2, start_idx=%i, end_idx=%i",start_idx,end_idx))
+    likModelSelectionTest2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)
+    #model.data.dir = paste(model.data.dir,"holdoutTest",ratdata@rat,sep="/")
+    #printMatRes(ratdata,testData,model.data.dir)
+  }
+
+################# Test 6: combineHoldoutResLists ######################
+
+  if(currentTest == "getConfMatLikModelSelTest2"){
+
+    getConfMatLikModelSelTest2(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count, testSuite)
+
+  } 
+
+####################################
+
+if(currentTest %in% c("coaca_on_arlV2", "coaca_on_drlV2", "arl_on_drlV2","arl_on_coacaV2","drl_on_arlV2","drl_on_coacaV2"))
+{
+
+    #print(sprintf("gen.data.dir=%s",gen.data.dir))
+    gridMat <- gridMat[start_idx:end_idx,]
+    seq_id <- which((sequences+1) %in% start_idx)
+    name = paste0("multiLik",seq_id,"_",paste0("rat",rat))
+    print(sprintf("Test = likMultiTest, start_idx=%i, end_idx=%i",start_idx,end_idx))
+                                
+    multiLikModelSelectionTest2(ratdata,testData, src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name,initpop, testSuite, gen.model.dir, currentTest)
+    #model.data.dir = paste(model.data.dir,"holdoutTest",ratdata@rat,sep="/")
+    #printMatRes(ratdata,testData,model.data.dir)
+}
+
+  ##############
+
+if(currentTest %in% c("likValidation_on_coaca","likValidation_on_arl","likValidation_on_drl"))
+{                                 
+  getMultiConfMatLikModelSelTest2(ratdata,data.dir,model.data.dir,count,gen.model.dir,currentTest)
+
+}
+
+
+
+
 
 print(sprintf("End of script"))

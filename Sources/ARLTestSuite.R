@@ -1,6 +1,5 @@
-library(bigsnpr)
-args <- commandArgs(trailingOnly = TRUE)
-print(args)
+suppressPackageStartupMessages(library("optparse"))
+suppressPackageStartupMessages(library("bigsnpr"))
 
 
 rat <- as.integer(args[1])

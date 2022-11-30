@@ -229,8 +229,7 @@ if(testSuite=="ARLTestSuite"){
   }else if(currentTest %in% c("arl_on_drl", "coaca_on_drl", "holdoutValidation_on_drl","likelihoodValidation_on_drl")){
     gen.model.dir = file.path(data.dir, "DRLTestSuite",ratName)
   }
-}
-else if(testSuite=="ARLDRLCoACAR5V2"){
+}else if(testSuite=="ARLDRLCoACAR5V2"){
   if(currentTest %in% c("coaca_on_arlV2", "drl_on_arlV2", "likValidation_on_arl")){
     gen.model.dir = file.path(data.dir, "ARLTestSuite",ratName)
   }else if(currentTest %in% c("arl_on_coaca", "drl_on_coaca", "likValidation_on_coaca")){

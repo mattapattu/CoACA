@@ -2,7 +2,6 @@ suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("bigsnpr"))
 
 
-rat <- as.integer(args[1])
 #options(error=recover)
 options(error=function()traceback(2))
 
@@ -247,7 +246,6 @@ if((opt$paramEstTest))
 
 ################# paramEstTest: combineParamEstResLists #########################
 #print(sprintf("combineParamEstResLists=%s, is",toString(combineParamEstResLists)))
-print(is.logical(combineParamEstResLists))
 if((opt$combineParamEstResLists))
 {
   currentTest = "combineParamEstResLists"

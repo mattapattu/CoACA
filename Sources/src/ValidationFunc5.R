@@ -990,6 +990,7 @@ getConfMatLikModelSelTest2=function(ratdata,testData,src.dir,model.src,setup.hpc
 
   res.model.data.dir=file.path(model.data.dir, ratName)
   res.model.data.dir=file.path(res.model.data.dir, "likModelSelectionTest2")
+  print(res.model.data.dir) 
   setwd(res.model.data.dir)
   holdoutResLists1 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
 
@@ -1555,8 +1556,8 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
  
-  PathCounterMatLearning <- matrix(0,600,7)
-  PathCounterMatPostLearning <- matrix(0,600,7)
+  #PathCounterMatLearning <- matrix(0,600,7)
+  PathCounterMat <- matrix(0,600,7)
   index = 0 
   for(genDataFile in c(1:10))
   {
@@ -1566,35 +1567,35 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
     if(genDataNum <= length(genDataList))
     {
       generatedData = genDataList[[genDataNum]]
-      allpathsLearning <- generatedData@allpaths[c(1:800),]
-      path1count = length(which(allpathsLearning[,1] == 0))
-      path2count = length(which(allpathsLearning[,1] == 1))
-      path3count = length(which(allpathsLearning[,1] == 2))
-      path4count = length(which(allpathsLearning[,1] == 3))
-      path5count = length(which(allpathsLearning[,1] == 4))
-      path6count = length(which(allpathsLearning[,1] == 5))
+      # allpathsLearning <- generatedData@allpaths
+      # path1count = length(which(allpathsLearning[,1] == 0))
+      # path2count = length(which(allpathsLearning[,1] == 1))
+      # path3count = length(which(allpathsLearning[,1] == 2))
+      # path4count = length(which(allpathsLearning[,1] == 3))
+      # path5count = length(which(allpathsLearning[,1] == 4))
+      # path6count = length(which(allpathsLearning[,1] == 5))
 
-      PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
-      PathCounterLearning = PathCounterLearning/800
-      model = paste0(generatedData@simModel,generatedData@simMethod)
-      PathCounterLearning = c(PathCounterLearning,model)
+      # PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
+      # PathCounterLearning = PathCounterLearning/800
+      # model = paste0(generatedData@simModel,generatedData@simMethod)
+      # PathCounterLearning = c(PathCounterLearning,model)
 
-      allpathsPostLearning <- generatedData@allpaths[-c(1:800),]
-      path1count = length(which(allpathsPostLearning[,1] == 0))
-      path2count = length(which(allpathsPostLearning[,1] == 1))
-      path3count = length(which(allpathsPostLearning[,1] == 2))
-      path4count = length(which(allpathsPostLearning[,1] == 3))
-      path5count = length(which(allpathsPostLearning[,1] == 4))
-      path6count = length(which(allpathsPostLearning[,1] == 5))
+      allpaths <- generatedData@allpaths
+      path1count = length(which(allpaths[,1] == 0))
+      path2count = length(which(allpaths[,1] == 1))
+      path3count = length(which(allpaths[,1] == 2))
+      path4count = length(which(allpaths[,1] == 3))
+      path5count = length(which(allpaths[,1] == 4))
+      path6count = length(which(allpaths[,1] == 5))
 
-      PathCounterPostLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)  
+      PathCounterVec = c(path1count,path2count,path3count,path4count,path5count,path6count)  
       len = length(generatedData@allpaths[,1])-800
-      PathCounterPostLearning = PathCounterPostLearning/len
-      PathCounterPostLearning = c(PathCounterPostLearning,model)
+      PathCounterVec = PathCounterVec/len
+      PathCounterVec = c(PathCounterVec,model)
 
       index = index + 1
-      PathCounterMatLearning[index,] = PathCounterLearning
-      PathCounterMatPostLearning[index,] = PathCounterPostLearning
+      PathCounterMat[index,] = PathCounterLearning
+      PathCounterMat[index,] = PathCounterPostLearning
     }
    }
   }

@@ -1605,7 +1605,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
   print(sprintf("res.data.dir=%s",res.data.dir))
   dir.create(file.path(model.data.dir,ratName,"PathStats"), showWarnings = TRUE)
      
-  save(PathCounterMatLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
+  save(PathCounterMat, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMat.Rdata"))
 
 
 }

@@ -1578,7 +1578,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
       PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
       PathCounterLearning = PathCounterLearning/800
       model = paste0(generatedData@simModel,generatedData@simMethod)
-      endIdx = getEndIndex(ratName,generated_data@allpaths,sim=1,limit=0.8)
+      endIdx = getEndIndex(ratName,generatedData@allpaths,sim=1,limit=0.8)
       PathCounterLearning = c(PathCounterLearning,model,endIdx)
 
 

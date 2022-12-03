@@ -1557,7 +1557,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
   }
  
   #PathCounterMatLearning <- matrix(0,600,7)
-  PathCounterMat <- matrix(0,600,7)
+  PathCounterMat <- matrix(0,600,8)
   index = 0 
   for(genDataFile in c(1:10))
   {
@@ -1577,6 +1577,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
 
       # PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
       # PathCounterLearning = PathCounterLearning/800
+
       model = paste0(generatedData@simModel,generatedData@simMethod)
       # PathCounterLearning = c(PathCounterLearning,model)
 
@@ -1591,7 +1592,9 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
       PathCounterVec = c(path1count,path2count,path3count,path4count,path5count,path6count)  
       len = length(generatedData@allpaths[,1])
       PathCounterVec = PathCounterVec/len
-      PathCounterVec = c(PathCounterVec,model)
+      endLearningStage = getEndIndex(ratName,ratdata@allpaths,sim=1,limit=0.8)
+      PathCounterVec = c(PathCounterVec,model,endLearningStage)
+
 
       index = index + 1
       PathCounterMat[index,] = PathCounterVec

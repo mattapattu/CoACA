@@ -1597,7 +1597,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
 
       index = index + 1
       PathCounterMat[index,] = PathCounterLearning
-      PathCounterMat[index,] = PathCounterPostLearning
+      PathCounterMatLearning[index,] = PathCounterPostLearning
     }
    }
   }

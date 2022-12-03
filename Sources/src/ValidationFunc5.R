@@ -1577,7 +1577,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
 
       # PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
       # PathCounterLearning = PathCounterLearning/800
-      # model = paste0(generatedData@simModel,generatedData@simMethod)
+      model = paste0(generatedData@simModel,generatedData@simMethod)
       # PathCounterLearning = c(PathCounterLearning,model)
 
       allpaths <- generatedData@allpaths

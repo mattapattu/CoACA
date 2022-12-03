@@ -1589,13 +1589,12 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
       path6count = length(which(allpaths[,1] == 5))
 
       PathCounterVec = c(path1count,path2count,path3count,path4count,path5count,path6count)  
-      len = length(generatedData@allpaths[,1])-800
+      len = length(generatedData@allpaths[,1])
       PathCounterVec = PathCounterVec/len
       PathCounterVec = c(PathCounterVec,model)
 
       index = index + 1
       PathCounterMat[index,] = PathCounterLearning
-      PathCounterMat[index,] = PathCounterPostLearning
     }
    }
   }
@@ -1607,7 +1606,6 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
   dir.create(file.path(model.data.dir,ratName,"PathStats"), showWarnings = TRUE)
      
   save(PathCounterMatLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
-  save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))
 
 
 }

@@ -1592,7 +1592,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
       PathCounterVec = c(path1count,path2count,path3count,path4count,path5count,path6count)  
       len = length(generatedData@allpaths[,1])
       PathCounterVec = PathCounterVec/len
-      endLearningStage = getEndIndex(ratName,ratdata@allpaths,sim=1,limit=0.8)
+      endLearningStage = getEndIndex(ratName,generatedData@allpaths,sim=1,limit=0.8)
       PathCounterVec = c(PathCounterVec,model,endLearningStage)
 
 

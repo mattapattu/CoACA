@@ -1556,7 +1556,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
  
-  #PathCounterMatLearning <- matrix(0,600,7)
+  PathCounterMatLearning <- matrix(0,600,7)
   PathCounterMat <- matrix(0,600,8)
   index = 0 
   for(genDataFile in c(1:10))
@@ -1567,21 +1567,22 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
     if(genDataNum <= length(genDataList))
     {
       generatedData = genDataList[[genDataNum]]
-      # allpathsLearning <- generatedData@allpaths
-      # path1count = length(which(allpathsLearning[,1] == 0))
-      # path2count = length(which(allpathsLearning[,1] == 1))
-      # path3count = length(which(allpathsLearning[,1] == 2))
-      # path4count = length(which(allpathsLearning[,1] == 3))
-      # path5count = length(which(allpathsLearning[,1] == 4))
-      # path6count = length(which(allpathsLearning[,1] == 5))
+      allpathsLearning <- generatedData@allpaths[1:800,]
+      path1count = length(which(allpathsLearning[,1] == 0))
+      path2count = length(which(allpathsLearning[,1] == 1))
+      path3count = length(which(allpathsLearning[,1] == 2))
+      path4count = length(which(allpathsLearning[,1] == 3))
+      path5count = length(which(allpathsLearning[,1] == 4))
+      path6count = length(which(allpathsLearning[,1] == 5))
 
-      # PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
-      # PathCounterLearning = PathCounterLearning/800
-
+      PathCounterLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)    
+      PathCounterLearning = PathCounterLearning/800
       model = paste0(generatedData@simModel,generatedData@simMethod)
-      # PathCounterLearning = c(PathCounterLearning,model)
+      endIdx = getEndIndex(ratName,generated_data@allpaths,sim=1,limit=0.8)
+      PathCounterLearning = c(PathCounterLearning,model,endIdx)
 
-      allpaths <- generatedData@allpaths
+
+      allpaths <- generatedData@allpaths[-c(1:800),]
       path1count = length(which(allpaths[,1] == 0))
       path2count = length(which(allpaths[,1] == 1))
       path3count = length(which(allpaths[,1] == 2))
@@ -1589,15 +1590,14 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
       path5count = length(which(allpaths[,1] == 4))
       path6count = length(which(allpaths[,1] == 5))
 
-      PathCounterVec = c(path1count,path2count,path3count,path4count,path5count,path6count)  
-      len = length(generatedData@allpaths[,1])
-      PathCounterVec = PathCounterVec/len
-      endLearningStage = getEndIndex(ratName,generatedData@allpaths,sim=1,limit=0.8)
-      PathCounterVec = c(PathCounterVec,model,endLearningStage)
-
+      PathCounterPostLearning = c(path1count,path2count,path3count,path4count,path5count,path6count)  
+      len = length(generatedData@allpaths[,1])-800
+      PathCounterPostLearning = PathCounterPostLearning/len
+      PathCounterPostLearning = c(PathCounterPostLearning,model)
 
       index = index + 1
-      PathCounterMat[index,] = PathCounterVec
+      PathCounterMat[index,] = PathCounterLearning
+      PathCounterMat[index,] = PathCounterPostLearning
     }
    }
   }
@@ -1608,7 +1608,8 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
   print(sprintf("res.data.dir=%s",res.data.dir))
   dir.create(file.path(model.data.dir,ratName,"PathStats"), showWarnings = TRUE)
      
-  save(PathCounterMat, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMat.Rdata"))
+  save(PathCounterMatLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
+  save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))
 
 
 }

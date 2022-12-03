@@ -1556,7 +1556,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
     #genDataFiles[[i]] <- get(load(dfData[[i]]))
   }
  
-  PathCounterMatLearning <- matrix(0,600,7)
+  PathCounterMatPostLearning <- matrix(0,600,7)
   PathCounterMat <- matrix(0,600,8)
   index = 0 
   for(genDataFile in c(1:10))
@@ -1597,7 +1597,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
 
       index = index + 1
       PathCounterMat[index,] = PathCounterLearning
-      PathCounterMatLearning[index,] = PathCounterPostLearning
+      PathCounterMatPostLearning[index,] = PathCounterPostLearning
     }
    }
   }
@@ -1608,7 +1608,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
   print(sprintf("res.data.dir=%s",res.data.dir))
   dir.create(file.path(model.data.dir,ratName,"PathStats"), showWarnings = TRUE)
      
-  save(PathCounterMatLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
+  save(PathCounterMat, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
   save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))
 
 

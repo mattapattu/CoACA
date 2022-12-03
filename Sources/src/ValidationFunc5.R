@@ -1594,7 +1594,7 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
       PathCounterVec = c(PathCounterVec,model)
 
       index = index + 1
-      PathCounterMat[index,] = PathCounterLearning
+      PathCounterMat[index,] = PathCounterVec
     }
    }
   }

@@ -1285,7 +1285,7 @@ getMultiConfMatLikModelSelTest2=function(ratdata,data.dir,model.data.dir,count, 
   
   ####################################
 
-  print(sprintf("Inside combinemultiHoldoutValidation"))
+  print(sprintf("Inside getMultiConfMatLikModelSelTest2"))
   ratName = ratdata@rat
   #models = testData@Models
   #param.model.data.dir=paste(model.data.dir,"paramEstTest",ratName,sep="/")
@@ -1359,7 +1359,7 @@ getMultiConfMatLikModelSelTest2=function(ratdata,data.dir,model.data.dir,count, 
   holdoutResLists2 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
   for(k in c(1:length(holdoutResLists2)))
   {
-    pattern=paste0(ratName,"_multiHold",k,"_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,"_multiLik",k,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))
@@ -1374,7 +1374,7 @@ getMultiConfMatLikModelSelTest2=function(ratdata,data.dir,model.data.dir,count, 
   holdoutResLists3 <- list.files(".", pattern=paste0(ratName,".*HoldoutResList.Rdata"), full.names=FALSE)
   for(j in c(1:length(holdoutResLists3)))
   {
-    pattern=paste0(ratName,"_multiHold",j,"_.*_HoldoutResList.Rdata")
+    pattern=paste0(ratName,"_multiLik",j,"_.*_HoldoutResList.Rdata")
     resList=list.files(".", pattern=pattern, full.names=FALSE)
     print(resList)
     #print(any(!complete.cases(resList)))

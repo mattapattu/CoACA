@@ -1897,6 +1897,10 @@ plotRealProbs=function(ratdata,data.dir,testSuite)
 
   }
 
+  res.data.dir=file.path(model.data.dir, ratName,"PathStats")
+  dir.create(file.path(model.data.dir,ratName,"PathStats"))
+
+
   probMat_df <- as.data.frame(probMat)
   colnames(probMat_df) <- c("Path1.LF","Path2.LF","Path3.LF","Path4.LF","Path5.LF","Path6.LF","Path1.RF","Path2.RF","Path3.RF","Path4.RF","Path5.RF","Path6.RF","Idx","Model","CrAssgn")
   

@@ -1615,3 +1615,66 @@ getGenDataStats=function(ratdata,model.data.dir,testSuite)
 
 
 }
+
+########################################################3
+
+getRealDataStats=function(ratdata,data.dir,testSuite)
+{
+
+  ratName = ratdata@rat
+  endIdx = getEndIndex(ratName,generatedData@allpaths,sim=2,limit=0.85)
+  probMat<-matrix(0,0,15)
+
+
+  for(crAssgn in c("aca2","qlearningAvgRwd","qlearningDisRwd")) 
+  {
+    if(crAssgn=="aca2")
+    {
+      testSuite = "CoACAR5"
+      testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")      testData = new("TestModels", Name = testSuite,Models=testModels)
+    }else if(crAssgn == "qlearningAvgRwd")
+    {
+      testSuite = "ARLTestSuite"
+      testModels = c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd")
+    }else if(crAssgn == "qlearningDisRwd"){
+      
+      testSuite = "DRLTestSuite"
+      testModels = c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd")
+    }
+    
+    testData = new("TestModels", Name = testSuite,Models=testModels)
+    param.model.data.dir=file.path(data.dir, testSuite,ratName,modelParams)
+    allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
+   for(modelName in c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"))
+   {
+    trueModelData = slot(slot(allModelRes,modelName),crAssgn)
+    argList <- getArgList(trueModelData, ratdata)
+    probMat_model <- TurnsNew::getProbMatrix(ratdata, trueModelData, argList[[6]], sim=2)
+    model = paste0(modelName,".",crAssgn)
+    
+    probMat_model <- cbind(probMat_model,rep(model,length(probMat[,1])),rep(crAssgn,length(probMat[,1])))
+    probMat<- rbind(probMat,probMat_model)
+    
+   }
+   
+  }
+
+  probMat_df <- as.data.frame(probMat)
+  colnames(probMat_df) <- c("Path1.LF","Path2.LF","Path3.LF","Path4.LF","Path5.LF","Path6.LF","Path1.RF","Path2.RF","Path3.RF","Path4.RF","Path5.RF","Path6.RF","Idx","Model","CrAssgn")
+  cols.num <- c(1:13)
+  probMat_df[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_df[[x]]))  
+  probMat_df.melt <- melt(probMat_df[which(probMat[,13] <= endIdx),c(1:12,14)],id.vars = c("Model","CrAssgn"))
+  p<-ggplot(probMat_df.melt) +
+        geom_boxplot(aes(x=variable, y=value, fill=Model))+facet_wrap(~CrAssgn)
+
+
+  res.data.dir=file.path(model.data.dir, ratName,"PathStats")
+  print(sprintf("res.data.dir=%s",res.data.dir))
+  dir.create(file.path(model.data.dir,ratName,"PathStats"))
+  ggsave(file.path(res.data.dir,"boxplotProbs.pdf"), p)
+   
+  #save(PathCounterMat, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
+  #save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))
+
+
+}

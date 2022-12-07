@@ -1688,7 +1688,10 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 
 
   #print(file)
-  ggsave("boxplotLearningProbs.pdf", p4, path = res.data.dir)
+  ggsave("boxplotLearningProbs.pdf", p4, path = res.data.dir, width=10,height=7)
+
+  cols.num <- c(1:13)
+  probMat_df[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_df[[x]]))  
 
   probMat_df_aca2<-probMat_df[which(probMat_df[,15]=="aca2"),]
   probMat_df.melt.aca2 <- melt(probMat_df_aca2[which(probMat_df_aca2[,13] > endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
@@ -1703,7 +1706,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 
 
   #print(file)
-  ggsave("boxplotPostLearningProbs.pdf", p5, path = res.data.dir)
+  ggsave("boxplotPostLearningProbs.pdf", p5, path = res.data.dir, width=10,height=7)
    
   #save(PathCounterMat, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
   #save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))

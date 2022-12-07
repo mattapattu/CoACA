@@ -1677,13 +1677,13 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
   
   probMat_df_aca2<-probMat_df[which(probMat_df[,15]=="aca2"),]
   probMat_df.melt.aca2 <- melt(probMat_df_aca2[which(probMat_df_aca2[,13] <= endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
-  p1<-ggplot(probMat_df.melt.aca2) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  p1<-ggplot(probMat_df.melt.aca2) +  geom_boxplot(aes(x=variable, y=value, fill=Model),outlier.size = 0.1)
   probMat_df_arl<-probMat_df[which(probMat_df[,15]=="qlearningAvgRwd"),]
   probMat_df.melt.arl <- melt(probMat_df_arl[which(probMat_df_arl[,13] <= endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
-  p2<-ggplot(probMat_df.melt.arl) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  p2<-ggplot(probMat_df.melt.arl) +  geom_boxplot(aes(x=variable, y=value, fill=Model),outlier.size = 0.1)
   probMat_df_drl<-probMat_df[which(probMat_df[,15]=="qlearningDisRwd"),]
   probMat_df.melt.drl <- melt(probMat_df_drl[which(probMat_df_drl[,13] <= endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
-  p3<-ggplot(probMat_df.melt.drl) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  p3<-ggplot(probMat_df.melt.drl) +  geom_boxplot(aes(x=variable, y=value, fill=Model),outlier.size = 0.1)
   p4<-grid.arrange(p1,p2,p3,nrow=3)
 
 
@@ -1695,13 +1695,13 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 
   probMat_df_aca2<-probMat_df[which(probMat_df[,15]=="aca2"),]
   probMat_df.melt.aca2 <- melt(probMat_df_aca2[which(probMat_df_aca2[,13] > endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
-  p1<-ggplot(probMat_df.melt.aca2) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  p1<-ggplot(probMat_df.melt.aca2) +  geom_boxplot(aes(x=variable, y=value, fill=Model),outlier.size = 0.1)
   probMat_df_arl<-probMat_df[which(probMat_df[,15]=="qlearningAvgRwd"),]
   probMat_df.melt.arl <- melt(probMat_df_arl[which(probMat_df_arl[,13] > endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
-  p2<-ggplot(probMat_df.melt.arl) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  p2<-ggplot(probMat_df.melt.arl) +  geom_boxplot(aes(x=variable, y=value, fill=Model),outlier.size = 0.1)
   probMat_df_drl<-probMat_df[which(probMat_df[,15]=="qlearningDisRwd"),]
   probMat_df.melt.drl <- melt(probMat_df_drl[which(probMat_df_drl[,13] > endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
-  p3<-ggplot(probMat_df.melt.drl) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  p3<-ggplot(probMat_df.melt.drl) +  geom_boxplot(aes(x=variable, y=value, fill=Model),outlier.size = 0.1)
   p5<-grid.arrange(p1,p2,p3,nrow=3)
 
 

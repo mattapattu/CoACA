@@ -1653,6 +1653,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
     model = paste0(modelName,".",crAssgn)
     
     probMat_model <- cbind(probMat_model,rep(model,length(probMat[,1])),rep(crAssgn,length(probMat[,1])))
+    print(sprintf("probMat cols=%i, probMat_model cols=%i", ncol(probMat), ncol(probMat_model)))
     probMat<- rbind(probMat,probMat_model)
     
    }

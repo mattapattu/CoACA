@@ -1622,7 +1622,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 {
 
   ratName = ratdata@rat
-  endIdx = getEndIndex(ratName,generatedData@allpaths,sim=2,limit=0.85)
+  endIdx = getEndIndex(ratName,ratdata@allpaths,sim=2,limit=0.85)
   probMat<-matrix(0,0,15)
 
 

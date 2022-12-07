@@ -1653,7 +1653,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
     model = paste0(modelName,".",crAssgn)
     
     probMat_model <- cbind(probMat_model,rep(model,length(probMat_model[,1])),rep(crAssgn,length(probMat_model[,1])))
-    print(sprintf("probMat cols=%i, probMat_model cols=%i", ncol(probMat), ncol(probMat_model)))
+    #print(sprintf("probMat cols=%i, probMat_model cols=%i", ncol(probMat), ncol(probMat_model)))
     probMat<- rbind(probMat,probMat_model)
     
    }
@@ -1664,7 +1664,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
   colnames(probMat_df) <- c("Path1.LF","Path2.LF","Path3.LF","Path4.LF","Path5.LF","Path6.LF","Path1.RF","Path2.RF","Path3.RF","Path4.RF","Path5.RF","Path6.RF","Idx","Model","CrAssgn")
   cols.num <- c(1:13)
   probMat_df[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_df[[x]]))  
-  probMat_df.melt <- melt(probMat_df[which(probMat[,13] <= endIdx),c(1:12,14)],id.vars = c("Model","CrAssgn"))
+  probMat_df.melt <- melt(probMat_df[which(probMat[,13] <= endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
   p<-ggplot(probMat_df.melt) +
         geom_boxplot(aes(x=variable, y=value, fill=Model))+facet_wrap(~CrAssgn)
 

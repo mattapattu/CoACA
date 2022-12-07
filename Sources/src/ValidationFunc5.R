@@ -1659,6 +1659,10 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
    }
    
   }
+
+  res.data.dir=file.path(model.data.dir, ratName,"PathStats")
+  dir.create(file.path(model.data.dir,ratName,"PathStats"))
+
   
   save(probMat, file = paste0(res.data.dir, "/" , ratName,"_","_probMat.Rdata"))
 
@@ -1671,9 +1675,6 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
         geom_boxplot(aes(x=variable, y=value, fill=Model))+facet_wrap(~CrAssgn)
 
 
-  res.data.dir=file.path(model.data.dir, ratName,"PathStats")
-  #print(sprintf("res.data.dir=%s",res.data.dir))
-  dir.create(file.path(model.data.dir,ratName,"PathStats"))
   file=file.path(res.data.dir,"boxplotProbs.pdf")
   #print(file)
   ggsave("boxplotProbs.pdf", p, path = res.data.dir)

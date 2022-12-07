@@ -92,6 +92,11 @@ if(currentTest == "unitTestProbDiff"){
     getRealDataStats(ratdata,data.dir,testSuite)
   }
 
+  if(currentTest == "plotRealProbs")
+  {
+    plotRealProbs(ratdata,data.dir,testSuite)
+  }
+
 ################# Test 3: Param estimation test ######################
 
   if(currentTest == "paramEstTest"){

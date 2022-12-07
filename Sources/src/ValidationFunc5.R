@@ -1668,16 +1668,42 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 
   probMat_df <- as.data.frame(probMat)
   colnames(probMat_df) <- c("Path1.LF","Path2.LF","Path3.LF","Path4.LF","Path5.LF","Path6.LF","Path1.RF","Path2.RF","Path3.RF","Path4.RF","Path5.RF","Path6.RF","Idx","Model","CrAssgn")
+  
+  probMat_df[,14] = gsub(".qlearningDisRwd",".DRL",probMat_df[,14])
+  probMat_df[,14] = gsub(".qlearningAvgRwd",".ARL",probMat_df[,14])
+  
   cols.num <- c(1:13)
   probMat_df[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_df[[x]]))  
-  probMat_df.melt <- melt(probMat_df[which(probMat[,13] <= endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
-  p<-ggplot(probMat_df.melt) +
-        geom_boxplot(aes(x=variable, y=value, fill=Model))+facet_wrap(~CrAssgn)
+  
+  probMat_df_aca2<-probMat_df[which(probMat_df[,15]=="aca2"),]
+  probMat_df.melt.aca2 <- melt(probMat_df_aca2[which(probMat_df_aca2[,13] <= endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
+  p1<-ggplot(probMat_df.melt.aca2) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  probMat_df_arl<-probMat_df[which(probMat_df[,15]=="qlearningAvgRwd"),]
+  probMat_df.melt.arl <- melt(probMat_df_arl[which(probMat_df_arl[,13] <= endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
+  p2<-ggplot(probMat_df.melt.arl) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  probMat_df_drl<-probMat_df[which(probMat_df[,15]=="qlearningDisRwd"),]
+  probMat_df.melt.drl <- melt(probMat_df_drl[which(probMat_df_drl[,13] <= endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
+  p3<-ggplot(probMat_df.melt.drl) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  p4<-grid.arrange(p1,p2,p3,nrow=3)
 
 
-  file=file.path(res.data.dir,"boxplotProbs.pdf")
   #print(file)
-  ggsave("boxplotProbs.pdf", p, path = res.data.dir)
+  ggsave("boxplotLearningProbs.pdf", p4, path = res.data.dir)
+
+  probMat_df_aca2<-probMat_df[which(probMat_df[,15]=="aca2"),]
+  probMat_df.melt.aca2 <- melt(probMat_df_aca2[which(probMat_df_aca2[,13] > endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
+  p1<-ggplot(probMat_df.melt.aca2) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  probMat_df_arl<-probMat_df[which(probMat_df[,15]=="qlearningAvgRwd"),]
+  probMat_df.melt.arl <- melt(probMat_df_arl[which(probMat_df_arl[,13] > endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
+  p2<-ggplot(probMat_df.melt.arl) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  probMat_df_drl<-probMat_df[which(probMat_df[,15]=="qlearningDisRwd"),]
+  probMat_df.melt.drl <- melt(probMat_df_drl[which(probMat_df_drl[,13] > endIdx),c(1:12,14,15)],id.vars = c("Model","CrAssgn"))
+  p3<-ggplot(probMat_df.melt.drl) +  geom_boxplot(aes(x=variable, y=value, fill=Model))
+  p5<-grid.arrange(p1,p2,p3,nrow=3)
+
+
+  #print(file)
+  ggsave("boxplotPostLearningProbs.pdf", p5, path = res.data.dir)
    
   #save(PathCounterMat, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
   #save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))

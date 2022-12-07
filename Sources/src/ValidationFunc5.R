@@ -1670,9 +1670,11 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 
 
   res.data.dir=file.path(model.data.dir, ratName,"PathStats")
-  print(sprintf("res.data.dir=%s",res.data.dir))
+  #print(sprintf("res.data.dir=%s",res.data.dir))
   dir.create(file.path(model.data.dir,ratName,"PathStats"))
-  ggsave(file.path(res.data.dir,"boxplotProbs.pdf"), p)
+  file=file.path(res.data.dir,"boxplotProbs.pdf")
+  print(file)
+  ggsave(file, p)
    
   #save(PathCounterMat, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
   #save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))

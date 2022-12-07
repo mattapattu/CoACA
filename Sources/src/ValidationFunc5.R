@@ -1643,7 +1643,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
     }
     
     testData = new("TestModels", Name = testSuite,Models=testModels)
-    param.model.data.dir=file.path(data.dir, testSuite,ratName,modelParams)
+    param.model.data.dir=file.path(data.dir, testSuite,ratName,"modelParams")
     allModelRes = readModelParamsNew(ratdata,param.model.data.dir,testData, sim=2)
    for(modelName in c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"))
    {

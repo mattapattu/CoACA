@@ -1688,7 +1688,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 
 
   #print(file)
-  ggsave("boxplotLearningProbs.pdf", p4, path = res.data.dir, width=10,height=7)
+  ggsave(paste0("boxplotLearningProbs",ratName,".pdf"), p4, path = res.data.dir, width=10,height=7)
 
   cols.num <- c(1:13)
   probMat_df[,cols.num] <- lapply(cols.num,function(x) as.numeric(probMat_df[[x]]))  
@@ -1706,7 +1706,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 
 
   #print(file)
-  ggsave("boxplotPostLearningProbs.pdf", p5, path = res.data.dir, width=10,height=7)
+  ggsave(paste0("boxplotPostLearningProbs",ratName,".pdf"), p5, path = res.data.dir, width=10,height=7)
 
 
   cols.num <- c(1:13)
@@ -1725,7 +1725,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
 
 
   #print(file)
-  ggsave("boxplotAllProbs.pdf", p5, path = res.data.dir, width=10,height=7)
+  ggsave(paste0("boxplotAllProbs",ratName,".pdf"), p5, path = res.data.dir, width=10,height=7)
    
   #save(PathCounterMat, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatLearning.Rdata"))
   #save(PathCounterMatPostLearning, file = paste0(res.data.dir, "/" , ratName,"_",testSuite, "_PathCounterMatPostLearning.Rdata"))

@@ -1631,7 +1631,7 @@ getRealDataStats=function(ratdata,data.dir,testSuite)
     if(crAssgn=="aca2")
     {
       testSuite = "CoACAR5"
-      testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")      testData = new("TestModels", Name = testSuite,Models=testModels)
+      testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")      
     }else if(crAssgn == "qlearningAvgRwd")
     {
       testSuite = "ARLTestSuite"

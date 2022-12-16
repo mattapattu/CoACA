@@ -340,7 +340,7 @@ combinemultiHoldoutValidation=function(ratdata,data.dir,model.data.dir,count, ge
           minmodel@alpha = as.numeric(df_genData_model[3])
           minmodel@gamma1 = as.numeric(df_genData_model[4])
           minmodel@gamma2 = modelData@gamma2
-          minmodel@lambda = as.modelData@lambda
+          minmodel@lambda = modelData@lambda
         }
 
         #cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
@@ -531,7 +531,7 @@ testLikelihoodModelSelection=function(ratdata,testData,src.dir,model.src,setup.h
           minmodel@alpha = as.numeric(df_genData_model[3])
           minmodel@gamma1 = as.numeric(df_genData_model[4])
           minmodel@gamma2 = modelData@gamma2
-          minmodel@lambda = as.modelData@lambda
+          minmodel@lambda = modelData@lambda
         }
 
         #print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
@@ -731,7 +731,7 @@ multiLikModelSelectionTest=function(ratdata,testData,src.dir,model.src,setup.hpc
           minmodel@alpha = as.numeric(df_genData_model[3])
           minmodel@gamma1 = as.numeric(df_genData_model[4])
           minmodel@gamma2 = modelData@gamma2
-          minmodel@lambda = as.modelData@lambda
+          minmodel@lambda = modelData@lambda
         }
 
         cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
@@ -1071,7 +1071,7 @@ getConfMatLikModelSelTest2=function(ratdata,testData,src.dir,model.src,setup.hpc
           minmodel@alpha = as.numeric(df_genData_model[3])
           minmodel@gamma1 = as.numeric(df_genData_model[4])
           minmodel@gamma2 = modelData@gamma2
-          minmodel@lambda = as.modelData@lambda
+          minmodel@lambda = modelData@lambda
         }
 
         #print(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
@@ -1416,7 +1416,7 @@ getMultiConfMatLikModelSelTest2=function(ratdata,data.dir,model.data.dir,count, 
       trueModel = generatedData@simModel
       trueCreditAssignment = generatedData@simMethod
       trueModel = paste0(trueModel,".",trueCreditAssignment)
-      #cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, trueModel))
+      cat(sprintf('rat=%s, genDataFile=%i, genDataNum = %i, trueModel = %s\n', ratName,genDataFile,genDataNum, trueModel))
       #cat(models)
       #cat("\n")
      modelDataList <- 
@@ -1457,14 +1457,14 @@ getMultiConfMatLikModelSelTest2=function(ratdata,data.dir,model.data.dir,count, 
           minmodel@alpha = as.numeric(df_genData_model[3])
           minmodel@gamma1 = as.numeric(df_genData_model[4])
           minmodel@gamma2 = modelData@gamma2
-          minmodel@lambda = as.modelData@lambda
+          minmodel@lambda = modelData@lambda
         }
 
-        #cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
         
         modelData
       }
-      #cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
+      cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  

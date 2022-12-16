@@ -1513,7 +1513,7 @@ getMultiConfMatLikModelSelTest2=function(ratdata,data.dir,model.data.dir,count, 
     }
     trueModel = resList1[[i]]$trueModel
     minModel = resList1[[i]]$minModel
-    cat(sprintf("trueModel=%s, minModel=%s\n", trueModel, minModel))
+    #cat(sprintf("trueModel=%s, minModel=%s\n", trueModel, minModel))
     confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1 
   }
 

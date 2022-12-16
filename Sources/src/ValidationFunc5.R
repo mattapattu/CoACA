@@ -1460,11 +1460,11 @@ getMultiConfMatLikModelSelTest2=function(ratdata,data.dir,model.data.dir,count, 
           minmodel@lambda = modelData@lambda
         }
 
-        cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', modelName, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', model, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
         
         modelData
       }
-      cat(sprintf('selectedModel = %s, genData_minlik=%f\n', minmodel@Model, genData_minlik))
+      cat(sprintf('selectedModel = %s, trueModel=%s,genData_minlik=%f\n', paste0(minmodel@Model,minmodel@creditAssignment), trueModel,genData_minlik))
 
       #print(sprintf("trueModel=%s,minModel=%s",trueModel,minModel))
       #confusionMatrix[trueModel,minModel] = confusionMatrix[trueModel,minModel]+1  

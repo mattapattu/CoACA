@@ -1107,41 +1107,66 @@ plotSuccessRates=function(ratDataList)
   #dev.off()
 }
 
-plotThetaHat=function(ratdata,dfThetahat,plot.dir)
+plotThetaHat=function(ratdata,dfThetahat,testData, plot.dir)
 {
   rat=ratdata@rat
-  end_index80 = getEndIndex(ratdata@allpaths, sim=2, limit=0.80)
+  #end_index80 = getEndIndex(ratdata@allpaths, sim=2, limit=0.80)
   #end_index95 = getEndIndex(ratdata@allpaths, sim=2, limit=0.95)
   
   cols.num <- c(1,2,3)
   dfThetahat[,cols.num] <- lapply(cols.num,function(x) as.numeric(dfThetahat[[x]]))
-  colnames(dfThetahat) <- c("rowEnd","alpha" ,"gamma", "model",  "V5")
+  
+  if(testData@testSuite == "ARLTestSuite")
+  {
+    param2 = "beta"
+    
+  }else if(testData@testSuite == "DRLTestSuite")
+  {
+    param2 = "beta"
+    
+  }else if(testData@testSuite == "CoACAR5")
+  {
+    param2 = "gamma"
+  }
+  
+  
+  colnames(dfThetahat) <- c("rowEnd","alpha" ,param2, "model",  "V5")
   dfThetahat<-melt(dfThetahat,id.vars = c("rowEnd","model","V5"))
   
   
   dfThetahat1 <- dfThetahat[which(dfThetahat[,4]=="alpha"),]
-  colnames(dfThetahat) <- c("rowEnd", "model", "V5","Parameter", "value")
-  dfThetahat1[which(dfThetahat1[,3]=="rat_106"),3] <- "rat1"
-  dfThetahat1[which(dfThetahat1[,3]=="rat_112"),3] <- "rat2"
-  dfThetahat1[which(dfThetahat1[,3]=="rat_113"),3] <- "rat3"
-  dfThetahat1[which(dfThetahat1[,3]=="rat_114"),3] <- "rat4"
-  p<-ggplot() + geom_line(data=dfThetahat1, aes(x=rowEnd,y=value,group=Parameter,col=Parameter))+
+  colnames(dfThetahat1) <- c("rowEnd", "model", "V5","Parameter", "value")
+  #dfThetahat1[which(dfThetahat1[,3]=="rat_101"),3] <- "rat1"
+  dfThetahat1[which(dfThetahat1[,3]=="rat_103"),3] <- "rat1"
+  dfThetahat1[which(dfThetahat1[,3]=="rat_106"),3] <- "rat2"
+  dfThetahat1[which(dfThetahat1[,3]=="rat_112"),3] <- "rat3"
+  dfThetahat1[which(dfThetahat1[,3]=="rat_113"),3] <- "rat4"
+  dfThetahat1[which(dfThetahat1[,3]=="rat_114"),3] <- "rat5"
+  p1<-ggplot() + geom_line(data=dfThetahat1, aes(x=rowEnd,y=value,group=Parameter,col=Parameter))+
     scale_color_manual(values=c("black","red")) +
-    facet_grid(model~V5,scales = "free_x")+labs(y = "Parameter value", x = "Path Nb")
+    facet_grid(model~V5,scales = "free_x")+labs(y = "Parameter value", x = "Path Nb")+
+    theme(axis.text.x = element_text(angle=45))+scale_y_continuous(trans='log2')
   
   
-  dfThetahat2 <- dfThetahat[which(dfThetahat[,4]=="gamma"),]
-  colnames(dfThetahat) <- c("rowEnd", "model", "V5","Parameter", "value")
-  dfThetahat2[which(dfThetahat2[,3]=="rat_106"),3] <- "rat1"
-  dfThetahat2[which(dfThetahat2[,3]=="rat_112"),3] <- "rat2"
-  dfThetahat2[which(dfThetahat2[,3]=="rat_113"),3] <- "rat3"
-  dfThetahat2[which(dfThetahat2[,3]=="rat_114"),3] <- "rat4"
+  dfThetahat2 <- dfThetahat[which(dfThetahat[,4]==param2),]
+  colnames(dfThetahat2) <- c("rowEnd", "model", "V5","Parameter", "value")
+  #dfThetahat2[which(dfThetahat2[,3]=="rat_101"),3] <- "rat1"
+  dfThetahat2[which(dfThetahat2[,3]=="rat_103"),3] <- "rat1"
+  dfThetahat2[which(dfThetahat2[,3]=="rat_106"),3] <- "rat2"
+  dfThetahat2[which(dfThetahat2[,3]=="rat_112"),3] <- "rat3"
+  dfThetahat2[which(dfThetahat2[,3]=="rat_113"),3] <- "rat4"
+  dfThetahat2[which(dfThetahat2[,3]=="rat_114"),3] <- "rat5"
   p2<-ggplot() + geom_line(data=dfThetahat2, aes(x=rowEnd,y=value,group=Parameter,col=Parameter))+
     scale_color_manual(values=c("black","red")) +
-    facet_grid(model~V5,scales = "free_x")+labs(y = "Parameter value", x = "Path Nb")
+    facet_grid(model~V5,scales = "free_x")+labs(y = "Parameter value", x = "Path Nb")+
+    theme(axis.text.x = element_text(angle=45))+scale_y_continuous(trans='log2')
   
   #rat.dir = file.path(paste(res.dir,rat,sep="/"))
-  setwd(res.dir)
+  
+  p4<-grid.arrange(p1,p2,nrow=2)
+  setwd(plot.dir)
+  testSuite = testData@testSuite
+  ggsave(paste0("Thetahat_",testSuite,".pdf"), p4, path = plot.dir, width=10,height=9)
   
   #par(xpd=FALSE)
   dev.off()
@@ -1356,7 +1381,7 @@ printMatRes=function(ratdata,testData,res.dir)
 }
 
 
-plotSimParamEstimation=function(dfParamEstTest,plot.dir)
+plotSimParamEstimation=function(dfParamEstTest,testData,plot.dir)
 {
   setwd(plot.dir)
   cols.num <- c(1,2,3)
@@ -1366,9 +1391,9 @@ plotSimParamEstimation=function(dfParamEstTest,plot.dir)
                   Rat=character(),
                   label=character(),
                   stringsAsFactors=FALSE)
-  ratTrials<-c("rat_106"=2204,"rat_112"=4102,"rat_113"=2085,"rat_114"=2278)
+  ratTrials<-c("rat_103"=2862,"rat_106"=2204,"rat_112"=4102,"rat_113"=2085,"rat_114"=2278)
   models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
-  for(r in c("rat_106","rat_112","rat_113","rat_114"))
+  for(r in c("rat_103","rat_106","rat_106","rat_112","rat_113","rat_114"))
   {
     for(m in models)
     {
@@ -1377,42 +1402,72 @@ plotSimParamEstimation=function(dfParamEstTest,plot.dir)
     }
   }
   
-  df[which(df[,2]=="rat_106"),2] <- "rat1"
-  df[which(df[,2]=="rat_112"),2] <- "rat2"
-  df[which(df[,2]=="rat_113"),2] <- "rat3"
-  df[which(df[,2]=="rat_114"),2] <- "rat4"
+  #df[which(df[,2]=="rat_101"),2] <- "rat1"
+  df[which(df[,2]=="rat_103"),2] <- "rat1"
+  df[which(df[,2]=="rat_106"),2] <- "rat2"
+  df[which(df[,2]=="rat_112"),2] <- "rat3"
+  df[which(df[,2]=="rat_113"),2] <- "rat4"
+  df[which(df[,2]=="rat_114"),2] <- "rat5"
   colnames(df)<-c("Model","Rat","V3")
   dfParamEstTest<-  melt(dfParamEstTest,id.vars = c("Iter","Model","Rat"))
   
   #dfParamEstTest.melt = dfParamEstTest.melt %>% 
   #  mutate(variable = recode_factor(variable, `AlphaDiff` = "hat(alpha)[MLE]-(alpha[true]%+-%0.05)", `GammaDiff` = "hat(gamma)[MLE]-(gamma[true]%+-%0.05)"))
   
-  dfParamEstTest = dfParamEstTest %>% 
-    mutate(variable = recode_factor(variable, `AlphaDiff` = "hat(alpha)[MLE]-alpha[true]", `GammaDiff` = "hat(gamma)[MLE]-gamma[true]"))
-  dfParamEstTest[which(dfParamEstTest[,3]=="rat_106"),3] <- "rat1"
-  dfParamEstTest[which(dfParamEstTest[,3]=="rat_112"),3] <- "rat2"
-  dfParamEstTest[which(dfParamEstTest[,3]=="rat_113"),3] <- "rat3"
-  dfParamEstTest[which(dfParamEstTest[,3]=="rat_114"),3] <- "rat4"
   
-  dfParamEstTest1 <- dfParamEstTest[which(dfParamEstTest$variable=="hat(alpha)[MLE]-alpha[true]"),]
-  dfParamEstTest2 <- dfParamEstTest[which(dfParamEstTest$variable=="hat(gamma)[MLE]-gamma[true]"),]
+  #dfParamEstTest[which(dfParamEstTest[,3]=="rat_101"),3] <- "rat1"
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_103"),3] <- "rat1"
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_106"),3] <- "rat2"
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_112"),3] <- "rat3"
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_113"),3] <- "rat4"
+  dfParamEstTest[which(dfParamEstTest[,3]=="rat_114"),3] <- "rat5"
   
-  p<-ggplot(data=dfParamEstTest1) + geom_boxplot(aes(x=as.factor(Iter),y=value,fill=factor(variable)),outlier.size = 0.1)+
+  if(testData@testSuite == "ARLTestSuite")
+  {
+    dfParamEstTest = dfParamEstTest %>% 
+      mutate(variable = recode_factor(variable, `AlphaDiff` = "hat(alpha)[MLE]-alpha[true]", `GammaDiff` = "hat(beta)[MLE]-beta[true]"))
+    
+    dfParamEstTest1 <- dfParamEstTest[which(dfParamEstTest$variable=="hat(alpha)[MLE]-alpha[true]"),]
+    dfParamEstTest2 <- dfParamEstTest[which(dfParamEstTest$variable=="hat(beta)[MLE]-beta[true]"),]
+    
+  }else if(testData@testSuite == "DRLTestSuite")
+  {
+    dfParamEstTest = dfParamEstTest %>% 
+      mutate(variable = recode_factor(variable, `AlphaDiff` = "hat(alpha)[MLE]-alpha[true]", `GammaDiff` = "hat(beta)[MLE]-beta[true]"))
+    
+    dfParamEstTest1 <- dfParamEstTest[which(dfParamEstTest$variable=="hat(alpha)[MLE]-alpha[true]"),]
+    dfParamEstTest2 <- dfParamEstTest[which(dfParamEstTest$variable=="hat(beta)[MLE]-beta[true]"),]
+    
+  }else if(testData@testSuite == "CoACAR5")
+  {
+    dfParamEstTest = dfParamEstTest %>% 
+      mutate(variable = recode_factor(variable, `AlphaDiff` = "hat(alpha)[MLE]-alpha[true]", `GammaDiff` = "hat(gamma)[MLE]-gamma[true]"))
+    
+    dfParamEstTest1 <- dfParamEstTest[which(dfParamEstTest$variable=="hat(alpha)[MLE]-alpha[true]"),]
+    dfParamEstTest2 <- dfParamEstTest[which(dfParamEstTest$variable=="hat(gamma)[MLE]-gamma[true]"),]
+  }
+  
+  
+  p1<-ggplot(data=dfParamEstTest1) + geom_boxplot(aes(x=as.factor(Iter),y=value,fill=factor(variable)),outlier.size = 0.1)+
     scale_fill_manual("Model parameters",values = c("royalblue", "orange"),labels = parse_format()) +
     facet_grid(Model~Rat,scales = "free_x")+
     theme(legend.spacing.x = unit(1.0, 'cm'),axis.text.x = element_text(size = 6))+
     geom_text(data = df, x = Inf, y = Inf,aes(label = V3),size=2,hjust   = 1.05,vjust   = 1.5)+
     labs(y = "Estimated - True Parameter Values", x = "Path Nb")
-  print(p)
+  print(p1)
   
   
-  p<-ggplot(data=dfParamEstTest2) + geom_boxplot(aes(x=as.factor(Iter),y=value,fill=factor(variable)),outlier.size = 0.1)+
+  p2<-ggplot(data=dfParamEstTest2) + geom_boxplot(aes(x=as.factor(Iter),y=value,fill=factor(variable)),outlier.size = 0.1)+
     scale_fill_manual("Model parameters",values = c("royalblue", "orange"),labels = parse_format()) +
     facet_grid(Model~Rat,scales = "free_x")+
     theme(legend.spacing.x = unit(1.0, 'cm'),axis.text.x = element_text(size = 6))+
     geom_text(data = df, x = Inf, y = Inf,aes(label = V3),size=2,hjust   = 1.05,vjust   = 1.5)+
     labs(y = "Estimated - True Parameter Values", x = "Path Nb")
-  print(p)
+  print(p2)
+  
+  p4<-grid.arrange(p1,p2,nrow=2)
+  testSuite=testData@testSuite
+  ggsave(paste0("ParamEstTest_",testSuite,".pdf"), p4, path = plot.dir, width=15,height=9)
   #plot.new()
   #par(xpd=TRUE)
   
@@ -1812,11 +1867,11 @@ plotSimParamEstimation2=function(ratdata,testData,res.dir,plot.dir)
 }
 
 
-plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
+plotSimProbBoxPlots=function(ratdata,model.data.dir, testData, plot.dir)
 {
   rat=ratdata@rat
-  print(res.dir)
-  setwd(res.dir)
+  #print(model.data.dir)
+  setwd(model.data.dir)
   dfData=list.files(".", pattern=paste0(rat,".*minDflist.Rdata"), full.names=FALSE)
   load(dfData)
   # for(i in c(1:length(dfData)))
@@ -1939,8 +1994,11 @@ plotSimProbBoxPlots=function(ratdata,res.dir,plot.dir)
     strip.background = element_blank(),
   )+labs(y = "Probability Difference", x = "Paths")+ylim(c(-1,1))+scale_x_discrete(guide = guide_axis(n.dodge=3))   
   
-  pdf(paste(plot.dir,"/","BoxPlotSim_",rat,".pdf",sep=""),width=11, height=7)
+  #pdf(paste(plot.dir,"/","BoxPlotSim_",rat,".pdf",sep=""),width=11, height=7)
   print(p)
+  #dev.off()
+  testSuite=testData@testSuite
+  ggsave(paste0("ProbDiffBoxPlot_",testSuite,"_",ratName,".pdf"), p, path = plot.dir, width=15,height=9)
   dev.off()
   
   
@@ -2156,6 +2214,75 @@ plotPathProbs2=function(ratdata,allmodelRes,plot.dir)
   
     pdf(file=paste("PathProb_Path","_",rat,".pdf",sep=""),width=8, height=8)
     
+}
+
+plotPathProbs3=function(ratdata,plot.dir)
+{
+  ratName=ratdata@rat
+
+  for(crAssgn in c("CoACAR5","ARLTestSuite","DRLTestSuite")){
+    modelName = "Hybrid3"
+    if(crAssgn == "ARLTestSuite")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/ARLTestSuite"
+      creditAssignment = "qlearningAvgRwd"
+      
+      if(ratName=="rat_113" || ratName=="rat_114")
+      {
+        modelName = "Hybrid2"
+      }
+      
+    }else if(crAssgn == "DRLTestSuite")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/DRLTestSuite"
+      creditAssignment = "qlearningDisRwd"
+      
+      if(ratName=="rat_113")
+      {
+        modelName = "Turns"
+      }
+      
+    }else if(crAssgn == "CoACAR5")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/CoACAR5"
+      creditAssignment = "aca2"
+    }
+    
+
+   modelData = new("ModelData", Model=modelName, creditAssignment = creditAssignment , sim=2)
+   
+   param.model.data.dir = file.path(model.data.dir,ratName,"modelParams")
+   setwd(param.model.data.dir)
+   print(sprintf("param.model.data.dir=%s, testSuite=%s",param.model.data.dir,crAssgn))
+   ratName = ratdata@rat
+   load(list.files(".", pattern=paste0(ratName,"_",crAssgn,".*resMatList.Rdata"), full.names=FALSE))
+   modelParamsList <- resMat[which(as.numeric(resMat[,1])==length(ratdata@allpaths[,1]) & resMat[,2] == modelName),]
+   modelData@alpha <- as.numeric(modelParamsList[3])
+   modelData@gamma1 <- as.numeric(modelParamsList[4])
+   modelData@gamma2 <- as.numeric(modelParamsList[5])
+   modelData@lambda <- as.numeric(modelParamsList[6])
+   
+   
+   
+   testModelGraph = slot(allModels,modelName)
+   probMat <- TurnsNew::getProbMatrix(ratdata, modelData , testModelGraph, sim=2,debug = F)
+  
+   pdf(file = file.path(plot.dir,paste0(ratName,".",modelName,".",creditAssignment,".pdf")), width = 8, height = 8)    
+   plot(probMat[,10],type='l',ylim=c(0,1),ylab = "Path Probability", xlab = "Trials")
+   lines(probMat [,1],type='l',col='red',lty=1)
+   #lines(probMat [,11],type='l',col='green',lty=1)
+   legend("right", legend=c("Good.RF", "Shortcut.LF"), lty=c(1,1),col = c("black","red"))
+   #legend("right", legend=c("Good.LF", "Shortcut.RF","Loop.RF"), lty = c(1,1,1),col = c("black","red","green"))
+   
+   dev.off()
+  }
+  
+  
+  
+
+  
+  
+  
 }
 
 boxDistances = function(path,state)
@@ -2836,20 +2963,33 @@ plotPCA3=function(ratdata,res.dir,allModelRes,plot.dir)
 
 plotPCAComb=function(dfPCA,plot.dir)
 {
-  setwd(plot.dir)
-  dfPCA[which(dfPCA[,6]=="rat_106"),6] <- "rat1"
-  dfPCA[which(dfPCA[,6]=="rat_112"),6] <- "rat2"
-  dfPCA[which(dfPCA[,6]=="rat_113"),6] <- "rat3"
-  dfPCA[which(dfPCA[,6]=="rat_114"),6] <- "rat4"
+  # setwd(plot.dir)
+  # dfPCA[which(dfPCA[,6]=="rat_106"),6] <- "rat1"
+  # dfPCA[which(dfPCA[,6]=="rat_112"),6] <- "rat2"
+  # dfPCA[which(dfPCA[,6]=="rat_113"),6] <- "rat3"
+  # dfPCA[which(dfPCA[,6]=="rat_114"),6] <- "rat4"
+  # cols=c("black", "blue","green","red","violet","brown","yellow")
+  # ggplot(data = dfPCA)+
+  #   geom_path(aes(x=PC1, y=PC2,color=V3,alpha=ifelse(V4 > 800, 0.8,0.4))) +
+  #   geom_path(data = subset(dfPCA, V3 == "Empirical"),aes(x=PC1, y=PC2,alpha=ifelse(V4 > 800, 0.8,0.4))) +
+  #   guides(alpha=guide_legend(title="Brightness scale"))+
+  #   scale_alpha_continuous(limits = c(0.4,0.8), breaks = c(0.4,0.8), label=c("Path Nb <= 800","Path Nb > 800"))+
+  #   scale_color_manual(values = cols)+
+  #   facet_grid(~V6,scale="free")+theme(panel.spacing.x = unit(4, "mm"))+
+  #   labs(y = "PCA Component 1", x = "PCA Component 2")
+  # 
+  dfPCA[which(dfPCA[,6]=="rat_103"),6] <- "rat1"
+  dfPCA[which(dfPCA[,6]=="rat_106"),6] <- "rat2"
+  dfPCA[which(dfPCA[,6]=="rat_112"),6] <- "rat3"
+  dfPCA[which(dfPCA[,6]=="rat_113"),6] <- "rat4"
+  dfPCA[which(dfPCA[,6]=="rat_114"),6] <- "rat5"
   cols=c("black", "blue","green","red","violet","brown","yellow")
-  ggplot(data = dfPCA)+
-    geom_path(aes(x=PC1, y=PC2,color=V3,alpha=ifelse(V4 > 800, 0.8,0.4))) +
-    geom_path(data = subset(dfPCA, V3 == "Empirical"),aes(x=PC1, y=PC2,alpha=ifelse(V4 > 800, 0.8,0.4))) +
-    guides(alpha=guide_legend(title="Brightness scale"))+
-    scale_alpha_continuous(limits = c(0.4,0.8), breaks = c(0.4,0.8), label=c("Path Nb <= 800","Path Nb > 800"))+
-    scale_color_manual(values = cols)+
-    facet_grid(~V6,scale="free")+theme(panel.spacing.x = unit(4, "mm"))+
+  ggplot(data = subset(dfPCA, V3 != "Empirical"))+
+    geom_point(aes(x=PC1, y=PC2,color=V3),size=0.1) +
+    geom_point(data = subset(dfPCA, V3 == "Empirical",-V5),aes(x=PC1, y=PC2),size=0.1) +
+    facet_grid(V5~V6,scale="free")+theme(panel.spacing.x = unit(4, "mm"))+
     labs(y = "PCA Component 1", x = "PCA Component 2")
+  dev.off()
 }
 
 plotPCA3a=function(ratdata,model.data.dir,allmodelRes,plot.dir)
@@ -3035,6 +3175,248 @@ plotPCA3b=function(ratdata,model.data.dir,allmodelRes,plot.dir)
   setwd(plot.dir)
   ggsave(paste("PCA_",rat,".pdf",sep=""), P,width=8, height=8)
 }
+
+
+plotPCA3c=function(ratdata)
+{
+  models.populated = c()
+  models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns") 
+  
+  modelProbMats <- data.frame(matrix(0,0,14))
+  
+  for(crAssgn in c("CoACAR5","ARLTestSuite","DRLTestSuite")){
+    if(crAssgn == "ARLTestSuite")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/ARLTestSuite"
+      creditAssignment = "qlearningAvgRwd"
+      method= "ARL"
+      
+
+    }else if(crAssgn == "DRLTestSuite")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/DRLTestSuite"
+      creditAssignment = "qlearningDisRwd"
+      method= "DRL"
+      
+
+    }else if(crAssgn == "CoACAR5")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/CoACAR5"
+      creditAssignment = "aca2"
+      method= "CoACA"
+    }
+    
+    for(modelName in models)
+    {
+      modelData = new("ModelData", Model=modelName, creditAssignment = creditAssignment , sim=2)
+      
+      param.model.data.dir = file.path(model.data.dir,ratName,"modelParams")
+      setwd(param.model.data.dir)
+      print(sprintf("param.model.data.dir=%s, testSuite=%s",param.model.data.dir,crAssgn))
+      ratName = ratdata@rat
+      load(list.files(".", pattern=paste0(ratName,"_",crAssgn,".*resMatList.Rdata"), full.names=FALSE))
+      modelParamsList <- resMat[which(as.numeric(resMat[,1])==length(ratdata@allpaths[,1]) & resMat[,2] == modelName),]
+      modelData@alpha <- as.numeric(modelParamsList[3])
+      modelData@gamma1 <- as.numeric(modelParamsList[4])
+      modelData@gamma2 <- as.numeric(modelParamsList[5])
+      modelData@lambda <- as.numeric(modelParamsList[6])
+      
+      
+      
+      testModelGraph = slot(allModels,modelName)
+      probMat_model <- TurnsNew::getProbMatrix(ratdata, modelData , testModelGraph, sim=2,debug = F)
+      
+      n=length(probMat_model[,1])
+      probMat_model = cbind(probMat_model,rep(paste0(modelName,".",method),n))
+      
+      modelProbMats <- rbind(modelProbMats, probMat_model)
+      
+    }
+    
+  }
+  
+  empProbMat <- getEmpProbMat1a(ratdata@allpaths,40,2)
+  cols.num <- c(1:13)
+  modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
+  pca = prcomp(modelProbMats[,1:12],scale=T,center = T)
+  empPCA = scale(empProbMat[,c(1:12)], pca$center, pca$scale) %*% pca$rotation
+  df_s1 <- as.data.frame(cbind(pca$x[,1:2], modelProbMats[,13],modelProbMats[,14]))
+  df_s1 <- rbind(df_s1,cbind(empPCA[,1:2], empProbMat[,13],rep("Empirical",length(empPCA[,1]))))
+  cols=c("black", "blue","green","red","violet","brown","yellow")
+  cols.num <- c(1,2,3)
+  df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  min.ARL = "Hybrid3.ARL"
+  min.DRL = "Hybrid3.DRL"
+  df_s1_red <- df_s1[which(df_s1[,4]=="Empirical" | df_s1[,4]=="Hybrid3.CoACA" | df_s1[,4]== min.ARL | df_s1[,4]==min.DRL),]
+  P <- ggplot(data = df_s1_red)+ geom_path(aes(x=PC1, y=PC2,color=V3))+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_wrap(~V4,scales="free")+ 
+    coord_cartesian(xlim = c(min(df_s1$PC1),max(df_s1$PC1)), ylim=c(min(df_s1$PC2),max(df_s1$PC2)))+
+    xlab("Component 1") + ylab("Component 2")
+  
+  print(P)
+    
+}
+
+plotPcaOnDataSet=function(ratdata,model.data.dir,plot.dir)
+{
+  ratName=ratdata@rat
+  setwd(model.data.dir)
+  #dfData=list.files(".", pattern=paste0(ratName,".*AvgRwd_mat_res.Rdata"), full.names=FALSE)
+  #genDataFile = list.files(".", pattern=paste0(ratName,".*_genDataset.Rdata"), full.names=FALSE)
+  #load(genDataFile)
+  holdoutRes = list.files(".", pattern=paste0(ratName,".*_HoldoutRes.Rdata"), full.names=FALSE)
+  load(holdoutRes)
+  #genDataList <- c(1:60)
+  
+  genDataFiles <- list()
+  for(i in c(1:10))
+  {
+    pattern=paste0(ratName,"_GenData",i,"_.*Rdata")
+    #print(pattern)
+    res=list.files(".", pattern=pattern, full.names=FALSE)
+    load(res)
+    print(res)
+    genDataFiles[[i]] <- allData
+    
+    #genDataFiles[[i]] <- get(load(dfData[[i]]))
+  }
+  
+  resList1_idx = 27
+  testModelDataList = resList1[[resList1_idx]]$modelDataList
+  genDataFileNum = resList1[[resList1_idx]]$genDataFile
+  genDataNum = resList1[[resList1_idx]]$genDataNum
+  genDataList <- genDataFiles[[genDataFileNum]]
+  genData = genDataList[[genDataNum]]
+  genModel = genData@simModel
+  print(sprintf("genModel is %s",genModel ))
+  modelProbMats <- data.frame(matrix(0,0,16))
+  for(k in c(1:6))
+  {
+    ##Extracting generator model from resList[[k]][[1]]
+    
+    testModelData = testModelDataList[[k]]
+    testModelName = testModelData@Model
+    print(sprintf("k=%i,testModel=%s",k,testModelName))
+    
+    #probMat_model=testModelData@probMatrix[,c(1:12)]
+    testModel=slot(allModels,testModelName)
+    probMat_model=TurnsNew::getProbMatrix(genData, testModelData, testModel, sim=1)
+    n=length(probMat_model[,1])
+    probMat_model = cbind(probMat_model,c(1:n),rep(testModelName,n),rep(0,n),rep("SimProb",n))
+    
+    curr_idx = length(modelProbMats[,1])
+    modelProbMats <- rbind(modelProbMats, probMat_model)
+    idx1 = curr_idx+1
+    modelProbMats[idx1,16] = 1
+    idx2 = curr_idx+801
+    modelProbMats[idx2,16] = 1
+    idx3 = length(modelProbMats[,1])
+    modelProbMats[idx3,16] = 1
+
+  }
+  
+  empProbMat <- getEmpProbMat3(genData@allpaths,100,1)
+  cols.num <- c(1:13)
+  modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
+  pca = prcomp(modelProbMats[,1:12],scale=T,center = T)
+  empPCA = scale(empProbMat[,c(1:12)], pca$center, pca$scale) %*% pca$rotation
+  df_s1 <- as.data.frame(cbind(pca$x[,1:2], modelProbMats[,15],modelProbMats[,13]))
+  df_s1 <- rbind(df_s1,cbind(empPCA[,1:2], rep("Empirical",length(empPCA[,1])),empProbMat[,13]))
+  cols=c("black", "blue","green","red","violet","brown","yellow")
+  cols.num <- c(1,2,4)
+  df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  df_s1 <- df_s1[which(df_s1$V4 > 800),]
+  P <- ggplot(data = df_s1)+ geom_path(aes_(x=df_s1$PC1, y=df_s1$PC2,color=df_s1$V4))+
+    scale_colour_gradientn(colours = terrain.colors(10),name = "Trials")+facet_grid(~df_s1$V3)+ 
+    coord_cartesian(xlim = c(min(df_s1$PC1),max(df_s1$PC1)), ylim=c(min(df_s1$PC2),max(df_s1$PC2)))+
+    xlab("Component 1") + ylab("Component 2")
+  
+  print(P)
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P,width=8, height=8)
+}
+
+
+plotPcaOnRealData=function(ratdata,testDataList,model.data.dir,plot.dir)
+{
+  ratName=ratdata@rat
+  setwd(model.data.dir)
+  #dfData=list.files(".", pattern=paste0(ratName,".*AvgRwd_mat_res.Rdata"), full.names=FALSE)
+  #genDataFile = list.files(".", pattern=paste0(ratName,".*_genDataset.Rdata"), full.names=FALSE)
+  #load(genDataFile)
+  #holdoutRes = list.files(".", pattern=paste0(ratName,".*_HoldoutRes.Rdata"), full.names=FALSE)
+  #load(holdoutRes)
+  #genDataList <- c(1:60)
+  
+  
+  modelProbMats <- data.frame(matrix(0,0,16))
+  
+  for(i in c(1:length(testDataList)))
+  {
+    testData = testDataList[[i]]
+    models = testData@Models
+    allModelRes = readModelParamsNew(ratdata,model.data.dir,testData, sim=2)
+    
+    for(k in c(1:6))
+    {
+      ##Extracting generator model from resList[[k]][[1]]
+      
+      model = models[k] 
+      
+      modelName = strsplit(model,"\\.")[[1]][1]
+      creditAssignment = strsplit(model,"\\.")[[1]][2]
+      if(creditAssignment=="qlearningAvgRwd")
+      {
+        model=paste0(modelName,".ARL")
+      }else if(creditAssignment=="qlearningDisRwd")
+      {
+        model=paste0(modelName,".DRL")
+      }
+      trueModelData = slot(slot(allModelRes,modelName),creditAssignment)
+      testModel = slot(allModels,modelName)
+      print(sprintf("modelName=%s",modelName))
+      probMat_model=TurnsNew::getProbMatrix(ratdata, trueModelData, testModel, sim=2)
+      n=length(probMat_model[,1])
+      probMat_model = cbind(probMat_model,c(1:n),rep(model,n),rep(0,n),rep("SimProb",n))
+      
+      curr_idx = length(modelProbMats[,1])
+      modelProbMats <- rbind(modelProbMats, probMat_model)
+      idx1 = curr_idx+1
+      modelProbMats[idx1,16] = 1
+      idx2 = curr_idx+801
+      modelProbMats[idx2,16] = 1
+      idx3 = length(modelProbMats[,1])
+      modelProbMats[idx3,16] = 1
+      
+    }
+  }
+ 
+  
+  empProbMat <- getEmpProbMat3(ratdata@allpaths,30,2)
+  cols.num <- c(1:13)
+  modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
+  pca = prcomp(modelProbMats[,1:12],scale=T,center = T)
+  empPCA = scale(empProbMat[,c(1:12)], pca$center, pca$scale) %*% pca$rotation
+  df_s1 <- as.data.frame(cbind(pca$x[,1:2], modelProbMats[,15],modelProbMats[,13]))
+  df_s1 <- rbind(df_s1,cbind(empPCA[,1:2], rep("Empirical",length(empPCA[,1])),empProbMat[,13]))
+  cols=c("black", "blue","green","red","violet","brown","yellow")
+  cols.num <- c(1,2,4)
+  df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
+  df_s1 <- df_s1[which(df_s1$V4 <= 800),]
+  P <- ggplot(data = df_s1)+ geom_point(aes_(x=df_s1$PC1, y=df_s1$PC2,color=df_s1$V4))+
+    scale_colour_gradientn(colours = rainbow(10),name = "Trials")+
+    facet_wrap(~factor(df_s1$V3,levels = c("Empirical","Paths.ARL","Hybrid1.ARL","Hybrid2.ARL","Hybrid3.ARL","Hybrid4.ARL","Turns.ARL",
+                                           "Paths.DRL","Hybrid1.DRL","Hybrid2.DRL","Hybrid3.DRL","Hybrid4.DRL","Turns.DRL",
+                                           "Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")),scales = "free")+ 
+    coord_cartesian(xlim = c(min(df_s1$PC1),max(df_s1$PC1)), ylim=c(min(df_s1$PC2),max(df_s1$PC2)))+
+    xlab("Component 1") + ylab("Component 2")
+  print(P)
+  
+
+  setwd(plot.dir)
+  ggsave(paste("PCA_",rat,".pdf",sep=""), P,width=8, height=8)
+}
+
 
 
 plotPCA4=function(ratdata,res.dir,allModelRes,plot.dir)
@@ -3825,6 +4207,54 @@ getEmpProbMat=function(allpaths,window,sim){
   return(empProbMat)
 }
 
+getEmpProbMat1a=function(allpaths,window,sim){
+  totalActions = length(allpaths[,1])
+  empProbMat = matrix(0,totalActions,13)
+  
+  if(sim==1)
+  {
+    allpaths[,c(1:2)] = allpaths[,c(1:2)] + 1
+  }
+  for(trial in c(1:totalActions)){
+    empProbMat[trial,13] = allpaths[trial,6]
+    if(trial > 1 )
+    {
+      empProbMat[trial,1:12] = empProbMat[trial-1,1:12]
+    }
+    currState = allpaths[trial,2]
+    
+    allpaths_currstate = allpaths[which(allpaths[,2]==currState),]
+    trialIdx = which(allpaths_currstate[,6]==trial)
+    alltrialIdx_currstate = allpaths_currstate[,6]
+    
+    
+    startId = trialIdx - window/2
+    if(startId <= 0)
+    {
+      startId = 1
+    }
+    endId = trialIdx + window/2
+    if(endId > length(allpaths_currstate[,1]))
+    {
+      endId = length(allpaths_currstate[,1])
+    }
+    
+    trialSet <- c(startId:endId)
+    undefinedPaths <- which(allpaths_currstate[trialSet,1] == 7)
+    trialSet <- trialSet[! trialSet %in% trialSet[undefinedPaths]]
+    
+    
+    for(path in c(1:6))
+    {
+      empProbMat[trial,(path+6*(currState-1))] = mean(as.numeric(allpaths_currstate[trialSet,1] %in% path)) 
+      
+    }
+  
+  }
+  
+  return(empProbMat)
+}
+
 getEmpProbMat2=function(allpaths,window,sim){
   totalActions = length(allpaths[,1])
   empProbMat = matrix(-1,totalActions,13)
@@ -3838,7 +4268,8 @@ getEmpProbMat2=function(allpaths,window,sim){
     empProbMat[trial,13]= allpaths[trial,6]
     currState = allpaths[trial,2]
     
-    stateIdx <- which(allpaths[1:trial,2]==currState)
+    stateIdx <- which(allpaths[,2]==currState)
+    currTrialIdx = 
      
     
     if(length(stateIdx) <= window)
@@ -3849,6 +4280,7 @@ getEmpProbMat2=function(allpaths,window,sim){
     {
       trialSet = tail(stateIdx,window)
     }
+    
     
 
     for(path in c(1:6))
@@ -3921,7 +4353,81 @@ getEmpProbMat3=function(allpaths,window,sim){
     }
    
   }
+
+  return(empProbMat)
+}
+
+
+getEmpProbMat3b=function(allpaths,window,sim){
+  totalActions = length(allpaths[,1])
+  empProbMat = matrix(0,totalActions,13)
   
+  if(sim==1)
+  {
+    allpaths[,c(1:2)] = allpaths[,c(1:2)] + 1
+  }
+  
+  sessions = unique(allpaths[,5])
+  trial = 0
+  
+  for(ses in sessions)
+  {
+    
+    allpaths_ses = allpaths[which(allpaths[,5] == ses),]
+    
+    for(trial_ses in c(1:length(allpaths_ses[,1])))
+    {
+      trial = trial + 1 
+      empProbMat[trial,13]= allpaths_ses[trial_ses,6]
+      
+      if(trial > 1 )
+      {
+        empProbMat[trial,1:12] = empProbMat[trial-1,1:12]
+      }
+      
+      
+      
+      curr_state <- allpaths_ses[trial_ses,2]
+      #ses_currStateIndices <- which(allpaths_ses[,2] == curr_state)
+      
+      #curr_stateId <- which(allpaths_ses[ses_currStateIndices,6]==trial)
+      
+      currTrialIdx = trial_ses
+      
+      startId = currTrialIdx - window/2
+      if(startId <= 0)
+      {
+        startId = 1
+      }
+      endId = currTrialIdx + window/2
+      if(endId > length(allpaths_ses[,1]))
+      {
+        endId = length(allpaths_ses[,1])
+      }
+      
+      trialSet <- c(startId:endId)
+      undefinedPathIdx <- which(allpaths_ses[trialSet,1] == 7)
+      trialSet <- trialSet[-undefinedPathIdx]
+      #trialSet <- trialSet[! trialSet %in% trialSet[undefinedPaths]]
+      
+      
+      for(path in c(1:6))
+      {
+        #allpaths_ses_trialSet_currState <- allpaths_ses[which(allpaths_ses[trialSet,2]==curr_state),]
+        trialSet_currState = which(allpaths_ses[trialSet,2]==curr_state)
+        if(length(trialSet)==0)
+        {
+          empProbMat[trial,(path+6*(curr_state-1))] = 0
+        }else
+        {
+          empProbMat[trial,(path+6*(curr_state-1))] = sum(as.numeric(allpaths_ses[trialSet[trialSet_currState ],1] %in% path))/length(trialSet)
+        }
+
+      }
+      
+    }
+    
+  }
   
   return(empProbMat)
 }
@@ -4086,23 +4592,57 @@ getStartIndex = function(generated_data){
   return(start_index)
 }
 
-getEndIndex = function(allpaths, sim, limit){
+getEndIndex = function(ratName, generated_data, sim, limit){
   
-  end_index = -1
-  sessions <- allpaths[,5]
-  uniqueSessIds <- unique(sessions)
-  
-  for(sess in uniqueSessIds)
+  if(sim==1){
+    generated_data[,1:2] = generated_data[,1:2] + 1
+  }
+  if(ratName == "rat_101" || ratName == "robert")
   {
-    sessIdx <- which(allpaths[,5]==sess)
-    rewards_sess <- allpaths[sessIdx,3]
-    successRate <- sum(rewards_sess)/length(sessIdx)
-    if(successRate >= limit)
+    if(limit > 0.85)
     {
-      end_index = sessIdx[length(sessIdx)]
+      limit = 0.85
+    }
+    trialPeriod = 20
+    consecutiveTrials = 15
+  }
+  else
+  {
+    #limit = 0.95
+    trialPeriod = 30
+    consecutiveTrials = 20
+  }
+  end_index1=0
+  s1 <- which(generated_data[,2]==1)
+  l<-which(SMA(generated_data[s1,3],trialPeriod)>=limit)
+  k<-split(l, cumsum(c(1, diff(l) != 1)))
+  for(set in 1:length(k)){
+    if(length(k[[set]])>consecutiveTrials){
+      end_index1=k[[set]][1]
       break
     }
   }
+  
+  
+  end_index2=0
+  s2 <- which(generated_data[,2]==2)
+  l<-which(SMA(generated_data[s2,3],trialPeriod)>=limit)
+  k<-split(l, cumsum(c(1, diff(l) != 1)))
+  for(set in 1:length(k)){
+    if(length(k[[set]])>consecutiveTrials){
+      end_index2=k[[set]][1]
+      break
+    }
+  }
+  
+  if(end_index1==0 || end_index2 ==0){
+    end_index = -1
+  }else{
+    end_index = max(s1[end_index1],s2[end_index2])
+    #end_index = round(length(generated_data[,1]))/2
+  }
+  
+  #print(sprintf("end_index=%i", end_index))
   
   return(end_index)
 }

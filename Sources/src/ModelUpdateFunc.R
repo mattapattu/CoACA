@@ -651,16 +651,17 @@ readModelParams <- function(ratdata,res.dir,testingdata, sim){
   return(allmodelRes)
 }
 
-readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
+readModelParamsNew <- function(ratdata,param.model.data.dir,testData, sim){
   
   print(sprintf("Inside readModelParams"))
-  models <- testingdata@Models
+  models <- testData@Models
+  testSuite = testData@testSuite
   
   setwd(param.model.data.dir)
+  print(sprintf("param.model.data.dir=%s, testSuite=%s",param.model.data.dir,testSuite))
   ratName = ratdata@rat
-  load(list.files(".", pattern=paste0(ratName,".*minDfModels.Rdata"), full.names=FALSE))
-  allModelRes <- minDfModels
-  modelParamsList <- minDfModels[which(as.numeric(minDfModels[,2])==  length(ratdata@allpaths[,1])),]
+  load(list.files(".", pattern=paste0(ratName,"_",testSuite,".*resMatList.Rdata"), full.names=FALSE))
+  modelParamsList <- resMat[which(as.numeric(resMat[,1])==  length(ratdata@allpaths[,1])),]
   
   allmodelRes <- new("AllModelRes")
   #setwd(res.dir)
@@ -678,13 +679,11 @@ readModelParamsNew <- function(ratdata,param.model.data.dir,testingdata, sim){
     modelData <- new("ModelData", Model = modelName, creditAssignment = creditAssignment, sim = sim)
     print(sprintf("modelName=%s,creditAssignment=%s",modelName,creditAssignment))
     
-    modelData@alpha <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),3])
-    modelData@gamma1 <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),4])
-    if(creditAssignment == "qlearningAvgRwd")
-    {
-      modelData@gamma2 <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),5])
-      modelData@lambda <- as.numeric(modelParamsList[which(modelParamsList[,1]==modelName),6])
-    }
+    modelData@alpha <- as.numeric(modelParamsList[which(modelParamsList[,2]==modelName),3])
+    modelData@gamma1 <- as.numeric(modelParamsList[which(modelParamsList[,2]==modelName),4])
+    modelData@gamma2 <- as.numeric(modelParamsList[which(modelParamsList[,2]==modelName),5])
+    modelData@lambda <- as.numeric(modelParamsList[which(modelParamsList[,2]==modelName),6])
+    
     modelData <- setModelResults(modelData, ratdata, allModels)
     allmodelRes <- addModelData(allmodelRes, modelData)
     
@@ -722,9 +721,10 @@ printModelParams <- function(testingdata,allmodelResList){
   
 }
 
-checkSimLearns=function(allpaths,sim,limit)
+checkSimLearns=function(ratdata, modelData, testModel,sim,limit)
 {
   #end_index = -1
+  allpaths <- ratdata@allpaths
   simLearns = FALSE
   sessions <- allpaths[,5]
   uniqueSessIds <- unique(sessions)
@@ -739,14 +739,24 @@ checkSimLearns=function(allpaths,sim,limit)
     {
       end_index = sessIdx[length(sessIdx)]
       counter=counter+1
-      #print(sprintf("sess=%i, len sess = %i", sess,length(sessIdx)))
     }
-    
   }
-  if(counter>=3)
-  {
-    simLearns = TRUE
-  }
+  # if(counter>=2)
+  # {
+  #   simLearns = TRUE
+  # }
+  
+  # if(simLearns)
+  # {
+  #   probMat <- TurnsNew::getProbMatrix(ratdata, modelData, testModel, sim)
+  #   if((length(which(probMat[,4] > 0.8)) > 10 && length(which(probMat[,10] > 0.8)) > 10))
+  #   {
+  #     simLearns = TRUE
+  #   }else{
+  #     simLearns = FALSE
+  #   }
+  #   
+  # }
   
   return(simLearns)
 }

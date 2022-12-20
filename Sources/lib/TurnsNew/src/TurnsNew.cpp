@@ -3,6 +3,7 @@
 #include "aca2.hpp"
 #include "aca4.hpp"
 #include "avgRewardQLearning.hpp"
+#include "discountedRwdQLearning.hpp"
 
 
 // [[Rcpp::export()]]
@@ -26,6 +27,10 @@ Rcpp::List simulateTurnsModels(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 te
     {
       ret =   simulateQLearn(ratdata, modelData, testModel, turnModel,turnStages, debug);
     }
+    else if(creditAssignment == "qlearningDisRwd")
+    {
+      ret =   simulateDiscountedRwdQlearning(ratdata, modelData, testModel, turnModel,turnStages, debug);
+    }
     return(ret);
 }
 
@@ -41,7 +46,7 @@ std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcp
     }
     else if(creditAssignment == "aca2")
     {
-        ret =   getAca2Likelihood(ratdata, modelData, testModel, sim);
+        ret =   getAca2Likelihood(ratdata, modelData, testModel, sim, debug);
     }
     else if(creditAssignment == "aca4")
     {
@@ -54,6 +59,10 @@ std::vector<double> getTurnsLikelihood(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcp
     else if(creditAssignment == "qlearningAvgRwd")
     {
       ret =   getQLearningLik(ratdata, modelData, testModel, sim, debug);
+    }
+    else if(creditAssignment == "qlearningDisRwd")
+    {
+      ret =   getDiscountedRwdQlearningLik(ratdata, modelData, testModel, sim, debug);
     }
     return(ret);
 }
@@ -83,6 +92,10 @@ arma::mat getProbMatrix(Rcpp::S4 ratdata, Rcpp::S4 modelData, Rcpp::S4 testModel
     else if(creditAssignment == "qlearningAvgRwd")
     {
       ret =   getQLearningProbMat(ratdata, modelData, testModel, sim, debug);
+    }
+    else if(creditAssignment == "qlearningDisRwd")
+    {
+      ret =   getDiscountedRwdQlearningProbMat(ratdata, modelData, testModel, sim, debug);
     }
     return(ret);
 }

@@ -1460,7 +1460,7 @@ getMultiConfMatLikModelSelTest2=function(ratdata,data.dir,model.data.dir,count, 
           minmodel@lambda = modelData@lambda
         }
 
-        cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', model, holdoutLik, minmodel@alpha, minmodel@gamma1, minmodel@gamma2, minmodel@lambda))
+        cat(sprintf('modelName = %s, holdoutLik=%f, alpha=%.10f, gamma1=%.10f,gamma2=%f, lambda=%f,\n', model, holdoutLik, modelData@alpha, modelData@gamma1, modelData@gamma2, modelData@lambda))
         
         modelData
       }

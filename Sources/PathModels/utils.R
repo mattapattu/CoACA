@@ -355,6 +355,7 @@ getTurnDuration=function(path, state, enregRows)
 }
 
 
+
 getTurnsMatrix=function(allpaths,enreg,turnsModel)
 {
   totalTurns = 3*length(allpaths[,1])
@@ -571,6 +572,7 @@ convertTurnTimes=function(ratdata, turnsModel, hybridModel, sim)
       hybridModelMat[actIdx,6] = sum(diff_times)
       actIdx = actIdx+1
     }
+    
   }
   hybridModelMat = hybridModelMat[-(actIdx:totActions),]
   if(sim == 1)
@@ -2219,6 +2221,7 @@ plotPathProbs2=function(ratdata,allmodelRes,plot.dir)
 plotPathProbs3=function(ratdata,plot.dir)
 {
   ratName=ratdata@rat
+  df <- data.frame()
 
   for(crAssgn in c("CoACAR5","ARLTestSuite","DRLTestSuite")){
     modelName = "Hybrid3"
@@ -2226,26 +2229,31 @@ plotPathProbs3=function(ratdata,plot.dir)
     {
       model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/ARLTestSuite"
       creditAssignment = "qlearningAvgRwd"
-      
+      method = "ARL"
+
       if(ratName=="rat_113" || ratName=="rat_114")
       {
         modelName = "Hybrid2"
+        
       }
       
     }else if(crAssgn == "DRLTestSuite")
     {
       model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/DRLTestSuite"
       creditAssignment = "qlearningDisRwd"
+      method = "DRL"
       
       if(ratName=="rat_113")
       {
         modelName = "Turns"
+        
       }
       
     }else if(crAssgn == "CoACAR5")
     {
       model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/CoACAR5"
       creditAssignment = "aca2"
+      method = "CoACA"
     }
     
 
@@ -2262,23 +2270,43 @@ plotPathProbs3=function(ratdata,plot.dir)
    modelData@gamma2 <- as.numeric(modelParamsList[5])
    modelData@lambda <- as.numeric(modelParamsList[6])
    
-   
-   
    testModelGraph = slot(allModels,modelName)
    probMat <- TurnsNew::getProbMatrix(ratdata, modelData , testModelGraph, sim=2,debug = F)
-  
-   pdf(file = file.path(plot.dir,paste0(ratName,".",modelName,".",creditAssignment,".pdf")), width = 8, height = 8)    
-   plot(probMat[,10],type='l',ylim=c(0,1),ylab = "Path Probability", xlab = "Trials")
-   lines(probMat [,1],type='l',col='red',lty=1)
-   #lines(probMat [,11],type='l',col='green',lty=1)
-   legend("right", legend=c("Good.RF", "Shortcut.LF"), lty=c(1,1),col = c("black","red"))
-   #legend("right", legend=c("Good.LF", "Shortcut.RF","Loop.RF"), lty = c(1,1,1),col = c("black","red","green"))
+   probMat <- cbind(probMat,paste0(modelName,".",method))
+    
+   df <- rbind(df,probMat)
    
-   dev.off()
   }
   
+  empProbMat <- getEmpProbMat3(ratdata@allpaths,40,2)
+  empProbMat <- cbind(empProbMat,"Empirical")
+  empDf <- as.data.frame(empProbMat)
   
+  df <- rbind(df,empDf)
+  colnames(df) <- c("Shortcut.LF","V2","V3","Good.LF","Loop.LF","V6","Shortcut.RF","V7","V8","Good.RF","Loop.RF","V9","V13","V14")
   
+  cols.num <- c(1:13)
+  df[,cols.num] <- lapply(cols.num,function(x) as.numeric(df[[x]]))  
+  empDf[,cols.num] <- lapply(cols.num,function(x) as.numeric(empDf[[x]]))
+  
+  df.melt<-melt(df[,c(7,4,13,14)],id.vars = c("V13","V14"))
+  colnames(df.melt) <- c("V13","V14","Paths","value")
+  p <- ggplot(data = df.melt)+ geom_line(aes(x=V13, y=value,col=Paths)) + facet_wrap(~V14,nrow=2)+
+    scale_color_manual(values=c("red","black"))+xlab("Trials")+ylab("Path Probability")+
+    theme(legend.position="bottom",strip.text = element_text(size=15),legend.title = element_blank(),
+          legend.text = element_text(size=14),axis.title=element_text(size=14),axis.text=element_text(size=14))+
+    theme(legend.position="bottom")+scale_x_continuous(expand = c(0, 0)) + scale_y_continuous(expand = c(0, 0))
+  
+  print(p)
+  
+  pdf(file = file.path(plot.dir,paste0(ratName,".",modelName,".",creditAssignment,".pdf")), width = 8, height = 8)    
+  plot(probMat[,10],type='l',ylim=c(0,1),ylab = "Path Probability", xlab = "Trials")
+  lines(probMat [,1],type='l',col='red',lty=1)
+  #lines(probMat [,11],type='l',col='green',lty=1)
+  legend("right", legend=c("Good.RF", "Shortcut.LF"), lty=c(1,1),col = c("black","red"))
+  #legend("right", legend=c("Good.LF", "Shortcut.RF","Loop.RF"), lty = c(1,1,1),col = c("black","red","green"))
+  
+  dev.off()
 
   
   
@@ -4830,7 +4858,6 @@ enregCombine=function(enreg,rat){
   
   return(list("allpaths" = allpaths, "boxTimes" = boxTimes))
 }
-
 
 populateRatModel=function(rat,allpaths,enreg,turnsModel)
 {

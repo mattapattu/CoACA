@@ -27,13 +27,13 @@ computeModelLik = F
 loadAllModelRes = F
 modelSelection = F
 
-plotProb = F
+plotProb = T
 plotLik = F
 
-validateHoldout = FALSE
+validateHoldout = F
 
 printHoldoutRes = F
-paramEstTest = T
+paramEstTest = F
 analyzeParams = F
 thetaHatTest = F
 pcaPlot = F
@@ -53,12 +53,14 @@ if(unitTest1)
 }else
 {
   data.path = file.path("C:/Users/matta/OneDrive/Documents/Projects/Rats-Credit/Data/new_data_journeys.Rdata")
+  neuron.data = file.path("C:/Users/matta/OneDrive/Documents/Projects/Rats-Credit/Data/EnregNeurons.Rdata")
   #data.path = file.path("C:/Users/matta/OneDrive/Documents/Rats-Credit/Data/data_journeys.Rdata")
   #data.path = file.path("/home/amoongat/Projects/Rats-Credit/data_journeys.Rdata")
   
 }
 
 load(data.path)
+load(neuron.data)
 #load(data.path2)
 
 plot.dir = file.path("C:/Users/matta/OneDrive/Documents/Projects/Rats-Credit/Plots")
@@ -84,7 +86,7 @@ source(paste(src.dir,"BaseClasses.R", sep="/"))
 source(paste(src.dir,"ModelUpdateFunc.R", sep="/"))
 source(paste(src.dir,"ValidationFunc.R", sep="/"))
 source(paste(src.dir,"../PathModels/utils.R", sep="/"))
-
+source(paste(src.dir,"utils2.R",sep="/"))
 ### Loop through the enreg of all 6 rats
 ratDataList = list()
 allmodelResList <- list()
@@ -117,13 +119,25 @@ dfProbBoxPlot <- data.frame(Path1.S1=double(),
                             TextVec=integer(),
                             Rat=character(),
                             stringsAsFactors=FALSE)
-avgRwd_gamma2= 0.3
 
-for (i in c(4)) {
+
+#testData = new("TestModels", testSuite = "DRLTestSuite",Models=c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd"))
+#testData = new("TestModels", testSuite = "ARLTestSuite",Models=c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd"))
+testData = new("TestModels", testSuite = "CoACAR5",Models=c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd"))
+
+
+
+arlTestData = new("TestModels",testSuite="ARLTestSuite", Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
+coacaTestData = new("TestModels",testSuite="CoACAR5", Models=c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2"))
+drlTestData = new("TestModels",testSuite="DRLTestSuite", Models=c("Paths.qlearningDisRwd","Hybrid1.qlearningDisRwd","Hybrid2.qlearningDisRwd","Hybrid3.qlearningDisRwd","Hybrid4.qlearningDisRwd","Turns.qlearningDisRwd"))
+
+
+for (i in c(2:6)) {
   
   #testData = new("TestModels", Models=c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns"), creditAssignment=c("aca2"))
-  testData = new("TestModels", Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
-  #testData = new("TestModels", Models=c("Paths.aca4","Hybrid1.aca4","Hybrid2.aca4","Hybrid3.aca4","Hybrid4.aca4","Turns.aca4"))
+ # testData = new("TestModels",testSuite="CoACAR5", Models=c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2"))
+  #testData = new("TestModels", testSuite = "AvgRwd",Models=c("Paths.qlearningAvgRwd","Hybrid1.qlearningAvgRwd","Hybrid2.qlearningAvgRwd","Hybrid3.qlearningAvgRwd","Hybrid4.qlearningAvgRwd","Turns.qlearningAvgRwd"))
+  
   
   #model = "Model2"
   
@@ -137,6 +151,7 @@ for (i in c(4)) {
     rawData <- donnees_ash[[i]]
   }
   
+  #debug(enregCombine)
   enregres = enregCombine(rawData,rats[i])
   allpaths = enregres$allpaths
   boxTimes = enregres$boxTimes
@@ -150,11 +165,17 @@ for (i in c(4)) {
   }
   else
   {
+    
     ratdata = populateRatModel(allpaths=allpaths,rat=rats[i],donnees_ash[[i]],TurnModel)
+    ratPathNeuronalData = computePathNeurons(rawData,i)
+    debug(computeNeuronalFiringRates)
+    ratNeuronalData = computeNeuronalFiringRates(ratdata,i, donnees_ash[[i]],TurnModel)
     #load(paste0("C:/Users/matta/Downloads/rat_112_allmodelRes.Rdata"))
     #load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
     #load(paste0("C:/Rats-Credits/aca2_allmodelRes_",rats[i],".RData"))
   }
+  
+  ratName = ratdata@rat
   
   if(unitTest2)
   {
@@ -178,6 +199,9 @@ for (i in c(4)) {
   
   ############### Likelihood Computation and Model Selection ###########################################
   
+  #debug(checkEpisodes)
+  episodeList = checkEpisodes(ratdata)
+  
   if(printHoldoutRes)
   {
     printMatRes(ratdata,testData,"C:/Users/matta/Downloads")
@@ -185,6 +209,7 @@ for (i in c(4)) {
  
   if(computeModelParams)
   {
+    debug(getModelParams)
     getModelParams(ratdata,testData)
   }
   
@@ -227,10 +252,12 @@ for (i in c(4)) {
     #debug(generatePlots)
     #dir <- file.path(plot.dir,"New")
     #generatePlots(ratdata,allmodelRes,window=30,dir)
-    debug(plotPathProbs2)
-    load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
-    plotPathProbs2(ratdata,allmodelRes,plot.dir)
+    #debug(plotPathProbs2)
+    #load(file=paste0(model.data.dir,paste0("/aca2_",model,"_allmodelRes_",rats[i],".Rdata")))
+    #plotPathProbs2(ratdata,allmodelRes,plot.dir)
     
+    debug(plotPathProbs3)
+    plotPathProbs3(ratdata,plot.dir="C:/Projects/Rats-Credits/Data/Paper2/Plots")
     
     #debug(generateEmpiricalPlots)
     #generateEmpiricalPlots(ratdata,window=20)
@@ -268,10 +295,22 @@ for (i in c(4)) {
   
   if(paramEstTest)
   {
-    model.data.dir="C:/Users/matta/Downloads"
+    if(testData@testSuite == "ARLTestSuite")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/ARLTestSuite"
+      
+    }else if(testData@testSuite == "DRLTestSuite")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/DRLTestSuite"
+      
+    }else if(testData@testSuite == "CoACAR5")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/CoACAR5"
+    }
+    model.data.dir=file.path(model.data.dir, ratName,"paramEstTest")
     
     debug(plotSimProbBoxPlots)
-    plotSimProbBoxPlots(ratdata,model.data.dir,plot.dir)
+    plotSimProbBoxPlots(ratdata,model.data.dir,testData, plot.dir="C:/Projects/Rats-Credits/Data/Paper2/Plots")
     
     #debug(plotSimParamEstimation2)
     #plotSimParamEstimation2(ratdata,testData,model.data.dir,plot.dir)
@@ -285,44 +324,45 @@ for (i in c(4)) {
     #testParamEstimation(ratdata,testData,src.dir,setup.hpc,model.data.dir,allModelRes)
     
     
+    ## Uncomment to run plotSimParamEstimation
     
-    rat=ratdata@rat
-    setwd(model.data.dir)
-    dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Stability_df.Rdata"), full.names=FALSE)
-    listDfData <- list()
-    for(i in c(1:length(dfData)))
-    {
-      print(dfData[i])
-      load(dfData[i])
-      listDfData[[i]] <- df
-    }
-    dfcombined <- bind_rows(listDfData)
-    
-    iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
-    maxVecs=iters
-    
-    models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
-    for(model in models)
-    {
-      dfModel <- dfcombined[which(dfcombined[,1]==model),]
-      nbSims <- length(which(dfModel[,2]==maxVecs[1]))
-      print(sprintf("model=%s, nbSims=%i",model,nbSims))
-      if(nbSims > 0)
-      {
-        for(iter in maxVecs)
-        {
-          rowEnd = iter
-          simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),5]
-          simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),6]
-          
-          true_random_alphas <- dfModel[which(dfModel[,2]==rowEnd),9]
-          true_random_gammas <- dfModel[which(dfModel[,2]==rowEnd),10]
-          
-          dfParamEstTest <- rbind(dfParamEstTest,cbind(simulation_alphas-true_random_alphas, simulation_gammas-true_random_gammas,rep(iter,length(simulation_alphas)),rep(model,length(simulation_alphas)),rep(rat,length(simulation_alphas)) ))
-          
-        }
-      }
-    }
+    # rat=ratdata@rat
+    # setwd(model.data.dir)
+    # dfData=list.files(".", pattern=paste0(rat,".*ParamEs_Stability_df.Rdata"), full.names=FALSE)
+    # listDfData <- list()
+    # for(i in c(1:length(dfData)))
+    # {
+    #   print(dfData[i])
+    #   load(dfData[i])
+    #   listDfData[[i]] <- df
+    # }
+    # dfcombined <- bind_rows(listDfData)
+    # 
+    # iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
+    # maxVecs=iters
+    # 
+    # models <- c("Paths", "Hybrid1", "Hybrid2", "Hybrid3", "Hybrid4", "Turns")
+    # for(model in models)
+    # {
+    #   dfModel <- dfcombined[which(dfcombined[,1]==model),]
+    #   nbSims <- length(which(dfModel[,2]==maxVecs[1]))
+    #   print(sprintf("model=%s, nbSims=%i",model,nbSims))
+    #   if(nbSims > 0)
+    #   {
+    #     for(iter in maxVecs)
+    #     {
+    #       rowEnd = iter
+    #       simulation_alphas <- dfModel[which(dfModel[,2]==rowEnd),5]
+    #       simulation_gammas <- dfModel[which(dfModel[,2]==rowEnd),6]
+    #       
+    #       true_random_alphas <- dfModel[which(dfModel[,2]==rowEnd),9]
+    #       true_random_gammas <- dfModel[which(dfModel[,2]==rowEnd),10]
+    #       
+    #       dfParamEstTest <- rbind(dfParamEstTest,cbind(simulation_alphas-true_random_alphas, simulation_gammas-true_random_gammas,rep(iter,length(simulation_alphas)),rep(model,length(simulation_alphas)),rep(rat,length(simulation_alphas)) ))
+    #       
+    #     }
+    #   }
+    # }
     
   }
   
@@ -353,19 +393,33 @@ for (i in c(4)) {
     # }
     
     rat=ratdata@rat
-    #setwd(model.data.dir)
-    setwd("C:/Users/matta/Downloads")
-    #paramTestData=list.files(".", pattern=paste0(rat,".*.ParamRes.Rdata"), full.names=FALSE)
-    #load(paramTestData)
-    iters=c(seq(from = 0, to = length(allpaths[,1]), by = 400)[-1],length(allpaths[,1]))
     
-    minDf <- list.files(".", pattern=paste0(ratdata@rat,".*minDfModels.Rdata"), full.names=FALSE)[1]
+    
+    if(testData@testSuite == "ARLTestSuite")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/ARLTestSuite"
+      
+    }else if(testData@testSuite == "DRLTestSuite")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/DRLTestSuite"
+      
+    }else if(testData@testSuite == "CoACAR5")
+    {
+      model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/CoACAR5"
+    }
+    model.data.dir=file.path(model.data.dir, ratName,"modelParams")
+    setwd(model.data.dir)
+    
+    iters=c(seq(from = 0, to = length(allpaths[,1]), by = 200)[-1],length(allpaths[,1]))
+    
+    minDf <- list.files(".", pattern=paste0(ratdata@rat,".*resMatList.Rdata"), full.names=FALSE)[1]
+    print(minDf)
     minDfrat<-get(load(minDf))
     minDfrat.df <- as.data.frame(minDfrat)
-    cols.num <- c(2,3,4,5,6,7,8)
+    cols.num <- c(1,3,4,5,6,7,8)
     minDfrat.df[,cols.num] <- lapply(cols.num,function(x) as.numeric(minDfrat.df[[x]]))
     
-    dfThetahat<-rbind(dfThetahat,cbind(minDfrat.df[,c(2,3,4,1)],rep(rat,length(iters))))
+    dfThetahat<-rbind(dfThetahat,cbind(minDfrat.df[,c(1,3,4,2)],rep(rat,length(iters))))
     
   }
   
@@ -380,62 +434,114 @@ for (i in c(4)) {
     #debug(testPCA)
     #testPCA(ratdata,"C:/Users/matta/Downloads",plot.dir)
     
-    rat=ratdata@rat
-    setwd(model.data.dir)
-    dfData=list.files(".", pattern=paste0(rat,".*resList.Rdata"), full.names=FALSE)
-    combinedResList <- list()
-    for(i in c(1))
-    {
-      print(dfData[i])
-      load(dfData[i])
-      combinedResList <- append(combinedResList,resList)
-    }
-    allmodelRes <- new("AllModelRes")
-    models.populated = c()
-    models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+    #debug(plotPcaOnDataSet)
+    #plotPcaOnDataSet(ratdata,"C:/Users/matta/Downloads",plot.dir)
+    
+    #debug(plotPCA3c)
+    #plotPCA3c(ratdata)
+    
+    #debug(plotPcaOnRealData)
+    #testDataList=list(arlTestData,coacaTestData,drlTestData)
+    #plotPcaOnRealData(ratdata,testDataList,"C:/Users/matta/Downloads",plot.dir)
+    
     modelProbMats <- data.frame(matrix(0,0,16))
-    for(k in c(1:length(combinedResList)))
-    {
-      ##Extracting generator model from resList[[k]][[1]]
-      genData = combinedResList[[k]][[1]]$data
-      genModel = combinedResList[[k]][[1]]$data@simModel
-      ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
-      index = which(models==genModel)
-      testModelData = combinedResList[[k]][[index]]$res
-      testModelName = testModelData@Model
-      #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
-      if(!testModelName %in% models.populated)
+    ratName=ratdata@rat
+    print(sprintf("Rat=%s",ratName))
+    order = c("Hybrid3","Paths","Hybrid1","Hybrid2","Hybrid4","Turns","Empirical")
+    for(crAssgn in c("CoACAR5","ARLTestSuite","DRLTestSuite")){
+      if(crAssgn == "ARLTestSuite")
       {
-        models.populated = c(models.populated,genModel)
-        print(sprintf("testModel=%s",testModelName))
-        #modelData <- slot(slot(allmodelRes,"Paths"),"aca2")
+        model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/ARLTestSuite"
+        creditAssignment = "qlearningAvgRwd"
+        method= "ARL"
+        if(ratName=="rat_113")
+        {
+          order = c("Hybrid2","Paths","Hybrid1","Hybrid3","Hybrid4","Turns","Empirical")
+        }
+        
+      }else if(crAssgn == "DRLTestSuite")
+      {
+        model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/DRLTestSuite"
+        creditAssignment = "qlearningDisRwd"
+        method= "DRL"
         
         
-        #probMat_model=testModelData@probMatrix[,c(1:12)]
-        testModel=slot(allModels,testModelName)
-        probMat_model=TurnsNew::getProbMatrix2(genData, testModelData, testModel, sim=1)
-        n=length(probMat_model[,1])
-        probMat_model = cbind(probMat_model,c(1:n),rep(testModelName,n),rep(0,n),rep("SimProb",n))
-        
-        curr_idx = length(modelProbMats[,1])
-        modelProbMats <- rbind(modelProbMats, probMat_model)
-        idx1 = curr_idx+1
-        modelProbMats[idx1,16] = 1
-        idx2 = curr_idx+801
-        modelProbMats[idx2,16] = 1
-        idx3 = length(modelProbMats[,1])
-        modelProbMats[idx3,16] = 1
-        
+      }else if(crAssgn == "CoACAR5")
+      {
+        model.data.dir="C:/Projects/Rats-Credits/Data/Paper2/CoACAR5"
+        creditAssignment = "aca2"
+        method= "CoACA"
       }
       
-      if(length(models.populated)==6)
+      
+      model.data.dir=file.path(model.data.dir,ratName,"Datasets")
+      setwd(model.data.dir)
+      dfData <- list.files(".", pattern=paste0(ratName,".*genDataset.Rdata"), full.names=FALSE)
+      #print(dfData)
+      #dfData <- dfData[which(str_detect(dfData,paste0("GenData",genDataList,"_")))]
+      genDataFiles <- list()
+      for(x in 1:length(dfData))
       {
-        break
+        pattern=paste0(ratName,"_GenData",x,"_.*Rdata")
+        #print(pattern)
+        res=list.files(".", pattern=pattern, full.names=FALSE)
+        print(res)
+        load(res)
+        print(sprintf("len(allData):%i",length(allData)))
+        genDataFiles[[x]] <- allData
+        
+        #genDataFiles[[i]] <- get(load(dfData[[i]]))
+      }
+      genDataFiles <- Reduce(rbind,genDataFiles)
+      models.populated = c()
+      models = c("Paths","Hybrid1","Hybrid2","Hybrid3","Hybrid4","Turns")
+      range=c(1:length(genDataFiles))
+      if(ratName == "rat_106" && crAssgn == "CoACAR5")
+      {
+        range=c(90:length(genDataFiles))
+      }
+      for(k in range)
+      {
+        ##Extracting generator model from resList[[k]][[1]]
+        genData = genDataFiles[[k]]
+        genModel = genDataFiles[[k]]@simModel
+        ## Find the index of modelData corresponding to generator model, retrieve the result of holdout cut at trial 800
+        index = which(models==genModel)
+        testModelData = genDataFiles[[k]]@simModelData
+        testModelName = testModelData@Model
+        #print(sprintf("genModel=%s, k=%i, testModel=%s",genModel,k,testModel))
+        if(!testModelName %in% models.populated)
+        {
+          models.populated = c(models.populated,genModel)
+          print(sprintf("testModel=%s, method=%s",testModelName,method))
+          #modelData <- slot(slot(allmodelRes,"Paths"),"aca2")
+          
+          
+          #probMat_model=testModelData@probMatrix[,c(1:12)]
+          testModel=slot(allModels,testModelName)
+          probMat_model=TurnsNew::getProbMatrix(genData, testModelData, testModel, sim=1)
+          n=length(probMat_model[,1])
+          probMat_model = cbind(probMat_model,rep(testModelName,n),rep(0,n),rep(method,n))
+          
+          # curr_idx = length(modelProbMats[,1])
+           modelProbMats <- rbind(modelProbMats, probMat_model)
+          # idx1 = curr_idx+1
+          # modelProbMats[idx1,16] = 1
+          # idx2 = curr_idx+801
+          # modelProbMats[idx2,16] = 1
+          # idx3 = length(modelProbMats[,1])
+          # modelProbMats[idx3,16] = 1
+          
+        }
+        
+        if(length(models.populated)==6)
+        {
+          break
+        }
       }
     }
-    
     empProbMat <- getEmpProbMat3(ratdata@allpaths,40,2)
-    empProbMat <- rbind(empProbMat,c(0,0,0,1,0,0,0,0,0,1,0,0))
+    #empProbMat <- rbind(empProbMat,c(0,0,0,1,0,0,0,0,0,1,0,0))
     
     cols.num <- c(1:13)
     modelProbMats[,cols.num] <- lapply(cols.num,function(x) as.numeric(modelProbMats[[x]]))
@@ -443,14 +549,17 @@ for (i in c(4)) {
     pca = prcomp(modelProbMats[,1:12],scale=T,center = T)
     empPCA = scale(empProbMat[,c(1:12)], pca$center, pca$scale) %*% pca$rotation
     
-    textVec <- rep(0,length(empProbMat[,1]))
-    textVec[1]=1
-    textVec[801]=1
-    textVec[length(empProbMat[,1])-1]=1
-    df_s1 <- as.data.frame(cbind(pca$x[,1:2], modelProbMats[,15],modelProbMats[,13],modelProbMats[,16],rep(rat,length(pca$x[,1]))))
-    df_s1 <- rbind(df_s1,cbind(empPCA[,1:2], rep("Empirical",length(empPCA[,1])),empProbMat[,13],V5=textVec,rep(rat,length(empPCA[,1]))))
+    #textVec <- rep(0,length(empProbMat[,1]))
+    #textVec[1]=1
+    #textVec[801]=1
+    #textVec[length(empProbMat[,1])-1]=1
+    df_s1 <- as.data.frame(cbind(pca$x[,1:2], modelProbMats[,14],modelProbMats[,13],modelProbMats[,16],rep(ratName,length(pca$x[,1]))))
+    df_s1 <- rbind(df_s1,cbind(empPCA[,1:2], rep("Empirical",length(empPCA[,1])),empProbMat[,13],rep("Empirical",length(empPCA[,1])),rep(ratName,length(empPCA[,1]))))
     
-    cols.num <- c(1,2,4,5)
+    df_s1 <- df_s1 %>%
+      mutate(V3 =  factor(V3, levels = order)) %>%
+      arrange(V3)
+    cols.num <- c(1,2,4)
     df_s1[,cols.num] <- lapply(cols.num,function(x) as.numeric(df_s1[[x]]))
     dfPCA=rbind(dfPCA,df_s1)
   }
@@ -489,16 +598,16 @@ if(ratSpeedPlot)
 if(thetaHatTest)
 {
   debug(plotThetaHat)
-  plotThetaHat(ratdata,dfThetahat,plot.dir)
+  plotThetaHat(ratdata,dfThetahat,testData,plot.dir="C:/Projects/Rats-Credits/Data/Paper2/Plots")
   
 }
 
-if(paramEstTest)
-{
-  debug(plotSimParamEstimation)
-  plotSimParamEstimation(dfParamEstTest,plot.dir)
-  
-}
+# if(paramEstTest)
+# {
+#   debug(plotSimParamEstimation)
+#   plotSimParamEstimation(dfParamEstTest,testData,plot.dir="C:/Projects/Rats-Credits/Data/Paper2/Plots")
+#   
+# }
 
 if(pcaPlot)
 {

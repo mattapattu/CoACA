@@ -65,6 +65,22 @@ setClass("RatData",
          
 )
 
+setClass("RatNeuronalData",
+         slots = list(
+           rat = "character",
+           Paths="list",
+           Turns = "list",
+           Hybrid1 = "list",
+           Hybrid2 = "list",
+           Hybrid3 = "list",
+           Hybrid4 = "list",
+           simModel = "character",
+           simMethod = "character",
+           simModelData = "ModelData"
+         )
+         
+)
+
 
 setClass("AllModelRes", 
          representation(

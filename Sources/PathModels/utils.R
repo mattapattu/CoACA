@@ -4822,7 +4822,7 @@ enregCombine=function(enreg,rat){
     
     for(i in 1:(length(boxIndices)-1))
     {
-      if(boxIndices[i] == 1)
+      if(i == 1)
       {
         range = boxIndices[i+1]
       }

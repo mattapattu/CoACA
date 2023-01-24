@@ -67,11 +67,12 @@ checkEpisodes=function(ratdata)
   
 }
 
-computePathNeurons=function(enreg,rat){
+computePathFiringRates=function(enreg,rat,ratdata){
   
   boxTimes <- vector()
   
   neuronalFiringRates <- vector(mode = "list", length = length(enreg))
+  pathFiringNeurons <- vector(mode = "list", length = length(enreg))
   
   ### Loop through all enreg[[ses]] of current rat
   for(ses in 1:length(enreg)){
@@ -85,17 +86,24 @@ computePathNeurons=function(enreg,rat){
     }
     
     
+    allpaths_ses = ratdata@allpaths[which(ratdata@allpaths[,5]==ses),]
+    ses_paths = strsplit(enreg[[ses]]$short,"(?<=[ei])(?=(jk)|(ja)|(jb)|(fg)|(fb)|(fa)|(dc)|(hc)|(jik))",perl=TRUE)[[1]]
+    boxIndices = c(1,cumsum(nchar(ses_paths)))
     
-    allpaths_ses = strsplit(enreg[[ses]]$short,"(?<=[ei])(?=(jk)|(ja)|(jb)|(fg)|(fb)|(fa)|(dc)|(hc)|(jik))",perl=TRUE)[[1]]
-    boxIndices = c(1,cumsum(nchar(allpaths_ses)))
-    allpaths_ses = cbind(allpaths_ses,rep(0,length(allpaths_ses)),rep(0,length(allpaths_ses)),rep(0,length(allpaths_ses)))
     
-    firingRateMat <- matrix(0,length(allpaths_ses[,1]),nrow(uniq.neurons.ses))
-    colnames(firingRateMat) <- paste("tet",unique(EnregNeurons_ses[,c(2,3)])[,1],".",unique(EnregNeurons_ses[,c(2,3)])[,2],sep="")
+    colnames <- c("Path", "State", "Duration","Session", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
+    
+    firingRateMat <- matrix(0,length(allpaths_ses[,1]),length(colnames))
+    colnames(firingRateMat) <- colnames
+    
+    firingNeuronsMat <- matrix(0,length(allpaths_ses[,1]),length(colnames))
+    colnames(firingNeuronsMat) <- colnames
     
     for(i in 1:(length(boxIndices)-1))
     {
-      if(boxIndices[i] == 1)
+      #print(sprintf("ses=%i, actNb=%i, path=%i, pathString=%s, state=%i",ses,i,allpaths_ses[i,1],ses_paths[i],allpaths_ses[i,2]))
+      
+      if(i == 1)
       {
         range = boxIndices[i+1]
       }
@@ -115,7 +123,8 @@ computePathNeurons=function(enreg,rat){
       {
         pathTime = sum((enregRows[,2]-enregRows[,1])[-length(enregRows[,2])]) ## Remove last box which is i/e
         enregRowsFiringRate = enregRows[-nrow(enregRows),, drop=FALSE]
-        firingRates = computePathFiringRates(rat,enregRowsFiringRate,ses,pathTime)
+        firingRates = getFiringRates(rat,enregRowsFiringRate,ses,pathTime)
+        firingNeurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
         
       }
       else
@@ -123,42 +132,56 @@ computePathNeurons=function(enreg,rat){
         pathTime = enregRows[2] - enregRows[1]
         enregRowsFiringRate = enregRows
         firingRates = rep(0,nrow(uniq.neurons.ses))
+        firingNeurons = rep(0,nrow(uniq.neurons.ses))
       }
       
+      
 
-      firingRateMat[i,] = firingRates
+      firingRateMat[i,] = c(allpaths_ses[i,c(1,2,4,5)], firingRates)
+      firingNeuronsMat[i,] = c(allpaths_ses[i,c(1,2,4,5)],firingNeurons)
     }
     
-
+    
+    
     neuronalFiringRates[[ses]] <- firingRateMat
+    pathFiringNeurons[[ses]] <- firingNeuronsMat
   }
   
-  return(list("pathFirRates"=neuronalFiringRates))
+  return(list("pathFiringRates"=neuronalFiringRates, "pathFiringNeurons"=pathFiringNeurons))
 }
 
 
-computeNeuronalFiringRates=function(ratdata,ratNb,enreg,turnsModel)
+compute_Turns_n_Hybrid_FiringRates=function(ratdata,ratNb,enreg,turnsModel,ratPathNeuronalData)
 {
   
-  #debug(getTurnsMatrix)
+  #debug(getTurnsFiringRates)
   resList = getTurnsFiringRates(ratdata@allpaths,enreg,turnsModel, ratNb)
   turnFiringRates = resList$turnFiringRates
   turnFiringNeurons = resList$turnFiringNeurons
   
-
+  rat = ratdata@rat
+  
   hybrid1res = convertTurnNeuronsToHybrid(ratdata,ratNb,turnFiringNeurons,TurnModel,Hybrid1,sim=2)
   hybrid2res = convertTurnNeuronsToHybrid(ratdata,ratNb,turnFiringNeurons,TurnModel,Hybrid2,sim=2)
   hybrid3res = convertTurnNeuronsToHybrid(ratdata,ratNb,turnFiringNeurons,TurnModel,Hybrid3,sim=2)
   hybrid4res = convertTurnNeuronsToHybrid(ratdata,ratNb,turnFiringNeurons,TurnModel,Hybrid4,sim=2)
   
-  neurons = new("RatData", rat = rat,allpaths = allpaths_num,turnTimes = turnFiringNeurons)
+  firingNeuronData = new("RatNeuronalData", rat = rat,Paths = ratPathNeuronalData$pathFiringNeurons,Turns = turnFiringNeurons)
   
-  neurons@hybridModel1 = hybrid1res$firingNeuronsMat
-  neurons@hybridModel2 = hybrid1res$firingNeuronsMat
-  neurons@hybridModel3 = hybrid1res$firingNeuronsMat
-  neurons@hybridModel4 = hybrid1res$firingNeuronsMat
+  firingNeuronData@Hybrid1 = hybrid1res$firingNeuronsMat
+  firingNeuronData@Hybrid2 = hybrid1res$firingNeuronsMat
+  firingNeuronData@Hybrid3 = hybrid1res$firingNeuronsMat
+  firingNeuronData@Hybrid4 = hybrid1res$firingNeuronsMat
   
-  return(hybrid1res)
+  firingRateData = new("RatNeuronalData", rat = rat,Paths = ratPathNeuronalData$pathFiringRates,Turns = turnFiringNeurons)
+  
+  firingRateData@Hybrid1 = hybrid1res$firingRateMat
+  firingRateData@Hybrid2 = hybrid1res$firingRateMat
+  firingRateData@Hybrid3 = hybrid1res$firingRateMat
+  firingRateData@Hybrid4 = hybrid1res$firingRateMat
+  
+
+  return(list("firingNeuronData"=firingNeuronData, "firingRateData"=firingRateData))
   
 }
 
@@ -242,6 +265,8 @@ getTurnsFiringRates=function(allpaths,enreg,turnsModel, rat)
         stateSlot = "S1"
       }
       
+      #print(sprintf("ses=%i, actNb=%i, path=%i, state=%i",ses,i,allpaths[i,1],allpaths[i,2]))
+      
       
       turns = slot(slot(turnsModel, stateSlot),pathSlot)
       
@@ -316,7 +341,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:2,]
       enregRowsFiringRate[2,2] = et_dc1
-      dc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,dc1)
+      dc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,dc1)
       dc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       c2 = c/2
@@ -328,7 +353,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[2:3,]
       enregRowsFiringRate[1,1] = st_c2h
-      c2h_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2h)
+      c2h_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2h)
       c2h_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -349,7 +374,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:3,]
       enregRowsFiringRate[3,2] = et_fga1
-      fga1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,fga1)
+      fga1_fr = getFiringRates(rat,enregRowsFiringRate,ses,fga1)
       fga1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -362,7 +387,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[3:5,]
       enregRowsFiringRate[1,1] = st_a2kj
-      a2kj_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2kj)
+      a2kj_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2kj)
       a2kj_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       turntimes = list("fga1"=fga1, "a2kj" = a2kj)
@@ -384,7 +409,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:2,]
       enregRowsFiringRate[2,2] = et_dc1
-      dc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,dc1)
+      dc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,dc1)
       dc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -401,7 +426,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       enregRowsFiringRate = enregRows[2:4,]
       enregRowsFiringRate[1,1] = st_c2ba1
       enregRowsFiringRate[3,2] = et_c2ba1
-      c2ba1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2ba1)
+      c2ba1_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2ba1)
       c2ba1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -414,7 +439,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[4:6,]
       enregRowsFiringRate[1,1] = st_a2kj
-      a2kj_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2kj)
+      a2kj_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2kj)
       a2kj_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       turntimes = list("dc1"=dc1, "c2ba1" = c2ba1, "a2kj"=a2kj)
@@ -436,7 +461,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:3,]
       enregRowsFiringRate[3,2] = et_fga1
-      fga1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,fga1)
+      fga1_fr = getFiringRates(rat,enregRowsFiringRate,ses,fga1)
       fga1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       a2 = a/2
@@ -451,7 +476,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       enregRowsFiringRate = enregRows[3:5,]
       enregRowsFiringRate[1,1] = st_a2bc1
       enregRowsFiringRate[3,2] = et_a2bc1
-      a2bc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2bc1)
+      a2bc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2bc1)
       a2bc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       c2 = c/2
@@ -463,7 +488,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[5:6,]
       enregRowsFiringRate[1,1] = st_c2h
-      c2h_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2h)
+      c2h_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2h)
       c2h_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       turntimes = list("fga1"=fga1, "a2bc1" = a2bc1, "c2h"=c2h)
@@ -484,7 +509,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:3,]
       enregRowsFiringRate[3,2] = et_fga1
-      fga1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,fga1)
+      fga1_fr = getFiringRates(rat,enregRowsFiringRate,ses,fga1)
       fga1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       a2 = a/2
@@ -499,7 +524,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       enregRowsFiringRate = enregRows[3:5,]
       enregRowsFiringRate[1,1] = st_a2bc1
       enregRowsFiringRate[3,2] = et_a2bc1
-      a2bc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2bc1)
+      a2bc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2bc1)
       a2bc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       c2 = c/2
@@ -511,7 +536,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[5:6,]
       enregRowsFiringRate[1,1] = st_c2d
-      c2d_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2d)
+      c2d_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2d)
       c2d_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       turntimes = list("fga1"=fga1, "a2bc1" = a2bc1, "c2d"=c2d)
@@ -531,7 +556,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:2,]
       enregRowsFiringRate[2,2] = et_dc1
-      dc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,dc1)
+      dc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,dc1)
       dc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       c2 = c/2
@@ -546,7 +571,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       enregRowsFiringRate = enregRows[2:4,]
       enregRowsFiringRate[1,1] = st_c2ba1
       enregRowsFiringRate[3,2] = et_c2ba1
-      c2ba1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2ba1)
+      c2ba1_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2ba1)
       c2ba1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       a2 = a/2
@@ -558,7 +583,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[4:6,]
       enregRowsFiringRate[1,1] = st_a2gf
-      a2gf_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2gf)
+      a2gf_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2gf)
       a2gf_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -582,7 +607,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:2,]
       enregRowsFiringRate[2,2] = et_hc1
-      hc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,hc1)
+      hc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,hc1)
       hc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       c2 = c/2
@@ -594,7 +619,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[2:3,]
       enregRowsFiringRate[1,1] = st_c2d
-      c2d_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2d)
+      c2d_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2d)
       c2d_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       turntimes = list("hc1"=hc1, "c2d" = c2d)
@@ -614,7 +639,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:3,]
       enregRowsFiringRate[3,2] = et_jka1
-      jka1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,jka1)
+      jka1_fr = getFiringRates(rat,enregRowsFiringRate,ses,jka1)
       jka1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -627,7 +652,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[3:5,]
       enregRowsFiringRate[1,1] = st_a2gf
-      a2gf_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2gf)
+      a2gf_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2gf)
       a2gf_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -648,7 +673,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:2,]
       enregRowsFiringRate[2,2] = et_hc1
-      hc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,hc1)
+      hc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,hc1)
       hc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -664,7 +689,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       enregRowsFiringRate = enregRows[2:4,]
       enregRowsFiringRate[1,1] = st_c2ba1
       enregRowsFiringRate[3,2] = et_c2ba1
-      c2ba1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2ba1)
+      c2ba1_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2ba1)
       c2ba1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -677,7 +702,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[4:6,]
       enregRowsFiringRate[1,1] = st_a2gf
-      a2gf_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2gf)
+      a2gf_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2gf)
       a2gf_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -698,7 +723,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:3,]
       enregRowsFiringRate[3,2] = et_jka1
-      jka1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,jka1)
+      jka1_fr = getFiringRates(rat,enregRowsFiringRate,ses,jka1)
       jka1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       a2 = a/2
@@ -713,7 +738,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       enregRowsFiringRate = enregRows[3:5,]
       enregRowsFiringRate[1,1] = st_a2bc1
       enregRowsFiringRate[3,2] = et_a2bc1
-      a2bc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2bc1)
+      a2bc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2bc1)
       a2bc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       c2 = c/2
@@ -725,7 +750,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[5:6,]
       enregRowsFiringRate[1,1] = st_c2d
-      c2d_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2d)
+      c2d_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2d)
       c2d_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       turntimes = list("jka1"=jka1, "a2bc1" = a2bc1, "c2d"=c2d)
@@ -746,7 +771,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:3,]
       enregRowsFiringRate[3,2] = et_jka1
-      jka1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,jka1)
+      jka1_fr = getFiringRates(rat,enregRowsFiringRate,ses,jka1)
       jka1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -762,7 +787,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       enregRowsFiringRate = enregRows[3:5,]
       enregRowsFiringRate[1,1] = st_a2bc1
       enregRowsFiringRate[3,2] = et_a2bc1
-      a2bc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2bc1)
+      a2bc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2bc1)
       a2bc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -775,7 +800,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[5:6,]
       enregRowsFiringRate[1,1] = st_c2h
-      c2h_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2h)
+      c2h_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2h)
       c2h_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       turntimes = list("jka1"=jka1, "a2bc1" = a2bc1, "c2h"=c2h)
@@ -796,7 +821,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[1:2,]
       enregRowsFiringRate[2,2] = et_hc1
-      hc1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,hc1)
+      hc1_fr = getFiringRates(rat,enregRowsFiringRate,ses,hc1)
       hc1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -812,7 +837,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       enregRowsFiringRate = enregRows[2:4,]
       enregRowsFiringRate[1,1] = st_c2ba1
       enregRowsFiringRate[3,2] = et_c2ba1
-      c2ba1_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,c2ba1)
+      c2ba1_fr = getFiringRates(rat,enregRowsFiringRate,ses,c2ba1)
       c2ba1_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       
@@ -825,7 +850,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
       
       enregRowsFiringRate = enregRows[4:6,]
       enregRowsFiringRate[1,1] = st_a2kj
-      a2kj_fr = computePathFiringRates(rat,enregRowsFiringRate,ses,a2kj)
+      a2kj_fr = getFiringRates(rat,enregRowsFiringRate,ses,a2kj)
       a2kj_neurons = getFiringNeurons(rat,enregRowsFiringRate,ses)
       
       turntimes = list("hc1"=hc1, "c2ba1" = c2ba1, "a2kj"=a2kj)
@@ -839,7 +864,7 @@ convertNeuronToTurns=function(path, state, enregRows, rat, ses)
 
 
 
-computePathFiringRates=function(rat,enregRowsFiringRate,ses,pathTime)
+getFiringRates=function(rat,enregRowsFiringRate,ses,pathTime)
 {
   EnregNeurons_ses <- EnregNeurons[[rat]][[ses]]
   EnregNeurons_ses <- EnregNeurons_ses[which(EnregNeurons_ses[,3] != 0),, drop=FALSE]
@@ -881,7 +906,7 @@ getFiringNeurons=function(rat,enregRowsFiringRate,ses)
     uniq.neurons.ses <- uniq.neurons.ses[order(uniq.neurons.ses[,1],uniq.neurons.ses[,2]),]
   }
   
-  firingNeurons <- matrix(0,nrow(enregRowsFiringRate),nrow(uniq.neurons.ses))
+  firingNeurons <- matrix(0,nrow(enregRowsFiringRate),(nrow(uniq.neurons.ses)+2))
   
   for(i in 1:nrow(enregRowsFiringRate))
   {
@@ -889,15 +914,18 @@ getFiringNeurons=function(rat,enregRowsFiringRate,ses)
     boxExit = enregRowsFiringRate[i,2]
     EnregNeurons_firing <- EnregNeurons_ses[which(EnregNeurons_ses[,1] > boxEnter & EnregNeurons_ses[,1] <= boxExit),, drop=FALSE]
     
-    for(k in 1:nrow(uniq.neurons.ses))
+    firingNeurons[i,1] = boxEnter
+    firingNeurons[i,2] = boxExit
+    
+    for(k in 3:ncol(firingNeurons))
     {
-      enreg_neuron = EnregNeurons_firing[which(EnregNeurons_firing[,2]==uniq.neurons.ses[k,1] & EnregNeurons_firing[,3]==uniq.neurons.ses[k,2]),,drop=FALSE]
+      enreg_neuron = EnregNeurons_firing[which(EnregNeurons_firing[,2]==uniq.neurons.ses[k-2,1] & EnregNeurons_firing[,3]==uniq.neurons.ses[k-2,2]),,drop=FALSE]
       firingNeurons[i,k] = nrow(enreg_neuron)
     }
     
   }
-  
-  firingNeuronsVec <- colSums(firingNeurons)
+  #print(firingNeurons)
+  firingNeuronsVec <- colSums(firingNeurons[,-c(1:2), drop=FALSE])
   
   return(firingNeuronsVec)
   
@@ -1019,7 +1047,7 @@ convertTurnNeuronsToHybrid=function(ratdata,ratNb,turnFiringNeurons, turnsModel,
           select_turns = turnFiringNeurons_ses[which(turnFiringNeurons_ses[,1]==row[6]),]
           select_turns_to_merge = select_turns[res_idx,]
           firingNeurons = colSums(select_turns_to_merge[,-c(1:5), drop=FALSE])
-          firingRates = firingNeurons/sum(diff_times)
+          firingRates = firingNeurons*1000/sum(diff_times)
         }
         else
         {
@@ -1028,8 +1056,8 @@ convertTurnNeuronsToHybrid=function(ratdata,ratNb,turnFiringNeurons, turnsModel,
           diff_times = turntimevec[turn_idx[res_idx]]
           
           select_turns = turnFiringNeurons_ses[which(turnFiringNeurons_ses[,1]==row[6]),]
-          firingNeurons = select_turns[,c(1:5)]
-          firingRates = firingNeurons/diff_times
+          firingNeurons = select_turns[res_idx,-c(1:5),drop=FALSE]
+          firingRates = firingNeurons*1000/diff_times
         }
         
 
@@ -1048,5 +1076,29 @@ convertTurnNeuronsToHybrid=function(ratdata,ratNb,turnFiringNeurons, turnsModel,
     
   }
   
-  return(list("firingRateMat"=firingRateMat,"firingNeuronsMat"=firingNeuronsMat))
+  return(list("firingRateMat"=hybridFiringRates,"firingNeuronsMat"=hybridFiringNeurons))
+}
+
+computeNeuronZScores=function(ratdata,i, RatfiringRateData)
+{
+  firingRateZscoreData = new("RatNeuronalData", rat = rat)
+  
+  mazemodels <- c("Paths","Turns","Hybrid1","Hybrid2","Hybrid3","Hybrid4")
+  for(m in mazemodels)
+  {
+    ratFiringData_m <- slot(mazemodels, m)
+    qnique_ses <- unique(ratdata@allpaths[,5])
+    for(ses in qnique_ses)
+    {
+      ratFiringData_m_ses <- ratFiringData_m[[ses]]
+      zscoreMat <- ratFiringData_m_ses[,c(1:5)]
+      uniq.neurons <- colnames(ratFiringData_m_ses[-c(1:5)])
+    }
+  }
+  
+  firingRateData@hybridModel1 = hybrid1res$firingRateMat
+  firingRateData@hybridModel2 = hybrid1res$firingRateMat
+  firingRateData@hybridModel3 = hybrid1res$firingRateMat
+  firingRateData@hybridModel4 = hybrid1res$firingRateMat
+  
 }

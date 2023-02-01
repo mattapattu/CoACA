@@ -169,16 +169,16 @@ compute_Turns_n_Hybrid_FiringRates=function(ratdata,ratNb,enreg,turnsModel,ratPa
   firingNeuronData = new("RatNeuronalData", rat = rat,Paths = ratPathNeuronalData$pathFiringNeurons,Turns = turnFiringNeurons)
   
   firingNeuronData@Hybrid1 = hybrid1res$firingNeuronsMat
-  firingNeuronData@Hybrid2 = hybrid1res$firingNeuronsMat
-  firingNeuronData@Hybrid3 = hybrid1res$firingNeuronsMat
-  firingNeuronData@Hybrid4 = hybrid1res$firingNeuronsMat
+  firingNeuronData@Hybrid2 = hybrid2res$firingNeuronsMat
+  firingNeuronData@Hybrid3 = hybrid3res$firingNeuronsMat
+  firingNeuronData@Hybrid4 = hybrid4res$firingNeuronsMat
   
   firingRateData = new("RatNeuronalData", rat = rat,Paths = ratPathNeuronalData$pathFiringRates,Turns = turnFiringNeurons)
   
   firingRateData@Hybrid1 = hybrid1res$firingRateMat
-  firingRateData@Hybrid2 = hybrid1res$firingRateMat
-  firingRateData@Hybrid3 = hybrid1res$firingRateMat
-  firingRateData@Hybrid4 = hybrid1res$firingRateMat
+  firingRateData@Hybrid2 = hybrid2res$firingRateMat
+  firingRateData@Hybrid3 = hybrid3res$firingRateMat
+  firingRateData@Hybrid4 = hybrid4res$firingRateMat
   
 
   return(list("firingNeuronData"=firingNeuronData, "firingRateData"=firingRateData))
@@ -205,12 +205,12 @@ getTurnsFiringRates=function(allpaths,enreg,turnsModel, rat)
       uniq.neurons.ses <- uniq.neurons.ses[order(uniq.neurons.ses[,1],uniq.neurons.ses[,2]),]
     }
     
-    colnames <- c("Action", "Path", "State","Turn","Session", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
+    colnames <- c("Action", "Path", "State","Turn","Session", "Duration", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
 
     idx_ses = which(as.numeric(allpaths[,5])==ses)
     pathCount_ses = length(allpaths[idx_ses,1])
     
-    totalTurns = pathCount_ses*3
+    totalTurns = pathCount_ses*4
     
     firingRateMat <- matrix(0,totalTurns,length(colnames))
     firingNeuronsMat <- matrix(0,totalTurns,length(colnames))
@@ -285,6 +285,7 @@ getTurnsFiringRates=function(allpaths,enreg,turnsModel, rat)
       #debug(getTurnDuration)
       resList = convertNeuronToTurns(path, state, enregRows, rat, ses)
       
+      turnTimes = resList$turntimes
       firingRates = resList$firingRates
       firingNeurons = resList$firingNeurons
       
@@ -295,8 +296,8 @@ getTurnsFiringRates=function(allpaths,enreg,turnsModel, rat)
         for(j in 1:length(turns))
         {
           actId = which(slot(turnsModel, nodeList) == turns[j]) - 1
-          firingRateMat[matIdx,]=c(idx_ses[i],path,state,actId,ses, firingRates[[j]])
-          firingNeuronsMat[matIdx,] = c(idx_ses[i],path,state,actId,ses, firingNeurons[[j]])
+          firingRateMat[matIdx,]=c(idx_ses[i],path,state,actId,ses,turnTimes[[j]], firingRates[[j]])
+          firingNeuronsMat[matIdx,] = c(idx_ses[i],path,state,actId,ses,turnTimes[[j]], firingNeurons[[j]])
           matIdx = matIdx+1
         }
       }
@@ -306,8 +307,8 @@ getTurnsFiringRates=function(allpaths,enreg,turnsModel, rat)
     firingRateMat = firingRateMat[-(matIdx:totalTurns),]
     firingNeuronsMat = firingNeuronsMat[-(matIdx:totalTurns),]
     
-    colnames(firingRateMat) <- c("Action", "Path", "State","Turn","Session", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
-    colnames(firingNeuronsMat) <- c("Action", "Path", "State","Turn","Session", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
+    colnames(firingRateMat) <- colnames
+    colnames(firingNeuronsMat) <- colnames
     
     
     turnFiringRates[[ses]] <- firingRateMat
@@ -1024,6 +1025,7 @@ convertTurnNeuronsToHybrid=function(ratdata,ratNb,turnFiringNeurons, turnsModel,
         nodeList = "nodes.S1"
       }
       
+      #print(sprintf("ses=%i, rowNb=%i,path=%i",ses,rowNb,row[1]))
       actions = slot(slot(hybridModel, currState),currPath)
       for(j in 1:length(actions))
       {
@@ -1046,7 +1048,7 @@ convertTurnNeuronsToHybrid=function(ratdata,ratNb,turnFiringNeurons, turnsModel,
           
           select_turns = turnFiringNeurons_ses[which(turnFiringNeurons_ses[,1]==row[6]),]
           select_turns_to_merge = select_turns[res_idx,]
-          firingNeurons = colSums(select_turns_to_merge[,-c(1:5), drop=FALSE])
+          firingNeurons = colSums(select_turns_to_merge[,-c(1:6), drop=FALSE])
           firingRates = firingNeurons*1000/sum(diff_times)
         }
         else
@@ -1056,20 +1058,20 @@ convertTurnNeuronsToHybrid=function(ratdata,ratNb,turnFiringNeurons, turnsModel,
           diff_times = turntimevec[turn_idx[res_idx]]
           
           select_turns = turnFiringNeurons_ses[which(turnFiringNeurons_ses[,1]==row[6]),]
-          firingNeurons = select_turns[res_idx,-c(1:5),drop=FALSE]
+          firingNeurons = select_turns[res_idx,-c(1:6),drop=FALSE]
           firingRates = firingNeurons*1000/diff_times
         }
         
 
-        firingRateMat = rbind(firingRateMat,c(rowNb,row[1],row[2],actId,ses,firingRates))
-        firingNeuronsMat = rbind(firingNeuronsMat,c(rowNb,row[1],row[2],actId,ses,firingNeurons))
+        firingRateMat = rbind(firingRateMat,c(rowNb,row[1],row[2],actId,ses,sum(diff_times),firingRates))
+        firingNeuronsMat = rbind(firingNeuronsMat,c(rowNb,row[1],row[2],actId,ses,sum(diff_times),firingNeurons))
 
         #actIdx = actIdx+1
       }
     }
     
-    colnames(firingRateMat) <- c("Action", "Path", "State","Turn","Session", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
-    colnames(firingNeuronsMat) <- c("Action", "Path", "State","Turn","Session", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
+    colnames(firingRateMat) <- c("Action", "Path", "State","Turn","Session","Duration", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
+    colnames(firingNeuronsMat) <- c("Action", "Path", "State","Turn","Session","Duration", paste("tet",uniq.neurons.ses[,1],".",uniq.neurons.ses[,2],sep=""))
     
     hybridFiringRates[[ses]]   <- firingRateMat
     hybridFiringNeurons[[ses]]  <- firingNeuronsMat
@@ -1079,26 +1081,95 @@ convertTurnNeuronsToHybrid=function(ratdata,ratNb,turnFiringNeurons, turnsModel,
   return(list("firingRateMat"=hybridFiringRates,"firingNeuronsMat"=hybridFiringNeurons))
 }
 
-computeNeuronZScores=function(ratdata,i, RatfiringRateData)
+computePathNeuronZScores=function(ratdata,i, ratNeuronalData)
 {
+  rat= ratdata@rat
   firingRateZscoreData = new("RatNeuronalData", rat = rat)
   
   mazemodels <- c("Paths","Turns","Hybrid1","Hybrid2","Hybrid3","Hybrid4")
+  ratFiringNeuronalData <- ratNeuronalData$firingNeuronData
+  ratFiringNeuronalData_m <- slot(ratFiringNeuronalData, "Paths")
+  unique_ses <- unique(ratdata@allpaths[,5])
+  zscoreFirRates_m <- vector(mode = "list", length = length(unique_ses))
+  for(ses in unique_ses)
+  {
+      #print(sprintf("ses=%i",ses))
+    ratFiringNeuronalData_m_ses <- ratFiringNeuronalData_m[[ses]]
+    tetIdx <- grep("tet",colnames(ratFiringNeuronalData_m_ses))
+    ses_uniq.actions <- unique(ratFiringNeuronalData_m_ses[,c(1:2)])
+    badpathRows <- which(ses_uniq.actions[,1]==7)
+    if(length(badpathRows) > 0)
+    {
+      ses_uniq.actions = ses_uniq.actions[-badpathRows,]
+    }
+    
+    zscoreMat_ses <- matrix(0,nrow(ses_uniq.actions),ncol(ratFiringNeuronalData_m_ses)-1)
+    for(act in 1:nrow(ses_uniq.actions))
+    {
+      ratFiringNeuronalData_m_ses_act = ratFiringNeuronalData_m_ses[which(ratFiringNeuronalData_m_ses[,1]==ses_uniq.actions[act,1] & ratFiringNeuronalData_m_ses[,2]==ses_uniq.actions[act,2]),,drop=FALSE]
+      zscoreVec <- ratFiringNeuronalData_m_ses_act[1,-which(colnames(ratFiringNeuronalData_m_ses_act) %in% c("Duration",colnames(ratFiringNeuronalData_m_ses_act)[tetIdx])),drop=FALSE]
+      colNames.zscoremat<- colnames(zscoreVec)
+      rowFirRates<- colSums(ratFiringNeuronalData_m_ses_act[,c("Duration",colnames(ratFiringNeuronalData_m_ses_act)[tetIdx]),drop=F])
+      rowFirRates <- rowFirRates[-1]*1000/rowFirRates[1]
+      zscoreVec <- c(zscoreVec,rowFirRates)
+      zscoreMat_ses[act,] = zscoreVec
+      colNames.zscoremat <- c(colNames.zscoremat,names(rowFirRates))
+    }
+    colnames(zscoreMat_ses) <- names(zscoreVec)
+    zscoreMat_ses_tetIdx <- grep("tet",colnames(zscoreMat_ses))
+    zscoreMat_ses[,zscoreMat_ses_tetIdx] = scale(zscoreMat_ses[,zscoreMat_ses_tetIdx],center=T,scale = T)
+      
+    zscoreFirRates_m[[ses]] <- zscoreMat_ses
+  }
+
+  return(zscoreFirRates_m)
+  
+}
+
+compute_Turns_n_Hybrid_NeuronZScores=function(ratdata,i, ratNeuronalData,pathNeuronalZscores)
+{
+  rat= ratdata@rat
+  firingRateZscoreData = new("RatNeuronalData", rat = rat)
+  firingRateZscoreData@Paths = pathNeuronalZscores
+  mazemodels <- c("Turns","Hybrid1","Hybrid2","Hybrid3","Hybrid4")
   for(m in mazemodels)
   {
-    ratFiringData_m <- slot(mazemodels, m)
-    qnique_ses <- unique(ratdata@allpaths[,5])
-    for(ses in qnique_ses)
+    ratFiringNeuronalData <- ratNeuronalData$firingNeuronData
+    ratFiringNeuronalData_m <- slot(ratFiringNeuronalData, m)
+    unique_ses <- unique(ratdata@allpaths[,5])
+    zscoreFirRates_m <- vector(mode = "list", length = length(unique_ses))
+    for(ses in unique_ses)
     {
-      ratFiringData_m_ses <- ratFiringData_m[[ses]]
-      zscoreMat <- ratFiringData_m_ses[,c(1:5)]
-      uniq.neurons <- colnames(ratFiringData_m_ses[-c(1:5)])
+      #print(sprintf("ses=%i",ses))
+      ratFiringNeuronalData_m_ses <- ratFiringNeuronalData_m[[ses]]
+      tetIdx <- grep("tet",colnames(ratFiringNeuronalData_m_ses))
+      ses_uniq.actions <- unique(ratFiringNeuronalData_m_ses[,c(3:4)])
+      ses_uniq.actions <- ses_uniq.actions[order(ses_uniq.actions[,1],ses_uniq.actions[,2]),]
+      zscoreMat_ses <- matrix(0,nrow(ses_uniq.actions),length(tetIdx)+2)
+      pathCounter <- matrix(0,nrow(ses_uniq.actions),6)
+      colnames(pathCounter) <- c("Path1","Path2","Path3","Path4","Path5","Path6")
+      for(act in 1:nrow(ses_uniq.actions))
+      {
+        ratFiringNeuronalData_m_ses_act = ratFiringNeuronalData_m_ses[which(ratFiringNeuronalData_m_ses[,3]==ses_uniq.actions[act,1] & ratFiringNeuronalData_m_ses[,4]==ses_uniq.actions[act,2]),,drop=FALSE]
+        pathCounter[act,] = tabulate(factor(ratFiringNeuronalData_m_ses_act[,2], levels = c(0:5)), length(c(0:5)))
+        zscoreVec = ses_uniq.actions[act,]
+        #colNames.zscoremat<- colnames(zscoreVec)
+        rowFirRates<- colSums(ratFiringNeuronalData_m_ses_act[,c("Duration",colnames(ratFiringNeuronalData_m_ses_act)[tetIdx]),drop=F])
+        rowFirRates <- rowFirRates[-1]*1000/rowFirRates[1]
+        zscoreVec <- c(zscoreVec,rowFirRates)
+        zscoreMat_ses[act,] = zscoreVec
+        colNames.zscoremat<- names(zscoreVec)
+      }
+      colnames(zscoreMat_ses) <- colNames.zscoremat
+      zscoreMat_ses_tetIdx <- grep("tet",colnames(zscoreMat_ses))
+      zscoreMat_ses[,zscoreMat_ses_tetIdx] = scale(zscoreMat_ses[,zscoreMat_ses_tetIdx],center=T,scale = T)
+      
+      zscoreFirRates_m[[ses]] <- zscoreMat_ses
+      zscoreFirRates_m[[ses]] <- cbind(zscoreFirRates_m[[ses]], pathCounter)
     }
+    slot(firingRateZscoreData, m) = zscoreFirRates_m
+    
   }
   
-  firingRateData@hybridModel1 = hybrid1res$firingRateMat
-  firingRateData@hybridModel2 = hybrid1res$firingRateMat
-  firingRateData@hybridModel3 = hybrid1res$firingRateMat
-  firingRateData@hybridModel4 = hybrid1res$firingRateMat
-  
+  return(firingRateZscoreData)
 }

@@ -171,8 +171,11 @@ for (i in c(2:6)) {
     ratPathNeuronalData = computePathFiringRates(rawData,i,ratdata)
     #debug(compute_Turns_n_Hybrid_FiringRates)
     ratNeuronalData = compute_Turns_n_Hybrid_FiringRates(ratdata,i, donnees_ash[[i]],TurnModel,ratPathNeuronalData)
-    debug(computeNeuronZScores)
-    ratNeuronalData = computeNeuronZScores(ratdata,i, ratNeuronalData$firingRateData)
+    pathNeuronalZscores = computePathNeuronZScores(ratdata,i, ratNeuronalData)
+    #debug(compute_Turns_n_Hybrid_NeuronZScores)
+    ratNeuronalZscores = compute_Turns_n_Hybrid_NeuronZScores(ratdata,i, ratNeuronalData,pathNeuronalZscores)
+    save(ratNeuronalZscores,file=paste0(rats[i],"_","Zscores.Rdata"))
+    next
     #load(paste0("C:/Users/matta/Downloads/rat_112_allmodelRes.Rdata"))
     #load(paste0("C:/Rats-Credits/allmodelRes_",rats[i],".RData"))
     #load(paste0("C:/Rats-Credits/aca2_allmodelRes_",rats[i],".RData"))

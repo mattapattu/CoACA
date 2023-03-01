@@ -216,8 +216,8 @@ cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,m
             #idx = start_idx+j
             #alpha = gridMat[idx,1]
             #gamma1 = gridMat[idx,2]
-            iter = gridMat[idx,1]
-            model = gridMat[idx,2]
+            #iter = gridMat[idx,1]
+            model = gridMat[idx,1]
             #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
             #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
 
@@ -225,7 +225,7 @@ cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,m
             modelName = strsplit(model,"\\.")[[1]][1]
             #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
             creditAssignment = strsplit(model,"\\.")[[1]][2]
-            cat(sprintf('rat=%s, iter=%i,modelName=%s,creditAssignment = %s\n', ratName,iter,modelName,creditAssignment))
+            cat(sprintf('rat=%s, odelName=%s,creditAssignment = %s\n', ratName,modelName,creditAssignment))
 
 
             #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
@@ -235,7 +235,8 @@ cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,m
             #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
             #cat("Here1")
             myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 30)
-            out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2,myList)
+            endIdx = length(ratdata@allpaths[,1])
+            out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=ratdata,half_index=endIdx,modelData=modelData,testModel = argList[[6]],sim = 2,myList)
 
             # res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
             #              fn = negLogLikFunc,ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2)
@@ -261,7 +262,7 @@ cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,m
                   lik1 = 1000000
                 }
                 #cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik1=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik1))
-                c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx)
+                c(endIdx,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx)
             }
             
 

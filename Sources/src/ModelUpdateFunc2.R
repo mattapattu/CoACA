@@ -140,6 +140,139 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
 }
 
 
+cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)
+{
+  models = testData@Models
+  #########################
+
+  #creditAssignment = testData@creditAssignment
+  
+  #paramTest = list()
+  #modelNames = as.vector(sapply(creditAssignment, function(x) paste(models, x, sep=".")))
+  avg.rand.err <- mean(table(ratdata@allpaths[1:800,1])[c("2","3","6")]) 
+  path5Count <- length(ratdata@allpaths[which(ratdata@allpaths[1:800,1]==5),6])
+  removeIds<- sample(ratdata@allpaths[which(ratdata@allpaths[1:800,1]==5),6],path5Count-avg.rand.err,replace = F)
+  ratdata@allpaths <- ratdata@allpaths[-removeIds,]
+  ratdata@hybridModel1<-ratdata@hybridModel1[-which(ratdata@hybridModel1[,1] %in% removeIds),]
+  ratdata@hybridModel2<-ratdata@hybridModel2[-which(ratdata@hybridModel2[,1] %in% removeIds),]
+  ratdata@hybridModel3<-ratdata@hybridModel3[-which(ratdata@hybridModel3[,1] %in% removeIds),]
+  ratdata@hybridModel4<-ratdata@hybridModel4[-which(ratdata@hybridModel4[,1] %in% removeIds),]
+  ratdata@Turns<-ratdata@Turns[-which(ratdata@Turns[,1] %in% removeIds),]
+
+  ratName = ratdata@rat
+  model.data.dir=file.path(model.data.dir, ratName)
+  dir.create(file.path(model.data.dir,"modelParams"), showWarnings = FALSE)
+  model.data.dir=file.path(model.data.dir, "modelParams")
+  print(model.data.dir)
+  if(currentTest == "computeARLCogModelParams")
+  {
+    dir.create(file.path(model.data.dir,"ARL"), showWarnings = FALSE)
+    model.data.dir=file.path(model.data.dir, "ARL")
+  }else if(currentTest == "computeDRLCogModelParams")
+  {
+    dir.create(file.path(model.data.dir,"DRL"), showWarnings = FALSE)
+    model.data.dir=file.path(model.data.dir, "DRL")
+  }else if(currentTest == "computeCoACACogModelParams")
+  {
+    dir.create(file.path(model.data.dir,"CoACA"), showWarnings = FALSE)
+    model.data.dir=file.path(model.data.dir, "CoACA")
+  }
+
+  dir.path = file.path(paste("/home/amoongat/Projects/Rats-Credit/Sources/logs",ratName, sep = "/")) 
+  
+  cl <- startMPIcluster(count=count,verbose=TRUE, logdir = dir.path)
+  setRngDoMPI(cl, seed=count)
+  exportDoMPI(cl, c("src.dir","model.data.dir","model.src", "gamma2_Global", "lambda_Global"), envir=environment())
+  registerDoMPI(cl)
+  
+   initWorkers <-  function() {
+       source(paste(src.dir, "ModelClasses.R", sep = "/"))
+       source(paste(model.src, "PathModel.R", sep = "/"))
+       source(paste(model.src, "TurnModel.R", sep = "/"))
+       source(paste(model.src, "HybridModel1.R", sep = "/"))
+       source(paste(model.src, "HybridModel2.R", sep = "/"))
+       source(paste(model.src, "HybridModel3.R", sep = "/"))
+       source(paste(model.src, "HybridModel4.R", sep = "/"))
+       #source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+       source(paste(src.dir,"exportFunctions.R", sep="/"))
+   
+       #attach(myEnv, name="sourced_scripts")
+     }
+  
+  #chunkSize = length(gridMat[,1])/getDoParWorkers()
+  #chunkSize = 150
+  opts <- list(initEnvir=initWorkers) 
+  source(paste(src.dir,"exportFunctions.R", sep="/")) 
+  print(sprintf("gridMat len=%i, getDoParWorkers=%i",length(gridMat[,1]),getDoParWorkers()))
+   
+  resMat <- 
+      foreach(idx = 1:length(gridMat[,1]), .packages="DEoptim",.options.mpi=opts) %dopar% {
+            
+            cat(names(environment()))
+            cat("\n")
+            cat(sprintf('gamma2_Global=%f, lambda_Global=%f\n', gamma2_Global,lambda_Global))
+            source(paste(src.dir, "BaseClasses.R", sep = "/"), local=environment())
+            #start_idx=sequences[i]
+            #idx = start_idx+j
+            #alpha = gridMat[idx,1]
+            #gamma1 = gridMat[idx,2]
+            iter = gridMat[idx,1]
+            model = gridMat[idx,2]
+            #cat(sprintf("idx= %i,alpha=%.10f,gamma1=%.10f\n", idx,alpha,gamma1))
+            #cat(sprintf('Rat is %s, model is %s\n', ratName,model))
+
+
+            modelName = strsplit(model,"\\.")[[1]][1]
+            #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
+            creditAssignment = strsplit(model,"\\.")[[1]][2]
+            cat(sprintf('rat=%s, iter=%i,modelName=%s,creditAssignment = %s\n', ratName,iter,modelName,creditAssignment))
+
+
+            #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
+            modelData =  new("ModelData", Model=modelName, creditAssignment = creditAssignment, sim=2)
+            argList<-getArgList(modelData,ratdata)
+            #cat(sprintf('gamma2=%f, lambda=%f\n', modelData@gamma2,modelData@lambda))
+            #cat(sprintf("res$alpha=%.10f, res$gamma1=%.10f",res$minlevels[1],res$minlevels[2]))
+            #cat("Here1")
+            myList <- DEoptim.control(initialpop=initpop, F=0.8, CR = 0.9,trace = FALSE, itermax = 30)
+            out <-DEoptim(negLogLikFunc,lower=c(0,0),upper=c(1,1),ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2,myList)
+
+            # res <- bobyqa(x0 = c(alpha,gamma1),lower = c(0,0),upper=c(1,1),
+            #              fn = negLogLikFunc,ratdata=ratdata,half_index=iter,modelData=modelData,testModel = argList[[6]],sim = 2)
+            #cat("Here2")
+            if(out$optim$bestval >= 1000000)
+            {
+              modelData = setModelParams(modelData, c(NA,NA,modelData@gamma2,modelData@lambda))
+              c(iter,modelName,NA, NA,modelData@gamma2,modelData@lambda,NA,idx)
+
+            }else
+            {
+              modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
+                lik1 <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
+                lik1 <- sum(lik1[(1:iter)])*-1
+                #reprint(lik1)
+                if (is.infinite(lik1)) {
+                  lik1= 1000000
+                }else if (is.nan(lik1)) {
+                  #print(sprintf("Alpha = %f", alpha))
+                  lik1 = 1000000
+                }else if (is.na(lik1)) {
+                  #print(sprintf("Alpha = %f, Gamma1=%f", alpha,gamma1))
+                  lik1 = 1000000
+                }
+                #cat(sprintf('Iter=%i, alpha = %.10f, gamma1 = %.15f, gamma2 = %f, lik1=%f\n', iter,modelData@alpha, modelData@gamma1,0.1,lik1))
+                c(iter,modelName,modelData@alpha, modelData@gamma1,modelData@gamma2,modelData@lambda,lik1,idx)
+            }
+            
+
+      }
+   resMat <- Reduce(rbind,resMat)
+   print(resMat)
+   rat = ratdata@rat
+   save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata"))   
+}
+
+
 learningStageModelSelection=function(ratdata,data.dir)
 {
   min_index = 0

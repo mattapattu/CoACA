@@ -228,7 +228,14 @@ if(currentTest %in% c("likValidation_on_coaca","likValidation_on_arl","likValida
 
 }
 
+###################
 
+
+if(currentTest %in% c("computeARLCogModelParams","computeDRLCogModelParams","computeCoACACogModelParams"))
+{                                 
+  cognitiveTestModelParams(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)
+
+}
 
 
 

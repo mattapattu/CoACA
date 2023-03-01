@@ -157,7 +157,7 @@ cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,m
   ratdata@hybridModel2<-ratdata@hybridModel2[-which(ratdata@hybridModel2[,1] %in% removeIds),]
   ratdata@hybridModel3<-ratdata@hybridModel3[-which(ratdata@hybridModel3[,1] %in% removeIds),]
   ratdata@hybridModel4<-ratdata@hybridModel4[-which(ratdata@hybridModel4[,1] %in% removeIds),]
-  ratdata@Turns<-ratdata@Turns[-which(ratdata@Turns[,1] %in% removeIds),]
+  ratdata@turnTimes<-ratdata@turnTimes[-which(ratdata@turnTimes[,1] %in% removeIds),]
 
   ratName = ratdata@rat
   model.data.dir=file.path(model.data.dir, ratName)

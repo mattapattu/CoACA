@@ -140,7 +140,7 @@ analyzeParamSpaceV2=function(ratdata,testData,src.dir,model.src,setup.hpc,model.
 }
 
 
-cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,name, initpop, testSuite)
+cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,model.data.dir,count,gridMat,initpop, testSuite)
 {
   models = testData@Models
   #########################
@@ -270,7 +270,7 @@ cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,m
    resMat <- Reduce(rbind,resMat)
    print(resMat)
    rat = ratdata@rat
-   save(resMat, file = paste0(model.data.dir,"/",rat,"_",name, format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata"))   
+   save(resMat, file = paste0(model.data.dir,"/",rat,"_", format(Sys.time(),'_%Y%m%d_%H%M%S'),"_resMat.Rdata"))   
 }
 
 

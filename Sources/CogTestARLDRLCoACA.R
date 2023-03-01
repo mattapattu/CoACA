@@ -54,22 +54,19 @@ if((opt$computeARLCogModelParams)){
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
-  paramMat <-
-    foreach(i = c(1:2), .combine='rbind') %do%
+    paramMat <-
+    foreach(i = c(1), .combine='rbind')%do%
     {
       
-      start_idx = sequences[i]+1
-      end_idx = sequences[i+1]
-      print(sprintf("start_idx=%d, end_idx=%d", start_idx, end_idx))
-      seed = start_idx
-      spawnslaves = cores-1
-      
+      start_idx = 0
+      end_idx = 0
+      seed = 0
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T1_rat",rat)  
-  write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 
@@ -93,21 +90,18 @@ if((opt$computeDRLCogModelParams)){
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1:2), .combine='rbind') %do%
+    foreach(i = c(1), .combine='rbind')%do%
     {
       
-      start_idx = sequences[i]+1
-      end_idx = sequences[i+1]
-      print(sprintf("start_idx=%d, end_idx=%d", start_idx, end_idx))
-      seed = start_idx
-      spawnslaves = cores-1
-      
+      start_idx = 0
+      end_idx = 0
+      seed = 0
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T2_rat",rat)  
-  write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 
@@ -130,21 +124,18 @@ if((opt$computeCoACACogModelParams)){
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1:2), .combine='rbind') %do%
+    foreach(i = c(1), .combine='rbind')%do%
     {
       
-      start_idx = sequences[i]+1
-      end_idx = sequences[i+1]
-      print(sprintf("start_idx=%d, end_idx=%d", start_idx, end_idx))
-      seed = start_idx
-      spawnslaves = cores-1
-      
+      start_idx = 0
+      end_idx = 0
+      seed = 0
         #name = paste0("modelParams_",i,"_",rats[[rat]])
       c(rat,seed,spawnslaves,currentTest, start_idx, end_idx, testSuite)  
     }
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T3_rat",rat)  
-  write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
+  write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
   command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 

@@ -48,8 +48,8 @@ if((opt$computeARLCogModelParams)){
   currentTest = "computeARLCogModelParams"
   source("testConfig2.R")
   #print(sprintf("currentTest=%s", currentTest)) 
-  cores = 10
-  walltime = "10:00"
+  cores = 5
+  walltime = "2:00"
   name = paste0("mParams","_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
@@ -86,8 +86,8 @@ if((opt$computeDRLCogModelParams)){
   currentTest = "computeDRLCogModelParams"
   source("testConfig2.R")
   #print(sprintf("currentTest=%s", currentTest)) 
-  cores = 10
-  walltime = "10:00"
+  cores = 5
+  walltime = "2:00"
   name = paste0("mParams","_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
@@ -123,8 +123,8 @@ if((opt$computeCoACACogModelParams)){
   currentTest = "computeCoACACogModelParams"
   source("testConfig2.R")
   #print(sprintf("currentTest=%s", currentTest)) 
-  cores = 10
-  walltime = "10:00"
+  cores = 5
+  walltime = "2:00"
   name = paste0("mParams","_",paste0("rat",rat))
   stdout = paste0("\'logs/",name,"_%jobid%.stdout\'")
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")

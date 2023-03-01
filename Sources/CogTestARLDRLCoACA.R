@@ -35,7 +35,7 @@ option_list = list(
   make_option(c("--generateCogModelParamMat"), action="store_true", default=FALSE,
               ),
   make_option(c("--getCogMinModel"), action="store_true", default=FALSE,
-              ),
+              )
 )
 opt = parse_args(OptionParser(option_list=option_list))
 rat=opt$rat

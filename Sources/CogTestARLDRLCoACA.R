@@ -67,7 +67,7 @@ if((opt$computeARLCogModelParams)){
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T1_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
-  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarsub --array-param-file %s -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 
   cat(command)
@@ -102,7 +102,7 @@ if((opt$computeDRLCogModelParams)){
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T2_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
-  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarsub --array-param-file %s -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 
   cat(command)
@@ -136,7 +136,7 @@ if((opt$computeCoACACogModelParams)){
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T3_rat",rat)  
   write.table(t(paramMat), file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
-  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarsub --array-param-file %s -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 
   cat(command)

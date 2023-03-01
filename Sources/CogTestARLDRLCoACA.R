@@ -48,7 +48,7 @@ if((opt$computeARLCogModelParams)){
   currentTest = "computeARLCogModelParams"
   source("testConfig2.R")
   #print(sprintf("currentTest=%s", currentTest)) 
-  cores = 5
+  cores = 7
   spawnslaves = cores-1
   walltime = "2:00"
   name = paste0("mParams","_",paste0("rat",rat))
@@ -84,7 +84,7 @@ if((opt$computeDRLCogModelParams)){
   currentTest = "computeDRLCogModelParams"
   source("testConfig2.R")
   #print(sprintf("currentTest=%s", currentTest)) 
-  cores = 5
+  cores = 7
   spawnslaves = cores-1
   walltime = "2:00"
   name = paste0("mParams","_",paste0("rat",rat))
@@ -119,7 +119,7 @@ if((opt$computeCoACACogModelParams)){
   currentTest = "computeCoACACogModelParams"
   source("testConfig2.R")
   #print(sprintf("currentTest=%s", currentTest)) 
-  cores = 5
+  cores = 7
   spawnslaves = cores-1
   walltime = "2:00"
   name = paste0("mParams","_",paste0("rat",rat))

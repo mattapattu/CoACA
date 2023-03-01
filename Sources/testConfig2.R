@@ -202,7 +202,7 @@ if(testSuite=="ARLTestSuite")
     gamma1_seq = seq_log(0.01, 0.9,5)
     initpop <- as.matrix(expand.grid(alpha_seq,gamma1_seq,stringsAsFactors = FALSE))
     
-    gamma2_Global <<- 0.1
+    gamma2_Global <<- 0.5
     lambda_Global <<- 0
     testModels = c("Paths.aca2","Hybrid1.aca2","Hybrid2.aca2","Hybrid3.aca2","Hybrid4.aca2","Turns.aca2")
 

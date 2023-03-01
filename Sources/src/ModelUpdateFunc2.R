@@ -225,7 +225,7 @@ cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,m
             modelName = strsplit(model,"\\.")[[1]][1]
             #cat(sprintf('rat=%s, iter=%i,modelName = %s\n', ratName,iter,modelName))
             creditAssignment = strsplit(model,"\\.")[[1]][2]
-            cat(sprintf('rat=%s, odelName=%s,creditAssignment = %s\n', ratName,modelName,creditAssignment))
+            cat(sprintf('rat=%s, modelName=%s,creditAssignment = %s\n', ratName,modelName,creditAssignment))
 
 
             #cat(sprintf('rat=%s, iter=%i,model = %s\n', ratName,iter,modelName))
@@ -244,13 +244,13 @@ cognitiveTestModelParams=function(ratdata,testData,src.dir,model.src,setup.hpc,m
             if(out$optim$bestval >= 1000000)
             {
               modelData = setModelParams(modelData, c(NA,NA,modelData@gamma2,modelData@lambda))
-              c(iter,modelName,NA, NA,modelData@gamma2,modelData@lambda,NA,idx)
+              c(endIdx,modelName,NA, NA,modelData@gamma2,modelData@lambda,NA,idx)
 
             }else
             {
               modelData = setModelParams(modelData, c(out$optim$bestmem,modelData@gamma2,modelData@lambda))
                 lik1 <- TurnsNew::getTurnsLikelihood(ratdata, modelData, argList[[6]], sim=2)
-                lik1 <- sum(lik1[(1:iter)])*-1
+                lik1 <- sum(lik1[(1:endIdx)])*-1
                 #reprint(lik1)
                 if (is.infinite(lik1)) {
                   lik1= 1000000

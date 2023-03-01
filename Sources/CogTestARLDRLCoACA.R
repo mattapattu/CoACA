@@ -55,7 +55,7 @@ if((opt$computeARLCogModelParams)){
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1:6), .combine='rbind') %do%
+    foreach(i = c(1:2), .combine='rbind') %do%
     {
       
       start_idx = sequences[i]+1
@@ -70,7 +70,7 @@ if((opt$computeARLCogModelParams)){
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T1_rat",rat)  
   write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 
   cat(command)
@@ -93,7 +93,7 @@ if((opt$computeDRLCogModelParams)){
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1:6), .combine='rbind') %do%
+    foreach(i = c(1:2), .combine='rbind') %do%
     {
       
       start_idx = sequences[i]+1
@@ -108,7 +108,7 @@ if((opt$computeDRLCogModelParams)){
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T2_rat",rat)  
   write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 
   cat(command)
@@ -130,7 +130,7 @@ if((opt$computeCoACACogModelParams)){
   stderr = paste0("\'logs/",name,"_%jobid%.stderr\'")
 
   paramMat <-
-    foreach(i = c(1:6), .combine='rbind') %do%
+    foreach(i = c(1:2), .combine='rbind') %do%
     {
       
       start_idx = sequences[i]+1
@@ -145,7 +145,7 @@ if((opt$computeCoACACogModelParams)){
 
   filename = paste0("CogTestARLDRLCoACA_paramMat_T3_rat",rat)  
   write.table(paramMat, file=filename, row.names=FALSE, col.names=FALSE,quote=FALSE)
-  command <- sprintf("oarctl sub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
+  command <- sprintf("oarsub --array-param-file %s -t besteffort -t idempotent -p \"cputype=\'xeon\'\" -l /nodes=1/core=%i,walltime=%s -n %s --stdout=%s --stderr=%s -S \"./ratscript2.sh \" ", filename,cores, walltime,name,stdout,stderr)
 
 
   cat(command)

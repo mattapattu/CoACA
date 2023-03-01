@@ -372,7 +372,7 @@ if(currentTest %in% c("computeARLCogModelParams","computeDRLCogModelParams","com
 {
   models = testData@Models
   gridMat<- expand.grid(models,stringsAsFactors = FALSE)
-  sequences = seq(0,length(gridMat[,1]), length.out=7)
+  sequences = seq(0,length(gridMat[,1]), length.out=3)
   print(sequences)  
   print(sprintf("gridMat len=%i",length(gridMat[,1])))
 
